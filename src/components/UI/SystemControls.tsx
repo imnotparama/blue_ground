@@ -1,0 +1,242 @@
+'use client';
+
+import React from 'react';
+import { useSystemState, SystemMode } from '@/hooks/useSystemState';
+import { 
+  Wrench, 
+  Eye, 
+  Settings, 
+  Sparkles, 
+  Play, 
+  Compass, 
+  Database,
+  Cpu
+} from 'lucide-react';
+import { motion } from 'framer-motion';
+
+export const SystemControls = () => {
+  const { 
+    mode, 
+    setMode, 
+    exploded, 
+    setExploded, 
+    cutaway, 
+    setCutaway, 
+    transparent, 
+    setTransparent, 
+    setMetrics,
+    demoRunning, 
+    landingVisited 
+  } = useSystemState();
+
+  if (!landingVisited || demoRunning) return null; // Hide controls during landing or guided tour
+
+  // Preset trigger handlers to simulate scenarios dynamically
+  const triggerNormal = () => {
+    setMode('NORMAL');
+    setMetrics(prev => ({
+      ...prev,
+      batteryPercent: 88,
+      solarWatts: 48.5,
+      currentDraw: 12.0,
+      waterLevel: 65,
+      flowRate: 4.8,
+      ph: 7.20,
+      tds: 145,
+      turbidity: 1.2,
+      temperature: 24.5,
+      pumpRpm: 1800,
+      filterHealth: 98,
+      uvStatus: 'ON',
+      esp32Online: true,
+      waterQuality: 'EXCELLENT'
+    }));
+  };
+
+  const triggerTurbidity = () => {
+    setMode('TURBIDITY');
+    setMetrics(prev => ({
+      ...prev,
+      batteryPercent: 86,
+      solarWatts: 45.0,
+      currentDraw: 12.4,
+      waterLevel: 62,
+      flowRate: 4.2,
+      ph: 7.65,
+      tds: 260,
+      turbidity: 14.8, // high turbidity
+      temperature: 24.8,
+      pumpRpm: 1950,
+      filterHealth: 95,
+      uvStatus: 'ON',
+      esp32Online: true,
+      waterQuality: 'POOR'
+    }));
+  };
+
+  const triggerPumpFailure = () => {
+    setMode('PUMP_FAILURE');
+    setMetrics(prev => ({
+      ...prev,
+      batteryPercent: 82,
+      solarWatts: 40.0,
+      currentDraw: 1.2, // low draw (pump stopped)
+      flowRate: 0.0,
+      pumpRpm: 0,
+      ph: 7.20,
+      tds: 145,
+      turbidity: 1.2,
+      uvStatus: 'OFF',
+      waterQuality: 'GOOD'
+    }));
+  };
+
+  const triggerCleaning = () => {
+    setMode('CLEANING');
+    setMetrics(prev => ({
+      ...prev,
+      batteryPercent: 78,
+      solarWatts: 42.0,
+      currentDraw: 18.0, // solenoid active
+      waterLevel: 22, // draining
+      flowRate: 0.0,
+      pumpRpm: 0,
+      uvStatus: 'OFF',
+      waterQuality: 'GOOD'
+    }));
+  };
+
+  const triggerLowBattery = () => {
+    setMode('LOW_BATTERY');
+    setMetrics(prev => ({
+      ...prev,
+      batteryPercent: 8.5, // low
+      solarWatts: 2.0, // overcast
+      currentDraw: 3.5, // power-save mode
+      flowRate: 1.2,
+      pumpRpm: 800, // running slow
+      uvStatus: 'OFF',
+      waterQuality: 'GOOD'
+    }));
+  };
+
+  return (
+    <div className="fixed left-6 bottom-6 z-30 pointer-events-none select-none w-full max-w-[280px]">
+      <div className="glass-panel rounded-2xl p-4 border border-white/10 relative overflow-hidden pointer-events-auto flex flex-col gap-4 bg-zinc-950/75 backdrop-blur-md shadow-[0_16px_36px_rgba(0,0,0,0.5)]">
+        
+        {/* Title */}
+        <div className="flex items-center gap-1.5 border-b border-white/5 pb-2">
+          <Database className="w-3.5 h-3.5 text-cyan-400" />
+          <span className="text-[10px] font-bold text-white tracking-[0.2em] font-mono uppercase">LEVIATHAN ENGINE</span>
+        </div>
+
+        {/* 1. Holographic CAD toggles */}
+        <div className="flex flex-col gap-2">
+          <span className="text-[8px] font-mono text-zinc-500 uppercase tracking-widest flex items-center gap-1">
+            <Eye className="w-3 h-3 text-zinc-500" /> CAD Layer Views
+          </span>
+          <div className="grid grid-cols-2 gap-2">
+            {/* Exploded View Toggle */}
+            <button
+              onClick={() => setExploded(!exploded)}
+              className={`flex items-center justify-center gap-1 py-1.5 rounded-lg border text-[9px] font-mono font-bold tracking-wider transition-all cursor-pointer ${
+                exploded 
+                  ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40 shadow-[0_0_8px_rgba(6,182,212,0.15)]' 
+                  : 'bg-white/2 border-white/5 text-zinc-400 hover:bg-white/5 hover:text-white'
+              }`}
+            >
+              <Wrench className="w-3 h-3" />
+              Exploded
+            </button>
+
+            {/* X-Ray / Transparency View Toggle */}
+            <button
+              onClick={() => {
+                setTransparent(!transparent);
+                setCutaway(!transparent);
+              }}
+              className={`flex items-center justify-center gap-1 py-1.5 rounded-lg border text-[9px] font-mono font-bold tracking-wider transition-all cursor-pointer ${
+                transparent 
+                  ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40 shadow-[0_0_8px_rgba(6,182,212,0.15)]' 
+                  : 'bg-white/2 border-white/5 text-zinc-400 hover:bg-white/5 hover:text-white'
+              }`}
+            >
+              <Cpu className="w-3 h-3" />
+              X-Ray Mode
+            </button>
+          </div>
+        </div>
+
+        {/* 2. Simulation preset scenarios */}
+        <div className="flex flex-col gap-2">
+          <span className="text-[8px] font-mono text-zinc-500 uppercase tracking-widest flex items-center gap-1">
+            <Settings className="w-3 h-3 text-zinc-500" /> Preset Scenarios
+          </span>
+          <div className="flex flex-col gap-1.5 font-mono text-[9px]">
+            {/* Presets */}
+            <button
+              onClick={triggerNormal}
+              className={`w-full text-left px-2.5 py-1.5 rounded-lg border flex items-center justify-between transition-all cursor-pointer ${
+                mode === 'NORMAL' 
+                  ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 font-bold' 
+                  : 'bg-white/2 border-white/5 text-zinc-400 hover:bg-white/5 hover:text-white'
+              }`}
+            >
+              <span>🟢 Normal Operations</span>
+              <span>NOMINAL</span>
+            </button>
+
+            <button
+              onClick={triggerTurbidity}
+              className={`w-full text-left px-2.5 py-1.5 rounded-lg border flex items-center justify-between transition-all cursor-pointer ${
+                mode === 'TURBIDITY' 
+                  ? 'bg-amber-500/10 border-amber-500/30 text-amber-400 font-bold' 
+                  : 'bg-white/2 border-white/5 text-zinc-400 hover:bg-white/5 hover:text-white'
+              }`}
+            >
+              <span>🟡 High Turbidity</span>
+              <span>POOR INFLOW</span>
+            </button>
+
+            <button
+              onClick={triggerPumpFailure}
+              className={`w-full text-left px-2.5 py-1.5 rounded-lg border flex items-center justify-between transition-all cursor-pointer ${
+                mode === 'PUMP_FAILURE' 
+                  ? 'bg-red-500/10 border-red-500/30 text-red-400 font-bold animate-pulse' 
+                  : 'bg-white/2 border-white/5 text-zinc-400 hover:bg-white/5 hover:text-white'
+              }`}
+            >
+              <span>🔴 Pump Failure</span>
+              <span>ERROR</span>
+            </button>
+
+            <button
+              onClick={triggerCleaning}
+              className={`w-full text-left px-2.5 py-1.5 rounded-lg border flex items-center justify-between transition-all cursor-pointer ${
+                mode === 'CLEANING' 
+                  ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-300 font-bold' 
+                  : 'bg-white/2 border-white/5 text-zinc-400 hover:bg-white/5 hover:text-white'
+              }`}
+            >
+              <span>🟣 Self Cleaning</span>
+              <span>FLUSHING</span>
+            </button>
+
+            <button
+              onClick={triggerLowBattery}
+              className={`w-full text-left px-2.5 py-1.5 rounded-lg border flex items-center justify-between transition-all cursor-pointer ${
+                mode === 'LOW_BATTERY' 
+                  ? 'bg-rose-500/10 border-rose-500/30 text-rose-400 font-bold' 
+                  : 'bg-white/2 border-white/5 text-zinc-400 hover:bg-white/5 hover:text-white'
+              }`}
+            >
+              <span>🟤 Low Battery</span>
+              <span>LOW POWER</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+};

@@ -7,6 +7,7 @@ import { TopBar } from '@/components/UI/TopBar';
 import { PresentationOverlay } from '@/components/UI/PresentationOverlay';
 import { Dashboard } from '@/components/UI/Dashboard';
 import { BottomDetailCard } from '@/components/UI/BottomDetailCard';
+import { SystemControls } from '@/components/UI/SystemControls';
 import { LandingHero } from '@/components/UI/LandingHero';
 
 // Dynamically import the 3D Scene with SSR disabled to prevent WebGL hydration mismatches in Next.js
@@ -50,6 +51,9 @@ const HomePageContent = () => {
 
       {/* Slide-up bottom detail drawer (replaces left panel) */}
       <BottomDetailCard />
+
+      {/* Floating CAD & Scenario engine controller (bottom-left) */}
+      <SystemControls />
 
       {/* Narrative AI Presentation card overlay */}
       <PresentationOverlay />
