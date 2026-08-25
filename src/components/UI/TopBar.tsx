@@ -42,10 +42,10 @@ export const TopBar = () => {
       {/* Brand logo (interactive, pointers enabled) */}
       <div className="flex items-center gap-3 glass-panel px-4 py-2.5 rounded-full pointer-events-auto">
         <Compass className="w-5 h-5 text-cyan-400 animate-spin-slow" style={{ animationDuration: '20s' }} />
-        <span className="font-semibold tracking-[0.2em] text-white text-sm">AURA</span>
+        <span className="font-bold tracking-[0.25em] text-white text-sm">blue<span className="text-cyan-400">ground</span></span>
         <div className="flex items-center gap-1.5 border-l border-white/10 pl-3">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-          <span className="text-[10px] tracking-wider text-zinc-400 font-mono uppercase">PURIFY V1.0</span>
+          <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+          <span className="text-[9px] tracking-widest text-zinc-400 font-mono uppercase font-bold">Leviathan</span>
         </div>
       </div>
 

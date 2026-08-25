@@ -30,7 +30,7 @@ export const LandingHero = () => {
           {/* Top Brand Header */}
           <div className="flex items-center gap-3">
             <Compass className="w-6 h-6 text-cyan-400 animate-spin-slow" style={{ animationDuration: '25s' }} />
-            <span className="font-semibold tracking-[0.25em] text-white text-base">AURA SYSTEMS</span>
+            <span className="font-semibold tracking-[0.25em] text-white text-base">TEAM LEVIATHAN</span>
           </div>
 
           {/* Centered Pitch Card */}
@@ -39,9 +39,9 @@ export const LandingHero = () => {
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.15, duration: 0.6 }}
-              className="text-4xl sm:text-6xl font-extralight tracking-[0.35em] text-white uppercase"
+              className="text-4xl sm:text-6xl font-extralight tracking-[0.35em] text-white uppercase font-sans"
             >
-              Aura <span className="font-semibold text-cyan-400 drop-shadow-[0_0_15px_rgba(6,182,212,0.4)]">Purify</span>
+              blue<span className="font-semibold text-cyan-400 drop-shadow-[0_0_15px_rgba(6,182,212,0.4)]">ground</span>
             </motion.h1>
             
             <motion.div 
@@ -57,7 +57,7 @@ export const LandingHero = () => {
               transition={{ delay: 0.4, duration: 0.6 }}
               className="text-zinc-400 text-sm sm:text-base font-light leading-relaxed max-w-lg mb-10"
             >
-              Experience the self-sustaining, solar-powered IoT water purification system. An interactive 3D digital-twin built for engineering visualization and telemetry diagnostics.
+              Experience blueground by Team Leviathan: a self-sustaining, solar-powered IoT water purification system. An interactive 3D digital-twin built for engineering visualization and telemetry diagnostics.
             </motion.p>
 
             {/* Quick Feature Grid */}
