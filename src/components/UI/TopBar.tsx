@@ -1,0 +1,120 @@
+'use client';
+
+import React from 'react';
+import { useSystemState, EnvironmentalMode } from '@/hooks/useSystemState';
+import { 
+  Wifi, 
+  RefreshCw, 
+  Sun, 
+  CloudSun, 
+  Cloud, 
+  CloudRain, 
+  Moon, 
+  Play,
+  Pause,
+  Compass
+} from 'lucide-react';
+
+export const TopBar = () => {
+  const { 
+    metrics, 
+    envMode, 
+    setEnvMode, 
+    demoRunning, 
+    startDemo, 
+    stopDemo,
+    mode,
+    landingVisited
+  } = useSystemState();
+
+  const envs: { mode: EnvironmentalMode; icon: React.ReactNode; label: string }[] = [
+    { mode: 'SUNNY', icon: <Sun className="w-4 h-4" />, label: 'Sunny' },
+    { mode: 'MORNING', icon: <CloudSun className="w-4 h-4" />, label: 'Golden Hour' },
+    { mode: 'CLOUDY', icon: <Cloud className="w-4 h-4" />, label: 'Overcast' },
+    { mode: 'RAIN', icon: <CloudRain className="w-4 h-4" />, label: 'Rainy' },
+    { mode: 'NIGHT', icon: <Moon className="w-4 h-4" />, label: 'Night' },
+  ];
+
+  if (!landingVisited) return null;
+
+  return (
+    <header className="fixed top-0 left-0 w-full z-40 px-6 py-4 flex items-center justify-between pointer-events-none select-none">
+      {/* Brand logo (interactive, pointers enabled) */}
+      <div className="flex items-center gap-3 glass-panel px-4 py-2.5 rounded-full pointer-events-auto">
+        <Compass className="w-5 h-5 text-cyan-400 animate-spin-slow" style={{ animationDuration: '20s' }} />
+        <span className="font-semibold tracking-[0.2em] text-white text-sm">AURA</span>
+        <div className="flex items-center gap-1.5 border-l border-white/10 pl-3">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+          <span className="text-[10px] tracking-wider text-zinc-400 font-mono uppercase">PURIFY V1.0</span>
+        </div>
+      </div>
+
+      {/* Center demo action / info (pointers enabled) */}
+      <div className="flex items-center gap-4 pointer-events-auto">
+        {!demoRunning ? (
+          <button
+            onClick={startDemo}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-cyan-500/80 to-blue-600/80 hover:from-cyan-500 hover:to-blue-600 border border-cyan-400/20 text-white font-medium text-xs tracking-wider uppercase transition-all shadow-[0_0_15px_rgba(6,182,212,0.25)] hover:scale-105"
+          >
+            <Play className="w-3.5 h-3.5 fill-white" />
+            Start Guided Demo
+          </button>
+        ) : (
+          <button
+            onClick={stopDemo}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-red-950/75 border border-red-500/30 hover:bg-red-900/80 text-red-200 font-medium text-xs tracking-wider uppercase transition-all"
+          >
+            <Pause className="w-3.5 h-3.5 fill-red-200" />
+            End Demo Tour
+          </button>
+        )}
+      </div>
+
+      {/* Right side diagnostics status & environment switcher (pointers enabled) */}
+      <div className="flex items-center gap-3 pointer-events-auto">
+        {/* Environmental Controller */}
+        <div className="flex items-center glass-panel p-1 rounded-full">
+          {envs.map((env) => {
+            const isActive = envMode === env.mode;
+            return (
+              <button
+                key={env.mode}
+                onClick={() => setEnvMode(env.mode)}
+                disabled={demoRunning}
+                className={`p-2 rounded-full transition-all duration-300 ${
+                  isActive 
+                    ? 'bg-cyan-500/20 text-cyan-300 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] border border-cyan-400/10' 
+                    : 'text-zinc-500 hover:text-zinc-300 disabled:opacity-30'
+                }`}
+                title={env.label}
+              >
+                {env.icon}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* System Diagnostics status panel */}
+        <div className="flex items-center gap-4 glass-panel px-4 py-2.5 rounded-full text-xs font-mono text-zinc-300">
+          {/* IoT Status */}
+          <div className="flex items-center gap-1.5" title="ESP32 IoT Controller Status">
+            <span className={`w-1.5 h-1.5 rounded-full ${metrics.esp32Online ? 'bg-emerald-500' : 'bg-red-500'}`} />
+            <span className="text-[10px] text-zinc-400">ESP32</span>
+          </div>
+
+          {/* Wi-Fi RSSI */}
+          <div className="flex items-center gap-1.5" title="Wi-Fi Signal strength">
+            <Wifi className={`w-3.5 h-3.5 ${metrics.wifiSignal > -60 ? 'text-emerald-400' : 'text-amber-400'}`} />
+            <span className="text-[10px] text-zinc-400">{metrics.wifiSignal} dBm</span>
+          </div>
+
+          {/* Cloud Sync */}
+          <div className="flex items-center gap-1.5" title="Cloud Database Sync Status">
+            <RefreshCw className={`w-3 h-3 ${metrics.cloudSync === 'SYNCING' ? 'animate-spin text-cyan-400' : 'text-emerald-400'}`} />
+            <span className="text-[10px] text-zinc-400">SYNCED</span>
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+};
