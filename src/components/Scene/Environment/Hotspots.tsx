@@ -215,7 +215,7 @@ export const Hotspots = () => {
                   className={`absolute left-6 w-max max-w-[240px] flex flex-col gap-0.5 px-3 py-2 rounded-xl border border-white/10 bg-zinc-950/85 backdrop-blur-md text-[10px] text-zinc-300 font-mono shadow-[0_4px_16px_rgba(0,0,0,0.5)] transition-all duration-300 pointer-events-none transform origin-left ${
                     isHovered || isActive 
                       ? 'scale-100 opacity-100 translate-x-0' 
-                      : 'scale-90 opacity-40 translate-x-[-8px] pointer-events-none opacity-0'
+                      : 'scale-90 translate-x-[-8px] pointer-events-none opacity-0'
                   }`}
                 >
                   <div className="flex items-center gap-1.5 font-bold text-white tracking-wider">

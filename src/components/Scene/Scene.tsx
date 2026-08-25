@@ -27,13 +27,13 @@ export const Scene = () => {
   const { exploded, transparent, cutaway, mode } = useSystemState();
 
   return (
-    <div className="w-full h-full relative select-none bg-[#050507]">
+    <div className="w-full h-full relative select-none bg-[radial-gradient(circle_at_center,_#0f172a_0%,_#020204_100%)]">
       {/* 3D R3F Canvas */}
       <Canvas
         shadows
         gl={{
           antialias: true,
-          alpha: false,
+          alpha: true,
           powerPreference: 'high-performance',
           stencil: false,
           depth: true,
@@ -48,7 +48,6 @@ export const Scene = () => {
         className="w-full h-full"
       >
         {/* Cinematic dark fog to blend edges into background */}
-        <color attach="background" args={['#050507']} />
         <fog attach="fog" args={['#050507', 8, 18]} />
 
         {/* Lighting setup */}
