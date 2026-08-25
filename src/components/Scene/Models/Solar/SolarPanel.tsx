@@ -8,67 +8,47 @@ import * as THREE from 'three';
 export const SolarPanel = () => {
   const { exploded, mode, metrics, activeHotspot, setActiveHotspot, setCameraPreset } = useSystemState();
   const groupRef = useRef<THREE.Group>(null);
-  const sunRaysRef = useRef<THREE.Mesh>(null);
   const [hovered, setHovered] = useState(false);
+  const [hoveredBh1750, setHoveredBh1750] = useState(false);
   
-  // Create solar grid canvas texture dynamically for a premium monocrystalline panel look
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  // Canvas texture for monocrystalline cells
   const textureRef = useRef<THREE.CanvasTexture | null>(null);
 
   React.useEffect(() => {
     const canvas = document.createElement('canvas');
-    canvas.width = 512;
-    canvas.height = 512;
+    canvas.width = 256;
+    canvas.height = 256;
     const ctx = canvas.getContext('2d');
     if (ctx) {
-      ctx.fillStyle = '#0f172a';
-      ctx.fillRect(0, 0, 512, 512);
-      ctx.strokeStyle = '#64748b';
-      ctx.lineWidth = 3;
-      const cellSize = 128;
-      for (let x = 0; x < 512; x += cellSize) {
-        for (let y = 0; y < 512; y += cellSize) {
-          ctx.strokeRect(x + 3, y + 3, cellSize - 6, cellSize - 6);
+      ctx.fillStyle = '#0b1329';
+      ctx.fillRect(0, 0, 256, 256);
+      ctx.strokeStyle = '#475569';
+      ctx.lineWidth = 2;
+      const cellSize = 64;
+      for (let x = 0; x < 256; x += cellSize) {
+        for (let y = 0; y < 256; y += cellSize) {
+          ctx.strokeRect(x + 2, y + 2, cellSize - 4, cellSize - 4);
           ctx.fillStyle = '#020617';
           ctx.beginPath();
-          ctx.moveTo(x + 3, y + 16);
-          ctx.lineTo(x + 16, y + 3);
-          ctx.lineTo(x + cellSize - 16, y + 3);
-          ctx.lineTo(x + cellSize - 3, y + 16);
-          ctx.lineTo(x + cellSize - 3, y + cellSize - 16);
-          ctx.lineTo(x + cellSize - 16, y + cellSize - 3);
-          ctx.lineTo(x + 16, y + cellSize - 3);
-          ctx.lineTo(x + 3, y + cellSize - 16);
+          ctx.arc(x + cellSize/2, y + cellSize/2, cellSize/2.4, 0, Math.PI * 2);
           ctx.fill();
         }
       }
     }
-    canvasRef.current = canvas;
     textureRef.current = new THREE.CanvasTexture(canvas);
   }, []);
 
   useFrame((state, delta) => {
-    const time = state.clock.getElapsedTime();
-
-    // 1. Exploded view: Solar panel rises
+    // 1. Exploded view offset
     const targetY = exploded ? 0.9 : 0;
     if (groupRef.current) {
       groupRef.current.position.y = THREE.MathUtils.lerp(groupRef.current.position.y, targetY, 0.08);
       
-      // Smooth scale up on hover (3%)
-      const targetScale = hovered ? 1.03 : 1.0;
+      const targetScale = (hovered || hoveredBh1750) ? 1.03 : 1.0;
       groupRef.current.scale.setScalar(THREE.MathUtils.lerp(groupRef.current.scale.x, targetScale, 0.15));
     }
 
-    // 2. Pulse Sun Rays Opacity based on charging speed
-    if (sunRaysRef.current) {
-      const isCharging = mode === 'NORMAL' && metrics.solarWatts > 10;
-      const targetOpacity = isCharging ? 0.08 + Math.sin(time * 3) * 0.03 : 0.0;
-      const mat = sunRaysRef.current.material as THREE.MeshBasicMaterial;
-      mat.opacity = THREE.MathUtils.lerp(mat.opacity, targetOpacity, 0.1);
-    }
-
-    // 3. Selective Focus Dimming traversal & Cyan outline glow
+    // 2. Traversal Dimming
     const isDimmed = activeHotspot !== null && activeHotspot !== 'solar';
     const targetOpacity = isDimmed ? 0.15 : 1.0;
     
@@ -78,25 +58,15 @@ export const SolarPanel = () => {
           const mat = child.material as THREE.MeshStandardMaterial;
           if (mat) {
             mat.transparent = true;
-            if (child === sunRaysRef.current) return;
-            
-            // Lerp opacity for dimming
             mat.opacity = THREE.MathUtils.lerp(mat.opacity, targetOpacity, 0.08);
 
-            // Apply cyan outline glow on hover
             if (mat.emissive) {
               if (hovered && !isDimmed) {
                 mat.emissive.set('#06b6d4');
-                mat.emissiveIntensity = THREE.MathUtils.lerp(mat.emissiveIntensity, 0.45, 0.1);
+                mat.emissiveIntensity = THREE.MathUtils.lerp(mat.emissiveIntensity, 0.4, 0.1);
               } else {
-                // Restore standard emissives
-                const standardEmissive = (child.name === 'photovoltaic-mesh' && mode === 'NORMAL' && metrics.solarWatts > 10) 
-                  ? new THREE.Color('#0e7490') 
-                  : new THREE.Color('#000000');
-                const standardIntensity = (child.name === 'photovoltaic-mesh' && mode === 'NORMAL' && metrics.solarWatts > 10) ? 0.45 : 0.0;
-                
-                mat.emissive.lerp(standardEmissive, 0.1);
-                mat.emissiveIntensity = THREE.MathUtils.lerp(mat.emissiveIntensity, standardIntensity, 0.1);
+                mat.emissive.set('#000000');
+                mat.emissiveIntensity = 0.0;
               }
             }
           }
@@ -104,8 +74,6 @@ export const SolarPanel = () => {
       });
     }
   });
-
-  const isCharging = mode === 'NORMAL' && metrics.solarWatts > 10;
 
   const handlePointerOver = (e: any) => {
     e.stopPropagation();
@@ -124,6 +92,13 @@ export const SolarPanel = () => {
     setCameraPreset('SOLAR');
   };
 
+  // 3 Panels relative offsets
+  const panels = [
+    { x: -0.36 },
+    { x: 0.0 },
+    { x: 0.36 }
+  ];
+
   return (
     <group 
       ref={groupRef}
@@ -131,83 +106,87 @@ export const SolarPanel = () => {
       onPointerOut={handlePointerOut}
       onClick={handleClick}
     >
-      {/* Solar Panel Mounts and Stand */}
+      {/* Solar Array framework: centered at x=-1.4, y=0.5, z=0 */}
       <group position={[-1.4, 0.5, 0]}>
+        
         {/* Support brackets */}
-        <mesh castShadow>
-          <cylinderGeometry args={[0.015, 0.015, 0.3, 8]} />
+        <mesh position={[-0.3, 0.0, 0]} castShadow>
+          <cylinderGeometry args={[0.012, 0.012, 0.28, 8]} />
+          <meshStandardMaterial color="#64748b" roughness={0.3} metalness={0.7} />
+        </mesh>
+        <mesh position={[0.3, 0.0, 0]} castShadow>
+          <cylinderGeometry args={[0.012, 0.012, 0.28, 8]} />
           <meshStandardMaterial color="#64748b" roughness={0.3} metalness={0.7} />
         </mesh>
         
-        {/* Hinge */}
-        <mesh position={[0, 0.15, 0]} rotation={[Math.PI / 2, 0, 0]} castShadow>
-          <cylinderGeometry args={[0.03, 0.03, 0.1, 12]} />
-          <meshStandardMaterial color="#334155" roughness={0.2} metalness={0.8} />
+        {/* Transverse mounting rail */}
+        <mesh position={[0, 0.14, 0]} rotation={[0, 0, Math.PI / 2]} castShadow>
+          <cylinderGeometry args={[0.015, 0.015, 1.1, 8]} />
+          <meshStandardMaterial color="#475569" roughness={0.2} metalness={0.8} />
         </mesh>
 
-        {/* Tilted Solar Panel Board */}
-        <group position={[0, 0.18, 0]} rotation={[0.2, 0, -0.15]}>
-          {/* Volumetric Sun Ray cylinder beam (additive blend glow) */}
-          <mesh ref={sunRaysRef} position={[0, 0.6, 0]}>
-            <cylinderGeometry args={[0.5, 0.55, 1.2, 16, 1, true]} />
-            <meshBasicMaterial
-              color="#fbbf24"
-              transparent
-              opacity={0.0}
-              blending={THREE.AdditiveBlending}
-              side={THREE.DoubleSide}
-              depthWrite={false}
-            />
-          </mesh>
+        {/* Tilted Solar Panels Deck */}
+        <group position={[0, 0.16, 0]} rotation={[0.2, 0, -0.15]}>
+          
+          {/* THREE SOLAR PANELS */}
+          {panels.map((p, idx) => (
+            <group key={idx} position={[p.x, 0, 0]}>
+              {/* Back Plate */}
+              <mesh castShadow>
+                <boxGeometry args={[0.32, 0.02, 0.7]} />
+                <meshStandardMaterial color="#1e293b" roughness={0.5} metalness={0.2} />
+              </mesh>
 
-          {/* Localized Sun Glow light above panel */}
-          {isCharging && (
-            <pointLight 
-              position={[0, 0.7, 0]} 
-              intensity={2.0} 
-              color="#fbbf24" 
-              distance={2.0} 
-              decay={2}
-            />
-          )}
+              {/* Monocrystalline cells surface */}
+              <mesh position={[0, 0.011, 0]} castShadow>
+                <boxGeometry args={[0.3, 0.005, 0.66]} />
+                <meshStandardMaterial
+                  map={textureRef.current || undefined}
+                  roughness={0.06}
+                  metalness={0.8}
+                />
+              </mesh>
 
-          {/* Panel Back Frame */}
-          <mesh castShadow>
-            <boxGeometry args={[1.0, 0.03, 0.9]} />
-            <meshStandardMaterial color="#1e293b" roughness={0.5} metalness={0.2} />
-          </mesh>
+              {/* Bezel frame */}
+              <mesh position={[0, 0, 0]}>
+                <boxGeometry args={[0.33, 0.025, 0.72]} />
+                <meshStandardMaterial color="#d4d4d8" roughness={0.1} metalness={0.95} />
+              </mesh>
+            </group>
+          ))}
 
-          {/* Monocrystalline cells surface */}
-          <mesh name="photovoltaic-mesh" position={[0, 0.018, 0]} castShadow>
-            <boxGeometry args={[0.96, 0.01, 0.86]} />
-            <meshStandardMaterial
-              map={textureRef.current || undefined}
-              roughness={0.05}
-              metalness={0.7}
-              emissive={isCharging ? '#0e7490' : '#000000'}
-              emissiveIntensity={isCharging ? 0.45 : 0}
-            />
-          </mesh>
+          {/* BH1750 LUX IRRADIANCE SENSOR */}
+          {/* Small blue board with white dome light sensor mounted on the center panel top rail */}
+          <group 
+            position={[0.22, 0.02, 0.38]}
+            onPointerOver={(e) => { e.stopPropagation(); setHoveredBh1750(true); }}
+            onPointerOut={() => setHoveredBh1750(false)}
+          >
+            {/* Small L-Bracket mount */}
+            <mesh position={[0, -0.025, -0.02]} castShadow>
+              <boxGeometry args={[0.02, 0.04, 0.03]} />
+              <meshStandardMaterial color="#3f4f6e" roughness={0.4} metalness={0.8} />
+            </mesh>
+            
+            {/* Blue Sensor PCB */}
+            <mesh castShadow>
+              <boxGeometry args={[0.035, 0.008, 0.055]} />
+              <meshStandardMaterial color="#1e3a8a" roughness={0.5} />
+            </mesh>
 
-          {/* Polished Frame Glass Panel */}
-          <mesh position={[0, 0.024, 0]}>
-            <boxGeometry args={[0.98, 0.005, 0.88]} />
-            <meshPhysicalMaterial
-              transparent
-              opacity={0.18}
-              roughness={0.01}
-              metalness={0.1}
-              transmission={0.95}
-              clearcoat={1.0}
-              clearcoatRoughness={0.01}
-            />
-          </mesh>
+            {/* White dome diffuser lens */}
+            <mesh position={[0, 0.007, 0.01]} castShadow>
+              <sphereGeometry args={[0.008, 8, 8]} />
+              <meshStandardMaterial color="#ffffff" roughness={0.9} />
+            </mesh>
 
-          {/* Premium Anodized Aluminum Outer Bevel Frame */}
-          <mesh position={[0, 0, 0]}>
-            <boxGeometry args={[1.02, 0.04, 0.92]} />
-            <meshStandardMaterial color="#d4d4d8" roughness={0.1} metalness={0.95} />
-          </mesh>
+            {/* Gold pin headers */}
+            <mesh position={[0, -0.006, -0.02]} rotation={[0, 0, Math.PI / 2]}>
+              <boxGeometry args={[0.005, 0.024, 0.008]} />
+              <meshStandardMaterial color="#fbbf24" metalness={0.9} />
+            </mesh>
+          </group>
+
         </group>
       </group>
     </group>

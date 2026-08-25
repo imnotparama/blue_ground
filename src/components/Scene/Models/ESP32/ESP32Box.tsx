@@ -11,15 +11,19 @@ export const ESP32Box = () => {
   const [hoveredBox, setHoveredBox] = useState(false);
   const [hoveredScreen, setHoveredScreen] = useState(false);
   
-  // Ref to the screen canvas and texture
+  // Ref to screen canvas and texture
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const textureRef = useRef<THREE.CanvasTexture | null>(null);
 
-  // Red/green diagnostic LEDs on the board
+  // Lid animation ref
+  const lidRef = useRef<THREE.Mesh>(null);
+  const lidMatRef = useRef<THREE.MeshStandardMaterial>(null);
+
+  // Diagnostic board LEDs
   const powerLedRef = useRef<THREE.Mesh>(null);
   const statusLedRef = useRef<THREE.Mesh>(null);
 
-  // Redraw TFT screen canvas when metrics update
+  // Redraw TFT screen canvas metrics
   useEffect(() => {
     const canvas = document.createElement('canvas');
     canvas.width = 128;
@@ -40,7 +44,7 @@ export const ESP32Box = () => {
       
       ctx.fillStyle = '#67e8f9';
       ctx.font = 'bold 8px monospace';
-      ctx.fillText('AURA IoT CORE', 6, 13);
+      ctx.fillText('LEVIATHAN CORE', 6, 13);
       
       ctx.fillStyle = metrics.esp32Online ? '#10b981' : '#ef4444';
       ctx.fillRect(110, 6, 8, 8);
@@ -77,18 +81,30 @@ export const ESP32Box = () => {
   }, [metrics, mode]);
 
   useFrame((state, delta) => {
-    // 1. Exploded view: ESP32 unit slides right
+    // 1. Exploded view offset
     const targetX = exploded ? 0.6 : 0;
     if (groupRef.current) {
       groupRef.current.position.x = THREE.MathUtils.lerp(groupRef.current.position.x, targetX, 0.08);
 
-      // Smooth scale up on hover (3%)
       const isHovered = hoveredBox || hoveredScreen;
       const targetScale = isHovered ? 1.03 : 1.0;
       groupRef.current.scale.setScalar(THREE.MathUtils.lerp(groupRef.current.scale.x, targetScale, 0.15));
     }
 
-    // 2. Blinking ESP32 status LEDs
+    // 2. Open enclosure lid when exploded or focused
+    const isLidOpen = exploded || activeHotspot === 'esp32';
+    const targetLidZ = isLidOpen ? -0.32 : 0.0;
+    const targetLidOpacity = isLidOpen ? 0.2 : 0.4;
+    
+    if (lidRef.current) {
+      lidRef.current.position.z = THREE.MathUtils.lerp(lidRef.current.position.z, targetLidZ, 0.08);
+    }
+    if (lidMatRef.current) {
+      lidMatRef.current.opacity = THREE.MathUtils.lerp(lidMatRef.current.opacity, targetLidOpacity, 0.08);
+      lidMatRef.current.transparent = true;
+    }
+
+    // 3. Status LEDs Blinking
     const time = state.clock.getElapsedTime();
     if (powerLedRef.current) {
       const mat = powerLedRef.current.material as THREE.MeshStandardMaterial;
@@ -100,30 +116,28 @@ export const ESP32Box = () => {
       mat.emissiveIntensity = metrics.esp32Online && isBlinking ? 1.2 : 0.0;
     }
 
-    // 3. Focus dimming traversal & Cyan outline glow
+    // 4. Focus dimming
     const isDimmed = activeHotspot !== null && activeHotspot !== 'esp32' && activeHotspot !== 'display';
     const targetOpacity = isDimmed ? 0.15 : 1.0;
 
     if (groupRef.current) {
       groupRef.current.traverse((child) => {
         if (child instanceof THREE.Mesh) {
-          // Skip board status LEDs
-          if (child === powerLedRef.current || child === statusLedRef.current) return;
+          if (child === powerLedRef.current || child === statusLedRef.current || child === lidRef.current) return;
 
           const mat = child.material as THREE.MeshStandardMaterial;
           if (mat) {
             mat.transparent = true;
             mat.opacity = THREE.MathUtils.lerp(mat.opacity, targetOpacity, 0.08);
 
-            // Apply cyan outline glow on hover
             if (mat.emissive) {
               const isHoveredPart = (child.name === 'tft-screen-bezel' && hoveredScreen) || (child.name === 'enclosure-mesh' && hoveredBox);
               if (isHoveredPart && !isDimmed) {
                 mat.emissive.set('#06b6d4');
-                mat.emissiveIntensity = THREE.MathUtils.lerp(mat.emissiveIntensity, 0.45, 0.1);
+                mat.emissiveIntensity = THREE.MathUtils.lerp(mat.emissiveIntensity, 0.4, 0.1);
               } else {
                 mat.emissive.set('#000000');
-                mat.emissiveIntensity = THREE.MathUtils.lerp(mat.emissiveIntensity, 0.0, 0.1);
+                mat.emissiveIntensity = 0.0;
               }
             }
           }
@@ -166,20 +180,34 @@ export const ESP32Box = () => {
     setCameraPreset('DISPLAY');
   };
 
-  // Screw positions on corners of display face
-  const screwCoordinates = [
-    { x: -0.31, y: 0.08 },
-    { x: 0.31, y: 0.08 },
-    { x: -0.31, y: -0.08 },
-    { x: 0.31, y: -0.08 },
-  ];
-
   return (
     <group ref={groupRef}>
-      {/* ESP32 box centered at: x=0.7, y=0.52, z=0 */}
+      {/* Box center: x=0.7, y=0.52, z=0 */}
       <group position={[0.7, 0.52, 0]}>
         
-        {/* 1. MAIN INDUSTRIAL ELECTRONICS ENCLOSURE */}
+        {/* 1. TRANSPARENT ENCLOSURE COVER LID */}
+        <mesh 
+          ref={lidRef} 
+          position={[0, 0, 0.252]} 
+          castShadow
+          onPointerOver={handlePointerOverScreen}
+          onPointerOut={handlePointerOutScreen}
+          onClick={handleClickScreen}
+        >
+          <boxGeometry args={[0.71, 0.23, 0.015]} />
+          <meshPhysicalMaterial
+            ref={lidMatRef}
+            color="#0891b2" // translucent cyan cover
+            roughness={0.1}
+            metalness={0.1}
+            transmission={0.85}
+            thickness={0.02}
+            clearcoat={1.0}
+            depthWrite={false}
+          />
+        </mesh>
+
+        {/* 2. MAIN ENCLOSURE BASE */}
         <mesh 
           name="enclosure-mesh"
           castShadow 
@@ -189,47 +217,144 @@ export const ESP32Box = () => {
           onClick={handleClickBox}
         >
           <boxGeometry args={[0.7, 0.22, 0.5]} />
-          <meshStandardMaterial
-            color="#1e293b"
-            roughness={0.35}
-            metalness={0.6}
-          />
+          <meshStandardMaterial color="#1e293b" roughness={0.35} metalness={0.6} />
         </mesh>
 
-        {/* Screw bolts on display plate */}
-        {screwCoordinates.map((screw, i) => (
-          <mesh key={i} position={[screw.x, screw.y, 0.251]} rotation={[Math.PI / 2, 0, 0]} castShadow>
-            <cylinderGeometry args={[0.012, 0.012, 0.005, 8]} />
-            <meshStandardMaterial color="#94a3b8" roughness={0.15} metalness={0.9} />
-          </mesh>
-        ))}
-
-        {/* 2. TFT SCREEN (1.8 Display on front face) */}
+        {/* TFT Screen on front face (slightly recessed in the base box lid frame) */}
         <group 
-          position={[0.0, 0.0, 0.252]}
+          position={[0.18, 0.0, 0.251]}
           onPointerOver={handlePointerOverScreen}
           onPointerOut={handlePointerOutScreen}
           onClick={handleClickScreen}
         >
-          {/* Bezel frame */}
           <mesh name="tft-screen-bezel" castShadow>
-            <boxGeometry args={[0.32, 0.32, 0.015]} />
+            <boxGeometry args={[0.26, 0.18, 0.01]} />
             <meshStandardMaterial color="#020617" roughness={0.4} metalness={0.7} />
           </mesh>
-          {/* TFT Screen Surface */}
-          <mesh position={[0, 0, 0.009]}>
-            <planeGeometry args={[0.28, 0.28]} />
+          <mesh position={[0, 0, 0.006]}>
+            <planeGeometry args={[0.23, 0.15]} />
             <meshStandardMaterial
               map={textureRef.current || undefined}
               roughness={0.1}
-              metalness={0.1}
               emissive="#ffffff"
               emissiveIntensity={metrics.esp32Online ? 0.9 : 0.0}
             />
           </mesh>
         </group>
 
-        {/* 3. SIDE CABLE GLANDS (Gland wire outputs) */}
+        {/* 3. ELECTRONICS PCB BOARD & MODULES LAYOUT (Inside box) */}
+        <group position={[0, -0.04, 0]}>
+          
+          {/* Main PCB Fiberglass Board (Green) */}
+          <mesh castShadow position={[0, 0.01, 0]}>
+            <boxGeometry args={[0.62, 0.01, 0.42]} />
+            <meshStandardMaterial color="#064e3b" roughness={0.5} />
+          </mesh>
+
+          {/* Module 1: ESP32-S3 Board */}
+          <group position={[-0.18, 0.02, -0.1]}>
+            <mesh castShadow>
+              <boxGeometry args={[0.08, 0.012, 0.12]} />
+              <meshStandardMaterial color="#18181b" roughness={0.6} />
+            </mesh>
+            {/* Esp32 Silver RF shielding lid */}
+            <mesh position={[0, 0.008, 0.01]} castShadow>
+              <boxGeometry args={[0.045, 0.008, 0.05]} />
+              <meshStandardMaterial color="#cbd5e1" roughness={0.1} metalness={0.9} />
+            </mesh>
+            {/* Gold Pin Headers */}
+            {[-0.038, 0.038].map((xOffset, i) => (
+              <mesh key={i} position={[xOffset, -0.006, 0]} castShadow>
+                <boxGeometry args={[0.003, 0.018, 0.11]} />
+                <meshStandardMaterial color="#eab308" metalness={0.9} />
+              </mesh>
+            ))}
+          </group>
+
+          {/* Module 2: XL6019E1 Boost Converter Module */}
+          <group position={[-0.18, 0.02, 0.1]}>
+            {/* Blue PCB */}
+            <mesh castShadow>
+              <boxGeometry args={[0.09, 0.01, 0.13]} />
+              <meshStandardMaterial color="#1d4ed8" roughness={0.4} />
+            </mesh>
+            {/* Copper wire wound Toroidal Inductor Coil */}
+            <mesh position={[-0.015, 0.014, 0.025]} rotation={[Math.PI / 2, 0, 0]} castShadow>
+              <cylinderGeometry args={[0.018, 0.018, 0.015, 12]} />
+              <meshStandardMaterial color="#b45309" roughness={0.15} metalness={0.9} />
+            </mesh>
+            {/* Gold trimmer screw head potentiometer */}
+            <mesh position={[0.028, 0.012, -0.035]} castShadow>
+              <boxGeometry args={[0.014, 0.015, 0.014]} />
+              <meshStandardMaterial color="#3f3f46" roughness={0.3} />
+            </mesh>
+            <mesh position={[0.028, 0.021, -0.035]} castShadow>
+              <cylinderGeometry args={[0.004, 0.004, 0.006, 8]} />
+              <meshStandardMaterial color="#fbbf24" metalness={0.9} />
+            </mesh>
+          </group>
+
+          {/* Module 3: Dual-Channel Relay Module */}
+          <group position={[0.12, 0.02, -0.11]}>
+            {/* Blue Relay Cubes */}
+            {[-0.025, 0.025].map((xVal, i) => (
+              <mesh key={i} position={[xVal, 0.014, 0]} castShadow>
+                <boxGeometry args={[0.036, 0.024, 0.045]} />
+                <meshStandardMaterial color="#0284c7" roughness={0.4} />
+              </mesh>
+            ))}
+            {/* PCB */}
+            <mesh castShadow position={[0, 0.001, 0]}>
+              <boxGeometry args={[0.09, 0.008, 0.12]} />
+              <meshStandardMaterial color="#1e293b" />
+            </mesh>
+          </group>
+
+          {/* Module 4: MOSFET Driver Module (for controlling pumps speed) */}
+          <group position={[0.12, 0.02, 0.08]}>
+            {/* Black PCB */}
+            <mesh castShadow>
+              <boxGeometry args={[0.08, 0.01, 0.11]} />
+              <meshStandardMaterial color="#09090b" roughness={0.6} />
+            </mesh>
+            {/* Aluminum Heatsink fins */}
+            <mesh position={[-0.015, 0.016, 0]} castShadow>
+              <boxGeometry args={[0.02, 0.02, 0.06]} />
+              <meshStandardMaterial color="#cbd5e1" roughness={0.2} metalness={0.95} />
+            </mesh>
+            {/* Terminal blocks */}
+            <mesh position={[0.025, 0.012, 0]} castShadow>
+              <boxGeometry args={[0.018, 0.018, 0.075]} />
+              <meshStandardMaterial color="#047857" roughness={0.4} />
+            </mesh>
+          </group>
+
+          {/* Diagnostic LEDs on main board */}
+          <mesh ref={powerLedRef} position={[-0.27, 0.018, 0.16]}>
+            <sphereGeometry args={[0.008, 8, 8]} />
+            <meshStandardMaterial color="#ef4444" emissive="#ef4444" emissiveIntensity={1} />
+          </mesh>
+          <mesh ref={statusLedRef} position={[-0.24, 0.018, 0.16]}>
+            <sphereGeometry args={[0.008, 8, 8]} />
+            <meshStandardMaterial color="#10b981" emissive="#10b981" emissiveIntensity={1} />
+          </mesh>
+
+          {/* Multi-color connecting jumper wires */}
+          <group position={[0.0, 0.015, 0.0]}>
+            {[0.0, 0.05, 0.1].map((offset, idx) => (
+              <mesh key={idx} position={[-0.05, 0.002, offset]} rotation={[0, 0, Math.PI/2]} castShadow>
+                <cylinderGeometry args={[0.003, 0.003, 0.16, 6]} />
+                <meshStandardMaterial 
+                  color={idx === 0 ? '#ef4444' : idx === 1 ? '#3b82f6' : '#eab308'} 
+                  roughness={0.6} 
+                />
+              </mesh>
+            ))}
+          </group>
+
+        </group>
+
+        {/* 4. SIDE CABLE GLANDS & HARNESSES */}
         {[-0.1, 0.1].map((zVal, i) => (
           <group key={i} position={[0.35, -0.04, zVal]}>
             <mesh rotation={[0, 0, Math.PI / 2]} castShadow>
@@ -243,49 +368,6 @@ export const ESP32Box = () => {
           </group>
         ))}
 
-        {/* 4. INTERIOR CIRCUIT BOARD (PCB) */}
-        <group position={[0, -0.05, 0]}>
-          {/* PCB Fiberglass Board (Green) */}
-          <mesh castShadow>
-            <boxGeometry args={[0.6, 0.01, 0.4]} />
-            <meshStandardMaterial color="#064e3b" roughness={0.6} metalness={0.15} />
-          </mesh>
-
-          {/* Silver ESP32 microchip */}
-          <mesh position={[-0.15, 0.01, -0.05]} castShadow>
-            <boxGeometry args={[0.1, 0.012, 0.12]} />
-            <meshStandardMaterial color="#e2e8f0" roughness={0.1} metalness={0.95} />
-          </mesh>
-
-          {/* Relay Board */}
-          <mesh position={[0.15, 0.015, -0.08]} castShadow>
-            <boxGeometry args={[0.08, 0.02, 0.08]} />
-            <meshStandardMaterial color="#1e3a8a" roughness={0.2} metalness={0.6} />
-          </mesh>
-
-          {/* Board LEDs */}
-          <mesh ref={powerLedRef} position={[-0.25, 0.01, 0.15]}>
-            <sphereGeometry args={[0.008, 8, 8]} />
-            <meshStandardMaterial color="#ef4444" emissive="#ef4444" emissiveIntensity={1} />
-          </mesh>
-          <mesh ref={statusLedRef} position={[-0.22, 0.01, 0.15]}>
-            <sphereGeometry args={[0.008, 8, 8]} />
-            <meshStandardMaterial color="#10b981" emissive="#10b981" emissiveIntensity={1} />
-          </mesh>
-
-          {/* Detailed wires running from PCB */}
-          <group position={[0.18, -0.08, 0.05]}>
-            {[0, 0.05, 0.1].map((zOffset, idx) => (
-              <mesh key={idx} position={[0, 0, zOffset]} rotation={[0, 0, 0]} castShadow>
-                <cylinderGeometry args={[0.004, 0.004, 0.15, 6]} />
-                <meshStandardMaterial 
-                  color={idx === 0 ? '#f59e0b' : idx === 1 ? '#06b6d4' : '#ec4899'} 
-                  roughness={0.5} 
-                />
-              </mesh>
-            ))}
-          </group>
-        </group>
       </group>
     </group>
   );

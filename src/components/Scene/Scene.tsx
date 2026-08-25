@@ -27,7 +27,7 @@ export const Scene = () => {
   const { exploded, transparent, cutaway, mode } = useSystemState();
 
   return (
-    <div className="w-full h-full relative select-none bg-[radial-gradient(circle_at_center,_#0f172a_0%,_#020204_100%)]">
+    <div className="w-full h-full relative select-none bg-[radial-gradient(circle_at_bottom,_#1e1b4b_0%,_#020205_100%)]">
       {/* 3D R3F Canvas */}
       <Canvas
         shadows
@@ -53,23 +53,46 @@ export const Scene = () => {
         {/* Lighting setup */}
         <SceneLighting />
 
-        {/* Photorealistic Showroom Environment Floor (Highly reflective clearcoat) */}
-        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2.201, 0]} receiveShadow>
-          <planeGeometry args={[80, 80]} />
-          <meshPhysicalMaterial
-            color="#08080d"
-            roughness={0.16}
-            metalness={0.85}
-            clearcoat={1.0}
-            clearcoatRoughness={0.05}
+        {/* Lush Green Grassy Outdoor Ground Landscape */}
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2.24, 0]} receiveShadow>
+          <planeGeometry args={[120, 120]} />
+          <meshStandardMaterial
+            color="#052e16"
+            roughness={0.95}
+            metalness={0.0}
           />
         </mesh>
 
-        {/* Industrial Concrete Mounting Pedestal/Plinth */}
-        <mesh position={[0.1, -2.23, -0.2]} receiveShadow castShadow>
+        {/* Concrete Installation Platform Pad */}
+        <mesh position={[0.1, -2.22, -0.2]} receiveShadow castShadow>
           <boxGeometry args={[6.8, 0.06, 2.6]} />
-          <meshStandardMaterial color="#1e293b" roughness={0.8} metalness={0.15} />
+          <meshStandardMaterial color="#3f3f46" roughness={0.8} metalness={0.1} />
         </mesh>
+
+        {/* Stone Borewell / Water Wellhead Source on Bottom Right */}
+        <group position={[3.8, -2.1, 0.0]}>
+          {/* Concrete Well Ring */}
+          <mesh castShadow receiveShadow>
+            <cylinderGeometry args={[0.3, 0.32, 0.3, 16, 1, false]} />
+            <meshStandardMaterial color="#1e293b" roughness={0.9} />
+          </mesh>
+          {/* Steel Wellhead Top Flange plate */}
+          <mesh position={[0, 0.15, 0]} castShadow>
+            <cylinderGeometry args={[0.33, 0.33, 0.02, 12]} />
+            <meshStandardMaterial color="#3f4f6e" roughness={0.3} metalness={0.8} />
+          </mesh>
+          {/* Submerged Borewell water surface inside ring */}
+          <mesh position={[0, 0.1, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+            <planeGeometry args={[0.55, 0.55]} />
+            <meshPhysicalMaterial
+              color="#0e7490"
+              transparent
+              opacity={0.7}
+              transmission={0.9}
+              roughness={0.1}
+            />
+          </mesh>
+        </group>
 
         {/* Camera state transitions controller */}
         <CameraController />

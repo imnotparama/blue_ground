@@ -162,6 +162,31 @@ export const Tanks = () => {
           />
         </mesh>
 
+        {/* Horizontal divider compartment divider at y=0 */}
+        <mesh position={[0, 0, 0]} receiveShadow castShadow>
+          <boxGeometry args={[2.18, 0.02, 1.38]} />
+          <meshPhysicalMaterial
+            color="#ffffff"
+            transparent
+            opacity={0.35}
+            roughness={0.1}
+            metalness={0.1}
+            transmission={0.9}
+            thickness={0.01}
+            depthWrite={false}
+          />
+        </mesh>
+
+        {/* Bypass gravity drop tube connecting top (sensor) chamber to bottom (clean) chamber */}
+        <mesh position={[0.5, -0.4, 0]} castShadow>
+          <cylinderGeometry args={[0.02, 0.02, 0.8, 8]} />
+          <meshStandardMaterial color="#f1f5f9" roughness={0.4} metalness={0.1} />
+        </mesh>
+        <mesh position={[0.5, 0.0, 0]} castShadow>
+          <cylinderGeometry args={[0.03, 0.03, 0.06, 8]} />
+          <meshStandardMaterial color="#ef4444" roughness={0.2} metalness={0.8} />
+        </mesh>
+
         {/* Structural Metal Corners */}
         <group>
           {/* Top Frame */}
