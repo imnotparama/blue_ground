@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSystemState } from '@/hooks/useSystemState';
 import { 
   Zap, 
@@ -13,9 +13,69 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
+// Small inline sparkline SVG chart
+const Sparkline = ({ data, color }: { data: number[]; color: string }) => {
+  const min = Math.min(...data);
+  const max = Math.max(...data);
+  const range = max - min || 1;
+  const width = 100;
+  const height = 18;
+  
+  const points = data.map((val, index) => {
+    const x = (index / (data.length - 1)) * width;
+    const y = height - 1 - ((val - min) / range) * (height - 2);
+    return `${x},${y}`;
+  }).join(' ');
+
+  const gradId = `grad-${color.replace('#', '')}`;
+
+  return (
+    <svg className="w-full h-4 mt-1.5 opacity-90" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
+      <defs>
+        <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity={0.25} />
+          <stop offset="100%" stopColor={color} stopOpacity={0.0} />
+        </linearGradient>
+      </defs>
+      <path
+        fill={`url(#${gradId})`}
+        d={`M 0,${height} L ${points} L ${width},${height} Z`}
+      />
+      <polyline
+        fill="none"
+        stroke={color}
+        strokeWidth="1.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        points={points}
+      />
+    </svg>
+  );
+};
+
 export const Dashboard = () => {
   const { metrics, mode, demoRunning, landingVisited } = useSystemState();
   const [collapsed, setCollapsed] = React.useState(false);
+
+  // Live sliding window telemetry history
+  const [history, setHistory] = useState<{ tds: number[]; ph: number[]; turbidity: number[]; flowRate: number[] }>({
+    tds: Array(12).fill(145),
+    ph: Array(12).fill(7.2),
+    turbidity: Array(12).fill(1.2),
+    flowRate: Array(12).fill(4.8),
+  });
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setHistory(prev => ({
+        tds: [...prev.tds.slice(1), metrics.tds],
+        ph: [...prev.ph.slice(1), metrics.ph],
+        turbidity: [...prev.turbidity.slice(1), metrics.turbidity],
+        flowRate: [...prev.flowRate.slice(1), metrics.flowRate],
+      }));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [metrics]);
 
   if (!landingVisited || demoRunning) return null; // Hide dashboard during landing or guided tour
 
@@ -129,20 +189,26 @@ export const Dashboard = () => {
                 <div className="bg-white/2 p-2.5 rounded-xl border border-white/5 flex flex-col gap-0.5">
                   <span className="text-[8px] text-zinc-500 font-mono">TDS PURITY</span>
                   <span className="text-xs font-bold font-mono text-sky-400">{metrics.tds} ppm</span>
+                  <Sparkline data={history.tds} color="#38bdf8" />
                 </div>
                 <div className="bg-white/2 p-2.5 rounded-xl border border-white/5 flex flex-col gap-0.5">
                   <span className="text-[8px] text-zinc-500 font-mono">ACIDITY INDEX</span>
                   <span className="text-xs font-bold font-mono text-pink-400">{metrics.ph.toFixed(2)} pH</span>
+                  <Sparkline data={history.ph} color="#f472b6" />
                 </div>
                 <div className="bg-white/2 p-2.5 rounded-xl border border-white/5 flex flex-col gap-0.5">
                   <span className="text-[8px] text-zinc-500 font-mono">CLARITY (TURB)</span>
                   <span className={`text-xs font-bold font-mono ${metrics.turbidity > 5.0 ? 'text-amber-400' : 'text-yellow-400'}`}>
                     {metrics.turbidity.toFixed(1)} NTU
                   </span>
+                  <Sparkline data={history.turbidity} color="#fbbf24" />
                 </div>
                 <div className="bg-white/2 p-2.5 rounded-xl border border-white/5 flex flex-col gap-0.5">
                   <span className="text-[8px] text-zinc-500 font-mono">THERMAL DATA</span>
                   <span className="text-xs font-bold font-mono text-emerald-400">{metrics.temperature.toFixed(1)} °C</span>
+                  <div className="w-full h-1 bg-zinc-800 rounded-full overflow-hidden mt-2">
+                    <div className="h-full bg-emerald-500" style={{ width: `${(metrics.temperature / 50) * 100}%` }} />
+                  </div>
                 </div>
               </div>
             </div>
@@ -155,14 +221,18 @@ export const Dashboard = () => {
                 <Droplet className="w-3.5 h-3.5 text-blue-400" /> Hydraulics Loop
               </h2>
               <div className="bg-white/2 p-3 rounded-xl border border-white/5 flex flex-col gap-2">
-                <div className="grid grid-cols-2 gap-4 text-center">
+                <div className="grid grid-cols-2 gap-4 text-center items-center">
                   <div>
                     <span className="text-[8px] text-zinc-500 font-mono block">INLINE FLOW</span>
                     <span className="text-xs font-bold font-mono text-cyan-300">{metrics.flowRate.toFixed(2)} L/min</span>
+                    <Sparkline data={history.flowRate} color="#06b6d4" />
                   </div>
                   <div>
                     <span className="text-[8px] text-zinc-500 font-mono block">PUMP SPEED</span>
                     <span className="text-xs font-bold font-mono text-zinc-300">{metrics.pumpRpm} RPM</span>
+                    <div className="w-full h-1 bg-zinc-800 rounded-full overflow-hidden mt-3">
+                      <div className="h-full bg-cyan-500" style={{ width: `${(metrics.pumpRpm / 2400) * 100}%` }} />
+                    </div>
                   </div>
                 </div>
                 <div className="flex justify-between items-center pt-2 border-t border-white/5 text-[9px] font-mono">

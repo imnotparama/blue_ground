@@ -29,48 +29,48 @@ export const SceneLighting = () => {
     switch (envMode) {
       case 'SUNNY':
         sunColor = '#fffaf0';
-        sunIntensity = 3.5;
+        sunIntensity = 5.5;
         sunPosition = [8, 12, 5];
-        ambientColor = '#1b1b24';
-        ambientIntensity = 0.6;
+        ambientColor = '#1e1e2d';
+        ambientIntensity = 1.1;
         rimColor = '#06b6d4'; // Cyan highlights
-        rimIntensity = 2.0;
+        rimIntensity = 3.0;
         break;
       case 'MORNING':
         sunColor = '#fca5a5'; // Soft rose/golden light
-        sunIntensity = 2.0;
+        sunIntensity = 3.8;
         sunPosition = [-6, 5, 4];
-        ambientColor = '#1e1b29';
-        ambientIntensity = 0.7;
+        ambientColor = '#242033';
+        ambientIntensity = 1.1;
         rimColor = '#f97316'; // Golden orange rim
-        rimIntensity = 1.8;
+        rimIntensity = 2.5;
         break;
       case 'CLOUDY':
         sunColor = '#cbd5e1';
-        sunIntensity = 1.0;
+        sunIntensity = 2.8;
         sunPosition = [3, 8, 3];
-        ambientColor = '#0f172a';
-        ambientIntensity = 0.4;
+        ambientColor = '#131c30';
+        ambientIntensity = 0.9;
         rimColor = '#64748b';
-        rimIntensity = 0.8;
+        rimIntensity = 1.5;
         break;
       case 'RAIN':
         sunColor = '#475569';
-        sunIntensity = 0.4;
+        sunIntensity = 1.8;
         sunPosition = [2, 6, 2];
-        ambientColor = '#020617';
-        ambientIntensity = 0.2;
+        ambientColor = '#050c1e';
+        ambientIntensity = 0.6;
         rimColor = '#0284c7';
-        rimIntensity = 0.5;
+        rimIntensity = 1.2;
         break;
       case 'NIGHT':
         sunColor = '#1e293b'; // Moonlight
-        sunIntensity = 0.15;
+        sunIntensity = 0.8;
         sunPosition = [-5, 8, -2];
-        ambientColor = '#030712';
-        ambientIntensity = 0.1;
+        ambientColor = '#060a17';
+        ambientIntensity = 0.4;
         rimColor = '#3b82f6'; // Deep blue highlights
-        rimIntensity = 1.2;
+        rimIntensity = 2.0;
         break;
     }
 
@@ -141,12 +141,12 @@ export const SceneLighting = () => {
   return (
     <>
       {/* Soft Ambient Environment light */}
-      <ambientLight ref={ambientLightRef} intensity={0.5} color="#1b1b24" />
+      <ambientLight ref={ambientLightRef} intensity={1.0} color="#1e1e2d" />
 
       {/* Main Directional Sun Light */}
       <directionalLight
         ref={sunLightRef}
-        intensity={2.5}
+        intensity={4.5}
         position={[8, 12, 5]}
         color="#fffaf0"
         castShadow
@@ -163,7 +163,7 @@ export const SceneLighting = () => {
       {/* Rim light (placed behind the model to create beautiful glossy outlines on glass/metal) */}
       <directionalLight
         ref={rimLightRef}
-        intensity={1.5}
+        intensity={2.5}
         position={[-8, 4, -5]}
         color="#06b6d4"
       />
@@ -171,7 +171,7 @@ export const SceneLighting = () => {
       {/* Soft fill light (from the bottom front to avoid dark under-shadows) */}
       <pointLight
         ref={fillLightRef}
-        intensity={0.9}
+        intensity={1.8}
         position={[0.5, -2, 4]}
         color="#f8fafc"
       />

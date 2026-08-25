@@ -102,9 +102,9 @@ export const Scene = () => {
           makeDefault
           enableDamping
           dampingFactor={0.05}
-          maxPolarAngle={Math.PI / 2 + 0.05} // don't go below floor
-          minDistance={1.5}
-          maxDistance={12}
+          maxPolarAngle={Math.PI / 2 + 0.08}
+          minDistance={0.5}
+          maxDistance={18}
         />
 
         {/* Global Atmospheric Ambient Dust Motes */}
