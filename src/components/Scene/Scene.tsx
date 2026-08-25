@@ -21,6 +21,7 @@ import { Water } from './Models/Tank/Water';
 import { Flows } from './Models/Pipes/Flows';
 import { AmbientLife } from './Environment/AmbientLife';
 import { Hotspots } from './Environment/Hotspots';
+import { SupportRack } from './Environment/SupportRack';
 
 export const Scene = () => {
   const { exploded, transparent, cutaway, mode } = useSystemState();
@@ -53,6 +54,24 @@ export const Scene = () => {
         {/* Lighting setup */}
         <SceneLighting />
 
+        {/* Photorealistic Showroom Environment Floor (Highly reflective clearcoat) */}
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2.201, 0]} receiveShadow>
+          <planeGeometry args={[80, 80]} />
+          <meshPhysicalMaterial
+            color="#08080d"
+            roughness={0.16}
+            metalness={0.85}
+            clearcoat={1.0}
+            clearcoatRoughness={0.05}
+          />
+        </mesh>
+
+        {/* Industrial Concrete Mounting Pedestal/Plinth */}
+        <mesh position={[0.1, -2.23, -0.2]} receiveShadow castShadow>
+          <boxGeometry args={[6.8, 0.06, 2.6]} />
+          <meshStandardMaterial color="#1e293b" roughness={0.8} metalness={0.15} />
+        </mesh>
+
         {/* Camera state transitions controller */}
         <CameraController />
 
@@ -80,6 +99,7 @@ export const Scene = () => {
           <Sensors />
           <FilterHousing />
           <Pipes />
+          <SupportRack />
 
           {/* Render dynamic fluids and current animations */}
           <Water />
