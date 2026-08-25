@@ -8,7 +8,6 @@ import * as THREE from 'three';
 export const FilterHousing = () => {
   const { exploded, transparent, cutaway, activeHotspot, setActiveHotspot, setCameraPreset } = useSystemState();
   
-  // References to animate splitting casing shells and materials
   const mainGroupRef = useRef<THREE.Group>(null);
   const leftCasingRef = useRef<THREE.Group>(null);
   const rightCasingRef = useRef<THREE.Group>(null);
@@ -18,10 +17,10 @@ export const FilterHousing = () => {
   const rightMatRef = useRef<THREE.MeshPhysicalMaterial>(null);
   const [hovered, setHovered] = useState(false);
 
-  useFrame((state, delta) => {
+  useFrame(() => {
     // 1. Splitting Casing shells in exploded view
     const targetSplitX = exploded ? 0.35 : 0;
-    const targetMediaZ = exploded ? 0.18 : 0;
+    const targetMediaZ = exploded ? 0.20 : 0;
 
     if (leftCasingRef.current) {
       leftCasingRef.current.position.x = THREE.MathUtils.lerp(leftCasingRef.current.position.x, -targetSplitX, 0.08);
@@ -33,16 +32,16 @@ export const FilterHousing = () => {
       filterMediaRef.current.position.z = THREE.MathUtils.lerp(filterMediaRef.current.position.z, targetMediaZ, 0.08);
     }
 
-    // Smooth scale up on hover (3%)
+    // Smooth scale up on hover
     if (mainGroupRef.current) {
-      const targetScale = hovered ? 1.03 : 1.0;
+      const targetScale = hovered ? 1.025 : 1.0;
       mainGroupRef.current.scale.setScalar(THREE.MathUtils.lerp(mainGroupRef.current.scale.x, targetScale, 0.15));
     }
 
-    // 2. Adjust housing transparency dynamically when transparent or cutaway is active
-    const isDimmed = activeHotspot !== null && activeHotspot !== 'filter_housing' && activeHotspot !== 'filter' && activeHotspot !== 'inside_filter';
-    const targetOpacity = isDimmed ? 0.15 : 1.0;
-    const casingTargetOpacity = isDimmed ? 0.05 : (transparent || cutaway) ? 0.05 : 0.35;
+    // Adjust housing transparency
+    const isDimmed = activeHotspot !== null && activeHotspot !== 'filter_housing' && activeHotspot !== 'filter' && activeHotspot !== 'inside_filter' && activeHotspot !== 'sedimentation_tank';
+    const targetOpacity = isDimmed ? 0.12 : 1.0;
+    const casingTargetOpacity = isDimmed ? 0.05 : (transparent || cutaway) ? 0.05 : 0.45;
     
     if (leftMatRef.current) {
       leftMatRef.current.opacity = THREE.MathUtils.lerp(leftMatRef.current.opacity, casingTargetOpacity, 0.1);
@@ -53,7 +52,7 @@ export const FilterHousing = () => {
       rightMatRef.current.transparent = true;
     }
 
-    // Media layers dimming & hover glow
+    // Media layers hover glow & dimming
     if (filterMediaRef.current) {
       filterMediaRef.current.traverse((child) => {
         if (child instanceof THREE.Mesh) {
@@ -62,38 +61,10 @@ export const FilterHousing = () => {
             mat.transparent = true;
             mat.opacity = THREE.MathUtils.lerp(mat.opacity, targetOpacity, 0.08);
 
-            // Glow cyan on hover
             if (mat.emissive) {
               if (hovered && !isDimmed) {
                 mat.emissive.set('#06b6d4');
-                mat.emissiveIntensity = THREE.MathUtils.lerp(mat.emissiveIntensity, 0.45, 0.1);
-              } else {
-                mat.emissive.set('#000000');
-                mat.emissiveIntensity = THREE.MathUtils.lerp(mat.emissiveIntensity, 0.0, 0.1);
-              }
-            }
-          }
-        }
-      });
-    }
-
-    // Cap dimming and glows
-    if (mainGroupRef.current) {
-      mainGroupRef.current.traverse((child) => {
-        // Exclude meshes inside the filter media stack (handled separately above)
-        if (child.parent === filterMediaRef.current) return;
-        if (child === leftCasingRef.current || child === rightCasingRef.current) return;
-
-        if (child instanceof THREE.Mesh) {
-          const mat = child.material as THREE.MeshStandardMaterial;
-          if (mat && mat !== leftMatRef.current && mat !== rightMatRef.current) {
-            mat.transparent = true;
-            mat.opacity = THREE.MathUtils.lerp(mat.opacity, targetOpacity, 0.08);
-
-            if (mat.emissive) {
-              if (hovered && !isDimmed) {
-                mat.emissive.set('#06b6d4');
-                mat.emissiveIntensity = THREE.MathUtils.lerp(mat.emissiveIntensity, 0.45, 0.1);
+                mat.emissiveIntensity = THREE.MathUtils.lerp(mat.emissiveIntensity, 0.4, 0.1);
               } else {
                 mat.emissive.set('#000000');
                 mat.emissiveIntensity = THREE.MathUtils.lerp(mat.emissiveIntensity, 0.0, 0.1);
@@ -122,19 +93,19 @@ export const FilterHousing = () => {
     setCameraPreset('FILTER_HOUSING');
   };
 
-  // Details for filter layers
+  // Stacked multi-stage filter media layers
   const layers = [
-    { height: 0.1, y: 0.55, color: '#94a3b8', roughness: 0.2, metalness: 0.9, name: 'Coarse Mesh' },
-    { height: 0.25, y: 0.38, color: '#64748b', roughness: 0.8, metalness: 0.1, name: 'Gravel' },
-    { height: 0.3, y: 0.1, color: '#eab308', roughness: 0.9, metalness: 0.0, name: 'Sand' },
-    { height: 0.35, y: -0.22, color: '#18181b', roughness: 0.7, metalness: 0.3, name: 'Activated Carbon' },
-    { height: 0.15, y: -0.48, color: '#f4f4f5', roughness: 0.6, metalness: 0.0, name: 'Fine Filter' },
+    { height: 0.12, y: 0.52, color: '#94a3b8', roughness: 0.2, metalness: 0.9, name: 'Stainless Mesh' },
+    { height: 0.28, y: 0.32, color: '#64748b', roughness: 0.85, metalness: 0.1, name: 'Sedimentation Gravel' },
+    { height: 0.32, y: 0.02, color: '#eab308', roughness: 0.9, metalness: 0.0, name: 'Quartz Sand' },
+    { height: 0.36, y: -0.32, color: '#18181b', roughness: 0.7, metalness: 0.3, name: 'Activated Carbon' },
+    { height: 0.16, y: -0.58, color: '#f8fafc', roughness: 0.5, metalness: 0.0, name: 'Fine Polishing Filter' },
   ];
 
   return (
     <group 
       ref={mainGroupRef}
-      position={[0.3, -1.0, 0]}
+      position={[0.15, -0.95, 0]}
       onPointerOver={handlePointerOver}
       onPointerOut={handlePointerOut}
       onClick={handleClick}
@@ -144,25 +115,25 @@ export const FilterHousing = () => {
       {/* Left half shell casing */}
       <group ref={leftCasingRef}>
         <mesh castShadow receiveShadow>
-          <cylinderGeometry args={[0.26, 0.26, 1.3, 16, 1, false, 0, Math.PI]} />
+          <cylinderGeometry args={[0.28, 0.28, 1.45, 24, 1, false, 0, Math.PI]} />
           <meshPhysicalMaterial
             ref={leftMatRef}
             color="#0891b2"
             transparent
-            opacity={0.35}
-            roughness={0.15}
-            metalness={0.1}
-            transmission={0.8}
+            opacity={0.45}
+            roughness={0.06}
+            metalness={0.08}
+            transmission={0.84}
             side={THREE.DoubleSide}
             depthWrite={false}
           />
         </mesh>
         
         {/* Metal banding rims (split) */}
-        {[-0.64, 0.64].map((yVal, i) => (
+        {[-0.60, 0.0, 0.60].map((yVal, i) => (
           <mesh key={i} position={[0, yVal, 0]} castShadow>
-            <cylinderGeometry args={[0.27, 0.27, 0.03, 16, 1, true, 0, Math.PI]} />
-            <meshStandardMaterial color="#4b5563" roughness={0.3} metalness={0.8} />
+            <cylinderGeometry args={[0.29, 0.29, 0.025, 24, 1, true, 0, Math.PI]} />
+            <meshStandardMaterial color="#475569" roughness={0.25} metalness={0.9} />
           </mesh>
         ))}
       </group>
@@ -170,25 +141,25 @@ export const FilterHousing = () => {
       {/* Right half shell casing */}
       <group ref={rightCasingRef}>
         <mesh castShadow receiveShadow>
-          <cylinderGeometry args={[0.26, 0.26, 1.3, 16, 1, false, Math.PI, Math.PI]} />
+          <cylinderGeometry args={[0.28, 0.28, 1.45, 24, 1, false, Math.PI, Math.PI]} />
           <meshPhysicalMaterial
             ref={rightMatRef}
             color="#0891b2"
             transparent
-            opacity={0.35}
-            roughness={0.15}
-            metalness={0.1}
-            transmission={0.8}
+            opacity={0.45}
+            roughness={0.06}
+            metalness={0.08}
+            transmission={0.84}
             side={THREE.DoubleSide}
             depthWrite={false}
           />
         </mesh>
         
         {/* Metal banding rims (split) */}
-        {[-0.64, 0.64].map((yVal, i) => (
+        {[-0.60, 0.0, 0.60].map((yVal, i) => (
           <mesh key={i} position={[0, yVal, 0]} castShadow>
-            <cylinderGeometry args={[0.27, 0.27, 0.03, 16, 1, true, Math.PI, Math.PI]} />
-            <meshStandardMaterial color="#4b5563" roughness={0.3} metalness={0.8} />
+            <cylinderGeometry args={[0.29, 0.29, 0.025, 24, 1, true, Math.PI, Math.PI]} />
+            <meshStandardMaterial color="#475569" roughness={0.25} metalness={0.9} />
           </mesh>
         ))}
       </group>
@@ -199,7 +170,7 @@ export const FilterHousing = () => {
           const isMesh = idx === 0;
           return (
             <mesh key={idx} position={[0, layer.y, 0]} castShadow receiveShadow>
-              <cylinderGeometry args={[0.23, 0.23, layer.height, 16]} />
+              <cylinderGeometry args={[0.25, 0.25, layer.height, 20]} />
               <meshStandardMaterial
                 color={layer.color}
                 roughness={layer.roughness}
@@ -214,26 +185,47 @@ export const FilterHousing = () => {
 
         {/* Dynamic Emissive highlight ring for filter activation */}
         <mesh position={[0, 0, 0]}>
-          <cylinderGeometry args={[0.235, 0.235, 1.2, 16, 1, true]} />
+          <cylinderGeometry args={[0.255, 0.255, 1.35, 20, 1, true]} />
           <meshBasicMaterial 
             color="#22d3ee" 
             wireframe 
             transparent 
-            opacity={exploded ? 0.08 : 0.0} 
+            opacity={exploded ? 0.12 : 0.0} 
           />
         </mesh>
       </group>
 
       {/* 3. CAP INLETS AND CONNECTIONS */}
-      {/* Top cap */}
-      <mesh position={[0, 0.66, 0]} castShadow>
-        <cylinderGeometry args={[0.27, 0.27, 0.06, 16]} />
-        <meshStandardMaterial color="#1f2937" roughness={0.4} metalness={0.7} />
-      </mesh>
-      {/* Bottom funnel */}
-      <mesh position={[0, -0.71, 0]} castShadow>
-        <cylinderGeometry args={[0.27, 0.05, 0.1, 16]} />
-        <meshStandardMaterial color="#1f2937" roughness={0.4} metalness={0.7} />
+      {/* Top cap with pipe inlet nozzle */}
+      <group position={[0, 0.75, 0]}>
+        <mesh castShadow>
+          <cylinderGeometry args={[0.30, 0.30, 0.06, 24]} />
+          <meshStandardMaterial color="#1e293b" roughness={0.35} metalness={0.85} />
+        </mesh>
+        {/* Inlet connection collar */}
+        <mesh position={[0, 0.05, 0]} castShadow>
+          <cylinderGeometry args={[0.04, 0.04, 0.06, 12]} />
+          <meshStandardMaterial color="#475569" roughness={0.2} metalness={0.9} />
+        </mesh>
+      </group>
+
+      {/* Bottom Funnel Outlet */}
+      <group position={[0, -0.78, 0]}>
+        <mesh castShadow>
+          <cylinderGeometry args={[0.30, 0.05, 0.12, 24]} />
+          <meshStandardMaterial color="#1e293b" roughness={0.35} metalness={0.85} />
+        </mesh>
+        {/* Outlet connection collar */}
+        <mesh position={[0, -0.08, 0]} castShadow>
+          <cylinderGeometry args={[0.035, 0.035, 0.06, 12]} />
+          <meshStandardMaterial color="#475569" roughness={0.2} metalness={0.9} />
+        </mesh>
+      </group>
+
+      {/* Tank Base Mount Flange on floor */}
+      <mesh position={[0, -0.80, 0]} receiveShadow castShadow>
+        <cylinderGeometry args={[0.33, 0.33, 0.03, 20]} />
+        <meshStandardMaterial color="#1e293b" roughness={0.5} metalness={0.85} />
       </mesh>
     </group>
   );

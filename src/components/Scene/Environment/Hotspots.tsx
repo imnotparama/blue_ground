@@ -19,47 +19,47 @@ const hotspotsList: HotspotConfig[] = [
   {
     id: 'solar',
     preset: 'SOLAR',
-    position: [-1.4, 0.9, 0],
-    label: 'Solar Panel',
+    position: [-2.0, 0.75, 0],
+    label: 'Solar Array',
     getStatus: (m) => m.solarWatts > 5 ? { label: 'GENERATING', color: 'text-emerald-400' } : { label: 'STANDBY', color: 'text-zinc-500' },
     getSub: (m) => `Output: ${m.solarWatts.toFixed(1)}W`,
   },
   {
     id: 'battery',
     preset: 'BATTERY',
-    position: [-0.2, 0.65, 0.1],
-    label: 'Battery Pack',
+    position: [-1.45, 0.50, 0.35],
+    label: 'Lithium Battery',
     getStatus: (m) => m.batteryPercent < 15 ? { label: 'CRITICAL', color: 'text-rose-400 animate-pulse' } : { label: 'NOMINAL', color: 'text-emerald-400' },
     getSub: (m) => `Capacity: ${Math.round(m.batteryPercent)}%`,
   },
   {
     id: 'esp32',
     preset: 'ESP32',
-    position: [0.7, 0.65, 0.15],
-    label: 'ESP32 Controller',
+    position: [-1.45, 0.50, -0.35],
+    label: 'ESP32-S3 Core',
     getStatus: (m) => m.esp32Online ? { label: 'ONLINE', color: 'text-emerald-400' } : { label: 'OFFLINE', color: 'text-rose-400' },
     getSub: (m) => 'WiFi Connected',
   },
   {
     id: 'display',
     preset: 'DISPLAY',
-    position: [0.7, 0.52, 0.28],
+    position: [-1.33, 0.32, -0.17],
     label: 'TFT Display',
     getStatus: (m) => m.esp32Online ? { label: 'ACTIVE', color: 'text-emerald-400' } : { label: 'OFFLINE', color: 'text-zinc-500' },
-    getSub: (m) => 'Refreshing telemetry',
+    getSub: (m) => 'Live Telemetry',
   },
   {
     id: 'float',
     preset: 'FLOAT_SENSOR',
-    position: [-1.5, -0.15, 0],
-    label: 'Float Sensor',
+    position: [-2.6, -1.0, 0.3],
+    label: 'Float Level Sensor',
     getStatus: (m) => m.waterLevel > 95 ? { label: 'LEVEL FULL', color: 'text-amber-400' } : { label: 'MONITORING', color: 'text-emerald-400' },
     getSub: (m) => `Level: ${m.waterLevel}%`,
   },
   {
     id: 'pump',
     preset: 'PUMP',
-    position: [0.3, -0.2, 0],
+    position: [1.55, -1.65, 0],
     label: 'Water Pump',
     getStatus: (m) => m.pumpRpm > 0 ? { label: 'RUNNING', color: 'text-emerald-400' } : { label: 'STANDBY', color: 'text-zinc-500' },
     getSub: (m) => `${m.pumpRpm} RPM`,
@@ -67,15 +67,15 @@ const hotspotsList: HotspotConfig[] = [
   {
     id: 'uv',
     preset: 'UV_LED',
-    position: [0.4, -0.18, 0.3],
-    label: 'UV-C LED',
+    position: [2.02, -0.85, -0.22],
+    label: 'UV-C LED Light',
     getStatus: (m) => m.uvStatus === 'ON' ? { label: 'STERILIZING', color: 'text-violet-400 animate-pulse' } : { label: 'STANDBY', color: 'text-zinc-500' },
     getSub: (m) => `Emittance: ${m.uvStatus}`,
   },
   {
     id: 'ph',
     preset: 'PH_SENSOR',
-    position: [0.7, 0.08, -0.1],
+    position: [2.02, -0.25, 0.20],
     label: 'pH Probe',
     getStatus: (m) => m.ph < 6.5 || m.ph > 8.5 ? { label: 'ALERT', color: 'text-rose-400' } : { label: 'SAFE', color: 'text-emerald-400' },
     getSub: (m) => `${m.ph.toFixed(2)} pH`,
@@ -83,7 +83,7 @@ const hotspotsList: HotspotConfig[] = [
   {
     id: 'tds',
     preset: 'TDS_SENSOR',
-    position: [0.55, 0.08, 0.15],
+    position: [1.88, -0.25, 0.15],
     label: 'TDS Probe',
     getStatus: (m) => m.tds > 300 ? { label: 'ALERT', color: 'text-rose-400' } : { label: 'SAFE', color: 'text-emerald-400' },
     getSub: (m) => `${m.tds} ppm`,
@@ -91,7 +91,7 @@ const hotspotsList: HotspotConfig[] = [
   {
     id: 'turbidity',
     preset: 'TURBIDITY_SENSOR',
-    position: [0.85, 0.08, 0.15],
+    position: [2.18, -0.25, 0.15],
     label: 'Turbidity Probe',
     getStatus: (m) => m.turbidity > 5.0 ? { label: 'WARNING', color: 'text-amber-400' } : { label: 'SAFE', color: 'text-emerald-400' },
     getSub: (m) => `${m.turbidity.toFixed(1)} NTU`,
@@ -99,7 +99,7 @@ const hotspotsList: HotspotConfig[] = [
   {
     id: 'temp',
     preset: 'TEMP_SENSOR',
-    position: [0.62, 0.06, -0.22],
+    position: [2.32, -0.25, -0.15],
     label: 'Temp Probe',
     getStatus: () => ({ label: 'OK', color: 'text-emerald-400' }),
     getSub: (m) => `${m.temperature.toFixed(1)} °C`,
@@ -107,66 +107,58 @@ const hotspotsList: HotspotConfig[] = [
   {
     id: 'flow',
     preset: 'FLOW_SENSOR',
-    position: [1.6, 0.08, 0.05],
-    label: 'Flow Sensor',
+    position: [0.85, -1.65, 0.05],
+    label: 'Inline Flow Sensor',
     getStatus: (m) => m.flowRate > 0 ? { label: 'FLOWING', color: 'text-emerald-400' } : { label: 'STANDBY', color: 'text-zinc-500' },
     getSub: (m) => `${m.flowRate.toFixed(1)} L/min`,
   },
   {
-    id: 'sedimentation_tank',
-    preset: 'SEDIMENTATION_TANK',
-    position: [0.15, 0.0, 0.68],
-    label: 'Sedimentation Tank',
-    getStatus: () => ({ label: 'ACTIVE', color: 'text-cyan-400' }),
-    getSub: () => 'Settling Trap',
-  },
-  {
     id: 'filter_housing',
     preset: 'FILTER_HOUSING',
-    position: [2.2, -0.6, 0.28],
-    label: 'Filter Housing',
-    getStatus: () => ({ label: 'ACTIVE', color: 'text-cyan-400' }),
-    getSub: (m) => `${m.filterHealth}% Health`,
+    position: [0.15, -0.95, 0.35],
+    label: 'Sedimentation Filter',
+    getStatus: () => ({ label: '5-STAGE ACTIVE', color: 'text-cyan-400' }),
+    getSub: (m) => `${m.filterHealth}% Filter Health`,
   },
   {
     id: 'primary_tank',
     preset: 'PRIMARY_TANK',
-    position: [-0.6, -0.6, 0.7],
-    label: 'Primary Tank',
-    getStatus: () => ({ label: 'RESERVOIR', color: 'text-cyan-400' }),
-    getSub: (m) => `${m.waterLevel}% Purified`,
+    position: [-2.0, -0.75, 0.65],
+    label: 'Primary Storage Tank',
+    getStatus: () => ({ label: 'DUAL COMPARTMENT', color: 'text-cyan-400' }),
+    getSub: (m) => `${m.waterLevel}% Purified Storage`,
   },
   {
     id: 'secondary_tank',
     preset: 'SECONDARY_TANK',
-    position: [0.15, 0.0, -0.68],
-    label: 'Secondary Tank',
-    getStatus: () => ({ label: 'MONITORING', color: 'text-cyan-400' }),
-    getSub: () => 'Sump Well',
+    position: [2.1, -1.0, 0.50],
+    label: 'Raw Intake Tank',
+    getStatus: () => ({ label: 'INTAKE SUMP', color: 'text-cyan-400' }),
+    getSub: () => 'Sensor Analysis Sump',
   },
   {
     id: 'intake_pipe',
     preset: 'INTAKE_PIPE',
-    position: [3.8, -1.1, 0.06],
-    label: 'Intake Pipe',
+    position: [3.6, -1.0, 0.05],
+    label: 'Borewell Intake',
     getStatus: (m) => m.flowRate > 0 ? { label: 'SUCTION ACTIVE', color: 'text-emerald-400' } : { label: 'STANDBY', color: 'text-zinc-500' },
-    getSub: () => 'Source water inlet',
+    getSub: () => 'Source Water Inlet',
   },
   {
     id: 'return_pipe',
     preset: 'RETURN_PIPE',
-    position: [-0.4, -0.6, 0.06],
-    label: 'Return Pipe',
+    position: [-0.4, -1.90, 0.05],
+    label: 'Purified Return Pipe',
     getStatus: (m) => m.flowRate > 0 ? { label: 'LOOP ACTIVE', color: 'text-emerald-400' } : { label: 'STANDBY', color: 'text-zinc-500' },
-    getSub: () => 'Conveys clean water',
+    getSub: () => 'Conveys Purified Water',
   },
   {
     id: 'drain_valve',
     preset: 'DRAIN_VALVE',
-    position: [0.5, -1.5, 0.06],
-    label: 'Drain Solenoid',
-    getStatus: (m, mode) => mode === 'CLEANING' ? { label: 'OPEN', color: 'text-rose-400 animate-pulse' } : { label: 'CLOSED', color: 'text-zinc-400' },
-    getSub: (m) => m.mode === 'CLEANING' ? 'Purge cycle active' : 'Locked shut',
+    position: [-3.35, -1.35, 0.05],
+    label: 'Clean Water Tap Valve',
+    getStatus: (m, mode) => mode === 'CLEANING' ? { label: 'PURGE FLUSH', color: 'text-rose-400 animate-pulse' } : { label: 'DISPENSE OPEN', color: 'text-emerald-400' },
+    getSub: () => 'Pure Water Dispense',
   },
 ];
 
@@ -174,61 +166,96 @@ export const Hotspots = () => {
   const { landingVisited, demoRunning, activeHotspot, setActiveHotspot, setCameraPreset, metrics, mode } = useSystemState();
   const [hoveredId, setHoveredId] = useState<string | null>(null);
 
-  // Hide hotspots during the landing presentation or when the guided tour is active
   if (!landingVisited || demoRunning) return null;
 
   return (
     <group>
-      {hotspotsList.map((h) => {
-        const isHovered = hoveredId === h.id;
-        const isActive = activeHotspot === h.id;
-        const status = h.getStatus(metrics, mode);
-
-        const handleClick = (e: any) => {
-          e.stopPropagation();
-          setActiveHotspot(h.id);
-          setCameraPreset(h.preset);
-        };
+      {hotspotsList.map((spot) => {
+        const isHovered = hoveredId === spot.id;
+        const isActive = activeHotspot === spot.id;
+        const status = spot.getStatus(metrics, mode);
+        const sub = spot.getSub(metrics);
 
         return (
-          <group key={h.id} position={h.position}>
+          <group key={spot.id} position={spot.position}>
             <Html
               center
-              distanceFactor={4.2} // Scales hotspot down as camera pulls back
-              className="pointer-events-none select-none z-20"
+              distanceFactor={8}
+              zIndexRange={[100, 0]}
+              style={{
+                transition: 'all 0.2s ease-out',
+                pointerEvents: 'auto',
+              }}
             >
               <div 
-                className="relative flex items-center justify-center"
-                onPointerOver={() => setHoveredId(h.id)}
-                onPointerOut={() => setHoveredId(null)}
+                className="relative group cursor-pointer select-none"
+                onMouseEnter={() => setHoveredId(spot.id)}
+                onMouseLeave={() => setHoveredId(null)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActiveHotspot(spot.id);
+                  setCameraPreset(spot.preset);
+                }}
               >
-                {/* 1. Pulsing Core Anchor Dot (Vision Pro style) */}
-                <button
-                  onClick={handleClick}
-                  className={`w-3.5 h-3.5 rounded-full bg-cyan-400 border border-white/50 cursor-pointer pointer-events-auto transition-all duration-300 hotspot-pulse shadow-[0_0_8px_rgba(6,182,212,0.6)] ${
-                    isActive ? 'scale-125 bg-white border-cyan-400' : 'hover:scale-115'
-                  }`}
+                {/* 1. Pulsing Outer Glow Aura */}
+                <div 
+                  className={`absolute -inset-1.5 rounded-full blur-sm transition-opacity duration-300 ${
+                    isActive 
+                      ? 'bg-cyan-500/80 opacity-100 animate-pulse' 
+                      : isHovered 
+                        ? 'bg-cyan-400/60 opacity-100' 
+                        : 'bg-cyan-500/30 opacity-40 group-hover:opacity-100'
+                  }`} 
                 />
 
-                {/* 2. Floating Hover Info Pill Card */}
-                <div 
-                  className={`absolute left-6 w-max max-w-[240px] flex flex-col gap-0.5 px-3 py-2 rounded-xl border border-white/10 bg-zinc-950/85 backdrop-blur-md text-[10px] text-zinc-300 font-mono shadow-[0_4px_16px_rgba(0,0,0,0.5)] transition-all duration-300 pointer-events-none transform origin-left ${
-                    isHovered || isActive 
-                      ? 'scale-100 opacity-100 translate-x-0' 
-                      : 'scale-90 translate-x-[-8px] pointer-events-none opacity-0'
-                  }`}
-                >
-                  <div className="flex items-center gap-1.5 font-bold text-white tracking-wider">
-                    <span>{h.label}</span>
-                    <span className={`text-[8px] font-semibold tracking-widest uppercase ${status.color}`}>
-                      | {status.label}
-                    </span>
-                  </div>
-                  <div className="text-[8.5px] text-zinc-500 font-light flex items-center gap-1">
-                    <span>{h.getSub(metrics)}</span>
-                    {(isHovered && !isActive) && <span className="text-cyan-400 font-semibold pl-1.5">Click to Inspect</span>}
-                  </div>
+                {/* 2. Frosted Glass Vision Pro Style Hotspot Beacon Button */}
+                <div className={`relative flex items-center gap-1.5 px-2.5 py-1 rounded-full backdrop-blur-md border transition-all duration-300 ${
+                  isActive
+                    ? 'bg-cyan-950/80 border-cyan-400/90 shadow-[0_0_15px_rgba(6,182,212,0.6)] scale-110'
+                    : isHovered
+                      ? 'bg-zinc-900/80 border-cyan-400/60 shadow-[0_0_12px_rgba(6,182,212,0.4)] scale-105'
+                      : 'bg-zinc-950/60 border-zinc-700/60 shadow-lg hover:border-cyan-400/50'
+                }`}>
+                  {/* Glowing Core Dot */}
+                  <span className="relative flex h-2 w-2">
+                    <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
+                      isActive ? 'bg-cyan-400' : 'bg-cyan-500'
+                    }`} />
+                    <span className={`relative inline-flex rounded-full h-2 w-2 ${
+                      isActive ? 'bg-cyan-300' : 'bg-cyan-400'
+                    }`} />
+                  </span>
+
+                  {/* Hotspot Label */}
+                  <span className="text-[11px] font-medium tracking-wide text-zinc-100 whitespace-nowrap drop-shadow">
+                    {spot.label}
+                  </span>
                 </div>
+
+                {/* 3. Floating Tooltip Popover (Shown on hover or when selected) */}
+                {(isHovered || isActive) && (
+                  <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-48 p-2 rounded-xl backdrop-blur-xl bg-zinc-950/90 border border-cyan-500/40 shadow-2xl shadow-cyan-950/50 z-50 animate-in fade-in zoom-in-95 duration-200 pointer-events-none">
+                    <div className="flex items-center justify-between border-b border-zinc-800/80 pb-1 mb-1.5">
+                      <span className="text-[10px] font-bold text-zinc-300 uppercase tracking-wider flex items-center gap-1">
+                        <Sparkles className="w-2.5 h-2.5 text-cyan-400" />
+                        {spot.label}
+                      </span>
+                      <span className={`text-[9px] font-mono font-semibold px-1 rounded bg-zinc-900 border border-zinc-700/50 ${status.color}`}>
+                        {status.label}
+                      </span>
+                    </div>
+                    
+                    <div className="text-[11px] text-zinc-400 font-mono">
+                      {sub}
+                    </div>
+
+                    <div className="mt-1.5 pt-1 border-t border-zinc-900 flex items-center justify-between text-[9px] text-cyan-400 font-sans">
+                      <span className="flex items-center gap-0.5">
+                        <Compass className="w-2.5 h-2.5" /> Click to Inspect
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
             </Html>
           </group>

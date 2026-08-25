@@ -6,101 +6,60 @@ import { useSystemState } from '@/hooks/useSystemState';
 import * as THREE from 'three';
 
 export const BatteryUnit = () => {
-  const { exploded, metrics, mode, cameraPreset, activeHotspot, setActiveHotspot, setCameraPreset } = useSystemState();
+  const { exploded, metrics, mode, activeHotspot, setActiveHotspot, setCameraPreset } = useSystemState();
   const groupRef = useRef<THREE.Group>(null);
   const [hovered, setHovered] = useState(false);
   
-  // References for lid sliding and opacity animation
-  const lidRef = useRef<THREE.Mesh>(null);
-  const lidMatRef = useRef<THREE.MeshStandardMaterial>(null);
+  // LED battery level indicator light refs
+  const ledRefs = useRef<(THREE.MeshStandardMaterial | null)[]>([]);
 
-  // LED mesh references for charge level indicators
-  const chargeLedRefs = [
-    useRef<THREE.Mesh>(null),
-    useRef<THREE.Mesh>(null),
-    useRef<THREE.Mesh>(null),
-    useRef<THREE.Mesh>(null),
-    useRef<THREE.Mesh>(null),
-  ];
-
-  useFrame((state, delta) => {
-    // 1. Exploded view: Whole battery slides left
-    const targetX = exploded ? -0.6 : 0;
+  useFrame(() => {
+    // Exploded View
+    const targetY = exploded ? 0.35 : 0;
     if (groupRef.current) {
-      groupRef.current.position.x = THREE.MathUtils.lerp(groupRef.current.position.x, targetX, 0.08);
+      groupRef.current.position.y = THREE.MathUtils.lerp(groupRef.current.position.y, targetY, 0.08);
 
-      // Smooth scale up on hover (3%)
       const targetScale = hovered ? 1.03 : 1.0;
       groupRef.current.scale.setScalar(THREE.MathUtils.lerp(groupRef.current.scale.x, targetScale, 0.15));
     }
 
-    // 2. Battery Lid Opening: Slide lid backward and fade opacity when battery is active preset or exploded
-    const isOpen = cameraPreset === 'BATTERY' || exploded || activeHotspot === 'battery';
-    const targetLidZ = isOpen ? -0.3 : 0.0;
-    const targetLidY = isOpen ? 0.08 : 0.0;
-    const targetLidOpacityVal = isOpen ? 0.2 : 1.0;
+    // Dynamic LED illumination based on battery percentage
+    const activeLedsCount = Math.ceil((metrics.batteryPercent / 100) * 5);
+    ledRefs.current.forEach((mat, idx) => {
+      if (mat) {
+        const isActive = idx < activeLedsCount;
+        let ledColor = '#10b981'; // Green for normal
+        if (metrics.batteryPercent < 20) ledColor = '#ef4444'; // Red for low
+        else if (metrics.batteryPercent < 50) ledColor = '#f59e0b'; // Amber
 
-    if (lidRef.current) {
-      lidRef.current.position.z = THREE.MathUtils.lerp(lidRef.current.position.z, targetLidZ, 0.08);
-      lidRef.current.position.y = THREE.MathUtils.lerp(lidRef.current.position.y, targetLidY, 0.08);
-    }
-
-    // 3. LED pulse animation if battery is charging (solarWatts > 5)
-    const isCharging = metrics.solarWatts > 5 && mode === 'NORMAL';
-    if (isCharging) {
-      const pulse = Math.sin(state.clock.getElapsedTime() * 6) * 0.4 + 0.6;
-      const activeLedsCount = Math.ceil(metrics.batteryPercent / 20);
-      const activeLedIndex = Math.min(4, Math.max(0, activeLedsCount - 1));
-      
-      chargeLedRefs.forEach((ref, index) => {
-        if (ref.current) {
-          const mat = ref.current.material as THREE.MeshStandardMaterial;
-          if (index === activeLedIndex) {
-            mat.emissiveIntensity = pulse * 1.5;
-          } else if (index < activeLedIndex) {
-            mat.emissiveIntensity = 1.0;
-          } else {
-            mat.emissiveIntensity = 0.0;
-          }
+        if (isActive) {
+          mat.color.set(ledColor);
+          mat.emissive.set(ledColor);
+          mat.emissiveIntensity = 2.0;
+        } else {
+          mat.color.set('#27272a');
+          mat.emissive.set('#000000');
+          mat.emissiveIntensity = 0.0;
         }
-      });
-    } else {
-      const activeLedsCount = Math.round(metrics.batteryPercent / 20);
-      chargeLedRefs.forEach((ref, index) => {
-        if (ref.current) {
-          const mat = ref.current.material as THREE.MeshStandardMaterial;
-          mat.emissiveIntensity = index < activeLedsCount ? 1.0 : 0.0;
-        }
-      });
-    }
+      }
+    });
 
-    // 4. Focus dimming traversal & Cyan outline glow
-    const isDimmed = activeHotspot !== null && activeHotspot !== 'battery';
+    // Focus dimming & Cyan glow
+    const isDimmed = activeHotspot !== null && activeHotspot !== 'battery' && activeHotspot !== 'battery_pack';
     const targetOpacity = isDimmed ? 0.15 : 1.0;
 
     if (groupRef.current) {
       groupRef.current.traverse((child) => {
         if (child instanceof THREE.Mesh) {
-          // Skip charge indicators LEDs
-          if (chargeLedRefs.some(ref => ref.current === child)) return;
-
           const mat = child.material as THREE.MeshStandardMaterial;
-          if (mat) {
+          if (mat && !ledRefs.current.includes(mat)) {
             mat.transparent = true;
-            
-            // Lid has its own opacity targets
-            if (child === lidRef.current) {
-              const currentLidTarget = isDimmed ? 0.15 : targetLidOpacityVal;
-              mat.opacity = THREE.MathUtils.lerp(mat.opacity, currentLidTarget, 0.08);
-            } else {
-              mat.opacity = THREE.MathUtils.lerp(mat.opacity, targetOpacity, 0.08);
-            }
+            mat.opacity = THREE.MathUtils.lerp(mat.opacity, targetOpacity, 0.08);
 
-            // Glow casing cyan on hover
             if (mat.emissive) {
               if (hovered && !isDimmed) {
                 mat.emissive.set('#06b6d4');
-                mat.emissiveIntensity = THREE.MathUtils.lerp(mat.emissiveIntensity, 0.45, 0.1);
+                mat.emissiveIntensity = THREE.MathUtils.lerp(mat.emissiveIntensity, 0.4, 0.1);
               } else {
                 mat.emissive.set('#000000');
                 mat.emissiveIntensity = THREE.MathUtils.lerp(mat.emissiveIntensity, 0.0, 0.1);
@@ -129,11 +88,6 @@ export const BatteryUnit = () => {
     setCameraPreset('BATTERY');
   };
 
-  // Green battery cells layout
-  const cells = [
-    { x: -0.22 }, { x: -0.11 }, { x: 0 }, { x: 0.11 }, { x: 0.22 }
-  ];
-
   return (
     <group 
       ref={groupRef}
@@ -141,98 +95,75 @@ export const BatteryUnit = () => {
       onPointerOut={handlePointerOut}
       onClick={handleClick}
     >
-      {/* Battery — on top shelf of primary tank */}
-      {/* Primary tank top y = -0.75 + 1.0 = +0.25 */}
-      <group position={[-2.2, 0.35, 0.40]}>
+      {/* Battery Box — mounted on top-front of Primary Tank lid at x = -1.45, y = 0.32, z = 0.35 */}
+      <group position={[-1.45, 0.32, 0.35]}>
         
-        {/* A. BOTTOM CASING HOUSING */}
-        <mesh position={[0, -0.06, 0]} castShadow receiveShadow>
-          <boxGeometry args={[0.7, 0.1, 0.5]} />
-          <meshStandardMaterial color="#1e1b4b" roughness={0.3} metalness={0.8} />
+        {/* Main Casing Housing */}
+        <mesh position={[0, 0, 0]} castShadow receiveShadow>
+          <boxGeometry args={[0.55, 0.20, 0.32]} />
+          <meshStandardMaterial color="#0f172a" roughness={0.35} metalness={0.8} />
         </mesh>
 
-        {/* B. DETAILED INTERNAL BATTERY CELLS */}
-        <group position={[0, -0.04, 0]}>
-          {cells.map((cell, idx) => (
-            <mesh key={idx} position={[cell.x, 0, 0]} rotation={[Math.PI / 2, 0, 0]} castShadow>
-              <cylinderGeometry args={[0.042, 0.042, 0.38, 12]} />
-              <meshStandardMaterial color="#047857" roughness={0.15} metalness={0.4} />
-            </mesh>
-          ))}
-          {/* Silver/copper connection busbars on top of cells */}
-          {[-0.165, 0.055].map((xOffset, i) => (
-            <mesh key={i} position={[xOffset, 0.045, 0]} rotation={[0, 0, Math.PI / 2]} castShadow>
-              <boxGeometry args={[0.008, 0.18, 0.03]} />
-              <meshStandardMaterial color="#b45309" roughness={0.1} metalness={0.9} />
-            </mesh>
-          ))}
-          {[-0.055, 0.165].map((xOffset, i) => (
-            <mesh key={i} position={[xOffset, 0.045, 0]} rotation={[0, 0, Math.PI / 2]} castShadow>
-              <boxGeometry args={[0.008, 0.18, 0.03]} />
-              <meshStandardMaterial color="#b45309" roughness={0.1} metalness={0.9} />
-            </mesh>
-          ))}
-        </group>
-
-        {/* C. SLIDING TOP COVER LID */}
-        <mesh ref={lidRef} position={[0, 0.05, 0]} castShadow>
-          <boxGeometry args={[0.704, 0.12, 0.504]} />
-          <meshStandardMaterial
-            ref={lidMatRef}
-            color="#27272a"
-            roughness={0.2}
-            metalness={0.8}
-            depthWrite={false}
-          />
-        </mesh>
-
-        {/* Heatsink Fins */}
-        {[-0.355, 0.355].map((xSide, i) => (
-          <group key={i} position={[xSide, -0.02, 0]}>
-            {[-0.15, -0.05, 0.05, 0.15].map((zOffset, idx) => (
-              <mesh key={idx} position={[0, 0, zOffset]} castShadow>
-                <boxGeometry args={[0.012, 0.14, 0.015]} />
-                <meshStandardMaterial color="#111827" roughness={0.4} metalness={0.9} />
-              </mesh>
-            ))}
-          </group>
+        {/* Heat dissipation cooling fins on rear */}
+        {[-0.20, -0.10, 0.0, 0.10, 0.20].map((xVal, i) => (
+          <mesh key={i} position={[xVal, 0.0, -0.165]} castShadow>
+            <boxGeometry args={[0.015, 0.16, 0.02]} />
+            <meshStandardMaterial color="#334155" roughness={0.2} metalness={0.9} />
+          </mesh>
         ))}
 
-        {/* Battery Power terminals */}
-        <group position={[0.2, 0.12, 0.15]}>
-          <mesh position={[-0.05, 0, 0]} castShadow>
-            <cylinderGeometry args={[0.02, 0.02, 0.04, 8]} />
-            <meshStandardMaterial color="#ef4444" roughness={0.1} metalness={0.9} />
+        {/* Front Metal Bezel & Battery Status Panel */}
+        <mesh position={[0, 0, 0.162]} castShadow>
+          <boxGeometry args={[0.48, 0.14, 0.005]} />
+          <meshStandardMaterial color="#1e293b" roughness={0.4} metalness={0.7} />
+        </mesh>
+
+        {/* LED 5-Segment State-of-Charge Bar */}
+        <group position={[-0.10, 0.02, 0.166]}>
+          {[0, 1, 2, 3, 4].map((i) => (
+            <mesh key={i} position={[i * 0.045, 0, 0]}>
+              <boxGeometry args={[0.028, 0.015, 0.004]} />
+              <meshStandardMaterial 
+                ref={(el) => { if (el) ledRefs.current[i] = el; }}
+                color="#10b981" 
+                roughness={0.2}
+              />
+            </mesh>
+          ))}
+        </group>
+
+        {/* Top Terminal Connectors (+ and -) */}
+        {/* Positive Red Terminal */}
+        <group position={[-0.18, 0.11, 0]}>
+          <mesh castShadow>
+            <cylinderGeometry args={[0.02, 0.02, 0.025, 12]} />
+            <meshStandardMaterial color="#ef4444" roughness={0.3} metalness={0.7} />
           </mesh>
-          <mesh position={[0.05, 0, 0]} castShadow>
-            <cylinderGeometry args={[0.02, 0.02, 0.04, 8]} />
-            <meshStandardMaterial color="#3b82f6" roughness={0.1} metalness={0.9} />
+          <mesh position={[0, 0.015, 0]} castShadow>
+            <cylinderGeometry args={[0.01, 0.01, 0.015, 8]} />
+            <meshStandardMaterial color="#ca8a04" roughness={0.2} metalness={0.95} />
           </mesh>
         </group>
 
-        {/* Status LED Indicator Panel */}
-        <group position={[0, -0.06, 0.252]}>
-          <mesh>
-            <boxGeometry args={[0.36, 0.06, 0.005]} />
-            <meshStandardMaterial color="#09090b" roughness={0.7} metalness={0.2} />
+        {/* Negative Black Terminal */}
+        <group position={[0.18, 0.11, 0]}>
+          <mesh castShadow>
+            <cylinderGeometry args={[0.02, 0.02, 0.025, 12]} />
+            <meshStandardMaterial color="#18181b" roughness={0.3} metalness={0.7} />
           </mesh>
-
-          {[-0.12, -0.06, 0, 0.06, 0.12].map((xOffset, index) => {
-            const isLow = metrics.batteryPercent < 15;
-            const ledColor = isLow ? '#ef4444' : '#10b981';
-            return (
-              <mesh key={index} ref={chargeLedRefs[index]} position={[xOffset, 0, 0.003]}>
-                <sphereGeometry args={[0.016, 8, 8]} />
-                <meshStandardMaterial
-                  color={ledColor}
-                  emissive={ledColor}
-                  emissiveIntensity={index * 20 < metrics.batteryPercent ? 1.0 : 0.0}
-                  roughness={0.1}
-                />
-              </mesh>
-            );
-          })}
+          <mesh position={[0, 0.015, 0]} castShadow>
+            <cylinderGeometry args={[0.01, 0.01, 0.015, 8]} />
+            <meshStandardMaterial color="#ca8a04" roughness={0.2} metalness={0.95} />
+          </mesh>
         </group>
+
+        {/* Mounting Brackets */}
+        {[-0.26, 0.26].map((xVal, idx) => (
+          <mesh key={idx} position={[xVal, -0.09, 0]} castShadow>
+            <boxGeometry args={[0.04, 0.02, 0.28]} />
+            <meshStandardMaterial color="#475569" roughness={0.3} metalness={0.8} />
+          </mesh>
+        ))}
       </group>
     </group>
   );

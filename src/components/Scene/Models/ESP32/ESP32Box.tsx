@@ -11,19 +11,16 @@ export const ESP32Box = () => {
   const [hoveredBox, setHoveredBox] = useState(false);
   const [hoveredScreen, setHoveredScreen] = useState(false);
   
-  // Ref to screen canvas and texture
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const textureRef = useRef<THREE.CanvasTexture | null>(null);
 
-  // Lid animation ref
   const lidRef = useRef<THREE.Mesh>(null);
-  const lidMatRef = useRef<THREE.MeshStandardMaterial>(null);
+  const lidMatRef = useRef<THREE.MeshPhysicalMaterial>(null);
 
-  // Diagnostic board LEDs
   const powerLedRef = useRef<THREE.Mesh>(null);
   const statusLedRef = useRef<THREE.Mesh>(null);
 
-  // Redraw TFT screen canvas metrics
+  // Draw real-time dynamic TFT screen telemetry
   useEffect(() => {
     const canvas = document.createElement('canvas');
     canvas.width = 128;
@@ -44,100 +41,80 @@ export const ESP32Box = () => {
       
       ctx.fillStyle = '#67e8f9';
       ctx.font = 'bold 8px monospace';
-      ctx.fillText('LEVIATHAN CORE', 6, 13);
+      ctx.fillText('AURA PURIFY CORE', 6, 13);
       
       ctx.fillStyle = metrics.esp32Online ? '#10b981' : '#ef4444';
       ctx.fillRect(110, 6, 8, 8);
 
-      ctx.fillStyle = '#e4e4e7';
+      ctx.fillStyle = '#94a3b8';
       ctx.font = '7px monospace';
+      ctx.fillText(`FLOW : ${metrics.flowRate.toFixed(1)} L/M`, 6, 36);
+      ctx.fillText(`TDS  : ${Math.round(metrics.tds)} PPM`, 6, 49);
+      ctx.fillText(`TURB : ${metrics.turbidity.toFixed(1)} NTU`, 6, 62);
+      ctx.fillText(`pH   : ${metrics.ph.toFixed(2)}`, 6, 75);
+      ctx.fillText(`SOLAR: ${metrics.solarWatts.toFixed(0)}W`, 6, 88);
+      ctx.fillText(`BATT : ${Math.round(metrics.batteryPercent)}%`, 6, 101);
 
-      ctx.fillText(`MODE: ${mode}`, 6, 36);
+      ctx.fillStyle = metrics.waterQuality === 'EXCELLENT' ? '#10b981' : '#f59e0b';
+      ctx.fillRect(0, 114, 128, 14);
+      ctx.fillStyle = '#09090b';
+      ctx.font = 'bold 8px monospace';
+      ctx.fillText(`SYS: ${metrics.waterQuality}`, 10, 124);
 
-      ctx.fillStyle = '#38bdf8';
-      ctx.fillText(`TDS:  ${metrics.tds} ppm`, 6, 52);
-      ctx.fillStyle = '#f472b6';
-      ctx.fillText(`pH:   ${metrics.ph.toFixed(1)}`, 6, 68);
+      const texture = new THREE.CanvasTexture(canvas);
+      textureRef.current = texture;
+      canvasRef.current = canvas;
+    }
+  }, [metrics]);
 
-      ctx.fillStyle = '#fbbf24';
-      ctx.fillText(`TURB: ${metrics.turbidity.toFixed(1)} NTU`, 6, 84);
-      ctx.fillStyle = '#34d399';
-      ctx.fillText(`TEMP: ${metrics.temperature.toFixed(1)}C`, 6, 100);
+  useFrame((state) => {
+    const time = state.clock.getElapsedTime();
 
-      ctx.fillStyle = '#52525b';
-      ctx.fillRect(0, 112, 128, 16);
-      
-      ctx.fillStyle = '#cbd5e1';
-      ctx.font = 'bold 7px monospace';
-      ctx.fillText(`BATT: ${Math.round(metrics.batteryPercent)}%  ${metrics.flowRate.toFixed(1)}L/m`, 6, 123);
+    // 1. Exploded view: Lid opens upward & hinges
+    const targetLidY = exploded ? 0.22 : 0.11;
+    const targetLidRotX = exploded ? -0.8 : 0;
+    
+    if (lidRef.current) {
+      lidRef.current.position.y = THREE.MathUtils.lerp(lidRef.current.position.y, targetLidY, 0.08);
+      lidRef.current.rotation.x = THREE.MathUtils.lerp(lidRef.current.rotation.x, targetLidRotX, 0.08);
     }
 
-    canvasRef.current = canvas;
-    if (textureRef.current) {
-      textureRef.current.needsUpdate = true;
-    } else {
-      textureRef.current = new THREE.CanvasTexture(canvas);
-    }
-  }, [metrics, mode]);
-
-  useFrame((state, delta) => {
-    // 1. Exploded view offset
-    const targetX = exploded ? 0.6 : 0;
     if (groupRef.current) {
-      groupRef.current.position.x = THREE.MathUtils.lerp(groupRef.current.position.x, targetX, 0.08);
+      const targetY = exploded ? 0.35 : 0;
+      groupRef.current.position.y = THREE.MathUtils.lerp(groupRef.current.position.y, targetY, 0.08);
 
-      const isHovered = hoveredBox || hoveredScreen;
-      const targetScale = isHovered ? 1.03 : 1.0;
+      const targetScale = (hoveredBox || hoveredScreen) ? 1.03 : 1.0;
       groupRef.current.scale.setScalar(THREE.MathUtils.lerp(groupRef.current.scale.x, targetScale, 0.15));
     }
 
-    // 2. Open enclosure lid when exploded or focused
-    const isLidOpen = exploded || activeHotspot === 'esp32';
-    const targetLidZ = isLidOpen ? -0.32 : 0.0;
-    const targetLidOpacity = isLidOpen ? 0.2 : 0.4;
-    
-    if (lidRef.current) {
-      lidRef.current.position.z = THREE.MathUtils.lerp(lidRef.current.position.z, targetLidZ, 0.08);
-    }
-    if (lidMatRef.current) {
-      lidMatRef.current.opacity = THREE.MathUtils.lerp(lidMatRef.current.opacity, targetLidOpacity, 0.08);
-      lidMatRef.current.transparent = true;
-    }
-
-    // 3. Status LEDs Blinking
-    const time = state.clock.getElapsedTime();
-    if (powerLedRef.current) {
-      const mat = powerLedRef.current.material as THREE.MeshStandardMaterial;
-      mat.emissiveIntensity = metrics.esp32Online ? 1.0 : 0.0;
-    }
+    // 2. Status LEDs blinking
     if (statusLedRef.current) {
       const mat = statusLedRef.current.material as THREE.MeshStandardMaterial;
-      const isBlinking = Math.floor(time * 2) % 2 === 0;
-      mat.emissiveIntensity = metrics.esp32Online && isBlinking ? 1.2 : 0.0;
+      if (mat) {
+        const isBlinking = metrics.esp32Online && Math.sin(time * 8) > 0;
+        mat.emissiveIntensity = isBlinking ? 2.5 : 0.2;
+      }
     }
 
-    // 4. Focus dimming
-    const isDimmed = activeHotspot !== null && activeHotspot !== 'esp32' && activeHotspot !== 'display';
+    // 3. Focus dimming & Cyan glow
+    const isDimmed = activeHotspot !== null && activeHotspot !== 'esp32' && activeHotspot !== 'display' && activeHotspot !== 'esp32_box';
     const targetOpacity = isDimmed ? 0.15 : 1.0;
 
     if (groupRef.current) {
       groupRef.current.traverse((child) => {
         if (child instanceof THREE.Mesh) {
-          if (child === powerLedRef.current || child === statusLedRef.current || child === lidRef.current) return;
-
           const mat = child.material as THREE.MeshStandardMaterial;
-          if (mat) {
+          if (mat && mat !== lidMatRef.current) {
             mat.transparent = true;
             mat.opacity = THREE.MathUtils.lerp(mat.opacity, targetOpacity, 0.08);
 
-            if (mat.emissive) {
-              const isHoveredPart = (child.name === 'tft-screen-bezel' && hoveredScreen) || (child.name === 'enclosure-mesh' && hoveredBox);
-              if (isHoveredPart && !isDimmed) {
+            if (mat.emissive && child !== powerLedRef.current && child !== statusLedRef.current) {
+              if ((hoveredBox || hoveredScreen) && !isDimmed) {
                 mat.emissive.set('#06b6d4');
                 mat.emissiveIntensity = THREE.MathUtils.lerp(mat.emissiveIntensity, 0.4, 0.1);
               } else {
                 mat.emissive.set('#000000');
-                mat.emissiveIntensity = 0.0;
+                mat.emissiveIntensity = THREE.MathUtils.lerp(mat.emissiveIntensity, 0.0, 0.1);
               }
             }
           }
@@ -182,27 +159,26 @@ export const ESP32Box = () => {
 
   return (
     <group ref={groupRef}>
-      {/* ESP32 Control Box — on top shelf of primary tank, rear */}
-      {/* Primary tank top y = +0.25, ESP32 sits at y=0.35 */}
-      <group position={[-2.2, 0.35, -0.50]}>
+      {/* ESP32 Control Box — on top shelf of Primary Tank at x = -1.45, y = 0.32, z = -0.35 */}
+      <group position={[-1.45, 0.32, -0.35]}>
         
         {/* 1. TRANSPARENT ENCLOSURE COVER LID */}
         <mesh 
           ref={lidRef} 
-          position={[0, 0, 0.252]} 
+          position={[0, 0.11, 0]} 
           castShadow
           onPointerOver={handlePointerOverScreen}
           onPointerOut={handlePointerOutScreen}
           onClick={handleClickScreen}
         >
-          <boxGeometry args={[0.71, 0.23, 0.015]} />
+          <boxGeometry args={[0.55, 0.02, 0.35]} />
           <meshPhysicalMaterial
             ref={lidMatRef}
-            color="#0891b2" // translucent cyan cover
+            color="#0891b2"
             roughness={0.1}
             metalness={0.1}
             transmission={0.85}
-            thickness={0.02}
+            thickness={0.03}
             clearcoat={1.0}
             depthWrite={false}
           />
@@ -217,158 +193,99 @@ export const ESP32Box = () => {
           onPointerOut={handlePointerOutBox}
           onClick={handleClickBox}
         >
-          <boxGeometry args={[0.7, 0.22, 0.5]} />
-          <meshStandardMaterial color="#1e293b" roughness={0.35} metalness={0.6} />
+          <boxGeometry args={[0.55, 0.20, 0.35]} />
+          <meshStandardMaterial color="#1e293b" roughness={0.35} metalness={0.7} />
         </mesh>
 
-        {/* TFT Screen on front face (slightly recessed in the base box lid frame) */}
+        {/* TFT Screen on front face */}
         <group 
-          position={[0.18, 0.0, 0.251]}
+          position={[0.12, 0.0, 0.176]}
           onPointerOver={handlePointerOverScreen}
           onPointerOut={handlePointerOutScreen}
           onClick={handleClickScreen}
         >
           <mesh name="tft-screen-bezel" castShadow>
-            <boxGeometry args={[0.26, 0.18, 0.01]} />
+            <boxGeometry args={[0.24, 0.16, 0.008]} />
             <meshStandardMaterial color="#020617" roughness={0.4} metalness={0.7} />
           </mesh>
-          <mesh position={[0, 0, 0.006]}>
-            <planeGeometry args={[0.23, 0.15]} />
+          <mesh position={[0, 0, 0.005]}>
+            <planeGeometry args={[0.22, 0.14]} />
             <meshStandardMaterial
               map={textureRef.current || undefined}
               roughness={0.1}
               emissive="#ffffff"
-              emissiveIntensity={metrics.esp32Online ? 0.9 : 0.0}
+              emissiveIntensity={metrics.esp32Online ? 0.95 : 0.0}
             />
           </mesh>
         </group>
 
-        {/* 3. ELECTRONICS PCB BOARD & MODULES LAYOUT (Inside box) */}
-        <group position={[0, -0.04, 0]}>
-          
-          {/* Main PCB Fiberglass Board (Green) */}
-          <mesh castShadow position={[0, 0.01, 0]}>
-            <boxGeometry args={[0.62, 0.01, 0.42]} />
-            <meshStandardMaterial color="#064e3b" roughness={0.5} />
+        {/* 3. INTERNAL PCB & ELECTRONIC MODULES */}
+        <group position={[-0.10, -0.02, 0]}>
+          {/* Main PCB Green/Black Board */}
+          <mesh position={[0, 0, 0]} receiveShadow castShadow>
+            <boxGeometry args={[0.28, 0.008, 0.28]} />
+            <meshStandardMaterial color="#064e3b" roughness={0.4} metalness={0.2} />
           </mesh>
 
-          {/* Module 1: ESP32-S3 Board */}
-          <group position={[-0.18, 0.02, -0.1]}>
+          {/* ESP32-S3 Microcontroller Module */}
+          <group position={[-0.06, 0.015, -0.04]}>
             <mesh castShadow>
-              <boxGeometry args={[0.08, 0.012, 0.12]} />
-              <meshStandardMaterial color="#18181b" roughness={0.6} />
+              <boxGeometry args={[0.08, 0.006, 0.11]} />
+              <meshStandardMaterial color="#334155" roughness={0.3} metalness={0.85} />
             </mesh>
-            {/* Esp32 Silver RF shielding lid */}
-            <mesh position={[0, 0.008, 0.01]} castShadow>
-              <boxGeometry args={[0.045, 0.008, 0.05]} />
-              <meshStandardMaterial color="#cbd5e1" roughness={0.1} metalness={0.9} />
-            </mesh>
-            {/* Gold Pin Headers */}
-            {[-0.038, 0.038].map((xOffset, i) => (
-              <mesh key={i} position={[xOffset, -0.006, 0]} castShadow>
-                <boxGeometry args={[0.003, 0.018, 0.11]} />
-                <meshStandardMaterial color="#eab308" metalness={0.9} />
-              </mesh>
-            ))}
-          </group>
-
-          {/* Module 2: XL6019E1 Boost Converter Module */}
-          <group position={[-0.18, 0.02, 0.1]}>
-            {/* Blue PCB */}
-            <mesh castShadow>
-              <boxGeometry args={[0.09, 0.01, 0.13]} />
-              <meshStandardMaterial color="#1d4ed8" roughness={0.4} />
-            </mesh>
-            {/* Copper wire wound Toroidal Inductor Coil */}
-            <mesh position={[-0.015, 0.014, 0.025]} rotation={[Math.PI / 2, 0, 0]} castShadow>
-              <cylinderGeometry args={[0.018, 0.018, 0.015, 12]} />
-              <meshStandardMaterial color="#b45309" roughness={0.15} metalness={0.9} />
-            </mesh>
-            {/* Gold trimmer screw head potentiometer */}
-            <mesh position={[0.028, 0.012, -0.035]} castShadow>
-              <boxGeometry args={[0.014, 0.015, 0.014]} />
-              <meshStandardMaterial color="#3f3f46" roughness={0.3} />
-            </mesh>
-            <mesh position={[0.028, 0.021, -0.035]} castShadow>
-              <cylinderGeometry args={[0.004, 0.004, 0.006, 8]} />
-              <meshStandardMaterial color="#fbbf24" metalness={0.9} />
+            {/* ESP32 Metal RF Shielding Can */}
+            <mesh position={[0, 0.004, -0.015]} castShadow>
+              <boxGeometry args={[0.06, 0.006, 0.06]} />
+              <meshStandardMaterial color="#cbd5e1" roughness={0.2} metalness={0.95} />
             </mesh>
           </group>
 
-          {/* Module 3: Dual-Channel Relay Module */}
-          <group position={[0.12, 0.02, -0.11]}>
-            {/* Blue Relay Cubes */}
-            {[-0.025, 0.025].map((xVal, i) => (
+          {/* Dual-Channel Relay Module */}
+          <group position={[0.06, 0.02, -0.04]}>
+            {[-0.02, 0.02].map((xVal, i) => (
               <mesh key={i} position={[xVal, 0.014, 0]} castShadow>
-                <boxGeometry args={[0.036, 0.024, 0.045]} />
+                <boxGeometry args={[0.03, 0.024, 0.04]} />
                 <meshStandardMaterial color="#0284c7" roughness={0.4} />
               </mesh>
             ))}
-            {/* PCB */}
             <mesh castShadow position={[0, 0.001, 0]}>
-              <boxGeometry args={[0.09, 0.008, 0.12]} />
+              <boxGeometry args={[0.08, 0.008, 0.10]} />
               <meshStandardMaterial color="#1e293b" />
             </mesh>
           </group>
 
-          {/* Module 4: MOSFET Driver Module (for controlling pumps speed) */}
-          <group position={[0.12, 0.02, 0.08]}>
-            {/* Black PCB */}
+          {/* MOSFET Driver Module */}
+          <group position={[0.06, 0.02, 0.07]}>
             <mesh castShadow>
-              <boxGeometry args={[0.08, 0.01, 0.11]} />
+              <boxGeometry args={[0.07, 0.008, 0.08]} />
               <meshStandardMaterial color="#09090b" roughness={0.6} />
             </mesh>
-            {/* Aluminum Heatsink fins */}
-            <mesh position={[-0.015, 0.016, 0]} castShadow>
-              <boxGeometry args={[0.02, 0.02, 0.06]} />
+            <mesh position={[-0.012, 0.014, 0]} castShadow>
+              <boxGeometry args={[0.018, 0.018, 0.05]} />
               <meshStandardMaterial color="#cbd5e1" roughness={0.2} metalness={0.95} />
             </mesh>
-            {/* Terminal blocks */}
-            <mesh position={[0.025, 0.012, 0]} castShadow>
-              <boxGeometry args={[0.018, 0.018, 0.075]} />
-              <meshStandardMaterial color="#047857" roughness={0.4} />
-            </mesh>
           </group>
 
-          {/* Diagnostic LEDs on main board */}
-          <mesh ref={powerLedRef} position={[-0.27, 0.018, 0.16]}>
-            <sphereGeometry args={[0.008, 8, 8]} />
-            <meshStandardMaterial color="#ef4444" emissive="#ef4444" emissiveIntensity={1} />
+          {/* Diagnostic LEDs on PCB */}
+          <mesh ref={powerLedRef} position={[-0.10, 0.014, 0.10]}>
+            <sphereGeometry args={[0.006, 8, 8]} />
+            <meshStandardMaterial color="#ef4444" emissive="#ef4444" emissiveIntensity={1.5} />
           </mesh>
-          <mesh ref={statusLedRef} position={[-0.24, 0.018, 0.16]}>
-            <sphereGeometry args={[0.008, 8, 8]} />
-            <meshStandardMaterial color="#10b981" emissive="#10b981" emissiveIntensity={1} />
+          <mesh ref={statusLedRef} position={[-0.07, 0.014, 0.10]}>
+            <sphereGeometry args={[0.006, 8, 8]} />
+            <meshStandardMaterial color="#10b981" emissive="#10b981" emissiveIntensity={1.5} />
           </mesh>
-
-          {/* Multi-color connecting jumper wires */}
-          <group position={[0.0, 0.015, 0.0]}>
-            {[0.0, 0.05, 0.1].map((offset, idx) => (
-              <mesh key={idx} position={[-0.05, 0.002, offset]} rotation={[0, 0, Math.PI/2]} castShadow>
-                <cylinderGeometry args={[0.003, 0.003, 0.16, 6]} />
-                <meshStandardMaterial 
-                  color={idx === 0 ? '#ef4444' : idx === 1 ? '#3b82f6' : '#eab308'} 
-                  roughness={0.6} 
-                />
-              </mesh>
-            ))}
-          </group>
-
         </group>
 
-        {/* 4. SIDE CABLE GLANDS & HARNESSES */}
-        {[-0.1, 0.1].map((zVal, i) => (
-          <group key={i} position={[0.35, -0.04, zVal]}>
+        {/* Cable Gland Connectors on Right Side */}
+        {[-0.06, 0.06].map((zVal, i) => (
+          <group key={i} position={[0.28, -0.02, zVal]}>
             <mesh rotation={[0, 0, Math.PI / 2]} castShadow>
-              <cylinderGeometry args={[0.024, 0.024, 0.03, 6]} />
+              <cylinderGeometry args={[0.02, 0.02, 0.025, 8]} />
               <meshStandardMaterial color="#09090b" roughness={0.4} />
-            </mesh>
-            <mesh position={[0.03, -0.06, 0]} rotation={[0, 0, -0.2]} castShadow>
-              <cylinderGeometry args={[0.012, 0.012, 0.12, 8]} />
-              <meshStandardMaterial color="#09090b" roughness={0.6} />
             </mesh>
           </group>
         ))}
-
       </group>
     </group>
   );

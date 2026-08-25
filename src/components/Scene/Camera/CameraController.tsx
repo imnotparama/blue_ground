@@ -13,185 +13,182 @@ interface ControlsInterface {
   enabled: boolean;
 }
 
-// Camera coordinates based on engineering layout
-// Centered around:
-// Primary tank: x in [-2.0, 1.0], y in [-1.5, 1.2], z in [-1.0, 1.0]
-// Secondary tank: x in [0.2, 1.0], y in [0.2, 1.2], z in [-0.8, 0.8] (inside primary)
-// Electronics: on top (y in [1.2, 1.8])
-// Solar: top-left (x=-1.5)
-// Battery: top-middle (x=-0.2)
-// ESP32: top-right (x=0.7)
-// Filtration: right-side (x=2.2, y=-0.5)
-// Intake: far-right (x=3.8, extending down to y=-3.5)
+// Camera coordinates based on accurate physical layout
 export const CAMERA_PRESETS: Record<CameraPreset, { position: [number, number, number]; target: [number, number, number] }> = {
   OVERVIEW: {
-    position: [0.3, 0.2, 4.4],
-    target: [0.3, -0.5, 0],
+    position: [0.0, 0.8, 6.2],
+    target: [0.0, -0.7, 0],
   },
   SOLAR: {
-    position: [-1.4, 1.3, 1.3],
-    target: [-1.4, 0.7, 0],
+    position: [-2.0, 1.3, 1.4],
+    target: [-2.0, 0.45, 0],
   },
   BATTERY: {
-    position: [-0.2, 1.0, 1.1],
-    target: [-0.2, 0.52, 0],
+    position: [-1.45, 0.9, 1.2],
+    target: [-1.45, 0.35, 0.35],
   },
   ESP32: {
-    position: [0.7, 1.0, 1.0],
-    target: [0.7, 0.52, 0],
+    position: [-1.45, 0.9, 0.6],
+    target: [-1.45, 0.35, -0.35],
   },
   DISPLAY: {
-    position: [0.7, 0.65, 0.6],
-    target: [0.7, 0.52, 0.25],
+    position: [-1.33, 0.45, 0.4],
+    target: [-1.33, 0.32, -0.17],
   },
   FLOAT_SENSOR: {
-    position: [-1.2, -0.2, 1.0],
-    target: [-1.5, -0.5, 0],
+    position: [-2.6, -0.8, 1.1],
+    target: [-2.6, -1.0, 0.3],
   },
   PUMP: {
-    position: [0.3, -0.1, 0.9],
-    target: [0.3, -0.28, 0],
+    position: [1.55, -1.3, 0.9],
+    target: [1.55, -1.65, 0],
   },
   UV_LED: {
-    position: [0.4, 0.1, 0.9],
-    target: [0.4, -0.15, 0.3],
+    position: [2.0, -0.5, 0.7],
+    target: [2.02, -0.85, -0.22],
   },
   PH_SENSOR: {
-    position: [0.7, 0.4, 0.9],
-    target: [0.7, 0.18, -0.1],
+    position: [2.02, 0.1, 0.9],
+    target: [2.02, -0.25, 0.20],
   },
   TDS_SENSOR: {
-    position: [0.55, 0.4, 0.9],
-    target: [0.55, 0.18, 0.15],
+    position: [1.88, 0.1, 0.9],
+    target: [1.88, -0.25, 0.15],
   },
   TURBIDITY_SENSOR: {
-    position: [0.85, 0.4, 0.9],
-    target: [0.85, 0.18, 0.15],
+    position: [2.18, 0.1, 0.9],
+    target: [2.18, -0.25, 0.15],
   },
   TEMP_SENSOR: {
-    position: [0.62, 0.4, 0.9],
-    target: [0.62, 0.14, -0.22],
+    position: [2.32, 0.1, 0.7],
+    target: [2.32, -0.25, -0.15],
   },
   FLOW_SENSOR: {
-    position: [1.6, 0.2, 0.9],
-    target: [1.6, 0.0, 0],
+    position: [0.85, -1.3, 0.8],
+    target: [0.85, -1.65, 0],
   },
   SEDIMENTATION_TANK: {
-    position: [0.1, 0.3, 1.4],
-    target: [0.1, 0.0, 0],
+    position: [0.15, -0.5, 2.0],
+    target: [0.15, -0.95, 0],
   },
   FILTER_HOUSING: {
-    position: [2.2, -0.4, 1.6],
-    target: [2.2, -0.6, 0],
+    position: [0.15, -0.5, 2.0],
+    target: [0.15, -0.95, 0],
   },
   INSIDE_FILTER: {
-    position: [2.2, -0.6, 0.9],
-    target: [2.2, -0.6, 0],
+    position: [0.15, -0.8, 1.0],
+    target: [0.15, -0.95, 0],
   },
   PRIMARY_TANK: {
-    position: [-0.6, -0.6, 2.4],
-    target: [-0.6, -0.6, 0],
+    position: [-2.0, -0.5, 3.2],
+    target: [-2.0, -0.75, 0],
   },
   SECONDARY_TANK: {
-    position: [0.1, 0.3, 1.4],
-    target: [0.1, 0.0, 0],
+    position: [2.1, -0.6, 2.4],
+    target: [2.1, -1.0, 0],
   },
   INTAKE_PIPE: {
-    position: [3.8, -2.0, 1.8],
-    target: [3.8, -2.5, 0],
+    position: [3.6, -0.8, 1.8],
+    target: [3.6, -1.0, 0],
   },
   RETURN_PIPE: {
-    position: [-0.4, -0.6, 1.8],
-    target: [-0.6, -0.6, 0],
+    position: [-0.4, -1.4, 1.8],
+    target: [-0.4, -1.90, 0],
   },
   DRAIN_VALVE: {
-    position: [0.5, -1.2, 0.9],
-    target: [0.5, -1.5, 0],
+    position: [-3.35, -1.1, 1.2],
+    target: [-3.35, -1.35, 0],
   },
 };
 
 export const CameraController = () => {
-  const { cameraPreset, demoRunning } = useSystemState();
+  const { cameraPreset, setCameraPreset, setActiveHotspot, activeHotspot } = useSystemState();
   const { camera, controls } = useThree();
-  
-  // Track ongoing tweens to prevent overlaps
-  const tweenRef = useRef<gsap.core.Tween[]>([]);
+  const activeTimeline = useRef<gsap.core.Timeline | null>(null);
 
+  // Sync Hotspot selection to Camera Preset
   useEffect(() => {
-    const preset = CAMERA_PRESETS[cameraPreset];
-    if (!preset) return;
+    if (activeHotspot) {
+      const presetMap: Record<string, CameraPreset> = {
+        solar: 'SOLAR',
+        battery: 'BATTERY',
+        esp32: 'ESP32',
+        display: 'DISPLAY',
+        float: 'FLOAT_SENSOR',
+        pump: 'PUMP',
+        uv: 'UV_LED',
+        ph: 'PH_SENSOR',
+        tds: 'TDS_SENSOR',
+        turbidity: 'TURBIDITY_SENSOR',
+        temp: 'TEMP_SENSOR',
+        flow: 'FLOW_SENSOR',
+        sedimentation_tank: 'SEDIMENTATION_TANK',
+        filter_housing: 'FILTER_HOUSING',
+        primary_tank: 'PRIMARY_TANK',
+        secondary_tank: 'SECONDARY_TANK',
+        intake_pipe: 'INTAKE_PIPE',
+        return_pipe: 'RETURN_PIPE',
+        drain_valve: 'DRAIN_VALVE',
+      };
 
-    // Clean up active animations
-    tweenRef.current.forEach(t => t.kill());
-    tweenRef.current = [];
+      if (presetMap[activeHotspot] && presetMap[activeHotspot] !== cameraPreset) {
+        setCameraPreset(presetMap[activeHotspot]);
+      }
+    }
+  }, [activeHotspot, cameraPreset, setCameraPreset]);
 
-    // Duration based on demo state (slightly faster cuts in demo, slower/gentler in manual mode)
-    const duration = demoRunning ? 2.2 : 2.5;
+  // Smooth GSAP camera transition when cameraPreset changes
+  useEffect(() => {
+    const preset = CAMERA_PRESETS[cameraPreset] || CAMERA_PRESETS.OVERVIEW;
+    const ctrl = controls as unknown as ControlsInterface;
 
-    // Cast controls to ControlsInterface
-    const orbitControls = controls as unknown as ControlsInterface;
+    if (activeTimeline.current) {
+      activeTimeline.current.kill();
+    }
 
-    if (orbitControls) {
-      // Temporarily lock user control during auto-move
-      orbitControls.enabled = false;
-
-      // Tween controls target
-      const targetTween = gsap.to(orbitControls.target, {
-        x: preset.target[0],
-        y: preset.target[1],
-        z: preset.target[2],
-        duration: duration,
-        ease: 'power3.inOut',
-        onUpdate: () => orbitControls.update(),
-      });
-
-      // Tween camera position
-      const posTween = gsap.to(camera.position, {
-        x: preset.position[0],
-        y: preset.position[1],
-        z: preset.position[2],
-        duration: duration,
-        ease: 'power3.inOut',
-        onUpdate: () => {
-          camera.updateProjectionMatrix();
-        },
-        onComplete: () => {
-          // Re-enable controls, unless demo is running (keep it cinematic/guided)
-          orbitControls.enabled = !demoRunning;
-        },
-      });
-
-      tweenRef.current = [targetTween, posTween];
-    } else {
-      // If OrbitControls is not ready yet, update camera directly
-      const targetVec = new THREE.Vector3(...preset.target);
-      
-      const posTween = gsap.to(camera.position, {
-        x: preset.position[0],
-        y: preset.position[1],
-        z: preset.position[2],
-        duration: duration,
+    const tl = gsap.timeline({
+      defaults: {
+        duration: 1.4,
         ease: 'power2.inOut',
+      },
+    });
+
+    activeTimeline.current = tl;
+
+    // Animate Camera Position
+    tl.to(
+      camera.position,
+      {
+        x: preset.position[0],
+        y: preset.position[1],
+        z: preset.position[2],
         onUpdate: () => {
-          camera.lookAt(targetVec);
           camera.updateProjectionMatrix();
         },
-      });
-      tweenRef.current = [posTween];
+      },
+      0
+    );
+
+    // Animate OrbitControls Target LookAt Point
+    if (ctrl && ctrl.target) {
+      tl.to(
+        ctrl.target,
+        {
+          x: preset.target[0],
+          y: preset.target[1],
+          z: preset.target[2],
+          onUpdate: () => {
+            ctrl.update();
+          },
+        },
+        0
+      );
     }
 
     return () => {
-      tweenRef.current.forEach(t => t.kill());
+      if (tl) tl.kill();
     };
-  }, [cameraPreset, camera, controls, demoRunning]);
-
-  // In demo running mode, ensure the user cannot interact with the orbit controls
-  useEffect(() => {
-    const orbitControls = controls as unknown as ControlsInterface;
-    if (orbitControls) {
-      orbitControls.enabled = !demoRunning;
-    }
-  }, [demoRunning, controls]);
+  }, [cameraPreset, camera, controls]);
 
   return null;
 };
