@@ -141,8 +141,9 @@ export const BatteryUnit = () => {
       onPointerOut={handlePointerOut}
       onClick={handleClick}
     >
-      {/* Battery Box position: centered at x=-0.2, y=0.52, z=0 */}
-      <group position={[-0.2, 0.52, 0]}>
+      {/* Battery Box — mounted on top shelf of the primary tank lid */}
+      {/* Primary tank top face world y = -0.55 + 1.05 = 0.5; battery at y=0.68 */}
+      <group position={[-2.0, 0.68, 0]}>
         
         {/* A. BOTTOM CASING HOUSING */}
         <mesh position={[0, -0.06, 0]} castShadow receiveShadow>

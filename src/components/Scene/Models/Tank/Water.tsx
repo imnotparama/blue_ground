@@ -208,11 +208,15 @@ export const Water = () => {
 
   return (
     <group>
-      {/* A. PRIMARY TANK WATER VOLUME */}
-      <group position={[-0.6, -0.6, 0]}>
+      {/* ─── A. PRIMARY TANK WATER (clean storage, leftmost) ───────────── */}
+      {/* Primary tank center: [-2.0, -0.55, 0], size 2.2×2.0×1.4            */}
+      {/* Clean water fills LOWER chamber (below divider at local y=0.28)     */}
+      {/* Lower chamber h ≈ 1.27 → bottom-of-tank to divider                  */}
+      <group position={[-2.0, -0.55, 0]}>
         {metrics.waterLevel > 1 && (
-          <mesh ref={primaryWaterRef} position={[0, -0.5, 0]} castShadow receiveShadow>
-            <boxGeometry args={[2.16, 1.0, 1.36, 32, 1, 32]} /> {/* Higher mesh resolution for waves */}
+          <mesh ref={primaryWaterRef} position={[0, -0.55, 0]} castShadow receiveShadow>
+            {/* Max fill = 1.22 height (clean compartment) */}
+            <boxGeometry args={[2.12, 1.0, 1.36, 32, 1, 32]} />
             <primitive object={primaryShaderMat} ref={primaryMatRef} attach="material" />
           </mesh>
         )}
@@ -226,23 +230,21 @@ export const Water = () => {
               />
             </bufferGeometry>
             <pointsMaterial
-              color="#e0f2fe"
-              size={0.018}
-              transparent
-              opacity={0.7}
-              depthWrite={false}
+              color="#e0f2fe" size={0.016}
+              transparent opacity={0.65} depthWrite={false}
             />
           </points>
         )}
       </group>
 
-      {/* B. SECONDARY TANK WATER VOLUME */}
-      <group position={[0, 0.4, 0]}>
-        <mesh position={[0.2, -0.02, 0]} castShadow receiveShadow>
-          <boxGeometry args={[0.76, 0.74, 1.34, 16, 1, 16]} />
+      {/* ─── B. SECONDARY TANK WATER (raw intake, rightmost) ──────────── */}
+      {/* Secondary tank center: [2.4, -0.5, 0], size 1.1×1.6×1.0          */}
+      <group position={[2.4, -0.5, 0]}>
+        <mesh position={[0, -0.1, 0]} castShadow receiveShadow>
+          {/* Slightly murky tinted shader */}
+          <boxGeometry args={[1.04, 1.3, 0.94, 16, 1, 16]} />
           <primitive object={secondaryShaderMat} ref={secondaryMatRef} attach="material" />
         </mesh>
-
         <points ref={secondaryBubblesRef}>
           <bufferGeometry>
             <bufferAttribute
@@ -251,11 +253,8 @@ export const Water = () => {
             />
           </bufferGeometry>
           <pointsMaterial
-            color="#e0f2fe"
-            size={0.02}
-            transparent
-            opacity={0.6}
-            depthWrite={false}
+            color="#e0f2fe" size={0.018}
+            transparent opacity={0.5} depthWrite={false}
           />
         </points>
       </group>

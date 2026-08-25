@@ -5,230 +5,273 @@ import { useFrame } from '@react-three/fiber';
 import { useSystemState } from '@/hooks/useSystemState';
 import * as THREE from 'three';
 
-export const Tanks = () => {
-  const { transparent, cutaway, exploded, activeHotspot, setActiveHotspot, setCameraPreset } = useSystemState();
-  
-  // References for animating exploded position and material opacity
-  const primaryRef = useRef<THREE.Group>(null);
-  const secondaryRef = useRef<THREE.Group>(null);
-  
-  const outerMatRef = useRef<THREE.MeshPhysicalMaterial>(null);
-  const innerMatRef = useRef<THREE.MeshPhysicalMaterial>(null);
+// ─── Shared sub-components ───────────────────────────────────────────────────
+// A single aluminium extrusion corner post
+const CornerPost = ({ x, z }: { x: number; z: number }) => (
+  <mesh position={[x, 0, z]} castShadow>
+    <boxGeometry args={[0.03, 2.05, 0.03]} />
+    <meshStandardMaterial color="#374151" roughness={0.35} metalness={0.85} />
+  </mesh>
+);
 
-  // Hover states
-  const [hoveredPrimary, setHoveredPrimary] = useState(false);
+// Top / bottom frame rails
+const FrameRail = ({ y, w, d }: { y: number; w: number; d: number }) => (
+  <mesh position={[0, y, 0]} castShadow>
+    <boxGeometry args={[w + 0.04, 0.03, d + 0.04]} />
+    <meshStandardMaterial color="#374151" roughness={0.35} metalness={0.85} />
+  </mesh>
+);
+
+// Pipe connection nozzle welded on a tank wall
+const PipeNozzle = ({
+  pos,
+  rot = [0, 0, 0] as [number, number, number],
+}: {
+  pos: [number, number, number];
+  rot?: [number, number, number];
+}) => (
+  <group position={pos} rotation={rot}>
+    {/* Collar */}
+    <mesh castShadow>
+      <cylinderGeometry args={[0.04, 0.04, 0.05, 10]} />
+      <meshStandardMaterial color="#4b5563" roughness={0.25} metalness={0.9} />
+    </mesh>
+    {/* Short stub */}
+    <mesh position={[0, 0.04, 0]} castShadow>
+      <cylinderGeometry args={[0.025, 0.025, 0.06, 10]} />
+      <meshStandardMaterial color="#374151" roughness={0.2} metalness={0.9} />
+    </mesh>
+  </group>
+);
+
+// ─── Reusable glass tank wall ─────────────────────────────────────────────────
+interface GlassTankProps {
+  w: number;
+  h: number;
+  d: number;
+  matRef?: React.Ref<THREE.MeshPhysicalMaterial>;
+  color?: string;
+  opacity?: number;
+}
+const GlassTank: React.FC<GlassTankProps> = ({
+  w, h, d, matRef, color = '#083344', opacity = 0.42,
+}) => (
+  <mesh castShadow receiveShadow>
+    <boxGeometry args={[w, h, d]} />
+    <meshPhysicalMaterial
+      ref={matRef}
+      color={color}
+      transparent
+      opacity={opacity}
+      roughness={0.04}
+      metalness={0.08}
+      transmission={0.88}
+      thickness={0.06}
+      clearcoat={1.0}
+      clearcoatRoughness={0.01}
+      depthWrite={false}
+      side={THREE.DoubleSide}
+    />
+  </mesh>
+);
+
+// ─── Main Component ───────────────────────────────────────────────────────────
+export const Tanks = () => {
+  const {
+    transparent, cutaway, exploded, activeHotspot,
+    setActiveHotspot, setCameraPreset,
+  } = useSystemState();
+
+  // Group refs for exploded animation
+  const primaryRef   = useRef<THREE.Group>(null);
+  const sedRef       = useRef<THREE.Group>(null);
+  const secondaryRef = useRef<THREE.Group>(null);
+
+  // Material refs for glass opacity animation
+  const primaryMatRef   = useRef<THREE.MeshPhysicalMaterial>(null);
+  const sedMatRef       = useRef<THREE.MeshPhysicalMaterial>(null);
+  const secondaryMatRef = useRef<THREE.MeshPhysicalMaterial>(null);
+
+  const [hoveredPrimary,   setHoveredPrimary]   = useState(false);
+  const [hoveredSed,       setHoveredSed]       = useState(false);
   const [hoveredSecondary, setHoveredSecondary] = useState(false);
 
-  useFrame((state, delta) => {
-    // 1. Smoothly interpolate exploded offset
-    const targetPrimaryY = exploded ? -0.3 : 0;
-    const targetSecondaryY = exploded ? 0.3 : 0;
-    
+  useFrame((_state, _delta) => {
+    // Exploded offsets
     if (primaryRef.current) {
-      primaryRef.current.position.y = THREE.MathUtils.lerp(primaryRef.current.position.y, targetPrimaryY, 0.08);
-
-      // Smooth scale on hover (2%)
-      const targetScale = hoveredPrimary ? 1.02 : 1.0;
-      primaryRef.current.scale.setScalar(THREE.MathUtils.lerp(primaryRef.current.scale.x, targetScale, 0.15));
+      primaryRef.current.position.x = THREE.MathUtils.lerp(
+        primaryRef.current.position.x, exploded ? -0.4 : 0, 0.08,
+      );
+    }
+    if (sedRef.current) {
+      sedRef.current.position.y = THREE.MathUtils.lerp(
+        sedRef.current.position.y, exploded ? 0.3 : 0, 0.08,
+      );
     }
     if (secondaryRef.current) {
-      secondaryRef.current.position.y = THREE.MathUtils.lerp(secondaryRef.current.position.y, targetSecondaryY, 0.08);
-
-      // Smooth scale on hover (2%)
-      const targetScale = hoveredSecondary ? 1.02 : 1.0;
-      secondaryRef.current.scale.setScalar(THREE.MathUtils.lerp(secondaryRef.current.scale.x, targetScale, 0.15));
+      secondaryRef.current.position.x = THREE.MathUtils.lerp(
+        secondaryRef.current.position.x, exploded ? 0.4 : 0, 0.08,
+      );
     }
 
-    // 2. Material opacities for glass walls, reacting to active hotspots
-    const targetOuterOpacity = (transparent || cutaway) ? 0.08 : (activeHotspot !== null && activeHotspot !== 'primary_tank') ? 0.04 : 0.45;
-    const targetInnerOpacity = (transparent || cutaway) ? 0.08 : (activeHotspot !== null && activeHotspot !== 'secondary_tank' && activeHotspot !== 'sedimentation_tank') ? 0.04 : 0.45;
-    
-    if (outerMatRef.current) {
-      outerMatRef.current.opacity = THREE.MathUtils.lerp(outerMatRef.current.opacity, targetOuterOpacity, 0.1);
+    // Glass opacity reactions
+    const xrayActive = transparent || cutaway;
+    const calcOpacity = (hotspotId: string, base = 0.42) => {
+      if (xrayActive) return 0.06;
+      if (activeHotspot !== null && activeHotspot !== hotspotId) return 0.06;
+      return base;
+    };
+
+    if (primaryMatRef.current) {
+      primaryMatRef.current.opacity = THREE.MathUtils.lerp(
+        primaryMatRef.current.opacity, calcOpacity('primary_tank'), 0.1,
+      );
     }
-    if (innerMatRef.current) {
-      innerMatRef.current.opacity = THREE.MathUtils.lerp(innerMatRef.current.opacity, targetInnerOpacity, 0.1);
+    if (sedMatRef.current) {
+      sedMatRef.current.opacity = THREE.MathUtils.lerp(
+        sedMatRef.current.opacity, calcOpacity('sedimentation_tank', 0.35), 0.1,
+      );
     }
-
-    // 3. Highlight corner frame elements on hover
-    const isPrimaryDimmed = activeHotspot !== null && activeHotspot !== 'primary_tank';
-    const isSecondaryDimmed = activeHotspot !== null && activeHotspot !== 'secondary_tank' && activeHotspot !== 'sedimentation_tank';
-
-    if (primaryRef.current) {
-      primaryRef.current.traverse((child) => {
-        if (child instanceof THREE.Mesh && child.material !== outerMatRef.current) {
-          const mat = child.material as THREE.MeshStandardMaterial;
-          if (mat) {
-            mat.transparent = true;
-            mat.opacity = THREE.MathUtils.lerp(mat.opacity, isPrimaryDimmed ? 0.15 : 1.0, 0.08);
-
-            if (mat.emissive) {
-              if (hoveredPrimary && !isPrimaryDimmed) {
-                mat.emissive.set('#06b6d4');
-                mat.emissiveIntensity = THREE.MathUtils.lerp(mat.emissiveIntensity, 0.45, 0.1);
-              } else {
-                mat.emissive.set('#000000');
-                mat.emissiveIntensity = THREE.MathUtils.lerp(mat.emissiveIntensity, 0.0, 0.1);
-              }
-            }
-          }
-        }
-      });
+    if (secondaryMatRef.current) {
+      secondaryMatRef.current.opacity = THREE.MathUtils.lerp(
+        secondaryMatRef.current.opacity, calcOpacity('secondary_tank', 0.38), 0.1,
+      );
     }
 
-    if (secondaryRef.current) {
-      secondaryRef.current.traverse((child) => {
-        if (child instanceof THREE.Mesh && child.material !== innerMatRef.current) {
-          const mat = child.material as THREE.MeshStandardMaterial;
-          if (mat) {
-            mat.transparent = true;
-            mat.opacity = THREE.MathUtils.lerp(mat.opacity, isSecondaryDimmed ? 0.15 : 1.0, 0.08);
-
-            if (mat.emissive) {
-              if (hoveredSecondary && !isSecondaryDimmed) {
-                mat.emissive.set('#06b6d4');
-                mat.emissiveIntensity = THREE.MathUtils.lerp(mat.emissiveIntensity, 0.45, 0.1);
-              } else {
-                mat.emissive.set('#000000');
-                mat.emissiveIntensity = THREE.MathUtils.lerp(mat.emissiveIntensity, 0.0, 0.1);
-              }
-            }
-          }
-        }
-      });
-    }
+    // Hover scale
+    const scaleGroup = (
+      ref: React.RefObject<THREE.Group | null>,
+      hovered: boolean,
+    ) => {
+      if (ref.current) {
+        const t = hovered ? 1.02 : 1.0;
+        ref.current.scale.setScalar(
+          THREE.MathUtils.lerp(ref.current.scale.x, t, 0.12),
+        );
+      }
+    };
+    scaleGroup(primaryRef,   hoveredPrimary);
+    scaleGroup(sedRef,       hoveredSed);
+    scaleGroup(secondaryRef, hoveredSecondary);
   });
 
-  const handlePointerOverPrimary = (e: any) => {
-    e.stopPropagation();
-    setHoveredPrimary(true);
-    document.body.style.cursor = 'pointer';
-  };
+  // ── Click / hover handlers ───────────────────────────────────────────────
+  const makeHandlers = (
+    id: string,
+    preset: 'PRIMARY_TANK' | 'SECONDARY_TANK' | 'SEDIMENTATION_TANK',
+    setHovered: (v: boolean) => void,
+  ) => ({
+    onPointerOver: (e: any) => { e.stopPropagation(); setHovered(true);  document.body.style.cursor = 'pointer'; },
+    onPointerOut:  ()       => { setHovered(false); document.body.style.cursor = 'default'; },
+    onClick:       (e: any) => { e.stopPropagation(); setActiveHotspot(id); setCameraPreset(preset); },
+  });
 
-  const handlePointerOutPrimary = () => {
-    setHoveredPrimary(false);
-    document.body.style.cursor = 'default';
-  };
+  const primaryHandlers   = makeHandlers('primary_tank',       'PRIMARY_TANK',       setHoveredPrimary);
+  const sedHandlers       = makeHandlers('sedimentation_tank', 'SEDIMENTATION_TANK', setHoveredSed);
+  const secondaryHandlers = makeHandlers('secondary_tank',     'SECONDARY_TANK',     setHoveredSecondary);
 
-  const handlePointerOverSecondary = (e: any) => {
-    e.stopPropagation();
-    setHoveredSecondary(true);
-    document.body.style.cursor = 'pointer';
-  };
-
-  const handlePointerOutSecondary = () => {
-    setHoveredSecondary(false);
-    document.body.style.cursor = 'default';
-  };
-
-  const handleClickPrimary = (e: any) => {
-    e.stopPropagation();
-    setActiveHotspot('primary_tank');
-    setCameraPreset('PRIMARY_TANK');
-  };
-
-  const handleClickSecondary = (e: any) => {
-    e.stopPropagation();
-    setActiveHotspot('secondary_tank');
-    setCameraPreset('SECONDARY_TANK');
-  };
+  // Tank dimensions
+  const PW = 2.4; const PH = 2.1; const PD = 1.5; // Primary
+  const SdR = 0.30; const SdH = 1.7;               // Sedimentation radius & height
+  const SeW = 1.1; const SeH = 1.6; const SeD = 1.0; // Secondary
 
   return (
     <group>
-      {/* 1. PRIMARY TANK CONTAINER */}
-      <group 
-        ref={primaryRef} 
-        position={[-0.6, -0.6, 0]}
-        onPointerOver={handlePointerOverPrimary}
-        onPointerOut={handlePointerOutPrimary}
-        onClick={handleClickPrimary}
-      >
-        {/* Main Tank Glass Box */}
-        <mesh castShadow receiveShadow>
-          <boxGeometry args={[2.2, 2.0, 1.4]} />
-          <meshPhysicalMaterial
-            ref={outerMatRef}
-            color="#083344" // Deep cyan glass
-            transparent
-            opacity={0.45}
-            roughness={0.05} // lower roughness for shinier glass
-            metalness={0.1}
-            transmission={0.9} // higher transmission
-            thickness={0.06} // Simulates glass thickness
-            clearcoat={1.0} // clearcoat for glossy reflections
-            clearcoatRoughness={0.01}
-            depthWrite={false}
-            side={THREE.DoubleSide}
-          />
-        </mesh>
 
-        {/* Horizontal divider compartment divider at y=0 */}
-        <mesh position={[0, 0, 0]} receiveShadow castShadow>
-          <boxGeometry args={[2.18, 0.02, 1.38]} />
+      {/* ═══════════════════════════════════════════════════════════════════
+          1. PRIMARY TANK — large clean-water storage, leftmost
+             World position inside scene group: [-2.0, -0.55, 0]
+          ═══════════════════════════════════════════════════════════════════ */}
+      <group
+        ref={primaryRef}
+        position={[-2.0, -0.55, 0]}
+        {...primaryHandlers}
+      >
+        {/* Glass outer walls */}
+        <GlassTank w={PW} h={PH} d={PD} matRef={primaryMatRef} />
+
+        {/* Metal extrusion frame corners */}
+        {([-PW/2, PW/2] as number[]).map(x =>
+          ([-PD/2, PD/2] as number[]).map(z => (
+            <CornerPost key={`${x}-${z}`} x={x} z={z} />
+          ))
+        )}
+        <FrameRail y={ PH/2} w={PW} d={PD} />
+        <FrameRail y={-PH/2} w={PW} d={PD} />
+
+        {/* Horizontal divider shelf (sensor compartment above ↔ clean water below) */}
+        {/* Clean compartment = lower 65 %, Sensor compartment = upper 35 % */}
+        <mesh position={[0, 0.28, 0]} receiveShadow castShadow>
+          <boxGeometry args={[PW - 0.04, 0.025, PD - 0.04]} />
           <meshPhysicalMaterial
             color="#ffffff"
             transparent
-            opacity={0.35}
-            roughness={0.1}
-            metalness={0.1}
+            opacity={0.28}
             transmission={0.9}
-            thickness={0.01}
+            roughness={0.08}
             depthWrite={false}
           />
         </mesh>
 
-        {/* Bypass gravity drop tube connecting top (sensor) chamber to bottom (clean) chamber */}
-        <mesh position={[0.5, -0.4, 0]} castShadow>
-          <cylinderGeometry args={[0.02, 0.02, 0.8, 8]} />
-          <meshStandardMaterial color="#f1f5f9" roughness={0.4} metalness={0.1} />
-        </mesh>
-        <mesh position={[0.5, 0.0, 0]} castShadow>
-          <cylinderGeometry args={[0.03, 0.03, 0.06, 8]} />
-          <meshStandardMaterial color="#ef4444" roughness={0.2} metalness={0.8} />
+        {/* Label strip on divider edge */}
+        <mesh position={[PW/2 - 0.001, 0.28, 0]}>
+          <boxGeometry args={[0.002, 0.022, PD - 0.06]} />
+          <meshStandardMaterial color="#06b6d4" emissive="#06b6d4" emissiveIntensity={0.6} />
         </mesh>
 
-        {/* Structural Metal Corners */}
-        <group>
-          {/* Top Frame */}
-          <mesh position={[0, 1.0, 0]} castShadow>
-            <boxGeometry args={[2.22, 0.04, 1.42]} />
-            <meshStandardMaterial color="#27272a" roughness={0.4} metalness={0.8} />
-          </mesh>
-          {/* Bottom Frame */}
-          <mesh position={[0, -1.0, 0]} castShadow>
-            <boxGeometry args={[2.22, 0.04, 1.42]} />
-            <meshStandardMaterial color="#27272a" roughness={0.4} metalness={0.8} />
-          </mesh>
-          {/* Vertical Pillars */}
-          {[-1.1, 1.1].map((x, i) => 
-            [-0.7, 0.7].map((z, j) => (
-              <mesh key={`${i}-${j}`} position={[x, 0, z]} castShadow>
-                <boxGeometry args={[0.04, 2.0, 0.04]} />
-                <meshStandardMaterial color="#27272a" roughness={0.4} metalness={0.8} />
-              </mesh>
-            ))
-          )}
-        </group>
+        {/* Bypass check-valve tube (connects sensor chamber → clean chamber) */}
+        <mesh position={[0.6, -0.1, 0.3]} castShadow>
+          <cylinderGeometry args={[0.022, 0.022, 0.72, 10]} />
+          <meshPhysicalMaterial
+            color="#f0f9ff" transparent opacity={0.55}
+            transmission={0.85} roughness={0.1} depthWrite={false}
+          />
+        </mesh>
+        {/* Solenoid valve body on bypass */}
+        <mesh position={[0.6, -0.1, 0.3]} rotation={[Math.PI/2, 0, 0]} castShadow>
+          <cylinderGeometry args={[0.038, 0.038, 0.07, 12]} />
+          <meshStandardMaterial color="#18181b" roughness={0.3} metalness={0.85} />
+        </mesh>
+
+        {/* Outlet pipe nozzle — clean water exits left wall bottom */}
+        <PipeNozzle pos={[-PW/2, -0.55, 0]} rot={[0, 0, -Math.PI/2]} />
+
+        {/* Inlet nozzle — filtered water enters right wall mid */}
+        <PipeNozzle pos={[PW/2, -0.2, 0]} rot={[0, 0, Math.PI/2]} />
+
+        {/* Warning label sticker */}
+        <mesh position={[PW/2 - 0.001, -0.7, 0]}>
+          <boxGeometry args={[0.002, 0.12, 0.22]} />
+          <meshStandardMaterial color="#fef08a" roughness={0.9} />
+        </mesh>
+
+        {/* LABEL: CLEAN WATER STORAGE */}
+        <mesh position={[0, -PH/2 - 0.04, 0]}>
+          <boxGeometry args={[PW * 0.6, 0.03, PD * 0.5]} />
+          <meshStandardMaterial color="#0f172a" roughness={0.8} />
+        </mesh>
       </group>
 
-      {/* 2. SECONDARY TANK CONTAINER */}
-      <group 
-        ref={secondaryRef} 
-        position={[0.1, 0.0, 0]}
-        onPointerOver={handlePointerOverSecondary}
-        onPointerOut={handlePointerOutSecondary}
-        onClick={handleClickSecondary}
+      {/* ═══════════════════════════════════════════════════════════════════
+          2. SEDIMENTATION / FILTER TANK — cylindrical, center
+             World position: [0.5, -0.5, 0]
+          ═══════════════════════════════════════════════════════════════════ */}
+      <group
+        ref={sedRef}
+        position={[0.5, -0.5, 0]}
+        {...sedHandlers}
       >
+        {/* Outer transparent acrylic cylinder */}
         <mesh castShadow receiveShadow>
-          <boxGeometry args={[0.8, 0.8, 1.36]} />
+          <cylinderGeometry args={[SdR, SdR, SdH, 24, 1, false]} />
           <meshPhysicalMaterial
-            ref={innerMatRef}
+            ref={sedMatRef}
             color="#0e7490"
             transparent
-            opacity={0.45}
-            roughness={0.08}
-            metalness={0.1}
-            transmission={0.88}
+            opacity={0.35}
+            roughness={0.06}
+            metalness={0.05}
+            transmission={0.85}
             thickness={0.04}
             clearcoat={1.0}
             clearcoatRoughness={0.02}
@@ -237,12 +280,88 @@ export const Tanks = () => {
           />
         </mesh>
 
-        {/* Support brackets holding secondary tank in place */}
-        <mesh position={[0, 0.4, 0]}>
-          <boxGeometry args={[0.82, 0.02, 1.38]} />
-          <meshStandardMaterial color="#3f3f46" roughness={0.3} metalness={0.7} />
+        {/* Top metal cap with inlet port */}
+        <mesh position={[0, SdH/2 + 0.02, 0]} castShadow>
+          <cylinderGeometry args={[SdR + 0.02, SdR + 0.02, 0.04, 24]} />
+          <meshStandardMaterial color="#1f2937" roughness={0.35} metalness={0.8} />
+        </mesh>
+        {/* Inlet nozzle on top cap */}
+        <PipeNozzle pos={[0, SdH/2 + 0.07, 0]} rot={[0, 0, 0]} />
+
+        {/* Bottom funnel outlet */}
+        <mesh position={[0, -SdH/2 - 0.04, 0]} castShadow>
+          <cylinderGeometry args={[SdR + 0.02, 0.04, 0.08, 24]} />
+          <meshStandardMaterial color="#1f2937" roughness={0.35} metalness={0.8} />
+        </mesh>
+        {/* Outlet stub going down */}
+        <PipeNozzle pos={[0, -SdH/2 - 0.12, 0]} rot={[0, 0, 0]} />
+
+        {/* Metal banding rings */}
+        {([-0.55, 0, 0.55] as number[]).map((y, i) => (
+          <mesh key={i} position={[0, y, 0]} castShadow>
+            <torusGeometry args={[SdR + 0.02, 0.012, 8, 24]} />
+            <meshStandardMaterial color="#374151" roughness={0.3} metalness={0.85} />
+          </mesh>
+        ))}
+
+        {/* LABEL: SEDIMENTATION */}
+        <mesh position={[SdR + 0.015, 0, 0]} rotation={[0, Math.PI/2, 0]}>
+          <boxGeometry args={[0.28, 0.06, 0.003]} />
+          <meshStandardMaterial color="#7c3aed" roughness={0.9} />
         </mesh>
       </group>
+
+      {/* ═══════════════════════════════════════════════════════════════════
+          3. SECONDARY TANK — raw water intake, rightmost
+             World position: [2.4, -0.5, 0]
+          ═══════════════════════════════════════════════════════════════════ */}
+      <group
+        ref={secondaryRef}
+        position={[2.4, -0.5, 0]}
+        {...secondaryHandlers}
+      >
+        {/* Glass walls — slightly brownish tint to hint at raw/dirty water */}
+        <GlassTank
+          w={SeW} h={SeH} d={SeD}
+          matRef={secondaryMatRef}
+          color="#134e4a"
+          opacity={0.38}
+        />
+
+        {/* Metal corners */}
+        {([-SeW/2, SeW/2] as number[]).map(x =>
+          ([-SeD/2, SeD/2] as number[]).map(z => (
+            <CornerPost key={`${x}-${z}`} x={x} z={z} />
+          ))
+        )}
+        <FrameRail y={ SeH/2} w={SeW} d={SeD} />
+        <FrameRail y={-SeH/2} w={SeW} d={SeD} />
+
+        {/* Inlet nozzle — raw water enters right wall at top */}
+        <PipeNozzle pos={[SeW/2, SeH/2 - 0.2, 0]} rot={[0, 0, Math.PI/2]} />
+
+        {/* Outlet nozzle — pump draws from left wall bottom */}
+        <PipeNozzle pos={[-SeW/2, -SeH/2 + 0.15, 0]} rot={[0, 0, -Math.PI/2]} />
+
+        {/* Pump mount bracket at bottom */}
+        <mesh position={[0, -SeH/2 + 0.08, 0]} castShadow>
+          <boxGeometry args={[SeW - 0.1, 0.02, SeD - 0.1]} />
+          <meshStandardMaterial color="#374151" roughness={0.4} metalness={0.7} />
+        </mesh>
+
+        {/* Water level indicator stripe on front face */}
+        <mesh position={[0, 0, SeD/2 - 0.001]}>
+          <boxGeometry args={[0.018, SeH - 0.1, 0.003]} />
+          <meshStandardMaterial color="#22d3ee" roughness={0.5} metalness={0.1} />
+        </mesh>
+
+        {/* LABEL: RAW WATER INTAKE */}
+        <mesh position={[0, -SeH/2 - 0.04, 0]}>
+          <boxGeometry args={[SeW * 0.7, 0.03, SeD * 0.5]} />
+          <meshStandardMaterial color="#0f172a" roughness={0.8} />
+        </mesh>
+      </group>
+
     </group>
   );
 };

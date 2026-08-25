@@ -182,8 +182,8 @@ export const ESP32Box = () => {
 
   return (
     <group ref={groupRef}>
-      {/* Box center: x=0.7, y=0.52, z=0 */}
-      <group position={[0.7, 0.52, 0]}>
+      {/* Box center: on top of primary tank lid, beside battery */}
+      <group position={[-2.0, 0.68, -0.52]}>
         
         {/* 1. TRANSPARENT ENCLOSURE COVER LID */}
         <mesh 

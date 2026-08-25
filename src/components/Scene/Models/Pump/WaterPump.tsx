@@ -99,8 +99,8 @@ export const WaterPump = () => {
       onPointerOut={handlePointerOut}
       onClick={handleClick}
     >
-      {/* Pump location inside secondary tank: centered at x=0.3, y=-0.28, z=0 */}
-      <group position={[0.3, -0.28, 0]}>
+      {/* Pump at secondary tank bottom-left outlet — pipe run junction at x=1.85, y=-1.55 */}
+      <group position={[1.85, -1.55, 0]}>
         {/* Main cylindrical pump body */}
         <mesh castShadow receiveShadow>
           <cylinderGeometry args={[0.08, 0.08, 0.15, 16]} />

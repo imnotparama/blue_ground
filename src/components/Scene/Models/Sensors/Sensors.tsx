@@ -5,7 +5,7 @@ import { useFrame, useThree } from '@react-three/fiber';
 import { useSystemState, CameraPreset } from '@/hooks/useSystemState';
 import * as THREE from 'three';
 
-// Sensor interactive helper type
+// ─── Interactive Sensor Wrapper ────────────────────────────────────────────────
 interface InteractiveSensorProps {
   id: string;
   preset: CameraPreset;
@@ -14,92 +14,56 @@ interface InteractiveSensorProps {
   children: React.ReactNode;
 }
 
-const InteractiveSensor: React.FC<InteractiveSensorProps> = ({ id, preset, position, rotation = [0, 0, 0], children }) => {
-  const { setActiveHotspot, setCameraPreset, activeHotspot, demoRunning, metrics } = useSystemState();
+const InteractiveSensor: React.FC<InteractiveSensorProps> = ({
+  id, preset, position, rotation = [0, 0, 0], children,
+}) => {
+  const { setActiveHotspot, setCameraPreset, activeHotspot, metrics } = useSystemState();
   const [hovered, setHovered] = useState(false);
   const groupRef = useRef<THREE.Group>(null);
-
-  const handlePointerOver = (e: any) => {
-    if (demoRunning) return;
-    e.stopPropagation();
-    setHovered(true);
-    document.body.style.cursor = 'pointer';
-  };
-
-  const handlePointerOut = () => {
-    setHovered(false);
-    document.body.style.cursor = 'default';
-  };
-
-  const handleClick = (e: any) => {
-    if (demoRunning) return;
-    e.stopPropagation();
-    setActiveHotspot(id);
-    setCameraPreset(preset);
-  };
-
   const isActive = activeHotspot === id;
 
   useFrame(() => {
-    // 1. Lerp Scale on hover
-    if (groupRef.current) {
-      const targetScale = hovered ? 1.05 : 1.0;
-      groupRef.current.scale.setScalar(THREE.MathUtils.lerp(groupRef.current.scale.x, targetScale, 0.15));
-    }
-
-    // 2. Traversal Dimming & Emissive Glow
+    if (!groupRef.current) return;
     const isDimmed = activeHotspot !== null && activeHotspot !== id;
-    const targetOpacity = isDimmed ? 0.15 : 1.0;
-
-    if (groupRef.current) {
-      groupRef.current.traverse((child) => {
-        if (child instanceof THREE.Mesh) {
-          if (child.name === 'highlight-ring') return;
-          const mat = child.material as THREE.MeshStandardMaterial;
-          if (mat) {
-            mat.transparent = true;
-            mat.opacity = THREE.MathUtils.lerp(mat.opacity, targetOpacity, 0.08);
-
-            // Glow cyan on hover
-            if (mat.emissive) {
-              if (hovered && !isDimmed) {
-                mat.emissive.set('#06b6d4');
-                mat.emissiveIntensity = THREE.MathUtils.lerp(mat.emissiveIntensity, 0.45, 0.1);
-              } else {
-                // Restore standard emissives
-                const standardEmissive = (child.name === 'uv-emitter-mesh' && metrics.uvStatus === 'ON') 
-                  ? new THREE.Color('#a855f7') 
-                  : new THREE.Color('#000000');
-                const standardIntensity = (child.name === 'uv-emitter-mesh' && metrics.uvStatus === 'ON') ? 3.0 : 0.0;
-                
-                mat.emissive.lerp(standardEmissive, 0.1);
-                mat.emissiveIntensity = THREE.MathUtils.lerp(mat.emissiveIntensity, standardIntensity, 0.1);
-              }
-            }
-          }
+    groupRef.current.traverse((child) => {
+      if (!(child instanceof THREE.Mesh)) return;
+      const mat = child.material as THREE.MeshStandardMaterial;
+      if (!mat) return;
+      mat.transparent = true;
+      mat.opacity = THREE.MathUtils.lerp(mat.opacity, isDimmed ? 0.15 : 1.0, 0.08);
+      if (mat.emissive) {
+        const isUv = child.name === 'uv-emitter-mesh';
+        if (hovered && !isDimmed) {
+          mat.emissive.set('#06b6d4');
+          mat.emissiveIntensity = THREE.MathUtils.lerp(mat.emissiveIntensity, 0.5, 0.1);
+        } else if (isUv && metrics.uvStatus === 'ON') {
+          mat.emissive.set('#a855f7');
+          mat.emissiveIntensity = THREE.MathUtils.lerp(mat.emissiveIntensity, 3.0, 0.1);
+        } else {
+          mat.emissive.set('#000000');
+          mat.emissiveIntensity = THREE.MathUtils.lerp(mat.emissiveIntensity, 0, 0.1);
         }
-      });
-    }
+      }
+    });
+    const targetScale = hovered ? 1.06 : 1.0;
+    groupRef.current.scale.setScalar(THREE.MathUtils.lerp(groupRef.current.scale.x, targetScale, 0.15));
   });
 
   return (
-    <group 
+    <group
       ref={groupRef}
-      position={position} 
+      position={position}
       rotation={rotation}
-      onPointerOver={handlePointerOver}
-      onPointerOut={handlePointerOut}
-      onClick={handleClick}
+      onPointerOver={(e) => { e.stopPropagation(); setHovered(true); document.body.style.cursor = 'pointer'; }}
+      onPointerOut={() => { setHovered(false); document.body.style.cursor = 'default'; }}
+      onClick={(e) => { e.stopPropagation(); setActiveHotspot(id); setCameraPreset(preset); }}
     >
-      {/* 3D Emissive highlight ring shown when hovered or clicked */}
       {(hovered || isActive) && (
-        <mesh name="highlight-ring" position={[0, 0, 0]}>
-          <cylinderGeometry args={[0.08, 0.08, 0.45, 12, 1, true]} />
-          <meshBasicMaterial 
-            color={isActive ? '#22d3ee' : '#3b82f6'} 
-            wireframe 
-            transparent 
-            opacity={0.35} 
+        <mesh name="highlight-ring">
+          <cylinderGeometry args={[0.1, 0.1, 0.5, 12, 1, true]} />
+          <meshBasicMaterial
+            color={isActive ? '#22d3ee' : '#3b82f6'}
+            wireframe transparent opacity={0.3}
           />
         </mesh>
       )}
@@ -108,228 +72,308 @@ const InteractiveSensor: React.FC<InteractiveSensorProps> = ({ id, preset, posit
   );
 };
 
+// ─── Realistic Probe Builder ──────────────────────────────────────────────────
+const WaterproofProbe = ({
+  bodyColor = '#1e2937',
+  tipColor = '#d4d4d8',
+  tipShape = 'flat' as 'flat' | 'bulb' | 'cone',
+  cableColor = '#18181b',
+}: {
+  bodyColor?: string;
+  tipColor?: string;
+  tipShape?: 'flat' | 'bulb' | 'cone';
+  cableColor?: string;
+}) => (
+  <group>
+    {/* Cable */}
+    <mesh position={[0, 0.34, 0]} castShadow>
+      <cylinderGeometry args={[0.008, 0.008, 0.2, 8]} />
+      <meshStandardMaterial color={cableColor} roughness={0.8} />
+    </mesh>
+    {/* Waterproof body */}
+    <mesh castShadow>
+      <cylinderGeometry args={[0.018, 0.018, 0.48, 12]} />
+      <meshStandardMaterial color={bodyColor} roughness={0.35} metalness={0.75} />
+    </mesh>
+    {/* Cable gland top */}
+    <mesh position={[0, 0.25, 0]} castShadow>
+      <cylinderGeometry args={[0.022, 0.016, 0.04, 10]} />
+      <meshStandardMaterial color="#4b5563" roughness={0.2} metalness={0.9} />
+    </mesh>
+    {/* Tip */}
+    {tipShape === 'flat' && (
+      <mesh position={[0, -0.245, 0]} castShadow>
+        <cylinderGeometry args={[0.016, 0.014, 0.025, 10]} />
+        <meshStandardMaterial color={tipColor} roughness={0.08} metalness={0.95} />
+      </mesh>
+    )}
+    {tipShape === 'bulb' && (
+      <mesh position={[0, -0.26, 0]}>
+        <sphereGeometry args={[0.018, 10, 10]} />
+        <meshPhysicalMaterial
+          color="#0284c7" transparent opacity={0.75}
+          transmission={0.9} roughness={0.04}
+        />
+      </mesh>
+    )}
+    {tipShape === 'cone' && (
+      <mesh position={[0, -0.26, 0]} castShadow>
+        <coneGeometry args={[0.016, 0.04, 10]} />
+        <meshStandardMaterial color={tipColor} roughness={0.15} metalness={0.85} />
+      </mesh>
+    )}
+  </group>
+);
+
+// ─── Main Sensors Component ───────────────────────────────────────────────────
+/*
+ * All probe sensors dip into the SECONDARY TANK (raw water intake).
+ * Secondary tank center in scene: [2.4, -0.5, 0], height 1.6
+ * Top of secondary tank inner water: y = -0.5 + 0.75 = 0.25
+ * Probes mount through lid, body above y=0.25, tip below water surface.
+ *
+ * Flow sensor sits on the pipe run between secondary and sedimentation:
+ * Pipe segment runs at y=-1.48, x from 1.85 to 1.1
+ * Flow sensor at x=1.1, y=-1.48 (inline horizontal pipe)
+ *
+ * Float sensor mounts inside the PRIMARY tank:
+ * Primary center: [-2.0, -0.55, 0], clean water bottom chamber
+ */
 export const Sensors = () => {
   const { exploded, metrics } = useSystemState();
-  
-  // Impeller ref for flow sensor & float ring ref for water level
-  const flowRotorRef = useRef<THREE.Group>(null);
-  const floatRingRef = useRef<THREE.Mesh>(null);
-  
-  const probeGroupRef = useRef<THREE.Group>(null);
-  const flowSensorGroupRef = useRef<THREE.Group>(null);
-  const floatSensorGroupRef = useRef<THREE.Group>(null);
+
+  const flowRotorRef    = useRef<THREE.Group>(null);
+  const floatRingRef    = useRef<THREE.Mesh>(null);
+  const probeGroupRef   = useRef<THREE.Group>(null);
+  const flowGroupRef    = useRef<THREE.Group>(null);
+  const floatGroupRef   = useRef<THREE.Group>(null);
 
   useFrame((state, delta) => {
-    // 1. Exploded animations:
-    const targetProbeY = exploded ? -0.35 : 0;
+    // Exploded offsets
     if (probeGroupRef.current) {
-      probeGroupRef.current.position.y = THREE.MathUtils.lerp(probeGroupRef.current.position.y, targetProbeY, 0.08);
+      const ty = exploded ? 0.45 : 0;
+      probeGroupRef.current.position.y = THREE.MathUtils.lerp(probeGroupRef.current.position.y, ty, 0.08);
     }
-    
-    const targetFlowX = exploded ? 0.35 : 0;
-    if (flowSensorGroupRef.current) {
-      flowSensorGroupRef.current.position.x = THREE.MathUtils.lerp(flowSensorGroupRef.current.position.x, targetFlowX, 0.08);
+    if (flowGroupRef.current) {
+      const tx = exploded ? 0.35 : 0;
+      flowGroupRef.current.position.x = THREE.MathUtils.lerp(flowGroupRef.current.position.x, tx, 0.08);
+    }
+    if (floatGroupRef.current) {
+      const tx = exploded ? -0.3 : 0;
+      floatGroupRef.current.position.x = THREE.MathUtils.lerp(floatGroupRef.current.position.x, tx, 0.08);
     }
 
-    const targetFloatX = exploded ? -0.2 : 0;
-    if (floatSensorGroupRef.current) {
-      floatSensorGroupRef.current.position.x = THREE.MathUtils.lerp(floatSensorGroupRef.current.position.x, targetFloatX, 0.08);
-    }
-
-    // 2. Rotate flow sensor impeller proportional to flowRate
+    // Flow sensor impeller spin
     if (flowRotorRef.current && metrics.flowRate > 0) {
-      flowRotorRef.current.rotation.y += metrics.flowRate * 1.5 * delta;
+      flowRotorRef.current.rotation.y += metrics.flowRate * 2.0 * delta;
     }
 
-    // 3. Slide float sensor ring according to tank waterLevel
+    // Float ring follows water level inside PRIMARY tank
     if (floatRingRef.current) {
-      const waterHeight = -1.5 + (metrics.waterLevel / 100) * 1.68;
-      const targetRingY = waterHeight - (-0.5); // align with primary tank coordinates
-      floatRingRef.current.position.y = THREE.MathUtils.lerp(floatRingRef.current.position.y, targetRingY, 0.1);
+      // Primary tank bottom-of-clean-chamber: y = -0.55 - 1.05 + 0.05 = -1.55
+      // Full height of clean chamber: ~1.33 (below divider at y=0.28 relative)
+      const waterHeight = -1.55 + (metrics.waterLevel / 100) * 1.33;
+      floatRingRef.current.position.y = THREE.MathUtils.lerp(
+        floatRingRef.current.position.y, waterHeight, 0.08,
+      );
     }
   });
 
+  // Secondary tank top surface world y ≈ 0.25 (tank center y=-0.5, h=1.6/2=0.8 → top y=0.3)
+  // Probes hang down from tank lid: body center at y= 0.0, tip at y=-0.25 → submerged
+  const SEC_X = 2.4;
+  const SEC_Y = 0.12; // world y for probe group center (body straddles tank top)
+
   return (
     <group>
-      {/* ======================================================== */}
-      {/* A. SENSOR PROBES (TDS, pH, Turbidity, Temp, UV LED) */}
-      {/* ======================================================== */}
+
+      {/* ═══════════════════════════════════════════════════════════════════════
+          A. PROBE SENSORS — TDS, pH, Turbidity, Temp, UV LED
+             Positioned in secondary tank
+          ═══════════════════════════════════════════════════════════════════════ */}
       <group ref={probeGroupRef}>
+
         {/* 1. TDS Probe */}
-        <InteractiveSensor id="tds" preset="TDS_SENSOR" position={[0.55, 0.18, 0.15]}>
-          {/* Casing */}
-          <mesh castShadow>
-            <cylinderGeometry args={[0.02, 0.02, 0.45, 12]} />
-            <meshStandardMaterial color="#1e2937" roughness={0.4} metalness={0.8} />
+        <InteractiveSensor id="tds" preset="TDS_SENSOR"
+          position={[SEC_X - 0.15, SEC_Y, 0.18]}
+        >
+          <WaterproofProbe bodyColor="#1e2937" tipColor="#e2e8f0" tipShape="flat" />
+          {/* Twin electrode plate on tip */}
+          <mesh position={[-0.006, -0.26, 0.005]}>
+            <boxGeometry args={[0.006, 0.025, 0.018]} />
+            <meshStandardMaterial color="#d4d4d8" roughness={0.05} metalness={0.98} />
           </mesh>
-          {/* Silver electrodes at tip */}
-          <mesh position={[0, -0.225, 0]}>
-            <boxGeometry args={[0.008, 0.02, 0.02]} />
-            <meshStandardMaterial color="#d4d4d8" roughness={0.1} metalness={0.9} />
+          <mesh position={[ 0.006, -0.26, 0.005]}>
+            <boxGeometry args={[0.006, 0.025, 0.018]} />
+            <meshStandardMaterial color="#d4d4d8" roughness={0.05} metalness={0.98} />
           </mesh>
         </InteractiveSensor>
 
         {/* 2. pH Probe */}
-        <InteractiveSensor id="ph" preset="PH_SENSOR" position={[0.7, 0.18, -0.1]}>
-          {/* Casing */}
-          <mesh castShadow>
-            <cylinderGeometry args={[0.02, 0.02, 0.45, 12]} />
-            <meshStandardMaterial color="#27272a" roughness={0.3} metalness={0.7} />
-          </mesh>
-          {/* Glass bulb tip */}
-          <mesh position={[0, -0.225, 0]}>
-            <sphereGeometry args={[0.018, 10, 10]} />
-            <meshPhysicalMaterial 
-              color="#0284c7" 
-              transparent 
-              opacity={0.7} 
-              transmission={0.9} 
-              roughness={0.05} 
-            />
+        <InteractiveSensor id="ph" preset="PH_SENSOR"
+          position={[SEC_X + 0.05, SEC_Y, 0.22]}
+        >
+          <WaterproofProbe bodyColor="#18181b" tipColor="#0284c7" tipShape="bulb"
+            cableColor="#1e1b4b"
+          />
+          {/* Reference junction ring */}
+          <mesh position={[0, -0.2, 0]}>
+            <torusGeometry args={[0.016, 0.004, 6, 10]} />
+            <meshStandardMaterial color="#b45309" roughness={0.2} metalness={0.9} />
           </mesh>
         </InteractiveSensor>
 
         {/* 3. Turbidity Probe */}
-        <InteractiveSensor id="turbidity" preset="TURBIDITY_SENSOR" position={[0.85, 0.18, 0.15]}>
-          {/* Optical body */}
-          <mesh castShadow>
-            <cylinderGeometry args={[0.024, 0.024, 0.45, 12]} />
-            <meshStandardMaterial color="#18181b" roughness={0.5} metalness={0.6} />
-          </mesh>
-          {/* Metal base cap */}
-          <mesh position={[0, 0.225, 0]} castShadow>
-            <cylinderGeometry args={[0.026, 0.026, 0.02, 12]} />
-            <meshStandardMaterial color="#3f3f46" roughness={0.3} metalness={0.8} />
-          </mesh>
-          {/* Tiny sensor lens at bottom */}
-          <mesh position={[0, -0.225, 0]}>
-            <cylinderGeometry args={[0.015, 0.015, 0.005, 8]} />
-            <meshPhysicalMaterial color="#ffffff" transparent opacity={0.6} transmission={0.9} />
+        <InteractiveSensor id="turbidity" preset="TURBIDITY_SENSOR"
+          position={[SEC_X + 0.22, SEC_Y, 0.08]}
+        >
+          <WaterproofProbe bodyColor="#27272a" tipColor="#f5f5f5" tipShape="flat"
+            cableColor="#334155"
+          />
+          {/* Optical lens window */}
+          <mesh position={[0, -0.24, 0]}>
+            <cylinderGeometry args={[0.013, 0.013, 0.006, 10]} />
+            <meshPhysicalMaterial transparent opacity={0.7} transmission={0.95} roughness={0.02} />
           </mesh>
         </InteractiveSensor>
 
-        {/* 4. Temperature Probe */}
-        <InteractiveSensor id="temp" preset="TEMP_SENSOR" position={[0.62, 0.14, -0.22]}>
-          {/* Metal probe stem */}
-          <mesh castShadow>
-            <cylinderGeometry args={[0.01, 0.01, 0.52, 8]} />
-            <meshStandardMaterial color="#cbd5e1" roughness={0.15} metalness={0.9} />
-          </mesh>
-          {/* Brass threads */}
-          <mesh position={[0, 0.26, 0]} castShadow>
-            <cylinderGeometry args={[0.018, 0.018, 0.02, 8]} />
-            <meshStandardMaterial color="#ca8a04" roughness={0.2} metalness={0.8} />
-          </mesh>
+        {/* 4. Temperature Probe (DS18B20 style) */}
+        <InteractiveSensor id="temp" preset="TEMP_SENSOR"
+          position={[SEC_X + 0.12, SEC_Y, -0.2]}
+        >
+          <group>
+            {/* Thin stainless steel tube */}
+            <mesh castShadow>
+              <cylinderGeometry args={[0.008, 0.008, 0.55, 8]} />
+              <meshStandardMaterial color="#c0c8d0" roughness={0.1} metalness={0.95} />
+            </mesh>
+            {/* Threaded hex base */}
+            <mesh position={[0, 0.28, 0]} castShadow>
+              <cylinderGeometry args={[0.02, 0.02, 0.03, 6]} />
+              <meshStandardMaterial color="#ca8a04" roughness={0.15} metalness={0.9} />
+            </mesh>
+            {/* Cable */}
+            <mesh position={[0, 0.38, 0]} castShadow>
+              <cylinderGeometry args={[0.006, 0.006, 0.18, 8]} />
+              <meshStandardMaterial color="#dc2626" roughness={0.8} />
+            </mesh>
+          </group>
         </InteractiveSensor>
 
-        {/* 5. UV LED Sterilizer */}
-        <InteractiveSensor id="uv" preset="UV_LED" position={[0.4, -0.15, 0.3]} rotation={[0, 0, -Math.PI / 4]}>
-          {/* Metal base sleeve & bracket mount */}
+        {/* 5. UV/White LED sterilizer (prototype uses white LED) */}
+        <InteractiveSensor id="uv" preset="UV_LED"
+          position={[SEC_X - 0.1, SEC_Y - 0.55, 0.35]}
+          rotation={[0, 0, -Math.PI / 5]}
+        >
+          {/* Metal sleeve mount */}
           <mesh castShadow>
-            <cylinderGeometry args={[0.024, 0.024, 0.08, 12]} />
-            <meshStandardMaterial color="#3f3f46" roughness={0.3} metalness={0.8} />
+            <cylinderGeometry args={[0.025, 0.025, 0.09, 12]} />
+            <meshStandardMaterial color="#3f4f6e" roughness={0.3} metalness={0.85} />
           </mesh>
-          {/* Glass quartz sleeve bulb */}
+          {/* LED glass bulb */}
           <mesh position={[0, -0.07, 0]} castShadow>
             <cylinderGeometry args={[0.016, 0.016, 0.12, 10]} />
-            <meshPhysicalMaterial 
-              color="#a855f7" 
-              transparent 
-              opacity={0.4} 
-              transmission={0.9} 
-              roughness={0.05} 
+            <meshPhysicalMaterial
+              color="#fef9c3" transparent opacity={0.55}
+              transmission={0.9} roughness={0.04}
             />
           </mesh>
-          {/* Emissive internal LED element */}
+          {/* Emissive LED element */}
           <mesh name="uv-emitter-mesh" position={[0, -0.07, 0]}>
-            <cylinderGeometry args={[0.008, 0.008, 0.08, 8]} />
-            <meshStandardMaterial 
-              color="#c084fc" 
-              emissive="#a855f7" 
-              emissiveIntensity={metrics.uvStatus === 'ON' ? 3.0 : 0.0} 
+            <cylinderGeometry args={[0.008, 0.008, 0.09, 8]} />
+            <meshStandardMaterial
+              color="#fef08a"
+              emissive="#fef08a"
+              emissiveIntensity={metrics.uvStatus === 'ON' ? 3.5 : 0.0}
               roughness={0.1}
             />
+          </mesh>
+          {/* Bracket arm */}
+          <mesh position={[0.04, 0.05, 0]} rotation={[0, 0, Math.PI/4]} castShadow>
+            <boxGeometry args={[0.08, 0.01, 0.015]} />
+            <meshStandardMaterial color="#374151" roughness={0.3} metalness={0.8} />
           </mesh>
         </InteractiveSensor>
       </group>
 
-      {/* ======================================================== */}
-      {/* B. FLOW SENSOR */}
-      {/* ======================================================== */}
-      <group ref={flowSensorGroupRef}>
-        <InteractiveSensor id="flow" preset="FLOW_SENSOR" position={[1.6, 0.0, 0]}>
-          {/* Valve/T-Joint Pipe Fitting */}
-          <mesh rotation={[0, 0, Math.PI / 2]} castShadow>
-            <cylinderGeometry args={[0.045, 0.045, 0.22, 12]} />
-            <meshStandardMaterial color="#27272a" roughness={0.3} metalness={0.8} />
+      {/* ═══════════════════════════════════════════════════════════════════════
+          B. FLOW SENSOR — inline YF-S201 style on pipe at [1.1, -1.48, 0]
+             Positioned BETWEEN secondary tank outlet and sedimentation inlet
+          ═══════════════════════════════════════════════════════════════════════ */}
+      <group ref={flowGroupRef}>
+        <InteractiveSensor id="flow" preset="FLOW_SENSOR"
+          position={[1.1, -1.48, 0]}
+          rotation={[0, 0, Math.PI/2]}   // inline with horizontal pipe
+        >
+          {/* T-fitting body */}
+          <mesh rotation={[0, 0, Math.PI/2]} castShadow>
+            <cylinderGeometry args={[0.042, 0.042, 0.24, 14]} />
+            <meshStandardMaterial color="#18181b" roughness={0.3} metalness={0.85} />
           </mesh>
-          {/* Rotor center chamber cylinder */}
-          <mesh position={[0, 0.02, 0]} castShadow>
-            <cylinderGeometry args={[0.065, 0.065, 0.07, 16]} />
+          {/* Centre chamber */}
+          <mesh position={[0, 0.025, 0]} castShadow>
+            <cylinderGeometry args={[0.065, 0.065, 0.075, 16]} />
             <meshStandardMaterial color="#1e2937" roughness={0.4} metalness={0.7} />
           </mesh>
-          {/* Translucent plexiglass cover */}
-          <mesh position={[0, 0.056, 0]}>
-            <cylinderGeometry args={[0.066, 0.066, 0.005, 16]} />
-            <meshPhysicalMaterial transparent opacity={0.3} transmission={0.9} roughness={0.05} />
+          {/* Plexiglass cover */}
+          <mesh position={[0, 0.062, 0]}>
+            <cylinderGeometry args={[0.066, 0.066, 0.006, 16]} />
+            <meshPhysicalMaterial transparent opacity={0.28} transmission={0.9} roughness={0.03} />
           </mesh>
-
-          {/* Rotating Flow wheel rotor */}
-          <group ref={flowRotorRef} position={[0, 0.02, 0]}>
+          {/* Rotating impeller */}
+          <group ref={flowRotorRef} position={[0, 0.025, 0]}>
             <mesh castShadow>
-              <cylinderGeometry args={[0.015, 0.015, 0.05, 8]} />
+              <cylinderGeometry args={[0.014, 0.014, 0.055, 8]} />
               <meshStandardMaterial color="#ef4444" roughness={0.2} metalness={0.9} />
             </mesh>
-            {/* Rotor Blades */}
-            {[0, 1, 2, 3, 4, 5].map((i) => (
-              <mesh 
-                key={i} 
-                rotation={[(i * Math.PI) / 3, 0, 0]} 
-                position={[0, 0, 0]}
-                castShadow
-              >
-                <boxGeometry args={[0.008, 0.055, 0.01]} />
+            {[0,1,2,3,4,5].map((i) => (
+              <mesh key={i} rotation={[(i * Math.PI) / 3, 0, 0]} castShadow>
+                <boxGeometry args={[0.008, 0.052, 0.01]} />
                 <meshStandardMaterial color="#ef4444" roughness={0.3} metalness={0.5} />
               </mesh>
             ))}
           </group>
+          {/* Signal cable */}
+          <mesh position={[0.065, 0.025, 0]} rotation={[0, 0, Math.PI/2]} castShadow>
+            <cylinderGeometry args={[0.005, 0.005, 0.1, 8]} />
+            <meshStandardMaterial color="#dc2626" roughness={0.7} />
+          </mesh>
         </InteractiveSensor>
       </group>
 
-      {/* ======================================================== */}
-      {/* C. FLOAT SENSOR */}
-      {/* ======================================================== */}
-      <group ref={floatSensorGroupRef}>
-        <InteractiveSensor id="float" preset="FLOAT_SENSOR" position={[-1.5, -0.5, 0]}>
-          {/* Support bracket */}
-          <mesh position={[-0.1, 0.4, 0]} castShadow>
-            <boxGeometry args={[0.1, 0.04, 0.06]} />
-            <meshStandardMaterial color="#3f3f46" roughness={0.4} metalness={0.8} />
-          </mesh>
-          
-          {/* Vertical steel guide rod */}
-          <mesh position={[0, 0, 0]} castShadow>
-            <cylinderGeometry args={[0.008, 0.008, 0.9, 8]} />
+      {/* ═══════════════════════════════════════════════════════════════════════
+          C. FLOAT SENSOR — inside PRIMARY tank clean water chamber
+             Primary center [-2.0, -0.55, 0], clean chamber below divider y=0.28
+          ═══════════════════════════════════════════════════════════════════════ */}
+      <group ref={floatGroupRef}>
+        <InteractiveSensor id="float" preset="FLOAT_SENSOR"
+          position={[-2.4, -0.55, 0.4]}
+        >
+          {/* Guide rod */}
+          <mesh castShadow>
+            <cylinderGeometry args={[0.007, 0.007, 1.1, 8]} />
             <meshStandardMaterial color="#94a3b8" roughness={0.1} metalness={0.95} />
           </mesh>
-
+          {/* Mounting bracket top */}
+          <mesh position={[0, 0.55, 0]} castShadow>
+            <boxGeometry args={[0.1, 0.02, 0.06]} />
+            <meshStandardMaterial color="#374151" roughness={0.4} metalness={0.8} />
+          </mesh>
           {/* Stopper rings */}
-          <mesh position={[0, 0.42, 0]} castShadow>
-            <cylinderGeometry args={[0.015, 0.015, 0.015, 8]} />
-            <meshStandardMaterial color="#1e2937" roughness={0.3} metalness={0.7} />
-          </mesh>
-          <mesh position={[0, -0.42, 0]} castShadow>
-            <cylinderGeometry args={[0.015, 0.015, 0.015, 8]} />
-            <meshStandardMaterial color="#1e2937" roughness={0.3} metalness={0.7} />
-          </mesh>
-
-          {/* Sliding Float Ring */}
+          {([0.5, -0.5] as number[]).map((y, i) => (
+            <mesh key={i} position={[0, y, 0]} castShadow>
+              <cylinderGeometry args={[0.014, 0.014, 0.014, 8]} />
+              <meshStandardMaterial color="#1e2937" roughness={0.3} metalness={0.7} />
+            </mesh>
+          ))}
+          {/* Sliding float ball */}
           <mesh ref={floatRingRef} position={[0, 0, 0]} castShadow>
-            <torusGeometry args={[0.025, 0.014, 8, 16]} />
-            <meshStandardMaterial color="#f97316" roughness={0.4} metalness={0.6} />
+            <sphereGeometry args={[0.045, 12, 12]} />
+            <meshStandardMaterial color="#f97316" roughness={0.4} metalness={0.3} />
           </mesh>
         </InteractiveSensor>
       </group>
+
     </group>
   );
 };

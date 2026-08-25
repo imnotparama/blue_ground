@@ -27,7 +27,13 @@ export const Scene = () => {
   const { exploded, transparent, cutaway, mode } = useSystemState();
 
   return (
-    <div className="w-full h-full relative select-none bg-[radial-gradient(circle_at_bottom,_#1e1b4b_0%,_#020205_100%)]">
+    <div
+      className="w-full h-full relative select-none"
+      style={{
+        background:
+          'linear-gradient(180deg, #87ceeb 0%, #bfdbfe 40%, #dbeafe 65%, #dcfce7 85%, #bbf7d0 100%)',
+      }}
+    >
       {/* 3D R3F Canvas */}
       <Canvas
         shadows
@@ -37,62 +43,76 @@ export const Scene = () => {
           powerPreference: 'high-performance',
           stencil: false,
           depth: true,
-          toneMappingExposure: 1.0,
+          toneMappingExposure: 1.3,
         }}
         camera={{
           fov: 45,
           near: 0.1,
-          far: 50,
-          position: [0, 1.2, 7.0], // Matches CAMERA_PRESETS.OVERVIEW.position
+          far: 80,
+          position: [0, 1.2, 10.0],
         }}
         className="w-full h-full"
       >
-        {/* Cinematic dark fog to blend edges into background */}
-        <fog attach="fog" args={['#050507', 8, 18]} />
+        {/* Light outdoor haze — very subtle */}
+        <fog attach="fog" args={['#e0f2fe', 20, 60]} />
 
         {/* Lighting setup */}
         <SceneLighting />
 
-        {/* Lush Green Grassy Outdoor Ground Landscape */}
+        {/* Sunny Green Grassy Ground */}
         <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2.24, 0]} receiveShadow>
-          <planeGeometry args={[120, 120]} />
+          <planeGeometry args={[200, 200]} />
           <meshStandardMaterial
-            color="#052e16"
-            roughness={0.95}
+            color="#4ade80"
+            roughness={0.92}
             metalness={0.0}
           />
         </mesh>
 
-        {/* Concrete Installation Platform Pad */}
-        <mesh position={[0.1, -2.22, -0.2]} receiveShadow castShadow>
-          <boxGeometry args={[6.8, 0.06, 2.6]} />
-          <meshStandardMaterial color="#3f3f46" roughness={0.8} metalness={0.1} />
+        {/* Concrete Installation Platform — wider to span all 3 tanks */}
+        <mesh position={[-0.5, -2.22, -0.1]} receiveShadow castShadow>
+          <boxGeometry args={[10.0, 0.07, 2.8]} />
+          <meshStandardMaterial color="#d1d5db" roughness={0.85} metalness={0.05} />
+        </mesh>
+        {/* Platform edge border strip */}
+        <mesh position={[-0.5, -2.20, 1.45]} castShadow>
+          <boxGeometry args={[10.0, 0.06, 0.12]} />
+          <meshStandardMaterial color="#f59e0b" roughness={0.8} metalness={0.1} />
         </mesh>
 
-        {/* Stone Borewell / Water Wellhead Source on Bottom Right */}
+        {/* Stone Borewell / Water Wellhead Source — far right */}
         <group position={[3.8, -2.1, 0.0]}>
-          {/* Concrete Well Ring */}
           <mesh castShadow receiveShadow>
-            <cylinderGeometry args={[0.3, 0.32, 0.3, 16, 1, false]} />
-            <meshStandardMaterial color="#1e293b" roughness={0.9} />
+            <cylinderGeometry args={[0.32, 0.34, 0.35, 16, 1, false]} />
+            <meshStandardMaterial color="#78716c" roughness={0.92} />
           </mesh>
-          {/* Steel Wellhead Top Flange plate */}
-          <mesh position={[0, 0.15, 0]} castShadow>
-            <cylinderGeometry args={[0.33, 0.33, 0.02, 12]} />
-            <meshStandardMaterial color="#3f4f6e" roughness={0.3} metalness={0.8} />
+          <mesh position={[0, 0.18, 0]} castShadow>
+            <cylinderGeometry args={[0.35, 0.35, 0.025, 12]} />
+            <meshStandardMaterial color="#4b5563" roughness={0.3} metalness={0.8} />
           </mesh>
-          {/* Submerged Borewell water surface inside ring */}
           <mesh position={[0, 0.1, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-            <planeGeometry args={[0.55, 0.55]} />
+            <circleGeometry args={[0.3, 16]} />
             <meshPhysicalMaterial
               color="#0e7490"
-              transparent
-              opacity={0.7}
-              transmission={0.9}
-              roughness={0.1}
+              transparent opacity={0.75}
+              transmission={0.9} roughness={0.08}
             />
           </mesh>
         </group>
+
+        {/* Distant trees backdrop (billboard-style cylinders + cones) */}
+        {([-8,-6,-4, 6, 8, 10, 12] as number[]).map((x, i) => (
+          <group key={i} position={[x, -1.5, -6]}>
+            <mesh castShadow>
+              <cylinderGeometry args={[0.18, 0.22, 1.2, 8]} />
+              <meshStandardMaterial color="#713f12" roughness={0.9} />
+            </mesh>
+            <mesh position={[0, 1.2, 0]} castShadow>
+              <coneGeometry args={[0.7 + i * 0.05, 2.0 + i * 0.1, 8]} />
+              <meshStandardMaterial color="#166534" roughness={0.95} />
+            </mesh>
+          </group>
+        ))}
 
         {/* Camera state transitions controller */}
         <CameraController />
@@ -130,9 +150,9 @@ export const Scene = () => {
           {/* Vision Pro style hotspots */}
           <Hotspots />
 
-          {/* Label indicating model area */}
-          <gridHelper args={[20, 20, '#06b6d4', '#1f2937']} position={[0, -2.2, 0]}>
-            <lineBasicMaterial attach="material" transparent opacity={0.04} />
+          {/* Subtle grid overlay on platform */}
+          <gridHelper args={[10, 20, '#94a3b8', '#e2e8f0']} position={[-0.5, -2.18, 0]}>
+            <lineBasicMaterial attach="material" transparent opacity={0.08} />
           </gridHelper>
         </group>
 

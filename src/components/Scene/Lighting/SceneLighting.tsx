@@ -10,6 +10,7 @@ export const SceneLighting = () => {
 
   // References to lights
   const sunLightRef = useRef<THREE.DirectionalLight>(null);
+  const sunSphereRef = useRef<THREE.Group>(null);
   const ambientLightRef = useRef<THREE.AmbientLight>(null);
   const rimLightRef = useRef<THREE.DirectionalLight>(null);
   const fillLightRef = useRef<THREE.PointLight>(null);
@@ -28,13 +29,13 @@ export const SceneLighting = () => {
     // Apply adjustments based on Environmental Mode
     switch (envMode) {
       case 'SUNNY':
-        sunColor = '#fffaf0';
-        sunIntensity = 5.5;
-        sunPosition = [8, 12, 5];
-        ambientColor = '#1e1e2d';
-        ambientIntensity = 1.1;
-        rimColor = '#06b6d4'; // Cyan highlights
-        rimIntensity = 3.0;
+        sunColor = '#fff5d0';
+        sunIntensity = 8.0;
+        sunPosition = [10, 15, -5];
+        ambientColor = '#fff8e8';
+        ambientIntensity = 2.5;
+        rimColor = '#06b6d4';
+        rimIntensity = 2.0;
         break;
       case 'MORNING':
         sunColor = '#fca5a5'; // Soft rose/golden light
@@ -89,6 +90,16 @@ export const SceneLighting = () => {
         ease: 'power2.out',
       });
       gsap.to(sunLightRef.current.position, {
+        x: sunPosition[0],
+        y: sunPosition[1],
+        z: sunPosition[2],
+        duration: 2.0,
+        ease: 'power2.out',
+      });
+    }
+
+    if (sunSphereRef.current) {
+      gsap.to(sunSphereRef.current.position, {
         x: sunPosition[0],
         y: sunPosition[1],
         z: sunPosition[2],
@@ -175,6 +186,25 @@ export const SceneLighting = () => {
         position={[0.5, -2, 4]}
         color="#f8fafc"
       />
+
+      {/* 3D Visual Sun Sphere with Corona Glow — top-right of scene */}
+      <group ref={sunSphereRef} position={[10, 15, -5]}>
+        {/* Bright core */}
+        <mesh>
+          <sphereGeometry args={[0.7, 20, 20]} />
+          <meshBasicMaterial color="#fffbeb" />
+        </mesh>
+        {/* Inner corona */}
+        <mesh>
+          <sphereGeometry args={[1.1, 20, 20]} />
+          <meshBasicMaterial color="#fef9c3" transparent opacity={0.35} side={THREE.BackSide} />
+        </mesh>
+        {/* Outer diffuse glow */}
+        <mesh>
+          <sphereGeometry args={[1.9, 20, 20]} />
+          <meshBasicMaterial color="#fef08a" transparent opacity={0.08} side={THREE.BackSide} />
+        </mesh>
+      </group>
 
       {/* Dedicated point light representing the UV LED Sterilization light */}
       {/* Positioned inside the Secondary Tank aligned with the UV LED probe */}
