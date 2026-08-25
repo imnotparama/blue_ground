@@ -6,14 +6,12 @@ import { useSystemState, CameraPreset } from '@/hooks/useSystemState';
 import gsap from 'gsap';
 import * as THREE from 'three';
 
-// Type definition for OrbitControls reference
 interface ControlsInterface {
   target: THREE.Vector3;
   update: () => void;
   enabled: boolean;
 }
 
-// Camera coordinates based on engineering schematic layout
 export const CAMERA_PRESETS: Record<CameraPreset, { position: [number, number, number]; target: [number, number, number] }> = {
   OVERVIEW: {
     position: [0.0, 0.6, 5.8],
@@ -72,12 +70,12 @@ export const CAMERA_PRESETS: Record<CameraPreset, { position: [number, number, n
     target: [1.90, 0.05, 0],
   },
   FILTER_HOUSING: {
-    position: [1.90, 0.3, 1.8],
-    target: [1.90, 0.05, 0],
+    position: [-0.85, 0.65, 1.2],
+    target: [-0.85, 0.40, 0],
   },
   INSIDE_FILTER: {
-    position: [1.90, 0.1, 0.9],
-    target: [1.90, 0.05, 0],
+    position: [-0.85, 0.50, 0.8],
+    target: [-0.85, 0.40, 0],
   },
   PRIMARY_TANK: {
     position: [-0.7, -0.3, 3.2],
@@ -123,6 +121,7 @@ export const CameraController = () => {
         flow: 'FLOW_SENSOR',
         sedimentation_tank: 'SEDIMENTATION_TANK',
         filter_housing: 'FILTER_HOUSING',
+        filtration_tank: 'FILTER_HOUSING',
         primary_tank: 'PRIMARY_TANK',
         secondary_tank: 'SECONDARY_TANK',
         intake_pipe: 'INTAKE_PIPE',

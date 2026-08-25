@@ -98,7 +98,7 @@ export const Pipes = () => {
   return (
     <group>
       {/* ══════════════════════════════════════════════════════════════════════
-          1. INTAKE: BOREWELL [2.8, -1.8] → SEDIMENTATION TANK TOP [1.9, 0.73]
+          1. INTAKE: BOREWELL [2.8, -1.8] → SEDIMENTATION TANK TOP [1.9, 0.78]
           ══════════════════════════════════════════════════════════════════════ */}
       <group
         onClick={(e) => {
@@ -121,15 +121,15 @@ export const Pipes = () => {
         </mesh>
 
         {/* Vertical Riser */}
-        <PipeSeg pos={[2.8, -0.50, 0]} len={2.5} r={0.030} mat="gray" />
-        <PipeElbow pos={[2.8, 0.75, 0]} r={0.034} mat="gray" />
+        <PipeSeg pos={[2.8, -0.50, 0]} len={2.55} r={0.030} mat="gray" />
+        <PipeElbow pos={[2.8, 0.78, 0]} r={0.034} mat="gray" />
 
         {/* Horizontal run to Sedimentation top */}
-        <PipeSeg pos={[2.35, 0.75, 0]} len={0.90} r={0.030} rot={[0, 0, Math.PI / 2]} mat="gray" />
-        <PipeElbow pos={[1.90, 0.75, 0]} r={0.034} mat="gray" />
+        <PipeSeg pos={[2.35, 0.78, 0]} len={0.90} r={0.030} rot={[0, 0, Math.PI / 2]} mat="gray" />
+        <PipeElbow pos={[1.90, 0.78, 0]} r={0.034} mat="gray" />
 
         {/* Drop into Sedimentation Tank Top Cap */}
-        <PipeSeg pos={[1.90, 0.74, 0]} len={0.04} r={0.030} mat="gray" />
+        <PipeSeg pos={[1.90, 0.76, 0]} len={0.04} r={0.030} mat="gray" />
       </group>
 
       {/* ══════════════════════════════════════════════════════════════════════
@@ -166,25 +166,25 @@ export const Pipes = () => {
       </group>
 
       {/* ══════════════════════════════════════════════════════════════════════
-          4. SECONDARY FILTRATION PUMP LOOP (Bad Quality Water)
-             Pump [-0.35, 0.16] → Up to 0.45 → Horizontal to -1.30 → Down into Primary Tank
+          4. BAD WATER FILTRATION LOOP: PUMP [-0.35, 0.08] → RO FILTRATION TANK [-0.85, 0.40] → PRIMARY TANK [-1.39]
           ══════════════════════════════════════════════════════════════════════ */}
       <group>
-        {/* Riser from Pump */}
-        <PipeSeg pos={[-0.35, 0.28, 0]} len={0.24} />
+        {/* Pipe from Pump Outlet rising into Filtration Tank Inlet */}
+        <PipeSeg pos={[-0.35, 0.24, 0]} len={0.18} />
         <PipeElbow pos={[-0.35, 0.40, 0]} />
+        <PipeSeg pos={[-0.33, 0.40, 0]} len={0.05} rot={[0, 0, Math.PI / 2]} />
 
-        {/* Horizontal Loop Pipe */}
-        <PipeSeg pos={[-0.825, 0.40, 0]} len={0.95} rot={[0, 0, Math.PI / 2]} />
-        <PipeElbow pos={[-1.30, 0.40, 0]} />
+        {/* (Water flows through the RO Filtration Tank from x = -0.31 to -1.39) */}
 
-        {/* Drop Pipe into Primary Tank */}
-        <PipeSeg pos={[-1.30, 0.22, 0]} len={0.36} />
+        {/* Pipe from Filtration Tank Outlet dropping into Primary Clean Storage */}
+        <PipeSeg pos={[-1.39, 0.40, 0]} len={0.06} rot={[0, 0, Math.PI / 2]} />
+        <PipeElbow pos={[-1.42, 0.40, 0]} />
+        <PipeSeg pos={[-1.42, 0.20, 0]} len={0.38} />
       </group>
 
       {/* ══════════════════════════════════════════════════════════════════════
           5. CLEAN WATER DISPENSE TAP (Primary Tank Bottom-Left)
-             Primary Outlet [-2.4, -1.45] → Solenoid Valve [-2.6] → Tap Spout [-2.85, -1.70]
+             Primary Outlet [-2.4, -1.45] → Solenoid Valve [-2.62] → Tap Spout [-2.85, -1.72]
           ══════════════════════════════════════════════════════════════════════ */}
       <group
         onClick={(e) => {
@@ -215,7 +215,7 @@ export const Pipes = () => {
 
       {/* ══════════════════════════════════════════════════════════════════════
           6. RELEASE TAP / DRAIN VALVE FOR CLEANING (Primary Tank Bottom-Right)
-             Primary Bottom-Right [1.0, -1.50] → Release Tap [1.25, -1.50]
+             Primary Bottom-Right [1.0, -1.50] → Release Tap [1.22, -1.50]
           ══════════════════════════════════════════════════════════════════════ */}
       <group>
         <PipeSeg pos={[1.08, -1.50, 0]} len={0.16} rot={[0, 0, Math.PI / 2]} />

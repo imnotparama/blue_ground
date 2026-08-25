@@ -46,6 +46,7 @@ export const Flows = () => {
 
   const intakeTubeMatRef = useRef<THREE.ShaderMaterial>(null);
   const filterTubeMatRef = useRef<THREE.ShaderMaterial>(null);
+  const roTubeMatRef = useRef<THREE.ShaderMaterial>(null);
 
   const solarPowerRef = useRef<any>(null);
   const battPowerRef = useRef<any>(null);
@@ -53,16 +54,16 @@ export const Flows = () => {
   const espToUvRef = useRef<any>(null);
   const espToFloatRef = useRef<any>(null);
 
-  // 1. DEFINE EXACT 3D PATH CURVES ACCORDING TO SKETCH
+  // 1. DEFINE EXACT 3D PATH CURVES FOR WATER PIPING
   const curves = useMemo(() => {
     // A. Borewell to Sedimentation Tank top
     const intakeCurve = new THREE.CatmullRomCurve3([
       new THREE.Vector3(2.8, -1.8, 0),
       new THREE.Vector3(2.8, -0.5, 0),
-      new THREE.Vector3(2.8, 0.75, 0),
-      new THREE.Vector3(2.35, 0.75, 0),
-      new THREE.Vector3(1.90, 0.75, 0),
-      new THREE.Vector3(1.90, 0.70, 0),
+      new THREE.Vector3(2.8, 0.78, 0),
+      new THREE.Vector3(2.35, 0.78, 0),
+      new THREE.Vector3(1.90, 0.78, 0),
+      new THREE.Vector3(1.90, 0.72, 0),
     ], false, 'catmullrom', 0.02);
 
     // B. Sedimentation Tank to Secondary Compartment via Flow Sensor
@@ -79,13 +80,14 @@ export const Flows = () => {
       new THREE.Vector3(0.5, -0.25, 0),
     ], false, 'catmullrom', 0.02);
 
-    // D. Pump Filtration Loop (Bad water)
+    // D. Pump -> RO Filtration Tank -> Primary Tank (Bad water)
     const pumpCurve = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(-0.35, 0.16, 0),
+      new THREE.Vector3(-0.35, 0.08, 0),
       new THREE.Vector3(-0.35, 0.40, 0),
-      new THREE.Vector3(-0.825, 0.40, 0),
-      new THREE.Vector3(-1.30, 0.40, 0),
-      new THREE.Vector3(-1.30, 0.15, 0),
+      new THREE.Vector3(-0.85, 0.40, 0),
+      new THREE.Vector3(-1.39, 0.40, 0),
+      new THREE.Vector3(-1.42, 0.40, 0),
+      new THREE.Vector3(-1.42, 0.10, 0),
     ], false, 'catmullrom', 0.02);
 
     return { intakeCurve, filterCurve, directCurve, pumpCurve };
@@ -106,7 +108,7 @@ export const Flows = () => {
       intake: init(40),
       filter: init(25),
       direct: init(15),
-      pump: init(25),
+      pump: init(35),
     };
   }, []);
 
@@ -163,8 +165,12 @@ export const Flows = () => {
       filterTubeMatRef.current.uniforms.uSpeed.value = speedScale;
       filterTubeMatRef.current.uniforms.uFlowActive.value = isFlowActive;
     }
+    if (roTubeMatRef.current) {
+      roTubeMatRef.current.uniforms.uTime.value = time;
+      roTubeMatRef.current.uniforms.uSpeed.value = speedScale;
+      roTubeMatRef.current.uniforms.uFlowActive.value = metrics.waterQuality !== 'EXCELLENT' ? 1.0 : 0.0;
+    }
 
-    // Particle animations
     const updateParticles = (ref: React.RefObject<THREE.Points | null>, curve: THREE.Curve<THREE.Vector3>, progress: Float32Array) => {
       if (!ref.current) return;
       const positions = ref.current.geometry.attributes.position.array as Float32Array;
@@ -192,7 +198,7 @@ export const Flows = () => {
       updateParticles(pumpParticlesRef, curves.pumpCurve, particleConfig.pump.progress);
     }
 
-    // Electrical wiring animation
+    // Power wiring animations
     const isSolarCharging = metrics.solarWatts > 2 && envMode !== 'NIGHT';
     const isBatteryDischarging = metrics.currentDraw > 1 && mode !== 'LOW_BATTERY';
 
@@ -241,9 +247,21 @@ export const Flows = () => {
     return mat;
   }, []);
 
+  const roShaderMat = useMemo(() => {
+    const mat = new THREE.ShaderMaterial({
+      uniforms: THREE.UniformsUtils.clone(TubeFlowShader.uniforms),
+      vertexShader: TubeFlowShader.vertexShader,
+      fragmentShader: TubeFlowShader.fragmentShader,
+      transparent: true,
+      depthWrite: false,
+    });
+    mat.uniforms.uColor.value.set('#38bdf8');
+    return mat;
+  }, []);
+
   return (
     <group>
-      {/* ─── 1. GLOWING INTERNAL FLUID CORES ────────────────────────────── */}
+      {/* Fluid Tube Meshes */}
       <mesh>
         <tubeGeometry args={[curves.intakeCurve, 30, 0.016, 8, false]} />
         <primitive object={intakeShaderMat} ref={intakeTubeMatRef} attach="material" />
@@ -254,7 +272,12 @@ export const Flows = () => {
         <primitive object={filterShaderMat} ref={filterTubeMatRef} attach="material" />
       </mesh>
 
-      {/* ─── 2. FLOWING PARTICLES ───────────────────────────────────────── */}
+      <mesh>
+        <tubeGeometry args={[curves.pumpCurve, 30, 0.016, 8, false]} />
+        <primitive object={roShaderMat} ref={roTubeMatRef} attach="material" />
+      </mesh>
+
+      {/* Flowing Water Particles */}
       <points ref={intakeParticlesRef}>
         <bufferGeometry>
           <bufferAttribute
@@ -293,12 +316,11 @@ export const Flows = () => {
               args={[particleConfig.pump.positions, 3]}
             />
           </bufferGeometry>
-          <pointsMaterial color="#f59e0b" size={0.035} transparent opacity={0.85} depthWrite={false} />
+          <pointsMaterial color="#38bdf8" size={0.035} transparent opacity={0.85} depthWrite={false} />
         </points>
       )}
 
-      {/* ─── 3. ELECTRICAL WIRING LINES (AS DRAWN IN SKETCH) ────────────── */}
-      {/* Solar -> Battery (+/-) */}
+      {/* Electrical Power & Signal Wiring */}
       <Line
         ref={solarPowerRef}
         points={wirePoints.solar}
@@ -312,7 +334,6 @@ export const Flows = () => {
         opacity={0.9}
       />
 
-      {/* Battery -> Unit & Control */}
       <Line
         ref={battPowerRef}
         points={wirePoints.batt}
@@ -326,7 +347,6 @@ export const Flows = () => {
         opacity={0.9}
       />
 
-      {/* Unit & Control -> Flow Sensor Signal Line */}
       <Line
         ref={espToFlowRef}
         points={wirePoints.flow}
@@ -340,7 +360,6 @@ export const Flows = () => {
         opacity={0.8}
       />
 
-      {/* Unit & Control -> UV Light Wire */}
       <Line
         ref={espToUvRef}
         points={wirePoints.uv}
@@ -354,7 +373,6 @@ export const Flows = () => {
         opacity={0.8}
       />
 
-      {/* Unit & Control -> Float Sensor Signal Line */}
       <Line
         ref={espToFloatRef}
         points={wirePoints.float}
