@@ -106,10 +106,10 @@ export const SolarPanel = () => {
       onPointerOut={handlePointerOut}
       onClick={handleClick}
     >
-      {/* Solar Array — mounted on angled bracket above primary tank top */}
-      {/* Primary tank center [-2.0, -0.55], top face y=+0.5 → world y=-0.05 */}
-      {/* Solar group sits at y=0.6 to be above the tank lid */}
-      <group position={[-2.0, 0.62, 0]}>
+      {/* Solar Array — angled bracket on top of primary tank */}
+      {/* Primary tank top face: y = -0.75 + 1.0 = +0.25 (group-local) */}
+      {/* Solar group at y=0.38 above that */}
+      <group position={[-2.2, 0.38, 0]}>
         
         {/* Support brackets */}
         <mesh position={[-0.3, 0.0, 0]} castShadow>

@@ -208,11 +208,10 @@ export const Water = () => {
 
   return (
     <group>
-      {/* ─── A. PRIMARY TANK WATER (clean storage, leftmost) ───────────── */}
-      {/* Primary tank center: [-2.0, -0.55, 0], size 2.2×2.0×1.4            */}
-      {/* Clean water fills LOWER chamber (below divider at local y=0.28)     */}
-      {/* Lower chamber h ≈ 1.27 → bottom-of-tank to divider                  */}
-      <group position={[-2.0, -0.55, 0]}>
+      {/* ─── A. PRIMARY TANK WATER (clean storage) ──────── */}
+      {/* Primary center: [-2.2, -0.75, 0], H=2.0  bottom=-1.75  top=+0.25 */}
+      {/* Clean water BELOW divider at local y=+0.20, so from y=-1.0 to y=+0.20 */}
+      <group position={[-2.2, -0.75, 0]}>
         {metrics.waterLevel > 1 && (
           <mesh ref={primaryWaterRef} position={[0, -0.55, 0]} castShadow receiveShadow>
             {/* Max fill = 1.22 height (clean compartment) */}
@@ -237,10 +236,10 @@ export const Water = () => {
         )}
       </group>
 
-      {/* ─── B. SECONDARY TANK WATER (raw intake, rightmost) ──────────── */}
-      {/* Secondary tank center: [2.4, -0.5, 0], size 1.1×1.6×1.0          */}
-      <group position={[2.4, -0.5, 0]}>
-        <mesh position={[0, -0.1, 0]} castShadow receiveShadow>
+      {/* ─── B. SECONDARY TANK WATER (raw intake) ────────── */}
+      {/* Secondary center: [2.2, -1.0, 0], H=1.5  bottom=-1.75  top=-0.25  */}
+      <group position={[2.2, -1.0, 0]}>
+        <mesh position={[0, -0.05, 0]} castShadow receiveShadow>
           {/* Slightly murky tinted shader */}
           <boxGeometry args={[1.04, 1.3, 0.94, 16, 1, 16]} />
           <primitive object={secondaryShaderMat} ref={secondaryMatRef} attach="material" />

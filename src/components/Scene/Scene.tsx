@@ -46,10 +46,10 @@ export const Scene = () => {
           toneMappingExposure: 1.3,
         }}
         camera={{
-          fov: 45,
+          fov: 48,
           near: 0.1,
           far: 80,
-          position: [0, 1.2, 10.0],
+          position: [0.0, 1.5, 11.0],
         }}
         className="w-full h-full"
       >
@@ -122,9 +122,10 @@ export const Scene = () => {
           makeDefault
           enableDamping
           dampingFactor={0.05}
-          maxPolarAngle={Math.PI / 2 + 0.08}
+          target={[0.0, -0.5, 0]}
+          maxPolarAngle={Math.PI / 2 + 0.1}
           minDistance={0.5}
-          maxDistance={18}
+          maxDistance={22}
         />
 
         {/* Global Atmospheric Ambient Dust Motes */}

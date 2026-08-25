@@ -134,7 +134,7 @@ export const FilterHousing = () => {
   return (
     <group 
       ref={mainGroupRef}
-      position={[0.5, -0.5, 0]}
+      position={[0.3, -1.0, 0]}
       onPointerOver={handlePointerOver}
       onPointerOut={handlePointerOut}
       onClick={handleClick}

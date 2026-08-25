@@ -179,10 +179,10 @@ export const Sensors = () => {
     }
   });
 
-  // Secondary tank top surface world y ≈ 0.25 (tank center y=-0.5, h=1.6/2=0.8 → top y=0.3)
-  // Probes hang down from tank lid: body center at y= 0.0, tip at y=-0.25 → submerged
-  const SEC_X = 2.4;
-  const SEC_Y = 0.12; // world y for probe group center (body straddles tank top)
+  // Secondary tank top surface: center=[2.2,-1.0,0], top y=-1.0+0.75=-0.25
+  // Probe bodies straddle the tank lid (cable above, tip submerged)
+  const SEC_X = 2.2;
+  const SEC_Y = -0.38; // probe body center y (tip at -0.65 = inside tank)
 
   return (
     <group>
@@ -302,7 +302,7 @@ export const Sensors = () => {
           ═══════════════════════════════════════════════════════════════════════ */}
       <group ref={flowGroupRef}>
         <InteractiveSensor id="flow" preset="FLOW_SENSOR"
-          position={[1.1, -1.48, 0]}
+          position={[1.32, -1.72, 0]}
           rotation={[0, 0, Math.PI/2]}   // inline with horizontal pipe
         >
           {/* T-fitting body */}
@@ -347,7 +347,7 @@ export const Sensors = () => {
           ═══════════════════════════════════════════════════════════════════════ */}
       <group ref={floatGroupRef}>
         <InteractiveSensor id="float" preset="FLOAT_SENSOR"
-          position={[-2.4, -0.55, 0.4]}
+          position={[-2.6, -0.75, 0.4]}
         >
           {/* Guide rod */}
           <mesh castShadow>
