@@ -6,15 +6,12 @@ import { useSystemState } from '@/hooks/useSystemState';
 import * as THREE from 'three';
 
 export const BatteryUnit = () => {
-  const { exploded, metrics, mode, activeHotspot, setActiveHotspot, setCameraPreset } = useSystemState();
+  const { exploded, metrics, activeHotspot, setActiveHotspot, setCameraPreset } = useSystemState();
   const groupRef = useRef<THREE.Group>(null);
   const [hovered, setHovered] = useState(false);
-  
-  // LED battery level indicator light refs
   const ledRefs = useRef<(THREE.MeshStandardMaterial | null)[]>([]);
 
   useFrame(() => {
-    // Exploded View
     const targetY = exploded ? 0.35 : 0;
     if (groupRef.current) {
       groupRef.current.position.y = THREE.MathUtils.lerp(groupRef.current.position.y, targetY, 0.08);
@@ -23,14 +20,13 @@ export const BatteryUnit = () => {
       groupRef.current.scale.setScalar(THREE.MathUtils.lerp(groupRef.current.scale.x, targetScale, 0.15));
     }
 
-    // Dynamic LED illumination based on battery percentage
     const activeLedsCount = Math.ceil((metrics.batteryPercent / 100) * 5);
     ledRefs.current.forEach((mat, idx) => {
       if (mat) {
         const isActive = idx < activeLedsCount;
-        let ledColor = '#10b981'; // Green for normal
-        if (metrics.batteryPercent < 20) ledColor = '#ef4444'; // Red for low
-        else if (metrics.batteryPercent < 50) ledColor = '#f59e0b'; // Amber
+        let ledColor = '#10b981';
+        if (metrics.batteryPercent < 20) ledColor = '#ef4444';
+        else if (metrics.batteryPercent < 50) ledColor = '#f59e0b';
 
         if (isActive) {
           mat.color.set(ledColor);
@@ -44,7 +40,6 @@ export const BatteryUnit = () => {
       }
     });
 
-    // Focus dimming & Cyan glow
     const isDimmed = activeHotspot !== null && activeHotspot !== 'battery' && activeHotspot !== 'battery_pack';
     const targetOpacity = isDimmed ? 0.15 : 1.0;
 
@@ -95,34 +90,34 @@ export const BatteryUnit = () => {
       onPointerOut={handlePointerOut}
       onClick={handleClick}
     >
-      {/* Battery Box — mounted on top-front of Primary Tank lid at x = -1.45, y = 0.32, z = 0.35 */}
-      <group position={[-1.45, 0.32, 0.35]}>
+      {/* Battery Source Box in the middle of roof at x = -0.65, y = 0.74, z = 0 */}
+      <group position={[-0.65, 0.74, 0]}>
         
         {/* Main Casing Housing */}
         <mesh position={[0, 0, 0]} castShadow receiveShadow>
-          <boxGeometry args={[0.55, 0.20, 0.32]} />
+          <boxGeometry args={[0.70, 0.28, 0.40]} />
           <meshStandardMaterial color="#0f172a" roughness={0.35} metalness={0.8} />
         </mesh>
 
-        {/* Heat dissipation cooling fins on rear */}
-        {[-0.20, -0.10, 0.0, 0.10, 0.20].map((xVal, i) => (
-          <mesh key={i} position={[xVal, 0.0, -0.165]} castShadow>
-            <boxGeometry args={[0.015, 0.16, 0.02]} />
+        {/* Battery Source Label */}
+        <mesh position={[0, 0.04, 0.202]}>
+          <boxGeometry args={[0.55, 0.12, 0.005]} />
+          <meshStandardMaterial color="#1e293b" roughness={0.5} metalness={0.6} />
+        </mesh>
+
+        {/* Cooling Fins */}
+        {[-0.25, -0.15, -0.05, 0.05, 0.15, 0.25].map((xVal, i) => (
+          <mesh key={i} position={[xVal, 0.0, -0.205]} castShadow>
+            <boxGeometry args={[0.015, 0.22, 0.02]} />
             <meshStandardMaterial color="#334155" roughness={0.2} metalness={0.9} />
           </mesh>
         ))}
 
-        {/* Front Metal Bezel & Battery Status Panel */}
-        <mesh position={[0, 0, 0.162]} castShadow>
-          <boxGeometry args={[0.48, 0.14, 0.005]} />
-          <meshStandardMaterial color="#1e293b" roughness={0.4} metalness={0.7} />
-        </mesh>
-
         {/* LED 5-Segment State-of-Charge Bar */}
-        <group position={[-0.10, 0.02, 0.166]}>
+        <group position={[-0.10, -0.08, 0.204]}>
           {[0, 1, 2, 3, 4].map((i) => (
-            <mesh key={i} position={[i * 0.045, 0, 0]}>
-              <boxGeometry args={[0.028, 0.015, 0.004]} />
+            <mesh key={i} position={[i * 0.05, 0, 0]}>
+              <boxGeometry args={[0.035, 0.016, 0.004]} />
               <meshStandardMaterial 
                 ref={(el) => { if (el) ledRefs.current[i] = el; }}
                 color="#10b981" 
@@ -133,37 +128,29 @@ export const BatteryUnit = () => {
         </group>
 
         {/* Top Terminal Connectors (+ and -) */}
-        {/* Positive Red Terminal */}
-        <group position={[-0.18, 0.11, 0]}>
+        {/* Positive Red Terminal (Left side to Solar) */}
+        <group position={[-0.24, 0.15, 0]}>
           <mesh castShadow>
-            <cylinderGeometry args={[0.02, 0.02, 0.025, 12]} />
+            <cylinderGeometry args={[0.025, 0.025, 0.03, 12]} />
             <meshStandardMaterial color="#ef4444" roughness={0.3} metalness={0.7} />
           </mesh>
-          <mesh position={[0, 0.015, 0]} castShadow>
-            <cylinderGeometry args={[0.01, 0.01, 0.015, 8]} />
+          <mesh position={[0, 0.02, 0]} castShadow>
+            <cylinderGeometry args={[0.012, 0.012, 0.02, 8]} />
             <meshStandardMaterial color="#ca8a04" roughness={0.2} metalness={0.95} />
           </mesh>
         </group>
 
-        {/* Negative Black Terminal */}
-        <group position={[0.18, 0.11, 0]}>
+        {/* Negative Black Terminal (Right side to ESP32) */}
+        <group position={[0.24, 0.15, 0]}>
           <mesh castShadow>
-            <cylinderGeometry args={[0.02, 0.02, 0.025, 12]} />
+            <cylinderGeometry args={[0.025, 0.025, 0.03, 12]} />
             <meshStandardMaterial color="#18181b" roughness={0.3} metalness={0.7} />
           </mesh>
-          <mesh position={[0, 0.015, 0]} castShadow>
-            <cylinderGeometry args={[0.01, 0.01, 0.015, 8]} />
+          <mesh position={[0, 0.02, 0]} castShadow>
+            <cylinderGeometry args={[0.012, 0.012, 0.02, 8]} />
             <meshStandardMaterial color="#ca8a04" roughness={0.2} metalness={0.95} />
           </mesh>
         </group>
-
-        {/* Mounting Brackets */}
-        {[-0.26, 0.26].map((xVal, idx) => (
-          <mesh key={idx} position={[xVal, -0.09, 0]} castShadow>
-            <boxGeometry args={[0.04, 0.02, 0.28]} />
-            <meshStandardMaterial color="#475569" roughness={0.3} metalness={0.8} />
-          </mesh>
-        ))}
       </group>
     </group>
   );

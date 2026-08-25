@@ -6,7 +6,6 @@ import { useSystemState } from '@/hooks/useSystemState';
 import * as THREE from 'three';
 import { Line } from '@react-three/drei';
 
-// Moving Shader for Pipe Water Flow
 const TubeFlowShader = {
   uniforms: {
     uTime: { value: 0 },
@@ -40,56 +39,56 @@ const TubeFlowShader = {
 export const Flows = () => {
   const { metrics, mode, envMode } = useSystemState();
 
-  // Water particle system refs
   const intakeParticlesRef = useRef<THREE.Points>(null);
   const filterParticlesRef = useRef<THREE.Points>(null);
-  const returnParticlesRef = useRef<THREE.Points>(null);
+  const directParticlesRef = useRef<THREE.Points>(null);
+  const pumpParticlesRef = useRef<THREE.Points>(null);
 
-  // Moving tube materials references
   const intakeTubeMatRef = useRef<THREE.ShaderMaterial>(null);
   const filterTubeMatRef = useRef<THREE.ShaderMaterial>(null);
-  const returnTubeMatRef = useRef<THREE.ShaderMaterial>(null);
 
-  // Power lines refs
   const solarPowerRef = useRef<any>(null);
   const battPowerRef = useRef<any>(null);
-  const pumpPowerRef = useRef<any>(null);
-  const sensorPowerRef = useRef<any>(null);
+  const espToFlowRef = useRef<any>(null);
+  const espToUvRef = useRef<any>(null);
+  const espToFloatRef = useRef<any>(null);
 
-  // 1. DEFINE EXACT 3D PATH CURVES FOR WATER PIPING
+  // 1. DEFINE EXACT 3D PATH CURVES ACCORDING TO SKETCH
   const curves = useMemo(() => {
-    // A. Raw Intake Pipe: Borewell [3.6, -2.1] -> Top [3.6, 0.0] -> Secondary Inlet [2.65, -0.25]
+    // A. Borewell to Sedimentation Tank top
     const intakeCurve = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(3.6, -2.1, 0),
-      new THREE.Vector3(3.6, -1.0, 0),
-      new THREE.Vector3(3.6, 0.0, 0),
-      new THREE.Vector3(3.1, 0.0, 0),
-      new THREE.Vector3(2.65, 0.0, 0),
-      new THREE.Vector3(2.65, -0.25, 0),
+      new THREE.Vector3(2.8, -1.8, 0),
+      new THREE.Vector3(2.8, -0.5, 0),
+      new THREE.Vector3(2.8, 0.75, 0),
+      new THREE.Vector3(2.35, 0.75, 0),
+      new THREE.Vector3(1.90, 0.75, 0),
+      new THREE.Vector3(1.90, 0.70, 0),
     ], false, 'catmullrom', 0.02);
 
-    // B. Process Filtration Pipe: Pump [1.55, -1.65] -> Flow Sensor [0.85] -> Solenoid [0.45] -> Sedimentation Top [0.15, -0.20]
+    // B. Sedimentation Tank to Secondary Compartment via Flow Sensor
     const filterCurve = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(1.55, -1.65, 0),
-      new THREE.Vector3(1.10, -1.65, 0),
-      new THREE.Vector3(0.85, -1.65, 0),
-      new THREE.Vector3(0.45, -1.65, 0),
-      new THREE.Vector3(0.15, -1.65, 0),
-      new THREE.Vector3(0.15, -0.90, 0),
-      new THREE.Vector3(0.15, -0.20, 0),
+      new THREE.Vector3(1.62, 0.30, 0),
+      new THREE.Vector3(1.45, 0.30, 0),
+      new THREE.Vector3(1.20, 0.30, 0),
+      new THREE.Vector3(1.00, 0.30, 0),
     ], false, 'catmullrom', 0.02);
 
-    // C. Return Pipe: Sedimentation Bottom [0.15, -1.75] -> Under Tank [0.15, -1.90] -> Primary Inlet [-1.0, -0.55]
-    const returnCurve = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(0.15, -1.75, 0),
-      new THREE.Vector3(0.15, -1.90, 0),
-      new THREE.Vector3(-0.45, -1.90, 0),
-      new THREE.Vector3(-1.0, -1.90, 0),
-      new THREE.Vector3(-1.0, -1.20, 0),
-      new THREE.Vector3(-1.0, -0.55, 0),
+    // C. Direct Passage Valve (Good water)
+    const directCurve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(0.5, 0.05, 0),
+      new THREE.Vector3(0.5, -0.25, 0),
     ], false, 'catmullrom', 0.02);
 
-    return { intakeCurve, filterCurve, returnCurve };
+    // D. Pump Filtration Loop (Bad water)
+    const pumpCurve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(-0.35, 0.16, 0),
+      new THREE.Vector3(-0.35, 0.40, 0),
+      new THREE.Vector3(-0.825, 0.40, 0),
+      new THREE.Vector3(-1.30, 0.40, 0),
+      new THREE.Vector3(-1.30, 0.15, 0),
+    ], false, 'catmullrom', 0.02);
+
+    return { intakeCurve, filterCurve, directCurve, pumpCurve };
   }, []);
 
   // 2. INITIALIZE FLOW PARTICLE SYSTEMS
@@ -104,56 +103,53 @@ export const Flows = () => {
     };
 
     return {
-      intake: init(45),
-      filter: init(35),
-      ret: init(45),
+      intake: init(40),
+      filter: init(25),
+      direct: init(15),
+      pump: init(25),
     };
   }, []);
 
-  // 3. DEFINE WIRE FRAMES FOR POWER FLOW LINES
+  // 3. ELECTRICAL POWER & SIGNAL WIRING
   const wires = useMemo(() => {
-    const solarToBatt = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(-2.0, 0.35, 0),
-      new THREE.Vector3(-1.7, 0.35, 0.15),
-      new THREE.Vector3(-1.45, 0.32, 0.35),
-    ]);
-    
-    const battToEsp = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(-1.45, 0.32, 0.20),
-      new THREE.Vector3(-1.45, 0.32, 0.0),
-      new THREE.Vector3(-1.45, 0.32, -0.20),
-    ]);
-    
-    const espToPump = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(-1.45, 0.25, -0.35),
-      new THREE.Vector3(-0.5, 0.0, -0.4),
-      new THREE.Vector3(0.5, -0.8, -0.3),
-      new THREE.Vector3(1.55, -1.55, 0),
-    ]);
-    
-    const espToSensors = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(-1.45, 0.25, -0.35),
-      new THREE.Vector3(0.0, 0.1, -0.3),
-      new THREE.Vector3(1.2, 0.0, -0.2),
-      new THREE.Vector3(2.1, -0.25, 0),
+    const solarToBatt = new THREE.LineCurve3(
+      new THREE.Vector3(-1.65, 0.75, 0),
+      new THREE.Vector3(-0.65, 0.75, 0)
+    );
+    const battToEsp = new THREE.LineCurve3(
+      new THREE.Vector3(-0.65, 0.75, 0),
+      new THREE.Vector3(0.40, 0.75, 0)
+    );
+    const espToFlow = new THREE.LineCurve3(
+      new THREE.Vector3(0.60, 0.75, 0),
+      new THREE.Vector3(1.45, 0.35, 0)
+    );
+    const espToUv = new THREE.LineCurve3(
+      new THREE.Vector3(0.40, 0.60, 0),
+      new THREE.Vector3(0.35, -0.35, 0.25)
+    );
+    const espToFloat = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(0.20, 0.75, 0),
+      new THREE.Vector3(-1.0, 0.60, 0.2),
+      new THREE.Vector3(-2.1, -0.40, 0.3),
     ]);
 
-    return { solarToBatt, battToEsp, espToPump, espToSensors };
+    return { solarToBatt, battToEsp, espToFlow, espToUv, espToFloat };
   }, []);
 
   const wirePoints = useMemo(() => {
     return {
-      solar: wires.solarToBatt.getPoints(15),
-      batt: wires.battToEsp.getPoints(15),
-      pump: wires.espToPump.getPoints(25),
-      sensors: wires.espToSensors.getPoints(20),
+      solar: wires.solarToBatt.getPoints(10),
+      batt: wires.battToEsp.getPoints(10),
+      flow: wires.espToFlow.getPoints(10),
+      uv: wires.espToUv.getPoints(10),
+      float: wires.espToFloat.getPoints(20),
     };
   }, [wires]);
 
   useFrame((state, delta) => {
     const time = state.clock.getElapsedTime();
 
-    // A. Update Moving Tube Uniforms
     const isFlowActive = metrics.flowRate > 0.1 ? 1.0 : 0.0;
     const speedScale = 1.0 + (metrics.flowRate / 5.0) * 1.5;
 
@@ -167,75 +163,36 @@ export const Flows = () => {
       filterTubeMatRef.current.uniforms.uSpeed.value = speedScale;
       filterTubeMatRef.current.uniforms.uFlowActive.value = isFlowActive;
     }
-    if (returnTubeMatRef.current) {
-      returnTubeMatRef.current.uniforms.uTime.value = time;
-      returnTubeMatRef.current.uniforms.uSpeed.value = speedScale;
-      returnTubeMatRef.current.uniforms.uFlowActive.value = isFlowActive;
+
+    // Particle animations
+    const updateParticles = (ref: React.RefObject<THREE.Points | null>, curve: THREE.Curve<THREE.Vector3>, progress: Float32Array) => {
+      if (!ref.current) return;
+      const positions = ref.current.geometry.attributes.position.array as Float32Array;
+      const step = (metrics.flowRate / 5.0) * 0.22 * delta;
+
+      for (let i = 0; i < progress.length; i++) {
+        if (metrics.flowRate > 0) {
+          progress[i] += step;
+          if (progress[i] > 1.0) progress[i] = 0;
+        }
+        const pt = curve.getPointAt(progress[i]);
+        positions[i * 3] = pt.x;
+        positions[i * 3 + 1] = pt.y;
+        positions[i * 3 + 2] = pt.z;
+      }
+      ref.current.geometry.attributes.position.needsUpdate = true;
+    };
+
+    updateParticles(intakeParticlesRef, curves.intakeCurve, particleConfig.intake.progress);
+    updateParticles(filterParticlesRef, curves.filterCurve, particleConfig.filter.progress);
+
+    if (metrics.waterQuality === 'EXCELLENT') {
+      updateParticles(directParticlesRef, curves.directCurve, particleConfig.direct.progress);
+    } else {
+      updateParticles(pumpParticlesRef, curves.pumpCurve, particleConfig.pump.progress);
     }
 
-    // B. Update Water Particles Positions along Splines
-    const updateIntakeParticles = () => {
-      if (!intakeParticlesRef.current) return;
-      const positions = intakeParticlesRef.current.geometry.attributes.position.array as Float32Array;
-      const progress = particleConfig.intake.progress;
-      const step = (metrics.flowRate / 5.0) * 0.20 * delta;
-
-      for (let i = 0; i < progress.length; i++) {
-        if (metrics.flowRate > 0) {
-          progress[i] += step;
-          if (progress[i] > 1.0) progress[i] = 0;
-        }
-        const pt = curves.intakeCurve.getPointAt(progress[i]);
-        positions[i * 3] = pt.x;
-        positions[i * 3 + 1] = pt.y;
-        positions[i * 3 + 2] = pt.z;
-      }
-      intakeParticlesRef.current.geometry.attributes.position.needsUpdate = true;
-    };
-
-    const updateFilterParticles = () => {
-      if (!filterParticlesRef.current) return;
-      const positions = filterParticlesRef.current.geometry.attributes.position.array as Float32Array;
-      const progress = particleConfig.filter.progress;
-      const step = (metrics.flowRate / 5.0) * 0.20 * delta;
-
-      for (let i = 0; i < progress.length; i++) {
-        if (metrics.flowRate > 0) {
-          progress[i] += step;
-          if (progress[i] > 1.0) progress[i] = 0;
-        }
-        const pt = curves.filterCurve.getPointAt(progress[i]);
-        positions[i * 3] = pt.x;
-        positions[i * 3 + 1] = pt.y;
-        positions[i * 3 + 2] = pt.z;
-      }
-      filterParticlesRef.current.geometry.attributes.position.needsUpdate = true;
-    };
-
-    const updateReturnParticles = () => {
-      if (!returnParticlesRef.current) return;
-      const positions = returnParticlesRef.current.geometry.attributes.position.array as Float32Array;
-      const progress = particleConfig.ret.progress;
-      const step = (metrics.flowRate / 5.0) * 0.20 * delta;
-
-      for (let i = 0; i < progress.length; i++) {
-        if (metrics.flowRate > 0) {
-          progress[i] += step;
-          if (progress[i] > 1.0) progress[i] = 0;
-        }
-        const pt = curves.returnCurve.getPointAt(progress[i]);
-        positions[i * 3] = pt.x;
-        positions[i * 3 + 1] = pt.y;
-        positions[i * 3 + 2] = pt.z;
-      }
-      returnParticlesRef.current.geometry.attributes.position.needsUpdate = true;
-    };
-
-    updateIntakeParticles();
-    updateFilterParticles();
-    updateReturnParticles();
-
-    // C. Power Flow Dash Animations
+    // Electrical wiring animation
     const isSolarCharging = metrics.solarWatts > 2 && envMode !== 'NIGHT';
     const isBatteryDischarging = metrics.currentDraw > 1 && mode !== 'LOW_BATTERY';
 
@@ -249,16 +206,14 @@ export const Flows = () => {
       battPowerRef.current.material.opacity = isBatteryDischarging ? 0.9 : 0.05;
     }
 
-    if (pumpPowerRef.current && pumpPowerRef.current.material) {
-      const isPumpOn = metrics.pumpRpm > 10;
-      pumpPowerRef.current.material.dashOffset = isPumpOn ? -time * 0.9 : 0;
-      pumpPowerRef.current.material.opacity = isPumpOn ? 0.8 : 0.05;
+    if (espToFlowRef.current && espToFlowRef.current.material) {
+      espToFlowRef.current.material.dashOffset = -time * 0.4;
     }
-
-    if (sensorPowerRef.current && sensorPowerRef.current.material) {
-      const isEspOn = metrics.esp32Online;
-      sensorPowerRef.current.material.dashOffset = isEspOn ? -time * 0.4 : 0;
-      sensorPowerRef.current.material.opacity = isEspOn ? 0.8 : 0.05;
+    if (espToUvRef.current && espToUvRef.current.material) {
+      espToUvRef.current.material.dashOffset = metrics.uvStatus === 'ON' ? -time * 0.6 : 0;
+    }
+    if (espToFloatRef.current && espToFloatRef.current.material) {
+      espToFloatRef.current.material.dashOffset = -time * 0.3;
     }
   });
 
@@ -286,41 +241,20 @@ export const Flows = () => {
     return mat;
   }, []);
 
-  const returnShaderMat = useMemo(() => {
-    const mat = new THREE.ShaderMaterial({
-      uniforms: THREE.UniformsUtils.clone(TubeFlowShader.uniforms),
-      vertexShader: TubeFlowShader.vertexShader,
-      fragmentShader: TubeFlowShader.fragmentShader,
-      transparent: true,
-      depthWrite: false,
-    });
-    mat.uniforms.uColor.value.set('#38bdf8');
-    return mat;
-  }, []);
-
   return (
     <group>
       {/* ─── 1. GLOWING INTERNAL FLUID CORES ────────────────────────────── */}
-      {/* Intake Flow Tube */}
       <mesh>
-        <tubeGeometry args={[curves.intakeCurve, 40, 0.016, 8, false]} />
+        <tubeGeometry args={[curves.intakeCurve, 30, 0.016, 8, false]} />
         <primitive object={intakeShaderMat} ref={intakeTubeMatRef} attach="material" />
       </mesh>
 
-      {/* Process Flow Tube */}
       <mesh>
-        <tubeGeometry args={[curves.filterCurve, 40, 0.016, 8, false]} />
+        <tubeGeometry args={[curves.filterCurve, 20, 0.016, 8, false]} />
         <primitive object={filterShaderMat} ref={filterTubeMatRef} attach="material" />
       </mesh>
 
-      {/* Return Flow Tube */}
-      <mesh>
-        <tubeGeometry args={[curves.returnCurve, 40, 0.016, 8, false]} />
-        <primitive object={returnShaderMat} ref={returnTubeMatRef} attach="material" />
-      </mesh>
-
-      {/* ─── 2. FLOWING WATER PARTICLES ─────────────────────────────────── */}
-      {/* Intake Particles */}
+      {/* ─── 2. FLOWING PARTICLES ───────────────────────────────────────── */}
       <points ref={intakeParticlesRef}>
         <bufferGeometry>
           <bufferAttribute
@@ -328,16 +262,9 @@ export const Flows = () => {
             args={[particleConfig.intake.positions, 3]}
           />
         </bufferGeometry>
-        <pointsMaterial
-          color="#38bdf8"
-          size={0.035}
-          transparent
-          opacity={0.8}
-          depthWrite={false}
-        />
+        <pointsMaterial color="#38bdf8" size={0.035} transparent opacity={0.85} depthWrite={false} />
       </points>
 
-      {/* Filter Process Particles */}
       <points ref={filterParticlesRef}>
         <bufferGeometry>
           <bufferAttribute
@@ -345,34 +272,33 @@ export const Flows = () => {
             args={[particleConfig.filter.positions, 3]}
           />
         </bufferGeometry>
-        <pointsMaterial
-          color="#22d3ee"
-          size={0.035}
-          transparent
-          opacity={0.8}
-          depthWrite={false}
-        />
+        <pointsMaterial color="#22d3ee" size={0.035} transparent opacity={0.85} depthWrite={false} />
       </points>
 
-      {/* Purified Return Particles */}
-      <points ref={returnParticlesRef}>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            args={[particleConfig.ret.positions, 3]}
-          />
-        </bufferGeometry>
-        <pointsMaterial
-          color="#a5f3fc"
-          size={0.035}
-          transparent
-          opacity={0.85}
-          depthWrite={false}
-        />
-      </points>
+      {metrics.waterQuality === 'EXCELLENT' ? (
+        <points ref={directParticlesRef}>
+          <bufferGeometry>
+            <bufferAttribute
+              attach="attributes-position"
+              args={[particleConfig.direct.positions, 3]}
+            />
+          </bufferGeometry>
+          <pointsMaterial color="#10b981" size={0.035} transparent opacity={0.85} depthWrite={false} />
+        </points>
+      ) : (
+        <points ref={pumpParticlesRef}>
+          <bufferGeometry>
+            <bufferAttribute
+              attach="attributes-position"
+              args={[particleConfig.pump.positions, 3]}
+            />
+          </bufferGeometry>
+          <pointsMaterial color="#f59e0b" size={0.035} transparent opacity={0.85} depthWrite={false} />
+        </points>
+      )}
 
-      {/* ─── 3. ELECTRICAL POWER CONDUIT LINES (Dashed Animated Lines) ── */}
-      {/* Solar -> Battery */}
+      {/* ─── 3. ELECTRICAL WIRING LINES (AS DRAWN IN SKETCH) ────────────── */}
+      {/* Solar -> Battery (+/-) */}
       <Line
         ref={solarPowerRef}
         points={wirePoints.solar}
@@ -386,7 +312,7 @@ export const Flows = () => {
         opacity={0.9}
       />
 
-      {/* Battery -> ESP32 */}
+      {/* Battery -> Unit & Control */}
       <Line
         ref={battPowerRef}
         points={wirePoints.batt}
@@ -400,30 +326,44 @@ export const Flows = () => {
         opacity={0.9}
       />
 
-      {/* ESP32 -> Pump Power Conduit */}
+      {/* Unit & Control -> Flow Sensor Signal Line */}
       <Line
-        ref={pumpPowerRef}
-        points={wirePoints.pump}
+        ref={espToFlowRef}
+        points={wirePoints.flow}
         color="#06b6d4"
         lineWidth={1.5}
         dashed
         dashScale={4}
-        dashSize={0.25}
-        gapSize={0.2}
+        dashSize={0.2}
+        gapSize={0.15}
         transparent
         opacity={0.8}
       />
 
-      {/* ESP32 -> Sensors Signal Ribbon */}
+      {/* Unit & Control -> UV Light Wire */}
       <Line
-        ref={sensorPowerRef}
-        points={wirePoints.sensors}
+        ref={espToUvRef}
+        points={wirePoints.uv}
+        color="#fef08a"
+        lineWidth={1.5}
+        dashed
+        dashScale={4}
+        dashSize={0.2}
+        gapSize={0.15}
+        transparent
+        opacity={0.8}
+      />
+
+      {/* Unit & Control -> Float Sensor Signal Line */}
+      <Line
+        ref={espToFloatRef}
+        points={wirePoints.float}
         color="#a855f7"
         lineWidth={1.5}
         dashed
         dashScale={4}
-        dashSize={0.25}
-        gapSize={0.2}
+        dashSize={0.2}
+        gapSize={0.15}
         transparent
         opacity={0.8}
       />

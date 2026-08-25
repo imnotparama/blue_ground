@@ -17,7 +17,7 @@ const GrayPvc = () => (
 const PipeSeg = ({
   pos,
   len,
-  r = 0.026,
+  r = 0.024,
   rot = [0, 0, 0] as [number, number, number],
   mat = 'white' as 'white' | 'gray',
 }: {
@@ -35,7 +35,7 @@ const PipeSeg = ({
 
 const PipeElbow = ({
   pos,
-  r = 0.030,
+  r = 0.028,
   mat = 'white' as 'white' | 'gray',
 }: {
   pos: [number, number, number];
@@ -48,7 +48,7 @@ const PipeElbow = ({
   </mesh>
 );
 
-// ─── Industrial Solenoid Valve ────────────────────────────────────────────────
+// ─── Solenoid Valve Component ─────────────────────────────────────────────────
 const SolenoidValve = ({
   pos,
   rot = [0, 0, Math.PI / 2] as [number, number, number],
@@ -71,17 +71,17 @@ const SolenoidValve = ({
     <group position={pos} rotation={rot}>
       {/* Valve Main Body */}
       <mesh castShadow>
-        <cylinderGeometry args={[0.042, 0.042, 0.09, 12]} />
+        <cylinderGeometry args={[0.038, 0.038, 0.08, 12]} />
         <meshStandardMaterial color="#1e293b" roughness={0.3} metalness={0.85} />
       </mesh>
-      {/* Solenoid Coil Cylinder / Stem */}
-      <mesh position={[0, 0.065, 0]} castShadow>
-        <cylinderGeometry args={[0.022, 0.022, 0.055, 10]} />
+      {/* Solenoid Coil */}
+      <mesh position={[0, 0.055, 0]} castShadow>
+        <cylinderGeometry args={[0.02, 0.02, 0.05, 10]} />
         <meshStandardMaterial color="#0284c7" roughness={0.35} metalness={0.7} />
       </mesh>
       {/* Manual Actuator Lever */}
-      <mesh ref={leverRef} position={[0, 0.095, 0]} castShadow>
-        <boxGeometry args={[0.12, 0.014, 0.02]} />
+      <mesh ref={leverRef} position={[0, 0.085, 0]} castShadow>
+        <boxGeometry args={[0.11, 0.012, 0.018]} />
         <meshStandardMaterial color="#ef4444" roughness={0.3} metalness={0.5} />
       </mesh>
     </group>
@@ -91,14 +91,14 @@ const SolenoidValve = ({
 export const Pipes = () => {
   const { mode, setActiveHotspot, setCameraPreset } = useSystemState();
 
-  const isProcessValveOpen = mode !== 'PUMP_FAILURE' && mode !== 'MAINTENANCE';
-  const isOutletValveOpen = mode !== 'CLEANING' && mode !== 'PUMP_FAILURE';
+  const isDirectValveOpen = mode !== 'TURBIDITY' && mode !== 'CLEANING' && mode !== 'PUMP_FAILURE';
+  const isDrainValveOpen = mode === 'CLEANING';
+  const isTapOpen = mode !== 'PUMP_FAILURE';
 
   return (
     <group>
       {/* ══════════════════════════════════════════════════════════════════════
-          1. RAW WATER INTAKE PIPE (Gray PVC)
-             Borewell [3.6, -2.1, 0] → Riser to [3.6, 0.0] → Horizontal to [2.65, 0.0] → Drop to Secondary Tank
+          1. INTAKE: BOREWELL [2.8, -1.8] → SEDIMENTATION TANK TOP [1.9, 0.73]
           ══════════════════════════════════════════════════════════════════════ */}
       <group
         onClick={(e) => {
@@ -114,31 +114,26 @@ export const Pipes = () => {
           document.body.style.cursor = 'default';
         }}
       >
-        {/* Foot Valve Strainer inside Wellhead */}
-        <mesh position={[3.6, -2.15, 0]} castShadow>
-          <cylinderGeometry args={[0.05, 0.05, 0.16, 12, 3, true]} />
+        {/* Foot valve strainer inside borewell */}
+        <mesh position={[2.8, -1.85, 0]} castShadow>
+          <cylinderGeometry args={[0.045, 0.045, 0.15, 12, 3, true]} />
           <meshStandardMaterial color="#94a3b8" roughness={0.3} metalness={0.9} wireframe />
         </mesh>
-        <mesh position={[3.6, -2.15, 0]} castShadow>
-          <cylinderGeometry args={[0.032, 0.032, 0.14, 10]} />
-          <meshStandardMaterial color="#334155" roughness={0.6} metalness={0.3} />
-        </mesh>
 
-        {/* Vertical Riser Pipe */}
-        <PipeSeg pos={[3.6, -1.05, 0]} len={2.1} r={0.032} mat="gray" />
-        <PipeElbow pos={[3.6, 0.0, 0]} r={0.036} mat="gray" />
+        {/* Vertical Riser */}
+        <PipeSeg pos={[2.8, -0.50, 0]} len={2.5} r={0.030} mat="gray" />
+        <PipeElbow pos={[2.8, 0.75, 0]} r={0.034} mat="gray" />
 
-        {/* Horizontal Overhead Pipe to Secondary Tank */}
-        <PipeSeg pos={[3.125, 0.0, 0]} len={0.95} r={0.032} rot={[0, 0, Math.PI / 2]} mat="gray" />
-        <PipeElbow pos={[2.65, 0.0, 0]} r={0.036} mat="gray" />
+        {/* Horizontal run to Sedimentation top */}
+        <PipeSeg pos={[2.35, 0.75, 0]} len={0.90} r={0.030} rot={[0, 0, Math.PI / 2]} mat="gray" />
+        <PipeElbow pos={[1.90, 0.75, 0]} r={0.034} mat="gray" />
 
-        {/* Short Drop into Secondary Tank Inlet */}
-        <PipeSeg pos={[2.65, -0.125, 0]} len={0.25} r={0.032} mat="gray" />
+        {/* Drop into Sedimentation Tank Top Cap */}
+        <PipeSeg pos={[1.90, 0.74, 0]} len={0.04} r={0.030} mat="gray" />
       </group>
 
       {/* ══════════════════════════════════════════════════════════════════════
-          2. MAIN FILTRATION PROCESS PIPE (White PVC)
-             Secondary Tank Outlet [1.55, -1.60] → Pump [1.55, -1.65] → Flow Sensor [0.85] → Solenoid [0.45] → Sedimentation Riser [0.15, -0.20]
+          2. PROCESS: SEDIMENTATION OUTLET [1.62, 0.30] → FLOW SENSOR [1.45] → SECONDARY COMPARTMENT [1.0, 0.30]
           ══════════════════════════════════════════════════════════════════════ */}
       <group
         onClick={(e) => {
@@ -154,58 +149,42 @@ export const Pipes = () => {
           document.body.style.cursor = 'default';
         }}
       >
-        {/* Pipe from Pump Outlet to Flow Sensor */}
-        <PipeSeg pos={[1.20, -1.65, 0]} len={0.50} rot={[0, 0, Math.PI / 2]} />
+        {/* Pipe between Sedimentation Tank and Flow Sensor */}
+        <PipeSeg pos={[1.56, 0.30, 0]} len={0.18} rot={[0, 0, Math.PI / 2]} />
 
-        {/* Pipe from Flow Sensor to Solenoid Valve */}
-        <PipeSeg pos={[0.65, -1.65, 0]} len={0.25} rot={[0, 0, Math.PI / 2]} />
-
-        {/* Process Solenoid Valve */}
-        <SolenoidValve pos={[0.45, -1.65, 0]} open={isProcessValveOpen} />
-
-        {/* Pipe from Valve to Corner Elbow */}
-        <PipeSeg pos={[0.30, -1.65, 0]} len={0.20} rot={[0, 0, Math.PI / 2]} />
-        <PipeElbow pos={[0.15, -1.65, 0]} />
-
-        {/* Vertical Riser to Sedimentation Tank Top Cap */}
-        <PipeSeg pos={[0.15, -0.925, 0]} len={1.45} />
-        <PipeElbow pos={[0.15, -0.20, 0]} />
+        {/* Pipe between Flow Sensor and Secondary Tank Inlet */}
+        <PipeSeg pos={[1.20, 0.30, 0]} len={0.36} rot={[0, 0, Math.PI / 2]} />
       </group>
 
       {/* ══════════════════════════════════════════════════════════════════════
-          3. PURIFIED WATER RETURN PIPE (White PVC)
-             Sedimentation Funnel [0.15, -1.75] → Drop to -1.90 → Horizontal under tanks → Riser into Primary Tank Upper Chamber [-1.0, -0.55]
+          3. DIRECT PASSAGE VALVE (Secondary Floor → Primary Tank for Good Water)
+             Position: [0.5, 0.0, 0]
           ══════════════════════════════════════════════════════════════════════ */}
-      <group
-        onClick={(e) => {
-          e.stopPropagation();
-          setActiveHotspot('return_pipe');
-          setCameraPreset('RETURN_PIPE');
-        }}
-        onPointerOver={(e) => {
-          e.stopPropagation();
-          document.body.style.cursor = 'pointer';
-        }}
-        onPointerOut={() => {
-          document.body.style.cursor = 'default';
-        }}
-      >
-        {/* Drop from Sedimentation Bottom Funnel */}
-        <PipeSeg pos={[0.15, -1.825, 0]} len={0.15} />
-        <PipeElbow pos={[0.15, -1.90, 0]} />
-
-        {/* Long Under-Tank Horizontal Return Pipe */}
-        <PipeSeg pos={[-0.425, -1.90, 0]} len={1.15} rot={[0, 0, Math.PI / 2]} />
-        <PipeElbow pos={[-1.0, -1.90, 0]} />
-
-        {/* Vertical Riser to Primary Tank Upper Chamber Inlet */}
-        <PipeSeg pos={[-1.0, -1.225, 0]} len={1.35} />
-        <PipeElbow pos={[-1.0, -0.55, 0]} />
+      <group>
+        <SolenoidValve pos={[0.5, 0.0, 0]} rot={[Math.PI / 2, 0, 0]} open={isDirectValveOpen} />
+        <PipeSeg pos={[0.5, -0.15, 0]} len={0.24} />
       </group>
 
       {/* ══════════════════════════════════════════════════════════════════════
-          4. CLEAN WATER OUTLET PIPE & SOLENOID TAP (White PVC)
-             Primary Tank Left Wall [-3.0, -1.35] → Solenoid Valve [-3.35] → Pure Water Dispense Tap [-3.65, -1.68]
+          4. SECONDARY FILTRATION PUMP LOOP (Bad Quality Water)
+             Pump [-0.35, 0.16] → Up to 0.45 → Horizontal to -1.30 → Down into Primary Tank
+          ══════════════════════════════════════════════════════════════════════ */}
+      <group>
+        {/* Riser from Pump */}
+        <PipeSeg pos={[-0.35, 0.28, 0]} len={0.24} />
+        <PipeElbow pos={[-0.35, 0.40, 0]} />
+
+        {/* Horizontal Loop Pipe */}
+        <PipeSeg pos={[-0.825, 0.40, 0]} len={0.95} rot={[0, 0, Math.PI / 2]} />
+        <PipeElbow pos={[-1.30, 0.40, 0]} />
+
+        {/* Drop Pipe into Primary Tank */}
+        <PipeSeg pos={[-1.30, 0.22, 0]} len={0.36} />
+      </group>
+
+      {/* ══════════════════════════════════════════════════════════════════════
+          5. CLEAN WATER DISPENSE TAP (Primary Tank Bottom-Left)
+             Primary Outlet [-2.4, -1.45] → Solenoid Valve [-2.6] → Tap Spout [-2.85, -1.70]
           ══════════════════════════════════════════════════════════════════════ */}
       <group
         onClick={(e) => {
@@ -221,24 +200,27 @@ export const Pipes = () => {
           document.body.style.cursor = 'default';
         }}
       >
-        {/* Stub from Primary Outlet Nozzle */}
-        <PipeSeg pos={[-3.125, -1.35, 0]} len={0.25} rot={[0, 0, Math.PI / 2]} />
+        <PipeSeg pos={[-2.48, -1.45, 0]} len={0.16} rot={[0, 0, Math.PI / 2]} />
+        <SolenoidValve pos={[-2.62, -1.45, 0]} open={isTapOpen} />
+        <PipeSeg pos={[-2.76, -1.45, 0]} len={0.14} rot={[0, 0, Math.PI / 2]} />
+        <PipeElbow pos={[-2.85, -1.45, 0]} />
+        <PipeSeg pos={[-2.85, -1.58, 0]} len={0.26} />
 
-        {/* Clean Water Solenoid Dispense Valve */}
-        <SolenoidValve pos={[-3.35, -1.35, 0]} open={isOutletValveOpen} />
-
-        {/* Pipe to Tap Elbow */}
-        <PipeSeg pos={[-3.50, -1.35, 0]} len={0.20} rot={[0, 0, Math.PI / 2]} />
-        <PipeElbow pos={[-3.65, -1.35, 0]} />
-
-        {/* Vertical Drop to Tap */}
-        <PipeSeg pos={[-3.65, -1.515, 0]} len={0.33} />
-
-        {/* Polished Stainless Steel Dispense Spout Nozzle */}
-        <mesh position={[-3.65, -1.68, 0]} castShadow>
-          <cylinderGeometry args={[0.028, 0.018, 0.055, 12]} />
+        {/* Dispense Spout Nozzle */}
+        <mesh position={[-2.85, -1.72, 0]} castShadow>
+          <cylinderGeometry args={[0.026, 0.016, 0.05, 12]} />
           <meshStandardMaterial color="#334155" roughness={0.15} metalness={0.95} />
         </mesh>
+      </group>
+
+      {/* ══════════════════════════════════════════════════════════════════════
+          6. RELEASE TAP / DRAIN VALVE FOR CLEANING (Primary Tank Bottom-Right)
+             Primary Bottom-Right [1.0, -1.50] → Release Tap [1.25, -1.50]
+          ══════════════════════════════════════════════════════════════════════ */}
+      <group>
+        <PipeSeg pos={[1.08, -1.50, 0]} len={0.16} rot={[0, 0, Math.PI / 2]} />
+        <SolenoidValve pos={[1.22, -1.50, 0]} open={isDrainValveOpen} />
+        <PipeSeg pos={[1.36, -1.50, 0]} len={0.12} rot={[0, 0, Math.PI / 2]} />
       </group>
     </group>
   );

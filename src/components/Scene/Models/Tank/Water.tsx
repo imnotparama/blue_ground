@@ -19,39 +19,37 @@ export const Water = () => {
 
   // Bubble point particles inside primary clean water
   const primaryBubblesData = useMemo(() => {
-    const count = 120;
+    const count = 160;
     const positions = new Float32Array(count * 3);
     const speeds = new Float32Array(count);
     for (let i = 0; i < count; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 1.8;
-      positions[i * 3 + 1] = Math.random() * 0.9 - 0.5;
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 1.0;
-      speeds[i] = Math.random() * 0.15 + 0.05;
+      positions[i * 3] = (Math.random() - 0.5) * 3.1;
+      positions[i * 3 + 1] = Math.random() * 1.5 - 0.8;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 1.1;
+      speeds[i] = Math.random() * 0.16 + 0.06;
     }
     return { positions, speeds };
   }, []);
 
-  // Bubble point particles inside secondary raw intake water
+  // Bubble point particles inside secondary raw intake compartment
   const secondaryBubblesData = useMemo(() => {
-    const count = 60;
+    const count = 50;
     const positions = new Float32Array(count * 3);
     const speeds = new Float32Array(count);
     for (let i = 0; i < count; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 0.9;
-      positions[i * 3 + 1] = Math.random() * 1.1 - 0.6;
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 0.75;
-      speeds[i] = Math.random() * 0.18 + 0.06;
+      positions[i * 3] = (Math.random() - 0.5) * 1.2;
+      positions[i * 3 + 1] = Math.random() * 0.45 - 0.2;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 1.0;
+      speeds[i] = Math.random() * 0.20 + 0.08;
     }
     return { positions, speeds };
   }, []);
 
   useFrame((state, delta) => {
-    const time = state.clock.getElapsedTime();
-
-    // 1. Primary Tank Water Level (Fills lower clean water chamber)
-    // Clean chamber floor is at y = -1.68, shelf divider is at y = -0.55 (max height = 1.10)
+    // 1. Primary Tank Water Level (Clean Water Storage)
+    // Floor is at y = -1.65, max top is y = 0.0 (max height = 1.60)
     const fillFraction = Math.max(metrics.waterLevel / 100, 0.08);
-    const currentHeight = fillFraction * 1.05;
+    const currentHeight = fillFraction * 1.55;
 
     if (primaryWaterRef.current) {
       primaryWaterRef.current.scale.y = THREE.MathUtils.lerp(
@@ -59,11 +57,11 @@ export const Water = () => {
         currentHeight,
         0.06
       );
-      // Base sits at y = -1.68 + currentHeight / 2
-      primaryWaterRef.current.position.y = -1.68 + primaryWaterRef.current.scale.y / 2;
+      // Base sits at y = -1.65
+      primaryWaterRef.current.position.y = -1.65 + primaryWaterRef.current.scale.y / 2;
     }
 
-    // 2. Turbidity color transition for Secondary Raw Tank
+    // 2. Turbidity color transition for Secondary Raw Compartment
     const isTurbid = metrics.turbidity > 12 || mode === 'TURBIDITY';
     const targetRawColor = isTurbid ? new THREE.Color('#78350f') : new THREE.Color('#0d9488');
 
@@ -79,14 +77,14 @@ export const Water = () => {
     // 3. Animate Primary Bubbles
     if (primaryBubblesRef.current && primaryWaterRef.current) {
       const positions = primaryBubblesRef.current.geometry.attributes.position.array as Float32Array;
-      const topY = -1.68 + currentHeight;
+      const topY = -1.65 + currentHeight;
 
       for (let i = 0; i < primaryBubblesData.positions.length / 3; i++) {
         positions[i * 3 + 1] += primaryBubblesData.speeds[i] * delta;
         if (positions[i * 3 + 1] > topY) {
-          positions[i * 3 + 1] = -1.65;
-          positions[i * 3] = (Math.random() - 0.5) * 1.8;
-          positions[i * 3 + 2] = (Math.random() - 0.5) * 1.0;
+          positions[i * 3 + 1] = -1.62;
+          positions[i * 3] = (Math.random() - 0.5) * 3.1;
+          positions[i * 3 + 2] = (Math.random() - 0.5) * 1.1;
         }
       }
       primaryBubblesRef.current.geometry.attributes.position.needsUpdate = true;
@@ -95,14 +93,14 @@ export const Water = () => {
     // 4. Animate Secondary Bubbles
     if (secondaryBubblesRef.current) {
       const positions = secondaryBubblesRef.current.geometry.attributes.position.array as Float32Array;
-      const topY = -0.32;
+      const topY = 0.50;
 
       for (let i = 0; i < secondaryBubblesData.positions.length / 3; i++) {
         positions[i * 3 + 1] += secondaryBubblesData.speeds[i] * delta;
         if (positions[i * 3 + 1] > topY) {
-          positions[i * 3 + 1] = -1.65;
-          positions[i * 3] = (Math.random() - 0.5) * 0.9;
-          positions[i * 3 + 2] = (Math.random() - 0.5) * 0.75;
+          positions[i * 3 + 1] = 0.08;
+          positions[i * 3] = (Math.random() - 0.5) * 1.2;
+          positions[i * 3 + 2] = (Math.random() - 0.5) * 1.0;
         }
       }
       secondaryBubblesRef.current.geometry.attributes.position.needsUpdate = true;
@@ -113,17 +111,17 @@ export const Water = () => {
     <group>
       {/* ════════════════════════════════════════════════════════════════════
           A. PRIMARY TANK PURE WATER (Lower Clean Storage Compartment)
-             Primary Tank bounds: x=[-3.0, -1.0], z=[-0.6, 0.6], y=[-1.70, -0.55]
+             Bounds: x from -2.35 to 0.95 (center = -0.7), z from -0.6 to 0.6
           ════════════════════════════════════════════════════════════════════ */}
-      <group position={[-2.0, 0, 0]}>
-        {/* Pure Water Block */}
-        <mesh ref={primaryWaterRef} position={[0, -1.15, 0]} castShadow receiveShadow>
-          <boxGeometry args={[1.92, 1.0, 1.12]} />
+      <group position={[-0.7, 0, 0]}>
+        {/* Pure Water Volume */}
+        <mesh ref={primaryWaterRef} position={[0, -0.85, 0]} castShadow receiveShadow>
+          <boxGeometry args={[3.30, 1.0, 1.22]} />
           <meshPhysicalMaterial
             ref={primaryMatRef}
             color="#0284c7"
             transparent
-            opacity={0.62}
+            opacity={0.58}
             roughness={0.02}
             metalness={0.05}
             transmission={0.88}
@@ -134,7 +132,7 @@ export const Water = () => {
           />
         </mesh>
 
-        {/* Sparkling Bubbles */}
+        {/* Bubbles */}
         <points ref={primaryBubblesRef}>
           <bufferGeometry>
             <bufferAttribute
@@ -153,18 +151,17 @@ export const Water = () => {
       </group>
 
       {/* ════════════════════════════════════════════════════════════════════
-          B. SECONDARY TANK RAW WATER
-             Secondary Tank bounds: x=[1.55, 2.65], z=[-0.45, 0.45], y=[-1.70, -0.28]
+          B. SECONDARY COMPARTMENT WATER (Top Right Sensor Chamber)
+             Bounds: x from -0.35 to 0.95 (center = 0.30, width = 1.30), y = [0.05, 0.55]
           ════════════════════════════════════════════════════════════════════ */}
-      <group position={[2.1, 0, 0]}>
-        {/* Raw Water Block */}
-        <mesh ref={secondaryWaterRef} position={[0, -1.0, 0]} castShadow receiveShadow>
-          <boxGeometry args={[1.04, 1.35, 0.84]} />
+      <group position={[0.30, 0, 0]}>
+        <mesh ref={secondaryWaterRef} position={[0, 0.28, 0]} castShadow receiveShadow>
+          <boxGeometry args={[1.30, 0.46, 1.20]} />
           <meshPhysicalMaterial
             ref={secondaryMatRef}
             color="#0d9488"
             transparent
-            opacity={0.55}
+            opacity={0.52}
             roughness={0.05}
             metalness={0.05}
             transmission={0.82}
@@ -183,7 +180,7 @@ export const Water = () => {
           </bufferGeometry>
           <pointsMaterial
             color="#bae6fd"
-            size={0.022}
+            size={0.02}
             transparent
             opacity={0.6}
             depthWrite={false}

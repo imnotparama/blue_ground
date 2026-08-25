@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { useThree, useFrame } from '@react-three/fiber';
+import { useThree } from '@react-three/fiber';
 import { useSystemState, CameraPreset } from '@/hooks/useSystemState';
 import gsap from 'gsap';
 import * as THREE from 'three';
@@ -13,91 +13,91 @@ interface ControlsInterface {
   enabled: boolean;
 }
 
-// Camera coordinates based on accurate physical layout
+// Camera coordinates based on engineering schematic layout
 export const CAMERA_PRESETS: Record<CameraPreset, { position: [number, number, number]; target: [number, number, number] }> = {
   OVERVIEW: {
-    position: [0.0, 0.8, 6.2],
-    target: [0.0, -0.7, 0],
+    position: [0.0, 0.6, 5.8],
+    target: [0.0, -0.4, 0],
   },
   SOLAR: {
-    position: [-2.0, 1.3, 1.4],
-    target: [-2.0, 0.45, 0],
+    position: [-1.65, 1.4, 1.3],
+    target: [-1.65, 0.75, 0],
   },
   BATTERY: {
-    position: [-1.45, 0.9, 1.2],
-    target: [-1.45, 0.35, 0.35],
+    position: [-0.65, 1.3, 1.3],
+    target: [-0.65, 0.74, 0],
   },
   ESP32: {
-    position: [-1.45, 0.9, 0.6],
-    target: [-1.45, 0.35, -0.35],
+    position: [0.40, 1.3, 1.3],
+    target: [0.40, 0.74, 0],
   },
   DISPLAY: {
-    position: [-1.33, 0.45, 0.4],
-    target: [-1.33, 0.32, -0.17],
+    position: [0.22, 0.85, 0.7],
+    target: [0.22, 0.74, 0.20],
   },
   FLOAT_SENSOR: {
-    position: [-2.6, -0.8, 1.1],
-    target: [-2.6, -1.0, 0.3],
+    position: [-2.1, -0.4, 1.2],
+    target: [-2.1, -0.65, 0.3],
   },
   PUMP: {
-    position: [1.55, -1.3, 0.9],
-    target: [1.55, -1.65, 0],
+    position: [-0.35, 0.45, 0.8],
+    target: [-0.35, 0.15, 0],
   },
   UV_LED: {
-    position: [2.0, -0.5, 0.7],
-    target: [2.02, -0.85, -0.22],
+    position: [0.35, -0.2, 0.9],
+    target: [0.35, -0.40, 0.25],
   },
   PH_SENSOR: {
-    position: [2.02, 0.1, 0.9],
-    target: [2.02, -0.25, 0.20],
+    position: [0.40, 0.5, 0.8],
+    target: [0.40, 0.25, 0.0],
   },
   TDS_SENSOR: {
-    position: [1.88, 0.1, 0.9],
-    target: [1.88, -0.25, 0.15],
+    position: [0.55, 0.5, 0.8],
+    target: [0.55, 0.25, 0.0],
   },
   TURBIDITY_SENSOR: {
-    position: [2.18, 0.1, 0.9],
-    target: [2.18, -0.25, 0.15],
+    position: [0.22, 0.5, 0.8],
+    target: [0.22, 0.25, 0.0],
   },
   TEMP_SENSOR: {
-    position: [2.32, 0.1, 0.7],
-    target: [2.32, -0.25, -0.15],
+    position: [0.40, 0.5, 0.8],
+    target: [0.40, 0.25, 0.0],
   },
   FLOW_SENSOR: {
-    position: [0.85, -1.3, 0.8],
-    target: [0.85, -1.65, 0],
+    position: [1.45, 0.55, 0.9],
+    target: [1.45, 0.30, 0.0],
   },
   SEDIMENTATION_TANK: {
-    position: [0.15, -0.5, 2.0],
-    target: [0.15, -0.95, 0],
+    position: [1.90, 0.3, 1.8],
+    target: [1.90, 0.05, 0],
   },
   FILTER_HOUSING: {
-    position: [0.15, -0.5, 2.0],
-    target: [0.15, -0.95, 0],
+    position: [1.90, 0.3, 1.8],
+    target: [1.90, 0.05, 0],
   },
   INSIDE_FILTER: {
-    position: [0.15, -0.8, 1.0],
-    target: [0.15, -0.95, 0],
+    position: [1.90, 0.1, 0.9],
+    target: [1.90, 0.05, 0],
   },
   PRIMARY_TANK: {
-    position: [-2.0, -0.5, 3.2],
-    target: [-2.0, -0.75, 0],
+    position: [-0.7, -0.3, 3.2],
+    target: [-0.7, -0.55, 0],
   },
   SECONDARY_TANK: {
-    position: [2.1, -0.6, 2.4],
-    target: [2.1, -1.0, 0],
+    position: [0.30, 0.45, 1.8],
+    target: [0.30, 0.28, 0],
   },
   INTAKE_PIPE: {
-    position: [3.6, -0.8, 1.8],
-    target: [3.6, -1.0, 0],
+    position: [2.8, 0.2, 1.8],
+    target: [2.8, 0.0, 0],
   },
   RETURN_PIPE: {
-    position: [-0.4, -1.4, 1.8],
-    target: [-0.4, -1.90, 0],
+    position: [1.45, 0.45, 1.5],
+    target: [1.45, 0.30, 0],
   },
   DRAIN_VALVE: {
-    position: [-3.35, -1.1, 1.2],
-    target: [-3.35, -1.35, 0],
+    position: [-2.62, -1.2, 1.2],
+    target: [-2.62, -1.45, 0],
   },
 };
 
@@ -106,7 +106,6 @@ export const CameraController = () => {
   const { camera, controls } = useThree();
   const activeTimeline = useRef<gsap.core.Timeline | null>(null);
 
-  // Sync Hotspot selection to Camera Preset
   useEffect(() => {
     if (activeHotspot) {
       const presetMap: Record<string, CameraPreset> = {
@@ -137,7 +136,6 @@ export const CameraController = () => {
     }
   }, [activeHotspot, cameraPreset, setCameraPreset]);
 
-  // Smooth GSAP camera transition when cameraPreset changes
   useEffect(() => {
     const preset = CAMERA_PRESETS[cameraPreset] || CAMERA_PRESETS.OVERVIEW;
     const ctrl = controls as unknown as ControlsInterface;
@@ -155,7 +153,6 @@ export const CameraController = () => {
 
     activeTimeline.current = tl;
 
-    // Animate Camera Position
     tl.to(
       camera.position,
       {
@@ -169,7 +166,6 @@ export const CameraController = () => {
       0
     );
 
-    // Animate OrbitControls Target LookAt Point
     if (ctrl && ctrl.target) {
       tl.to(
         ctrl.target,

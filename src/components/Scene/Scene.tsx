@@ -80,8 +80,8 @@ export const Scene = () => {
           <meshStandardMaterial color="#f59e0b" roughness={0.8} metalness={0.1} />
         </mesh>
 
-        {/* Stone Borewell / Water Wellhead Source — far right at x = 3.6 */}
-        <group position={[3.6, -2.1, 0.0]}>
+        {/* Stone Borewell / Water Wellhead Source — far right at x = 2.8 */}
+        <group position={[2.8, -2.1, 0.0]}>
           <mesh castShadow receiveShadow>
             <cylinderGeometry args={[0.32, 0.34, 0.35, 16, 1, false]} />
             <meshStandardMaterial color="#78716c" roughness={0.92} />

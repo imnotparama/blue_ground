@@ -19,7 +19,7 @@ const hotspotsList: HotspotConfig[] = [
   {
     id: 'solar',
     preset: 'SOLAR',
-    position: [-2.0, 0.75, 0],
+    position: [-1.65, 0.95, 0],
     label: 'Solar Array',
     getStatus: (m) => m.solarWatts > 5 ? { label: 'GENERATING', color: 'text-emerald-400' } : { label: 'STANDBY', color: 'text-zinc-500' },
     getSub: (m) => `Output: ${m.solarWatts.toFixed(1)}W`,
@@ -27,138 +27,122 @@ const hotspotsList: HotspotConfig[] = [
   {
     id: 'battery',
     preset: 'BATTERY',
-    position: [-1.45, 0.50, 0.35],
-    label: 'Lithium Battery',
+    position: [-0.65, 0.92, 0],
+    label: 'Battery Source',
     getStatus: (m) => m.batteryPercent < 15 ? { label: 'CRITICAL', color: 'text-rose-400 animate-pulse' } : { label: 'NOMINAL', color: 'text-emerald-400' },
     getSub: (m) => `Capacity: ${Math.round(m.batteryPercent)}%`,
   },
   {
     id: 'esp32',
     preset: 'ESP32',
-    position: [-1.45, 0.50, -0.35],
-    label: 'ESP32-S3 Core',
+    position: [0.40, 0.92, 0],
+    label: 'Unit & Control',
     getStatus: (m) => m.esp32Online ? { label: 'ONLINE', color: 'text-emerald-400' } : { label: 'OFFLINE', color: 'text-rose-400' },
     getSub: (m) => 'WiFi Connected',
   },
   {
     id: 'display',
     preset: 'DISPLAY',
-    position: [-1.33, 0.32, -0.17],
-    label: 'TFT Display',
+    position: [0.22, 0.74, 0.20],
+    label: '1.8 TFT Display',
     getStatus: (m) => m.esp32Online ? { label: 'ACTIVE', color: 'text-emerald-400' } : { label: 'OFFLINE', color: 'text-zinc-500' },
     getSub: (m) => 'Live Telemetry',
   },
   {
     id: 'float',
     preset: 'FLOAT_SENSOR',
-    position: [-2.6, -1.0, 0.3],
-    label: 'Float Level Sensor',
+    position: [-2.1, -0.65, 0.3],
+    label: 'Float Sensor',
     getStatus: (m) => m.waterLevel > 95 ? { label: 'LEVEL FULL', color: 'text-amber-400' } : { label: 'MONITORING', color: 'text-emerald-400' },
     getSub: (m) => `Level: ${m.waterLevel}%`,
   },
   {
     id: 'pump',
     preset: 'PUMP',
-    position: [1.55, -1.65, 0],
-    label: 'Water Pump',
+    position: [-0.35, 0.20, 0],
+    label: 'Filtration Pump',
     getStatus: (m) => m.pumpRpm > 0 ? { label: 'RUNNING', color: 'text-emerald-400' } : { label: 'STANDBY', color: 'text-zinc-500' },
     getSub: (m) => `${m.pumpRpm} RPM`,
   },
   {
     id: 'uv',
     preset: 'UV_LED',
-    position: [2.02, -0.85, -0.22],
-    label: 'UV-C LED Light',
+    position: [0.35, -0.40, 0.25],
+    label: 'UV Light Emitter',
     getStatus: (m) => m.uvStatus === 'ON' ? { label: 'STERILIZING', color: 'text-violet-400 animate-pulse' } : { label: 'STANDBY', color: 'text-zinc-500' },
     getSub: (m) => `Emittance: ${m.uvStatus}`,
   },
   {
     id: 'ph',
     preset: 'PH_SENSOR',
-    position: [2.02, -0.25, 0.20],
-    label: 'pH Probe',
+    position: [0.40, 0.25, 0.0],
+    label: 'pH Sensor',
     getStatus: (m) => m.ph < 6.5 || m.ph > 8.5 ? { label: 'ALERT', color: 'text-rose-400' } : { label: 'SAFE', color: 'text-emerald-400' },
     getSub: (m) => `${m.ph.toFixed(2)} pH`,
   },
   {
     id: 'tds',
     preset: 'TDS_SENSOR',
-    position: [1.88, -0.25, 0.15],
-    label: 'TDS Probe',
+    position: [0.55, 0.25, 0.0],
+    label: 'TDS Sensor',
     getStatus: (m) => m.tds > 300 ? { label: 'ALERT', color: 'text-rose-400' } : { label: 'SAFE', color: 'text-emerald-400' },
     getSub: (m) => `${m.tds} ppm`,
   },
   {
     id: 'turbidity',
     preset: 'TURBIDITY_SENSOR',
-    position: [2.18, -0.25, 0.15],
-    label: 'Turbidity Probe',
+    position: [0.22, 0.25, 0.0],
+    label: 'Turbidity Sensor',
     getStatus: (m) => m.turbidity > 5.0 ? { label: 'WARNING', color: 'text-amber-400' } : { label: 'SAFE', color: 'text-emerald-400' },
     getSub: (m) => `${m.turbidity.toFixed(1)} NTU`,
   },
   {
-    id: 'temp',
-    preset: 'TEMP_SENSOR',
-    position: [2.32, -0.25, -0.15],
-    label: 'Temp Probe',
-    getStatus: () => ({ label: 'OK', color: 'text-emerald-400' }),
-    getSub: (m) => `${m.temperature.toFixed(1)} °C`,
-  },
-  {
     id: 'flow',
     preset: 'FLOW_SENSOR',
-    position: [0.85, -1.65, 0.05],
-    label: 'Inline Flow Sensor',
+    position: [1.45, 0.30, 0.05],
+    label: 'Flow Sensor',
     getStatus: (m) => m.flowRate > 0 ? { label: 'FLOWING', color: 'text-emerald-400' } : { label: 'STANDBY', color: 'text-zinc-500' },
     getSub: (m) => `${m.flowRate.toFixed(1)} L/min`,
   },
   {
-    id: 'filter_housing',
-    preset: 'FILTER_HOUSING',
-    position: [0.15, -0.95, 0.35],
-    label: 'Sedimentation Filter',
-    getStatus: () => ({ label: '5-STAGE ACTIVE', color: 'text-cyan-400' }),
+    id: 'sedimentation_tank',
+    preset: 'SEDIMENTATION_TANK',
+    position: [1.90, 0.05, 0.35],
+    label: 'Sedimentation Tank',
+    getStatus: () => ({ label: 'PRIMARY FILTER', color: 'text-cyan-400' }),
     getSub: (m) => `${m.filterHealth}% Filter Health`,
   },
   {
     id: 'primary_tank',
     preset: 'PRIMARY_TANK',
-    position: [-2.0, -0.75, 0.65],
-    label: 'Primary Storage Tank',
-    getStatus: () => ({ label: 'DUAL COMPARTMENT', color: 'text-cyan-400' }),
-    getSub: (m) => `${m.waterLevel}% Purified Storage`,
+    position: [-0.7, -0.55, 0.70],
+    label: 'Primary Tank (Storage)',
+    getStatus: () => ({ label: 'RESERVOIR', color: 'text-cyan-400' }),
+    getSub: (m) => `${m.waterLevel}% Purified Capacity`,
   },
   {
     id: 'secondary_tank',
     preset: 'SECONDARY_TANK',
-    position: [2.1, -1.0, 0.50],
-    label: 'Raw Intake Tank',
-    getStatus: () => ({ label: 'INTAKE SUMP', color: 'text-cyan-400' }),
-    getSub: () => 'Sensor Analysis Sump',
+    position: [0.30, 0.28, 0.70],
+    label: 'Secondary Compartment',
+    getStatus: () => ({ label: 'SENSOR CHAMBER', color: 'text-cyan-400' }),
+    getSub: () => 'Quality Analysis Compartment',
   },
   {
     id: 'intake_pipe',
     preset: 'INTAKE_PIPE',
-    position: [3.6, -1.0, 0.05],
-    label: 'Borewell Intake',
+    position: [2.8, 0.0, 0.05],
+    label: 'Borewell Suction Pipe',
     getStatus: (m) => m.flowRate > 0 ? { label: 'SUCTION ACTIVE', color: 'text-emerald-400' } : { label: 'STANDBY', color: 'text-zinc-500' },
-    getSub: () => 'Source Water Inlet',
-  },
-  {
-    id: 'return_pipe',
-    preset: 'RETURN_PIPE',
-    position: [-0.4, -1.90, 0.05],
-    label: 'Purified Return Pipe',
-    getStatus: (m) => m.flowRate > 0 ? { label: 'LOOP ACTIVE', color: 'text-emerald-400' } : { label: 'STANDBY', color: 'text-zinc-500' },
-    getSub: () => 'Conveys Purified Water',
+    getSub: () => 'Intake from Borewell',
   },
   {
     id: 'drain_valve',
     preset: 'DRAIN_VALVE',
-    position: [-3.35, -1.35, 0.05],
-    label: 'Clean Water Tap Valve',
-    getStatus: (m, mode) => mode === 'CLEANING' ? { label: 'PURGE FLUSH', color: 'text-rose-400 animate-pulse' } : { label: 'DISPENSE OPEN', color: 'text-emerald-400' },
-    getSub: () => 'Pure Water Dispense',
+    position: [-2.62, -1.45, 0.05],
+    label: 'Clean Water Dispense Tap',
+    getStatus: (m, mode) => mode === 'CLEANING' ? { label: 'PURGING', color: 'text-rose-400 animate-pulse' } : { label: 'DISPENSE READY', color: 'text-emerald-400' },
+    getSub: () => 'Pure Water Outlet',
   },
 ];
 
@@ -197,7 +181,6 @@ export const Hotspots = () => {
                   setCameraPreset(spot.preset);
                 }}
               >
-                {/* 1. Pulsing Outer Glow Aura */}
                 <div 
                   className={`absolute -inset-1.5 rounded-full blur-sm transition-opacity duration-300 ${
                     isActive 
@@ -208,7 +191,6 @@ export const Hotspots = () => {
                   }`} 
                 />
 
-                {/* 2. Frosted Glass Vision Pro Style Hotspot Beacon Button */}
                 <div className={`relative flex items-center gap-1.5 px-2.5 py-1 rounded-full backdrop-blur-md border transition-all duration-300 ${
                   isActive
                     ? 'bg-cyan-950/80 border-cyan-400/90 shadow-[0_0_15px_rgba(6,182,212,0.6)] scale-110'
@@ -216,7 +198,6 @@ export const Hotspots = () => {
                       ? 'bg-zinc-900/80 border-cyan-400/60 shadow-[0_0_12px_rgba(6,182,212,0.4)] scale-105'
                       : 'bg-zinc-950/60 border-zinc-700/60 shadow-lg hover:border-cyan-400/50'
                 }`}>
-                  {/* Glowing Core Dot */}
                   <span className="relative flex h-2 w-2">
                     <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
                       isActive ? 'bg-cyan-400' : 'bg-cyan-500'
@@ -226,13 +207,11 @@ export const Hotspots = () => {
                     }`} />
                   </span>
 
-                  {/* Hotspot Label */}
                   <span className="text-[11px] font-medium tracking-wide text-zinc-100 whitespace-nowrap drop-shadow">
                     {spot.label}
                   </span>
                 </div>
 
-                {/* 3. Floating Tooltip Popover (Shown on hover or when selected) */}
                 {(isHovered || isActive) && (
                   <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-48 p-2 rounded-xl backdrop-blur-xl bg-zinc-950/90 border border-cyan-500/40 shadow-2xl shadow-cyan-950/50 z-50 animate-in fade-in zoom-in-95 duration-200 pointer-events-none">
                     <div className="flex items-center justify-between border-b border-zinc-800/80 pb-1 mb-1.5">
