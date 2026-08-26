@@ -23,6 +23,7 @@ import { Flows } from './Models/Pipes/Flows';
 import { AmbientLife } from './Environment/AmbientLife';
 import { Hotspots } from './Environment/Hotspots';
 import { SupportRack } from './Environment/SupportRack';
+import { ScenicEnvironment } from './Environment/ScenicEnvironment';
 
 export const Scene = () => {
   const { exploded, transparent, cutaway, mode } = useSystemState();
@@ -109,8 +110,9 @@ export const Scene = () => {
           maxDistance={20}
         />
 
-        {/* Global Atmospheric Ambient Dust Motes */}
+        {/* Global Atmospheric Ambient Dust Motes & Scenic Landscape */}
         <AmbientLife />
+        <ScenicEnvironment />
 
         {/* Hardware Components Group */}
         <group position={[0, -0.2, 0]}>
