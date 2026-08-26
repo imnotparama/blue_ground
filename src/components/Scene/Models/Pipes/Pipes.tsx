@@ -82,6 +82,28 @@ const PipeClamp = ({
   </group>
 );
 
+// ─── 3-Way T-Junction Manifold Fitting ─────────────────────────────────────────
+const PipeTee = ({
+  pos,
+  rot = [0, 0, 0] as [number, number, number],
+}: {
+  pos: [number, number, number];
+  rot?: [number, number, number];
+}) => (
+  <group position={pos} rotation={rot}>
+    {/* Horizontal through-pipe collar */}
+    <mesh castShadow>
+      <cylinderGeometry args={[0.025, 0.025, 0.06, 12]} />
+      <meshStandardMaterial color="#0284c7" roughness={0.3} metalness={0.8} />
+    </mesh>
+    {/* Branch pipe collar */}
+    <mesh position={[0.025, 0, 0]} rotation={[0, 0, Math.PI / 2]} castShadow>
+      <cylinderGeometry args={[0.024, 0.024, 0.045, 12]} />
+      <meshStandardMaterial color="#0284c7" roughness={0.3} metalness={0.8} />
+    </mesh>
+  </group>
+);
+
 // ─── Solenoid Valve Component ─────────────────────────────────────────────────
 const SolenoidValve = ({
   pos,
@@ -238,7 +260,9 @@ export const Pipes = () => {
       </group>
 
       {/* ══════════════════════════════════════════════════════════════════════
-          4. BAD WATER FILTRATION LOOP: PUMP [0.05, 0.08] → RO FILTRATION TANK [-1.40, 0.38] → TANK 2 INLET [-1.85]
+          4. BAD WATER FILTRATION LOOP & RECIRCULATION RETURN MANIFOLD
+             Pump [0.05, 0.08] → RO Filtration Tank [-1.40, 0.38] → Tank 2 [-1.85, 0.15]
+             Recirculation Loop: Tank 2 Bottom [-1.70, -0.22] → Return Riser [-0.88] → RO Inlet Manifold [-0.88, 0.38]
           ══════════════════════════════════════════════════════════════════════ */}
       <group>
         {/* Pipe from Pump Outlet rising up to elbow */}
@@ -246,11 +270,9 @@ export const Pipes = () => {
         <PipeElbow pos={[0.05, 0.38, 0]} />
         <TeflonRing pos={[0.05, 0.36, 0]} />
 
-        {/* Horizontal pipe spanning left across open gap to RO Filtration Tank Inlet */}
-        <PipeSeg pos={[-0.45, 0.38, 0]} len={1.00} rot={[0, 0, Math.PI / 2]} />
-        <TeflonRing pos={[-0.92, 0.38, 0]} rot={[0, 0, Math.PI / 2]} />
-
-        {/* (Water flows through the RO Filtration Tank from x = -0.95 to -1.85) */}
+        {/* Horizontal pipe spanning left from Chamber 1 to RO Filtration Tank Inlet Manifold */}
+        <PipeSeg pos={[-0.41, 0.38, 0]} len={0.92} rot={[0, 0, Math.PI / 2]} />
+        <TeflonRing pos={[-0.88, 0.38, 0]} rot={[0, 0, Math.PI / 2]} />
 
         {/* ─── SETUP 1: Direct Single-Pass Piping (RO -> Primary Clean Tank) ─── */}
         {!dualVerificationMode ? (
@@ -265,6 +287,9 @@ export const Pipes = () => {
         ) : (
           /* ─── SETUP 2: Dual-Stage Tank 2 & Recirculation Loop ─── */
           <group>
+            {/* 3-Way T-Junction Manifold at RO Filtration Tank Inlet joining Pump line + Recirculation Return */}
+            <PipeTee pos={[-0.88, 0.38, 0]} rot={[0, 0, -Math.PI / 2]} />
+
             {/* Pipe from Filtration Tank Outlet dropping into Post-Filtration Tank 2 Inlet */}
             <PipeSeg pos={[-1.85, 0.38, 0]} len={0.10} rot={[0, 0, Math.PI / 2]} />
             <TeflonRing pos={[-1.85, 0.38, 0]} rot={[0, 0, Math.PI / 2]} />
@@ -276,7 +301,7 @@ export const Pipes = () => {
             <PipeElbow pos={[-2.27, 0.03, 0]} />
             <PipeSeg pos={[-2.27, -0.25, 0]} len={0.56} />
 
-            {/* Tank 2 Recirculation Return Loop (Path B: Sub-Standard TDS -> Return to RO Pump Intake) */}
+            {/* Tank 2 Closed-Loop Recirculation System (Path B: Sub-Standard -> Return to RO Filtration Inlet) */}
             <group
               onClick={(e) => {
                 e.stopPropagation();
@@ -284,15 +309,34 @@ export const Pipes = () => {
                 setCameraPreset('RECIRCULATION_LOOP');
               }}
             >
-              {/* Recirculation Drop Pipe */}
-              <PipeSeg pos={[-1.70, -0.18, 0]} len={0.14} />
-              <PipeElbow pos={[-1.70, -0.25, 0]} />
-              {/* Solenoid Diverter Valve on Recirculation Loop */}
-              <SolenoidValve pos={[-1.50, -0.25, 0]} open={true} />
-              {/* Horizontal Recirculation Return Line Spanning Right to Pump Inlet */}
-              <PipeSeg pos={[-0.75, -0.25, 0]} len={1.50} rot={[0, 0, Math.PI / 2]} mat="gray" />
-              <PipeElbow pos={[0.05, -0.25, 0]} />
-              <PipeSeg pos={[0.05, -0.08, 0]} len={0.34} mat="gray" />
+              {/* Recirculation Bottom Drop Pipe from Tank 2 */}
+              <PipeSeg pos={[-1.70, -0.16, 0]} len={0.12} />
+              <PipeElbow pos={[-1.70, -0.22, 0]} />
+              
+              {/* Solenoid Diverter Valve */}
+              <SolenoidValve pos={[-1.52, -0.22, 0]} open={true} />
+              
+              {/* Mini Inline Recirculation Booster Pump */}
+              <group position={[-1.28, -0.22, 0]}>
+                <mesh castShadow>
+                  <cylinderGeometry args={[0.032, 0.032, 0.07, 12]} />
+                  <meshStandardMaterial color="#0284c7" roughness={0.3} metalness={0.8} />
+                </mesh>
+                <mesh position={[0, 0.03, 0]} castShadow>
+                  <boxGeometry args={[0.045, 0.035, 0.045]} />
+                  <meshStandardMaterial color="#0f172a" roughness={0.5} />
+                </mesh>
+              </group>
+
+              {/* Horizontal Recirculation Return Line Spanning Right to Filter Riser */}
+              <PipeSeg pos={[-1.29, -0.22, 0]} len={0.82} rot={[0, 0, Math.PI / 2]} mat="gray" />
+              
+              {/* Elbow turning upward into the RO filter inlet */}
+              <PipeElbow pos={[-0.88, -0.22, 0]} mat="gray" />
+              
+              {/* Vertical Recirculation Return Riser Pipe feeding DIRECTLY into RO Filter Inlet Manifold */}
+              <PipeSeg pos={[-0.88, 0.08, 0]} len={0.60} mat="gray" />
+              <TeflonRing pos={[-0.88, 0.35, 0]} />
             </group>
           </group>
         )}

@@ -173,18 +173,19 @@ export const WaterDropletTracker = () => {
       new THREE.Vector3(-0.40, -0.60, 0),
     ], false, 'catmullrom', 0.05);
 
-    // Stage 6 Setup 2 Path B (Sub-Standard Fail): Tank 2 -> Recirculation Return -> Pump -> RO Filter
+    // Stage 6 Setup 2 Path B (Sub-Standard Fail): Tank 2 -> Recirculation Return -> Riser -> RO Filter Inlet -> Filter Media -> Tank 2
     const stage6Recirc = new THREE.CatmullRomCurve3([
       new THREE.Vector3(-1.85, 0.15, 0),
-      new THREE.Vector3(-1.70, -0.18, 0),
-      new THREE.Vector3(-1.70, -0.25, 0),
-      new THREE.Vector3(-0.85, -0.25, 0),
-      new THREE.Vector3(0.05, -0.25, 0),
-      new THREE.Vector3(0.05, 0.08, 0),
-      new THREE.Vector3(0.05, 0.38, 0),
-      new THREE.Vector3(-0.45, 0.38, 0),
-      new THREE.Vector3(-0.95, 0.38, 0),
+      new THREE.Vector3(-1.70, -0.11, 0),
+      new THREE.Vector3(-1.70, -0.22, 0),
+      new THREE.Vector3(-1.25, -0.22, 0),
+      new THREE.Vector3(-0.88, -0.22, 0),
+      new THREE.Vector3(-0.88, 0.10, 0),
+      new THREE.Vector3(-0.88, 0.38, 0),
+      new THREE.Vector3(-1.15, 0.38, 0),
       new THREE.Vector3(-1.40, 0.38, 0),
+      new THREE.Vector3(-1.85, 0.38, 0),
+      new THREE.Vector3(-1.85, 0.15, 0),
     ], false, 'catmullrom', 0.05);
 
     return { 

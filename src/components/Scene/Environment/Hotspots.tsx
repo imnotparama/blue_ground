@@ -152,6 +152,22 @@ const hotspotsList: HotspotConfig[] = [
     getStatus: (m, mode) => mode === 'CLEANING' ? { label: 'PURGING', color: 'text-rose-400 animate-pulse' } : { label: 'DISPENSE READY', color: 'text-emerald-400' },
     getSub: () => 'Pure Water Outlet',
   },
+  {
+    id: 'tank2_verification',
+    preset: 'TANK2_VERIFICATION',
+    position: [-1.85, 0.15, 0.35],
+    label: 'Tank 2 (Verification Chamber)',
+    getStatus: (m) => (m.tds2 || 28) > 100 ? { label: 'RECIRCULATE', color: 'text-amber-400 animate-pulse' } : { label: 'POTABLE PASS', color: 'text-emerald-400' },
+    getSub: (m) => `Post-RO TDS: ${m.tds2 || 28} ppm`,
+  },
+  {
+    id: 'recirculation_loop',
+    preset: 'RECIRCULATION_LOOP',
+    position: [-1.15, -0.22, 0.10],
+    label: 'Closed-Loop Recirculation Riser',
+    getStatus: (m) => (m.recirculationActive || (m.tds2 || 0) > 100) ? { label: 'RE-FILTERING', color: 'text-purple-400 animate-pulse' } : { label: 'STANDBY', color: 'text-zinc-500' },
+    getSub: () => 'Returns to RO Filter Inlet',
+  },
 ];
 
 export const Hotspots = () => {

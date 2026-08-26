@@ -98,13 +98,18 @@ export const Flows = () => {
       new THREE.Vector3(-2.27, -0.45, 0),
     ], false, 'catmullrom', 0.02);
 
-    // F. Tank 2 Recirculation Return Loop (Sub-Standard Post-RO Water -> RO Pump)
+    // F. Tank 2 Recirculation Return Loop (Sub-Standard Post-RO Water -> Riser -> RO Filter Inlet -> Filter Media)
     const recirculationCurve = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(-1.70, -0.18, 0),
-      new THREE.Vector3(-1.70, -0.25, 0),
-      new THREE.Vector3(-0.85, -0.25, 0),
-      new THREE.Vector3(0.05, -0.25, 0),
-      new THREE.Vector3(0.05, 0.08, 0),
+      new THREE.Vector3(-1.70, -0.11, 0),
+      new THREE.Vector3(-1.70, -0.22, 0),
+      new THREE.Vector3(-1.25, -0.22, 0),
+      new THREE.Vector3(-0.88, -0.22, 0),
+      new THREE.Vector3(-0.88, 0.10, 0),
+      new THREE.Vector3(-0.88, 0.38, 0),
+      new THREE.Vector3(-1.15, 0.38, 0),
+      new THREE.Vector3(-1.40, 0.38, 0),
+      new THREE.Vector3(-1.85, 0.38, 0),
+      new THREE.Vector3(-1.85, 0.15, 0),
     ], false, 'catmullrom', 0.02);
 
     return { intakeCurve, filterCurve, directCurve, pumpCurve, tank2DeliveryCurve, recirculationCurve };
