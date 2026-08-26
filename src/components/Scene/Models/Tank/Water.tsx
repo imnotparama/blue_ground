@@ -50,14 +50,14 @@ export const Water = () => {
     // Floor is at y = -1.65, max top is y = 0.0 (max height = 1.60)
     const fillFraction = Math.max(metrics.waterLevel / 100, 0.08);
     const currentHeight = fillFraction * 1.55;
+    const dampFactor = 1.0 - Math.exp(-4.0 * delta);
 
     if (primaryWaterRef.current) {
       primaryWaterRef.current.scale.y = THREE.MathUtils.lerp(
         primaryWaterRef.current.scale.y,
         currentHeight,
-        0.06
+        dampFactor
       );
-      // Base sits at y = -1.65
       primaryWaterRef.current.position.y = -1.65 + primaryWaterRef.current.scale.y / 2;
     }
 
@@ -66,11 +66,11 @@ export const Water = () => {
     const targetRawColor = isTurbid ? new THREE.Color('#78350f') : new THREE.Color('#0d9488');
 
     if (secondaryMatRef.current) {
-      secondaryMatRef.current.color.lerp(targetRawColor, 0.05);
+      secondaryMatRef.current.color.lerp(targetRawColor, dampFactor);
       secondaryMatRef.current.opacity = THREE.MathUtils.lerp(
         secondaryMatRef.current.opacity,
         isTurbid ? 0.78 : 0.55,
-        0.05
+        dampFactor
       );
     }
 

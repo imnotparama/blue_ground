@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useSystemState } from '@/hooks/useSystemState';
 import * as THREE from 'three';
@@ -10,14 +10,27 @@ export const BatteryUnit = () => {
   const groupRef = useRef<THREE.Group>(null);
   const [hovered, setHovered] = useState(false);
   const ledRefs = useRef<(THREE.MeshStandardMaterial | null)[]>([]);
+  const materialsRef = useRef<THREE.MeshStandardMaterial[]>([]);
 
-  useFrame(() => {
+  useEffect(() => {
+    if (!groupRef.current) return;
+    const mats: THREE.MeshStandardMaterial[] = [];
+    groupRef.current.traverse((child) => {
+      if (child instanceof THREE.Mesh && child.material && !ledRefs.current.includes(child.material as any)) {
+        mats.push(child.material as THREE.MeshStandardMaterial);
+      }
+    });
+    materialsRef.current = mats;
+  }, []);
+
+  useFrame((_, delta) => {
     const targetY = exploded ? 0.35 : 0;
-    if (groupRef.current) {
-      groupRef.current.position.y = THREE.MathUtils.lerp(groupRef.current.position.y, targetY, 0.08);
+    const damp = 1.0 - Math.exp(-6 * delta);
 
+    if (groupRef.current) {
+      groupRef.current.position.y = THREE.MathUtils.lerp(groupRef.current.position.y, targetY, damp);
       const targetScale = hovered ? 1.03 : 1.0;
-      groupRef.current.scale.setScalar(THREE.MathUtils.lerp(groupRef.current.scale.x, targetScale, 0.15));
+      groupRef.current.scale.setScalar(THREE.MathUtils.lerp(groupRef.current.scale.x, targetScale, damp * 1.5));
     }
 
     const activeLedsCount = Math.ceil((metrics.batteryPercent / 100) * 5);
@@ -43,26 +56,20 @@ export const BatteryUnit = () => {
     const isDimmed = activeHotspot !== null && activeHotspot !== 'battery' && activeHotspot !== 'battery_pack';
     const targetOpacity = isDimmed ? 0.15 : 1.0;
 
-    if (groupRef.current) {
-      groupRef.current.traverse((child) => {
-        if (child instanceof THREE.Mesh) {
-          const mat = child.material as THREE.MeshStandardMaterial;
-          if (mat && !ledRefs.current.includes(mat)) {
-            mat.transparent = true;
-            mat.opacity = THREE.MathUtils.lerp(mat.opacity, targetOpacity, 0.08);
+    for (let i = 0; i < materialsRef.current.length; i++) {
+      const mat = materialsRef.current[i];
+      mat.transparent = true;
+      mat.opacity = THREE.MathUtils.lerp(mat.opacity, targetOpacity, damp);
 
-            if (mat.emissive) {
-              if (hovered && !isDimmed) {
-                mat.emissive.set('#06b6d4');
-                mat.emissiveIntensity = THREE.MathUtils.lerp(mat.emissiveIntensity, 0.4, 0.1);
-              } else {
-                mat.emissive.set('#000000');
-                mat.emissiveIntensity = THREE.MathUtils.lerp(mat.emissiveIntensity, 0.0, 0.1);
-              }
-            }
-          }
+      if (mat.emissive) {
+        if (hovered && !isDimmed) {
+          mat.emissive.set('#06b6d4');
+          mat.emissiveIntensity = THREE.MathUtils.lerp(mat.emissiveIntensity, 0.4, damp);
+        } else {
+          mat.emissive.set('#000000');
+          mat.emissiveIntensity = THREE.MathUtils.lerp(mat.emissiveIntensity, 0.0, damp);
         }
-      });
+      }
     }
   });
 

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useSystemState, CameraPreset } from '@/hooks/useSystemState';
 import * as THREE from 'three';
@@ -21,32 +21,51 @@ const InteractiveSensor: React.FC<InteractiveSensorProps> = ({
   const [hovered, setHovered] = useState(false);
   const groupRef = useRef<THREE.Group>(null);
   const isActive = activeHotspot === id;
+  const materialsRef = useRef<{ mesh: THREE.Mesh; mat: THREE.MeshStandardMaterial; isUv: boolean }[]>([]);
 
-  useFrame(() => {
+  useEffect(() => {
     if (!groupRef.current) return;
-    const isDimmed = activeHotspot !== null && activeHotspot !== id;
-    groupRef.current.traverse((child) => {
-      if (!(child instanceof THREE.Mesh)) return;
-      const mat = child.material as THREE.MeshStandardMaterial;
-      if (!mat) return;
-      mat.transparent = true;
-      mat.opacity = THREE.MathUtils.lerp(mat.opacity, isDimmed ? 0.15 : 1.0, 0.08);
-      if (mat.emissive) {
-        const isUv = child.name === 'uv-emitter-mesh';
-        if (hovered && !isDimmed) {
-          mat.emissive.set('#06b6d4');
-          mat.emissiveIntensity = THREE.MathUtils.lerp(mat.emissiveIntensity, 0.5, 0.1);
-        } else if (isUv && metrics.uvStatus === 'ON') {
-          mat.emissive.set('#fef08a');
-          mat.emissiveIntensity = THREE.MathUtils.lerp(mat.emissiveIntensity, 3.0, 0.1);
-        } else {
-          mat.emissive.set('#000000');
-          mat.emissiveIntensity = THREE.MathUtils.lerp(mat.emissiveIntensity, 0, 0.1);
-        }
+    const list: { mesh: THREE.Mesh; mat: THREE.MeshStandardMaterial; isUv: boolean }[] = [];
+    groupRef.current.traverse((child: any) => {
+      if (child instanceof THREE.Mesh && child.material) {
+        list.push({
+          mesh: child,
+          mat: child.material as THREE.MeshStandardMaterial,
+          isUv: child.name === 'uv-emitter-mesh',
+        });
       }
     });
+    materialsRef.current = list;
+  }, []);
+
+  useFrame((_, delta) => {
+    if (!groupRef.current) return;
+    const isDimmed = activeHotspot !== null && activeHotspot !== id;
+    const targetOpacity = isDimmed ? 0.15 : 1.0;
+    const damp = 1.0 - Math.exp(-8 * delta);
+
+    for (let i = 0; i < materialsRef.current.length; i++) {
+      const item = materialsRef.current[i];
+      const mat = item.mat;
+      mat.transparent = true;
+      mat.opacity = THREE.MathUtils.lerp(mat.opacity, targetOpacity, damp);
+      
+      if (mat.emissive) {
+        if (hovered && !isDimmed) {
+          mat.emissive.set('#06b6d4');
+          mat.emissiveIntensity = THREE.MathUtils.lerp(mat.emissiveIntensity, 0.5, damp);
+        } else if (item.isUv && metrics.uvStatus === 'ON') {
+          mat.emissive.set('#fef08a');
+          mat.emissiveIntensity = THREE.MathUtils.lerp(mat.emissiveIntensity, 3.0, damp);
+        } else {
+          mat.emissive.set('#000000');
+          mat.emissiveIntensity = THREE.MathUtils.lerp(mat.emissiveIntensity, 0, damp);
+        }
+      }
+    }
+    
     const targetScale = hovered ? 1.06 : 1.0;
-    groupRef.current.scale.setScalar(THREE.MathUtils.lerp(groupRef.current.scale.x, targetScale, 0.15));
+    groupRef.current.scale.setScalar(THREE.MathUtils.lerp(groupRef.current.scale.x, targetScale, damp * 1.5));
   });
 
   return (

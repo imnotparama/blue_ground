@@ -12,24 +12,37 @@ export const WaterPump = () => {
   const impellerRef = useRef<THREE.Group>(null);
   const [hovered, setHovered] = useState(false);
 
+  const materialsRef = useRef<THREE.MeshStandardMaterial[]>([]);
+
+  React.useEffect(() => {
+    if (!groupRef.current) return;
+    const mats: THREE.MeshStandardMaterial[] = [];
+    groupRef.current.traverse((child) => {
+      if (child instanceof THREE.Mesh && child.material) {
+        mats.push(child.material as THREE.MeshStandardMaterial);
+      }
+    });
+    materialsRef.current = mats;
+  }, []);
+
   useFrame((state, delta) => {
     const time = state.clock.getElapsedTime();
+    const damp = 1.0 - Math.exp(-6 * delta);
 
     const targetY = exploded ? 0.25 : 0;
     
     // High-frequency vibration when pump is running
     const vibrationAmp = metrics.pumpRpm > 0 ? 0.0015 : 0;
     const vibX = Math.sin(time * 90) * vibrationAmp;
-    const vibY = Math.cos(time * 80) * vibrationAmp;
     const vibZ = Math.sin(time * 100) * vibrationAmp;
 
     if (groupRef.current) {
-      groupRef.current.position.y = THREE.MathUtils.lerp(groupRef.current.position.y, 0.08 + targetY, 0.08);
+      groupRef.current.position.y = THREE.MathUtils.lerp(groupRef.current.position.y, 0.08 + targetY, damp);
       groupRef.current.position.x = -0.35 + vibX;
       groupRef.current.position.z = vibZ;
 
       const targetScale = hovered ? 1.03 : 1.0;
-      groupRef.current.scale.setScalar(THREE.MathUtils.lerp(groupRef.current.scale.x, targetScale, 0.15));
+      groupRef.current.scale.setScalar(THREE.MathUtils.lerp(groupRef.current.scale.x, targetScale, damp * 1.5));
     }
 
     // Impeller rotation
@@ -41,26 +54,20 @@ export const WaterPump = () => {
     const isDimmed = activeHotspot !== null && activeHotspot !== 'pump' && activeHotspot !== 'water_pump';
     const targetOpacity = isDimmed ? 0.15 : 1.0;
 
-    if (groupRef.current) {
-      groupRef.current.traverse((child) => {
-        if (child instanceof THREE.Mesh) {
-          const mat = child.material as THREE.MeshStandardMaterial;
-          if (mat) {
-            mat.transparent = true;
-            mat.opacity = THREE.MathUtils.lerp(mat.opacity, targetOpacity, 0.08);
+    for (let i = 0; i < materialsRef.current.length; i++) {
+      const mat = materialsRef.current[i];
+      mat.transparent = true;
+      mat.opacity = THREE.MathUtils.lerp(mat.opacity, targetOpacity, damp);
 
-            if (mat.emissive) {
-              if (hovered && !isDimmed) {
-                mat.emissive.set('#06b6d4');
-                mat.emissiveIntensity = THREE.MathUtils.lerp(mat.emissiveIntensity, 0.45, 0.1);
-              } else {
-                mat.emissive.set('#000000');
-                mat.emissiveIntensity = THREE.MathUtils.lerp(mat.emissiveIntensity, 0.0, 0.1);
-              }
-            }
-          }
+      if (mat.emissive) {
+        if (hovered && !isDimmed) {
+          mat.emissive.set('#06b6d4');
+          mat.emissiveIntensity = THREE.MathUtils.lerp(mat.emissiveIntensity, 0.45, damp);
+        } else {
+          mat.emissive.set('#000000');
+          mat.emissiveIntensity = THREE.MathUtils.lerp(mat.emissiveIntensity, 0.0, damp);
         }
-      });
+      }
     }
   });
 

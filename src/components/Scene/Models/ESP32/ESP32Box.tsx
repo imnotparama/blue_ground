@@ -64,15 +64,29 @@ export const ESP32Box = () => {
     }
   }, [metrics]);
 
-  useFrame((state) => {
+  const materialsRef = useRef<THREE.MeshStandardMaterial[]>([]);
+
+  useEffect(() => {
+    if (!groupRef.current) return;
+    const mats: THREE.MeshStandardMaterial[] = [];
+    groupRef.current.traverse((child) => {
+      if (child instanceof THREE.Mesh && child.material) {
+        mats.push(child.material as THREE.MeshStandardMaterial);
+      }
+    });
+    materialsRef.current = mats;
+  }, []);
+
+  useFrame((state, delta) => {
     const time = state.clock.getElapsedTime();
+    const damp = 1.0 - Math.exp(-6 * delta);
 
     if (groupRef.current) {
       const targetY = exploded ? 0.35 : 0;
-      groupRef.current.position.y = THREE.MathUtils.lerp(groupRef.current.position.y, targetY, 0.08);
+      groupRef.current.position.y = THREE.MathUtils.lerp(groupRef.current.position.y, targetY, damp);
 
       const targetScale = (hoveredBox || hoveredScreen) ? 1.03 : 1.0;
-      groupRef.current.scale.setScalar(THREE.MathUtils.lerp(groupRef.current.scale.x, targetScale, 0.15));
+      groupRef.current.scale.setScalar(THREE.MathUtils.lerp(groupRef.current.scale.x, targetScale, damp * 1.5));
     }
 
     if (statusLedRef.current) {
@@ -86,26 +100,20 @@ export const ESP32Box = () => {
     const isDimmed = activeHotspot !== null && activeHotspot !== 'esp32' && activeHotspot !== 'display';
     const targetOpacity = isDimmed ? 0.15 : 1.0;
 
-    if (groupRef.current) {
-      groupRef.current.traverse((child) => {
-        if (child instanceof THREE.Mesh) {
-          const mat = child.material as THREE.MeshStandardMaterial;
-          if (mat) {
-            mat.transparent = true;
-            mat.opacity = THREE.MathUtils.lerp(mat.opacity, targetOpacity, 0.08);
+    for (let i = 0; i < materialsRef.current.length; i++) {
+      const mat = materialsRef.current[i];
+      mat.transparent = true;
+      mat.opacity = THREE.MathUtils.lerp(mat.opacity, targetOpacity, damp);
 
-            if (mat.emissive && child !== powerLedRef.current && child !== statusLedRef.current) {
-              if ((hoveredBox || hoveredScreen) && !isDimmed) {
-                mat.emissive.set('#06b6d4');
-                mat.emissiveIntensity = THREE.MathUtils.lerp(mat.emissiveIntensity, 0.4, 0.1);
-              } else {
-                mat.emissive.set('#000000');
-                mat.emissiveIntensity = THREE.MathUtils.lerp(mat.emissiveIntensity, 0.0, 0.1);
-              }
-            }
-          }
+      if (mat.emissive && mat !== powerLedRef.current?.material && mat !== statusLedRef.current?.material) {
+        if ((hoveredBox || hoveredScreen) && !isDimmed) {
+          mat.emissive.set('#06b6d4');
+          mat.emissiveIntensity = THREE.MathUtils.lerp(mat.emissiveIntensity, 0.4, damp);
+        } else {
+          mat.emissive.set('#000000');
+          mat.emissiveIntensity = THREE.MathUtils.lerp(mat.emissiveIntensity, 0.0, damp);
         }
-      });
+      }
     }
   });
 

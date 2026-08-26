@@ -34,9 +34,10 @@ export const Scene = () => {
           'linear-gradient(180deg, #87ceeb 0%, #bfdbfe 40%, #dbeafe 65%, #dcfce7 85%, #bbf7d0 100%)',
       }}
     >
-      {/* 3D R3F Canvas */}
+      {/* 3D R3F Canvas with high-DPI crispness and smooth performance */}
       <Canvas
-        shadows
+        shadows="soft"
+        dpr={[1, 2]}
         gl={{
           antialias: true,
           alpha: true,
@@ -117,15 +118,18 @@ export const Scene = () => {
         {/* Camera state transitions controller */}
         <CameraController />
 
-        {/* Orbit controls */}
+        {/* Silky Smooth Orbit controls */}
         <OrbitControls
           makeDefault
           enableDamping
-          dampingFactor={0.05}
+          dampingFactor={0.075}
+          rotateSpeed={0.8}
+          zoomSpeed={0.9}
+          panSpeed={0.8}
           target={[0.0, -0.5, 0]}
-          maxPolarAngle={Math.PI / 2 + 0.1}
-          minDistance={0.5}
-          maxDistance={22}
+          maxPolarAngle={Math.PI / 2 + 0.08}
+          minDistance={0.8}
+          maxDistance={20}
         />
 
         {/* Global Atmospheric Ambient Dust Motes */}

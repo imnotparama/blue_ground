@@ -26,18 +26,18 @@ export const AmbientLife = () => {
     return { positions, velocities };
   }, []);
 
-  // 2. Generate 100 swirling water mist particles around the filter (x=2.2, y in [-1.2, 0.0])
+  // 2. Generate 80 swirling water mist particles around the sedimentation filter (x=1.9, y in [-0.6, 0.6])
   const mist = useMemo(() => {
-    const count = 100;
+    const count = 80;
     const positions = new Float32Array(count * 3);
     const speeds = new Float32Array(count);
     for (let i = 0; i < count; i++) {
       const angle = Math.random() * Math.PI * 2;
-      const radius = Math.random() * 0.18 + 0.1;
-      positions[i * 3] = 2.2 + Math.cos(angle) * radius;
-      positions[i * 3 + 1] = Math.random() * 1.2 - 1.2;
+      const radius = Math.random() * 0.16 + 0.12;
+      positions[i * 3] = 1.9 + Math.cos(angle) * radius;
+      positions[i * 3 + 1] = Math.random() * 1.0 - 0.5;
       positions[i * 3 + 2] = Math.sin(angle) * radius;
-      speeds[i] = Math.random() * 0.12 + 0.04;
+      speeds[i] = Math.random() * 0.10 + 0.03;
     }
     return { positions, speeds };
   }, []);
@@ -64,28 +64,25 @@ export const AmbientLife = () => {
       pointsRef.current.geometry.attributes.position.needsUpdate = true;
     }
 
-    // B. Update Spiraling Water Mist around Filter
+    // B. Update Spiraling Water Mist around Sedimentation Filter
     if (mistRef.current) {
       const positions = mistRef.current.geometry.attributes.position.array as Float32Array;
       for (let i = 0; i < mist.positions.length / 3; i++) {
-        // Rise slowly
         positions[i * 3 + 1] += mist.speeds[i] * delta;
         
-        // Orbit/spiral around filter core (x=2.2)
-        const dx = positions[i * 3] - 2.2;
+        const dx = positions[i * 3] - 1.9;
         const dz = positions[i * 3 + 2];
         const angle = Math.atan2(dz, dx) + 0.6 * delta;
         const radius = Math.sqrt(dx * dx + dz * dz);
         
-        positions[i * 3] = 2.2 + Math.cos(angle) * radius;
-        positions[i * 3 + 2] = 2.2 - 2.2 + Math.sin(angle) * radius; // relative z stays circular
+        positions[i * 3] = 1.9 + Math.cos(angle) * radius;
+        positions[i * 3 + 2] = Math.sin(angle) * radius;
 
-        // Recycle when reaching the top flange cap of the filter
-        if (positions[i * 3 + 1] > 0.05) {
-          positions[i * 3 + 1] = -1.2; // reset to funnel bottom
+        if (positions[i * 3 + 1] > 0.65) {
+          positions[i * 3 + 1] = -0.65;
           const a = Math.random() * Math.PI * 2;
-          const r = Math.random() * 0.18 + 0.1;
-          positions[i * 3] = 2.2 + Math.cos(a) * r;
+          const r = Math.random() * 0.16 + 0.12;
+          positions[i * 3] = 1.9 + Math.cos(a) * r;
           positions[i * 3 + 2] = Math.sin(a) * r;
         }
       }

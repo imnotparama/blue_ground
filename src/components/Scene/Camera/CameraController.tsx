@@ -145,8 +145,8 @@ export const CameraController = () => {
 
     const tl = gsap.timeline({
       defaults: {
-        duration: 1.4,
-        ease: 'power2.inOut',
+        duration: 1.5,
+        ease: 'power3.inOut',
       },
     });
 
@@ -173,7 +173,7 @@ export const CameraController = () => {
           y: preset.target[1],
           z: preset.target[2],
           onUpdate: () => {
-            ctrl.update();
+            if (ctrl.update) ctrl.update();
           },
         },
         0

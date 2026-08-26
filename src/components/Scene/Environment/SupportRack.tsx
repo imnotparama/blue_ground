@@ -9,20 +9,28 @@ export const SupportRack = () => {
   const { activeHotspot } = useSystemState();
   const rackRef = useRef<THREE.Group>(null);
 
-  useFrame(() => {
+  const materialsRef = useRef<THREE.MeshStandardMaterial[]>([]);
+
+  React.useEffect(() => {
+    if (!rackRef.current) return;
+    const mats: THREE.MeshStandardMaterial[] = [];
+    rackRef.current.traverse((child) => {
+      if (child instanceof THREE.Mesh && child.material) {
+        mats.push(child.material as THREE.MeshStandardMaterial);
+      }
+    });
+    materialsRef.current = mats;
+  }, []);
+
+  useFrame((_, delta) => {
     const isDimmed = activeHotspot !== null;
     const targetOpacity = isDimmed ? 0.15 : 1.0;
+    const damp = 1.0 - Math.exp(-6 * delta);
     
-    if (rackRef.current) {
-      rackRef.current.traverse((child) => {
-        if (child instanceof THREE.Mesh) {
-          const mat = child.material as THREE.MeshStandardMaterial;
-          if (mat) {
-            mat.transparent = true;
-            mat.opacity = THREE.MathUtils.lerp(mat.opacity, targetOpacity, 0.08);
-          }
-        }
-      });
+    for (let i = 0; i < materialsRef.current.length; i++) {
+      const mat = materialsRef.current[i];
+      mat.transparent = true;
+      mat.opacity = THREE.MathUtils.lerp(mat.opacity, targetOpacity, damp);
     }
   });
 
