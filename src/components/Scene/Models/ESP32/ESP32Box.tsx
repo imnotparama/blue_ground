@@ -7,46 +7,37 @@ import * as THREE from 'three';
 
 export const ESP32Box = () => {
   const { exploded, metrics, activeHotspot, setActiveHotspot, setCameraPreset } = useSystemState();
-  const groupRef = useRef<THREE.Group>(null);
-  const [hoveredBox, setHoveredBox] = useState(false);
-  const [hoveredScreen, setHoveredScreen] = useState(false);
   
+  const groupRef = useRef<THREE.Group>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const textureRef = useRef<THREE.CanvasTexture | null>(null);
-
-  const powerLedRef = useRef<THREE.Mesh>(null);
   const statusLedRef = useRef<THREE.Mesh>(null);
+  const powerLedRef = useRef<THREE.Mesh>(null);
 
-  // Draw real-time dynamic 1.8 TFT screen telemetry
+  const [hoveredBox, setHoveredBox] = useState(false);
+  const [hoveredScreen, setHoveredScreen] = useState(false);
+
+  // Dynamic 1.8 TFT Display canvas rendering
   useEffect(() => {
     const canvas = document.createElement('canvas');
     canvas.width = 128;
     canvas.height = 128;
     const ctx = canvas.getContext('2d');
-    
+
     if (ctx) {
-      ctx.fillStyle = '#09090b';
+      ctx.fillStyle = '#050c1e';
       ctx.fillRect(0, 0, 128, 128);
 
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.03)';
-      for (let y = 0; y < 128; y += 4) {
-        ctx.fillRect(0, y, 128, 2);
-      }
+      ctx.fillStyle = '#0284c7';
+      ctx.fillRect(0, 0, 128, 16);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 9px monospace';
+      ctx.fillText('AURA PURIFY IoT', 4, 11);
 
-      ctx.fillStyle = '#1e1b4b';
-      ctx.fillRect(0, 0, 128, 20);
-      
-      ctx.fillStyle = '#67e8f9';
-      ctx.font = 'bold 8px monospace';
-      ctx.fillText('UNIT & CONTROL', 6, 13);
-      
-      ctx.fillStyle = metrics.esp32Online ? '#10b981' : '#ef4444';
-      ctx.fillRect(110, 6, 8, 8);
-
-      ctx.fillStyle = '#94a3b8';
-      ctx.font = '7px monospace';
+      ctx.fillStyle = '#38bdf8';
+      ctx.font = '8px monospace';
       ctx.fillText(`FLOW : ${metrics.flowRate.toFixed(1)} L/M`, 6, 36);
-      ctx.fillText(`TDS  : ${Math.round(metrics.tds)} PPM`, 6, 49);
+      ctx.fillText(`TDS  : ${metrics.tds} PPM`, 6, 49);
       ctx.fillText(`TURB : ${metrics.turbidity.toFixed(1)} NTU`, 6, 62);
       ctx.fillText(`pH   : ${metrics.ph.toFixed(2)}`, 6, 75);
       ctx.fillText(`SOLAR: ${metrics.solarWatts.toFixed(0)}W`, 6, 88);
@@ -156,7 +147,7 @@ export const ESP32Box = () => {
       {/* Unit & Control Box on right roof at x = 0.40, y = 0.74, z = 0 */}
       <group position={[0.40, 0.74, 0]}>
         
-        {/* Main Enclosure Box */}
+        {/* Main IP65 Industrial Polycarbonate Enclosure Box */}
         <mesh 
           name="enclosure-mesh"
           castShadow 
@@ -191,23 +182,55 @@ export const ESP32Box = () => {
               emissiveIntensity={metrics.esp32Online ? 0.95 : 0.0}
             />
           </mesh>
+          {/* Protective Acrylic Glass Lens */}
+          <mesh position={[0, 0, 0.007]}>
+            <planeGeometry args={[0.245, 0.185]} />
+            <meshPhysicalMaterial color="#ffffff" transparent opacity={0.25} transmission={0.95} roughness={0.02} />
+          </mesh>
+        </group>
+
+        {/* Tactile Pushbutton Switches on Front-Right */}
+        <group position={[0.10, 0.0, 0.192]}>
+          {[-0.04, 0.04].map((by, bIdx) => (
+            <group key={bIdx} position={[0, by, 0]}>
+              <mesh castShadow>
+                <cylinderGeometry args={[0.012, 0.012, 0.008, 12]} />
+                <meshStandardMaterial color="#0284c7" roughness={0.3} metalness={0.5} />
+              </mesh>
+              <mesh position={[0, 0, 0.005]} castShadow>
+                <cylinderGeometry args={[0.008, 0.008, 0.006, 12]} />
+                <meshStandardMaterial color="#e2e8f0" roughness={0.1} metalness={0.9} />
+              </mesh>
+            </group>
+          ))}
         </group>
 
         {/* Diagnostic LEDs on Front-Right */}
-        <mesh ref={powerLedRef} position={[0.22, 0.06, 0.192]}>
-          <sphereGeometry args={[0.008, 8, 8]} />
-          <meshStandardMaterial color="#ef4444" emissive="#ef4444" emissiveIntensity={1.5} />
-        </mesh>
-        <mesh ref={statusLedRef} position={[0.22, -0.04, 0.192]}>
-          <sphereGeometry args={[0.008, 8, 8]} />
-          <meshStandardMaterial color="#10b981" emissive="#10b981" emissiveIntensity={1.5} />
-        </mesh>
+        <group position={[0.24, 0, 0.192]}>
+          <mesh ref={powerLedRef} position={[0, 0.06, 0]}>
+            <sphereGeometry args={[0.008, 8, 8]} />
+            <meshStandardMaterial color="#ef4444" emissive="#ef4444" emissiveIntensity={1.5} />
+          </mesh>
+          <mesh ref={statusLedRef} position={[0, -0.04, 0]}>
+            <sphereGeometry args={[0.008, 8, 8]} />
+            <meshStandardMaterial color="#10b981" emissive="#10b981" emissiveIntensity={1.5} />
+          </mesh>
+        </group>
 
-        {/* Unit & Control Label */}
-        <mesh position={[0.15, 0.01, 0.192]}>
-          <boxGeometry args={[0.22, 0.18, 0.002]} />
-          <meshStandardMaterial color="#0f172a" roughness={0.7} />
-        </mesh>
+        {/* Bottom Screw Terminal Header Block (for sensor probe wires) */}
+        <group position={[0, -0.14, 0]}>
+          <mesh castShadow>
+            <boxGeometry args={[0.45, 0.02, 0.08]} />
+            <meshStandardMaterial color="#15803d" roughness={0.4} />
+          </mesh>
+          {/* Individual screw terminals */}
+          {[-0.18, -0.12, -0.06, 0, 0.06, 0.12, 0.18].map((tx, idx) => (
+            <mesh key={idx} position={[tx, -0.01, 0.02]} castShadow>
+              <cylinderGeometry args={[0.004, 0.004, 0.01, 8]} />
+              <meshStandardMaterial color="#cbd5e1" roughness={0.2} metalness={0.95} />
+            </mesh>
+          ))}
+        </group>
       </group>
     </group>
   );

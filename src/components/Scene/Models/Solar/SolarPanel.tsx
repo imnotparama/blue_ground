@@ -18,43 +18,47 @@ export const SolarPanel = () => {
     const ctx = canvas.getContext('2d');
 
     if (ctx) {
-      ctx.fillStyle = '#0a1128';
+      // Dark navy monocrystalline base
+      ctx.fillStyle = '#050c1e';
       ctx.fillRect(0, 0, 512, 512);
 
       const gradient = ctx.createLinearGradient(0, 0, 512, 512);
-      gradient.addColorStop(0, '#0c1a40');
-      gradient.addColorStop(0.5, '#071026');
-      gradient.addColorStop(1, '#030814');
+      gradient.addColorStop(0, '#091838');
+      gradient.addColorStop(0.5, '#040d21');
+      gradient.addColorStop(1, '#020612');
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, 512, 512);
 
-      ctx.strokeStyle = '#94a3b8';
+      // Silver Busbar Ribbons (3 main vertical conductors per cell)
+      ctx.strokeStyle = '#e2e8f0';
       ctx.lineWidth = 3;
-      for (let x = 64; x < 512; x += 128) {
+      for (let x = 42; x < 512; x += 85) {
         ctx.beginPath();
         ctx.moveTo(x, 0);
         ctx.lineTo(x, 512);
         ctx.stroke();
       }
 
-      ctx.strokeStyle = 'rgba(203, 213, 225, 0.4)';
+      // Micro Finger Grid Wires
+      ctx.strokeStyle = 'rgba(226, 232, 240, 0.45)';
       ctx.lineWidth = 1;
-      for (let y = 16; y < 512; y += 16) {
+      for (let y = 8; y < 512; y += 8) {
         ctx.beginPath();
         ctx.moveTo(0, y);
         ctx.lineTo(512, y);
         ctx.stroke();
       }
 
+      // Cell Border Isolation Grooves
       ctx.strokeStyle = '#020617';
       ctx.lineWidth = 4;
-      for (let x = 0; x <= 512; x += 128) {
+      for (let x = 0; x <= 512; x += 170) {
         ctx.beginPath();
         ctx.moveTo(x, 0);
         ctx.lineTo(x, 512);
         ctx.stroke();
       }
-      for (let y = 0; y <= 512; y += 128) {
+      for (let y = 0; y <= 512; y += 170) {
         ctx.beginPath();
         ctx.moveTo(0, y);
         ctx.lineTo(512, y);
@@ -148,13 +152,24 @@ export const SolarPanel = () => {
         {/* Support Struts Elevated Frame */}
         {[-0.45, 0.45].map((xVal, i) => (
           <group key={i} position={[xVal, 0, 0]}>
+            {/* Rear Strut */}
             <mesh position={[0, 0.10, -0.25]} castShadow>
               <cylinderGeometry args={[0.012, 0.012, 0.20, 8]} />
               <meshStandardMaterial color="#64748b" roughness={0.3} metalness={0.8} />
             </mesh>
+            {/* Front Strut */}
             <mesh position={[0, 0.18, 0.25]} castShadow>
               <cylinderGeometry args={[0.012, 0.012, 0.36, 8]} />
               <meshStandardMaterial color="#64748b" roughness={0.3} metalness={0.8} />
+            </mesh>
+            {/* Stainless Mounting Base Flange */}
+            <mesh position={[0, 0.005, -0.25]} castShadow>
+              <boxGeometry args={[0.04, 0.01, 0.04]} />
+              <meshStandardMaterial color="#334155" roughness={0.2} metalness={0.9} />
+            </mesh>
+            <mesh position={[0, 0.005, 0.25]} castShadow>
+              <boxGeometry args={[0.04, 0.01, 0.04]} />
+              <meshStandardMaterial color="#334155" roughness={0.2} metalness={0.9} />
             </mesh>
           </group>
         ))}
@@ -193,6 +208,17 @@ export const SolarPanel = () => {
               <mesh position={[0, 0, 0]}>
                 <boxGeometry args={[0.31, 0.022, 0.66]} />
                 <meshStandardMaterial color="#cbd5e1" roughness={0.15} metalness={0.9} />
+              </mesh>
+
+              {/* IP68 Waterproof MC4 Junction Box on Underneath Backplate */}
+              <mesh position={[0, -0.018, -0.15]} castShadow>
+                <boxGeometry args={[0.08, 0.016, 0.06]} />
+                <meshStandardMaterial color="#0f172a" roughness={0.5} />
+              </mesh>
+              {/* Output Cable Gland */}
+              <mesh position={[0.035, -0.018, -0.15]} rotation={[0, 0, Math.PI / 2]} castShadow>
+                <cylinderGeometry args={[0.008, 0.008, 0.015, 8]} />
+                <meshStandardMaterial color="#1e293b" roughness={0.3} />
               </mesh>
             </group>
           ))}

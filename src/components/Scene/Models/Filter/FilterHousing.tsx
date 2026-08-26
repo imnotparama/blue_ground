@@ -175,10 +175,14 @@ export const FilterHousing = () => {
           <cylinderGeometry args={[0.145, 0.145, 0.08, 24]} />
           <meshStandardMaterial color="#0284c7" roughness={0.35} metalness={0.7} />
         </mesh>
-        {/* Quick-connect John Guest Fitting */}
+        {/* Quick-connect John Guest Fitting with Blue Locking Clip */}
         <mesh position={[0.06, 0, 0]} rotation={[0, 0, Math.PI / 2]} castShadow>
           <cylinderGeometry args={[0.035, 0.035, 0.06, 12]} />
           <meshStandardMaterial color="#f8fafc" roughness={0.3} metalness={0.2} />
+        </mesh>
+        <mesh position={[0.08, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
+          <torusGeometry args={[0.036, 0.005, 8, 16]} />
+          <meshStandardMaterial color="#0284c7" roughness={0.4} />
         </mesh>
       </group>
 
@@ -188,34 +192,53 @@ export const FilterHousing = () => {
           <cylinderGeometry args={[0.145, 0.145, 0.08, 24]} />
           <meshStandardMaterial color="#0284c7" roughness={0.35} metalness={0.7} />
         </mesh>
-        {/* Quick-connect Fitting */}
+        {/* Quick-connect Fitting with Blue Locking Clip */}
         <mesh position={[-0.06, 0, 0]} rotation={[0, 0, -Math.PI / 2]} castShadow>
           <cylinderGeometry args={[0.035, 0.035, 0.06, 12]} />
           <meshStandardMaterial color="#f8fafc" roughness={0.3} metalness={0.2} />
         </mesh>
+        <mesh position={[-0.08, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
+          <torusGeometry args={[0.036, 0.005, 8, 16]} />
+          <meshStandardMaterial color="#0284c7" roughness={0.4} />
+        </mesh>
       </group>
 
-      {/* 4. ANALOG RO PRESSURE GAUGE (Dial Indicator) */}
+      {/* 4. ANALOG RO PRESSURE GAUGE (Dial Indicator with Dual PSI/Bar Scale) */}
       <group position={[0.20, 0.18, 0.08]} rotation={[0.2, 0, 0]}>
         {/* Brass Stem */}
         <mesh position={[0, -0.04, 0]} castShadow>
           <cylinderGeometry args={[0.012, 0.012, 0.06, 8]} />
           <meshStandardMaterial color="#ca8a04" roughness={0.2} metalness={0.9} />
         </mesh>
-        {/* Dial Bezel */}
+        {/* Dial Stainless Bezel */}
         <mesh rotation={[Math.PI / 2, 0, 0]} castShadow>
           <cylinderGeometry args={[0.065, 0.065, 0.02, 20]} />
           <meshStandardMaterial color="#d4d4d8" roughness={0.2} metalness={0.9} />
         </mesh>
-        {/* Dial Face */}
+        {/* Dial Face White Background */}
         <mesh position={[0, 0, 0.011]}>
           <circleGeometry args={[0.058, 20]} />
           <meshStandardMaterial color="#ffffff" roughness={0.9} />
         </mesh>
-        {/* Pressure Gauge Needle */}
+        {/* Green Safe Pressure Zone Arc */}
+        <mesh position={[0, 0, 0.0115]}>
+          <ringGeometry args={[0.038, 0.048, 16, 1, Math.PI * 0.25, Math.PI * 0.7]} />
+          <meshStandardMaterial color="#22c55e" roughness={0.5} />
+        </mesh>
+        {/* Red Overpressure Warning Zone Arc */}
+        <mesh position={[0, 0, 0.0115]}>
+          <ringGeometry args={[0.038, 0.048, 16, 1, Math.PI * 0.95, Math.PI * 0.35]} />
+          <meshStandardMaterial color="#ef4444" roughness={0.5} />
+        </mesh>
+        {/* Pressure Gauge Red Needle */}
         <mesh ref={pressureGaugeNeedleRef} position={[0, 0, 0.013]}>
           <boxGeometry args={[0.005, 0.045, 0.002]} />
           <meshStandardMaterial color="#dc2626" roughness={0.2} />
+        </mesh>
+        {/* Center Chrome Cap */}
+        <mesh position={[0, 0, 0.014]}>
+          <cylinderGeometry args={[0.008, 0.008, 0.004, 10]} />
+          <meshStandardMaterial color="#334155" roughness={0.1} metalness={0.9} />
         </mesh>
       </group>
 

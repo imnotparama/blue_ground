@@ -100,22 +100,36 @@ export const BatteryUnit = () => {
       {/* Battery Source Box in the middle of roof at x = -0.65, y = 0.74, z = 0 */}
       <group position={[-0.65, 0.74, 0]}>
         
-        {/* Main Casing Housing */}
+        {/* Main Aluminum Extruded Housing */}
         <mesh position={[0, 0, 0]} castShadow receiveShadow>
           <boxGeometry args={[0.70, 0.28, 0.40]} />
           <meshStandardMaterial color="#0f172a" roughness={0.35} metalness={0.8} />
         </mesh>
 
-        {/* Battery Source Label */}
+        {/* Stainless Steel Toggle Latch Clamps on Front */}
+        {[-0.22, 0.22].map((lx, idx) => (
+          <group key={idx} position={[lx, 0.08, 0.204]}>
+            <mesh castShadow>
+              <boxGeometry args={[0.025, 0.05, 0.012]} />
+              <meshStandardMaterial color="#cbd5e1" roughness={0.15} metalness={0.95} />
+            </mesh>
+            <mesh position={[0, -0.02, 0]} castShadow>
+              <cylinderGeometry args={[0.005, 0.005, 0.03, 8]} />
+              <meshStandardMaterial color="#94a3b8" roughness={0.2} metalness={0.9} />
+            </mesh>
+          </group>
+        ))}
+
+        {/* Battery Source Rating Nameplate */}
         <mesh position={[0, 0.04, 0.202]}>
-          <boxGeometry args={[0.55, 0.12, 0.005]} />
+          <boxGeometry args={[0.36, 0.10, 0.005]} />
           <meshStandardMaterial color="#1e293b" roughness={0.5} metalness={0.6} />
         </mesh>
 
-        {/* Cooling Fins */}
-        {[-0.25, -0.15, -0.05, 0.05, 0.15, 0.25].map((xVal, i) => (
-          <mesh key={i} position={[xVal, 0.0, -0.205]} castShadow>
-            <boxGeometry args={[0.015, 0.22, 0.02]} />
+        {/* Rear Aluminum Extrusion Thermal Heatsink Fins */}
+        {[-0.28, -0.20, -0.12, -0.04, 0.04, 0.12, 0.20, 0.28].map((xVal, i) => (
+          <mesh key={i} position={[xVal, 0.0, -0.208]} castShadow>
+            <boxGeometry args={[0.012, 0.24, 0.025]} />
             <meshStandardMaterial color="#334155" roughness={0.2} metalness={0.9} />
           </mesh>
         ))}
@@ -145,6 +159,11 @@ export const BatteryUnit = () => {
             <cylinderGeometry args={[0.012, 0.012, 0.02, 8]} />
             <meshStandardMaterial color="#ca8a04" roughness={0.2} metalness={0.95} />
           </mesh>
+          {/* Embossed '+' Symbol */}
+          <group position={[0, 0.018, 0.03]}>
+            <mesh><boxGeometry args={[0.016, 0.004, 0.002]} /><meshStandardMaterial color="#ffffff" /></mesh>
+            <mesh><boxGeometry args={[0.004, 0.016, 0.002]} /><meshStandardMaterial color="#ffffff" /></mesh>
+          </group>
         </group>
 
         {/* Negative Black Terminal (Right side to ESP32) */}
@@ -157,6 +176,10 @@ export const BatteryUnit = () => {
             <cylinderGeometry args={[0.012, 0.012, 0.02, 8]} />
             <meshStandardMaterial color="#ca8a04" roughness={0.2} metalness={0.95} />
           </mesh>
+          {/* Embossed '-' Symbol */}
+          <group position={[0, 0.018, 0.03]}>
+            <mesh><boxGeometry args={[0.016, 0.004, 0.002]} /><meshStandardMaterial color="#ffffff" /></mesh>
+          </group>
         </group>
       </group>
     </group>
