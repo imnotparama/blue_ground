@@ -59,7 +59,7 @@ const hotspotsList: HotspotConfig[] = [
   {
     id: 'pump',
     preset: 'PUMP',
-    position: [-0.35, 0.20, 0],
+    position: [0.05, 0.20, 0],
     label: 'Filtration Pump',
     getStatus: (m) => m.pumpRpm > 0 ? { label: 'RUNNING', color: 'text-emerald-400' } : { label: 'STANDBY', color: 'text-zinc-500' },
     getSub: (m) => `${m.pumpRpm} RPM`,
@@ -67,7 +67,7 @@ const hotspotsList: HotspotConfig[] = [
   {
     id: 'filter_housing',
     preset: 'FILTER_HOUSING',
-    position: [-0.85, 0.40, 0.20],
+    position: [-1.40, 0.40, 0.20],
     label: 'RO Filtration Tank',
     getStatus: (m, mode) => mode === 'TURBIDITY' ? { label: 'PURIFYING', color: 'text-amber-400 animate-pulse' } : { label: 'MULTI-STAGE ACTIVE', color: 'text-cyan-400' },
     getSub: (m) => `${m.filterHealth}% Health (PP+CTO+RO)`,
@@ -131,7 +131,7 @@ const hotspotsList: HotspotConfig[] = [
   {
     id: 'secondary_tank',
     preset: 'SECONDARY_TANK',
-    position: [0.30, 0.28, 0.70],
+    position: [0.45, 0.28, 0.70],
     label: 'Secondary Compartment',
     getStatus: () => ({ label: 'SENSOR CHAMBER', color: 'text-cyan-400' }),
     getSub: () => 'Quality Analysis Compartment',

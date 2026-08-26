@@ -38,7 +38,7 @@ export const WaterPump = () => {
 
     if (groupRef.current) {
       groupRef.current.position.y = THREE.MathUtils.lerp(groupRef.current.position.y, 0.08 + targetY, damp);
-      groupRef.current.position.x = -0.35 + vibX;
+      groupRef.current.position.x = 0.05 + vibX;
       groupRef.current.position.z = vibZ;
 
       const targetScale = hovered ? 1.03 : 1.0;
@@ -91,7 +91,7 @@ export const WaterPump = () => {
   return (
     <group 
       ref={groupRef}
-      position={[-0.35, 0.08, 0]}
+      position={[0.05, 0.08, 0]}
       onPointerOver={handlePointerOver}
       onPointerOut={handlePointerOut}
       onClick={handleClick}

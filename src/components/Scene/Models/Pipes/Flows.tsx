@@ -76,18 +76,19 @@ export const Flows = () => {
 
     // C. Direct Passage Valve (Good water)
     const directCurve = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(0.5, 0.05, 0),
-      new THREE.Vector3(0.5, -0.25, 0),
+      new THREE.Vector3(0.70, 0.05, 0),
+      new THREE.Vector3(0.70, -0.25, 0),
     ], false, 'catmullrom', 0.02);
 
-    // D. Pump -> RO Filtration Tank -> Primary Tank (Bad water)
+    // D. Pump [0.05, 0.08] -> RO Filtration Tank [-1.40, 0.38] -> Primary Tank [-1.95] (Bad water)
     const pumpCurve = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(-0.35, 0.08, 0),
-      new THREE.Vector3(-0.35, 0.40, 0),
-      new THREE.Vector3(-0.85, 0.40, 0),
-      new THREE.Vector3(-1.39, 0.40, 0),
-      new THREE.Vector3(-1.42, 0.40, 0),
-      new THREE.Vector3(-1.42, 0.10, 0),
+      new THREE.Vector3(0.05, 0.08, 0),
+      new THREE.Vector3(0.05, 0.38, 0),
+      new THREE.Vector3(-0.45, 0.38, 0),
+      new THREE.Vector3(-0.95, 0.38, 0),
+      new THREE.Vector3(-1.85, 0.38, 0),
+      new THREE.Vector3(-1.95, 0.38, 0),
+      new THREE.Vector3(-1.95, 0.10, 0),
     ], false, 'catmullrom', 0.02);
 
     return { intakeCurve, filterCurve, directCurve, pumpCurve };

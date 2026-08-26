@@ -152,11 +152,11 @@ export const Water = () => {
 
       {/* ════════════════════════════════════════════════════════════════════
           B. SECONDARY COMPARTMENT WATER (Top Right Sensor Chamber)
-             Bounds: x from -0.35 to 0.95 (center = 0.30, width = 1.30), y = [0.05, 0.55]
+             Bounds: x from -0.08 to 0.98 (center = 0.45, width = 1.06), y = [0.05, 0.55]
           ════════════════════════════════════════════════════════════════════ */}
-      <group position={[0.30, 0, 0]}>
+      <group position={[0.45, 0, 0]}>
         <mesh ref={secondaryWaterRef} position={[0, 0.28, 0]} castShadow receiveShadow>
-          <boxGeometry args={[1.30, 0.46, 1.20]} />
+          <boxGeometry args={[1.04, 0.46, 1.20]} />
           <meshPhysicalMaterial
             ref={secondaryMatRef}
             color="#0d9488"

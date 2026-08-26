@@ -176,9 +176,10 @@ export const Tanks = () => {
           </group>
         ))}
 
-        {/* HORIZONTAL COMPARTMENT DIVIDER (Secondary Top ↔ Primary Bottom) */}
-        <mesh position={[0.45, 0.55, 0]} receiveShadow castShadow>
-          <boxGeometry args={[1.7, 0.025, TD - 0.04]} />
+        {/* HORIZONTAL COMPARTMENT DIVIDER (Secondary Top ↔ Primary Bottom on Right Side) */}
+        {/* Secondary compartment spans world x from -0.10 to +1.00 -> local x from +0.60 to +1.70 (center = +1.15, width = 1.10) */}
+        <mesh position={[1.15, 0.55, 0]} receiveShadow castShadow>
+          <boxGeometry args={[1.10, 0.025, TD - 0.04]} />
           <meshPhysicalMaterial
             color="#e0f2fe"
             transparent
@@ -190,13 +191,13 @@ export const Tanks = () => {
         </mesh>
 
         {/* Divider Cyan Glowing Front Edge */}
-        <mesh position={[0.45, 0.55, TD / 2 - 0.001]}>
-          <boxGeometry args={[1.7, 0.02, 0.004]} />
+        <mesh position={[1.15, 0.55, TD / 2 - 0.001]}>
+          <boxGeometry args={[1.10, 0.02, 0.004]} />
           <meshStandardMaterial color="#06b6d4" emissive="#06b6d4" emissiveIntensity={0.8} />
         </mesh>
 
-        {/* Vertical Partition Wall for Secondary Compartment Left Edge */}
-        <mesh position={[-0.40, 0.85, 0]} receiveShadow castShadow>
+        {/* Vertical Partition Wall for Secondary Compartment Left Edge (world x = -0.10 -> local x = +0.60) */}
+        <mesh position={[0.60, 0.85, 0]} receiveShadow castShadow>
           <boxGeometry args={[0.025, 0.60, TD - 0.04]} />
           <meshPhysicalMaterial
             color="#e0f2fe"
@@ -206,6 +207,12 @@ export const Tanks = () => {
             roughness={0.06}
             depthWrite={false}
           />
+        </mesh>
+
+        {/* Vertical Divider Cyan Glowing Front Edge */}
+        <mesh position={[0.60, 0.85, TD / 2 - 0.001]}>
+          <boxGeometry args={[0.02, 0.60, 0.004]} />
+          <meshStandardMaterial color="#06b6d4" emissive="#06b6d4" emissiveIntensity={0.8} />
         </mesh>
 
         {/* ─── PHOTOREALISTIC HARDWARE & SCALE ETCHINGS ─── */}
@@ -285,8 +292,8 @@ export const Tanks = () => {
         {/* A. Secondary Compartment Inlet (from Sedimentation / Flow sensor) */}
         <PipeNozzle pos={[TW / 2, 0.85, 0]} rot={[0, 0, Math.PI / 2]} />
 
-        {/* B. Primary Tank Clean Return Inlet (from RO Filtration Tank on left) */}
-        <PipeNozzle pos={[-TW / 2 + 0.9, TH / 2, 0]} rot={[0, 0, 0]} />
+        {/* B. Primary Tank Clean Return Inlet (from RO Filtration Tank on left at world x = -1.95) */}
+        <PipeNozzle pos={[-1.25, TH / 2, 0]} rot={[0, 0, 0]} />
 
         {/* C. Primary Tank Clean Water Outlet Tap (Bottom-Left) */}
         <PipeNozzle pos={[-TW / 2, -0.90, 0]} rot={[0, 0, -Math.PI / 2]} />

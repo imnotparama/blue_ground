@@ -38,8 +38,8 @@ export const CAMERA_PRESETS: Record<CameraPreset, { position: [number, number, n
     target: [-2.1, -0.65, 0.3],
   },
   PUMP: {
-    position: [-0.35, 0.45, 0.8],
-    target: [-0.35, 0.15, 0],
+    position: [0.05, 0.45, 0.8],
+    target: [0.05, 0.15, 0],
   },
   UV_LED: {
     position: [0.35, -0.2, 0.9],
@@ -70,20 +70,20 @@ export const CAMERA_PRESETS: Record<CameraPreset, { position: [number, number, n
     target: [1.90, 0.05, 0],
   },
   FILTER_HOUSING: {
-    position: [-0.85, 0.65, 1.2],
-    target: [-0.85, 0.40, 0],
+    position: [-1.40, 0.65, 1.2],
+    target: [-1.40, 0.38, 0],
   },
   INSIDE_FILTER: {
-    position: [-0.85, 0.50, 0.8],
-    target: [-0.85, 0.40, 0],
+    position: [-1.40, 0.50, 0.8],
+    target: [-1.40, 0.38, 0],
   },
   PRIMARY_TANK: {
     position: [-0.7, -0.3, 3.2],
     target: [-0.7, -0.55, 0],
   },
   SECONDARY_TANK: {
-    position: [0.30, 0.45, 1.8],
-    target: [0.30, 0.28, 0],
+    position: [0.45, 0.45, 1.8],
+    target: [0.45, 0.28, 0],
   },
   INTAKE_PIPE: {
     position: [2.8, 0.2, 1.8],

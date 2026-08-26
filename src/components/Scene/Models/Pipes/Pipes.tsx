@@ -197,31 +197,34 @@ export const Pipes = () => {
 
       {/* ══════════════════════════════════════════════════════════════════════
           3. DIRECT PASSAGE VALVE (Secondary Floor → Primary Tank for Good Water)
-             Position: [0.5, 0.0, 0]
+             Position: [0.70, 0.0, 0]
           ══════════════════════════════════════════════════════════════════════ */}
       <group>
-        <SolenoidValve pos={[0.5, 0.0, 0]} rot={[Math.PI / 2, 0, 0]} open={isDirectValveOpen} />
-        <TeflonRing pos={[0.5, -0.04, 0]} />
-        <PipeSeg pos={[0.5, -0.15, 0]} len={0.24} />
+        <SolenoidValve pos={[0.70, 0.0, 0]} rot={[Math.PI / 2, 0, 0]} open={isDirectValveOpen} />
+        <TeflonRing pos={[0.70, -0.04, 0]} />
+        <PipeSeg pos={[0.70, -0.15, 0]} len={0.24} />
       </group>
 
       {/* ══════════════════════════════════════════════════════════════════════
-          4. BAD WATER FILTRATION LOOP: PUMP [-0.35, 0.08] → RO FILTRATION TANK [-0.85, 0.40] → PRIMARY TANK [-1.39]
+          4. BAD WATER FILTRATION LOOP: PUMP [0.05, 0.08] → RO FILTRATION TANK [-1.40, 0.38] → PRIMARY TANK [-1.95]
           ══════════════════════════════════════════════════════════════════════ */}
       <group>
-        {/* Pipe from Pump Outlet rising into Filtration Tank Inlet */}
-        <PipeSeg pos={[-0.35, 0.24, 0]} len={0.18} />
-        <PipeElbow pos={[-0.35, 0.40, 0]} />
-        <TeflonRing pos={[-0.35, 0.33, 0]} />
-        <PipeSeg pos={[-0.33, 0.40, 0]} len={0.05} rot={[0, 0, Math.PI / 2]} />
+        {/* Pipe from Pump Outlet rising up */}
+        <PipeSeg pos={[0.05, 0.23, 0]} len={0.16} />
+        <PipeElbow pos={[0.05, 0.38, 0]} />
+        <TeflonRing pos={[0.05, 0.32, 0]} />
 
-        {/* (Water flows through the RO Filtration Tank from x = -0.31 to -1.39) */}
+        {/* Horizontal pipe spanning left across open gap to RO Filtration Tank Inlet */}
+        <PipeSeg pos={[-0.45, 0.38, 0]} len={1.00} rot={[0, 0, Math.PI / 2]} />
+        <TeflonRing pos={[-0.92, 0.38, 0]} rot={[0, 0, Math.PI / 2]} />
+
+        {/* (Water flows through the RO Filtration Tank from x = -0.95 to -1.85) */}
 
         {/* Pipe from Filtration Tank Outlet dropping into Primary Clean Storage */}
-        <PipeSeg pos={[-1.39, 0.40, 0]} len={0.06} rot={[0, 0, Math.PI / 2]} />
-        <TeflonRing pos={[-1.40, 0.40, 0]} rot={[0, 0, Math.PI / 2]} />
-        <PipeElbow pos={[-1.42, 0.40, 0]} />
-        <PipeSeg pos={[-1.42, 0.20, 0]} len={0.38} />
+        <PipeSeg pos={[-1.90, 0.38, 0]} len={0.10} rot={[0, 0, Math.PI / 2]} />
+        <TeflonRing pos={[-1.88, 0.38, 0]} rot={[0, 0, Math.PI / 2]} />
+        <PipeElbow pos={[-1.95, 0.38, 0]} />
+        <PipeSeg pos={[-1.95, 0.19, 0]} len={0.38} />
       </group>
 
       {/* ══════════════════════════════════════════════════════════════════════
