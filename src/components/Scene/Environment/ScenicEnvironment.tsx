@@ -43,25 +43,211 @@ const CloudCluster = ({ position, scale = 1 }: { position: [number, number, numb
   );
 };
 
+// ─── High-Detail JCB Crawler Excavator Model ──────────────────────────────────
+const JCBExcavator = ({ position, rotation = [0, 0.6, 0], scale = 0.85 }: { position: [number, number, number]; rotation?: [number, number, number]; scale?: number }) => (
+  <group position={position} rotation={rotation} scale={scale}>
+    {/* Dual Heavy Crawler Tracks */}
+    {[-0.45, 0.45].map((zTrack, i) => (
+      <group key={i} position={[0, 0.22, zTrack]}>
+        {/* Track Belt */}
+        <mesh castShadow receiveShadow>
+          <boxGeometry args={[1.8, 0.38, 0.34]} />
+          <meshStandardMaterial color="#0f172a" roughness={0.95} metalness={0.8} />
+        </mesh>
+        {/* Track Sprockets / Rollers */}
+        {[-0.7, -0.25, 0.25, 0.7].map((xSp, sIdx) => (
+          <mesh key={sIdx} position={[xSp, 0, 0]} rotation={[Math.PI / 2, 0, 0]} castShadow>
+            <cylinderGeometry args={[0.16, 0.16, 0.36, 12]} />
+            <meshStandardMaterial color="#334155" roughness={0.8} metalness={0.9} />
+          </mesh>
+        ))}
+      </group>
+    ))}
+
+    {/* Center Undercarriage Turntable */}
+    <mesh position={[0, 0.38, 0]} castShadow>
+      <cylinderGeometry args={[0.35, 0.40, 0.15, 16]} />
+      <meshStandardMaterial color="#1e293b" roughness={0.7} metalness={0.8} />
+    </mesh>
+
+    {/* Rotating Upper Carriage (JCB Yellow & Charcoal Body) */}
+    <group position={[0, 0.75, 0]}>
+      {/* Main Engine Enclosure */}
+      <mesh position={[-0.2, 0.2, 0]} castShadow>
+        <boxGeometry args={[1.3, 0.65, 1.1]} />
+        <meshStandardMaterial color="#f59e0b" roughness={0.35} metalness={0.6} />
+      </mesh>
+      {/* Rear Counterweight (Dark Slate with Hazard Stripes) */}
+      <mesh position={[-0.85, 0.18, 0]} castShadow>
+        <boxGeometry args={[0.35, 0.60, 1.05]} />
+        <meshStandardMaterial color="#0f172a" roughness={0.8} metalness={0.9} />
+      </mesh>
+
+      {/* Operator Cabin with Tinted Glass */}
+      <group position={[0.25, 0.32, 0.38]}>
+        <mesh castShadow>
+          <boxGeometry args={[0.65, 0.65, 0.42]} />
+          <meshStandardMaterial color="#09090b" roughness={0.4} />
+        </mesh>
+        {/* Glass Windshield & Windows */}
+        <mesh position={[0.02, 0.05, 0.02]}>
+          <boxGeometry args={[0.62, 0.55, 0.40]} />
+          <meshPhysicalMaterial
+            color="#38bdf8"
+            transparent
+            opacity={0.65}
+            roughness={0.1}
+            metalness={0.8}
+            transmission={0.4}
+          />
+        </mesh>
+        {/* Roof Spotlight */}
+        <mesh position={[0.32, 0.32, 0]} castShadow>
+          <boxGeometry args={[0.08, 0.06, 0.12]} />
+          <meshStandardMaterial color="#fef08a" emissive="#fef08a" emissiveIntensity={1.5} />
+        </mesh>
+      </group>
+
+      {/* Hydraulic Articulating Boom Arm */}
+      <group position={[0.45, 0.15, -0.15]} rotation={[0, 0, -0.45]}>
+        {/* Main Boom Segment */}
+        <mesh position={[0.85, 0, 0]} castShadow>
+          <boxGeometry args={[1.8, 0.22, 0.16]} />
+          <meshStandardMaterial color="#f59e0b" roughness={0.35} metalness={0.6} />
+        </mesh>
+        {/* Hydraulic Cylinder */}
+        <mesh position={[0.5, 0.12, 0]} rotation={[0, 0, 0.1]} castShadow>
+          <cylinderGeometry args={[0.04, 0.04, 0.8, 8]} />
+          <meshStandardMaterial color="#cbd5e1" roughness={0.15} metalness={0.95} />
+        </mesh>
+
+        {/* Dipper / Arm Stick */}
+        <group position={[1.7, 0, 0]} rotation={[0, 0, 0.95]}>
+          <mesh position={[0.65, 0, 0]} castShadow>
+            <boxGeometry args={[1.35, 0.18, 0.14]} />
+            <meshStandardMaterial color="#f59e0b" roughness={0.35} metalness={0.6} />
+          </mesh>
+
+          {/* Heavy Digging Bucket with Teeth */}
+          <group position={[1.3, 0, 0]} rotation={[0, 0, 0.65]}>
+            <mesh castShadow>
+              <boxGeometry args={[0.55, 0.45, 0.45]} />
+              <meshStandardMaterial color="#1e293b" roughness={0.8} metalness={0.9} />
+            </mesh>
+            {/* Digging Teeth */}
+            {[-0.16, -0.05, 0.05, 0.16].map((zTooth, tIdx) => (
+              <mesh key={tIdx} position={[0.3, -0.18, zTooth]} rotation={[0, 0, -0.4]} castShadow>
+                <coneGeometry args={[0.03, 0.12, 4]} />
+                <meshStandardMaterial color="#cbd5e1" roughness={0.3} metalness={0.9} />
+              </mesh>
+            ))}
+          </group>
+        </group>
+      </group>
+    </group>
+  </group>
+);
+
+// ─── Heavy Mining Tipper Lorry / Dump Truck ────────────────────────────────────
+const MiningLorry = ({ position, rotation = [0, -0.5, 0], scale = 0.85 }: { position: [number, number, number]; rotation?: [number, number, number]; scale?: number }) => (
+  <group position={position} rotation={rotation} scale={scale}>
+    {/* 6 Large Off-Road Mining Wheels */}
+    {[-0.9, 0.5, 1.1].map((xW, i) =>
+      [-0.65, 0.65].map((zW, j) => (
+        <mesh key={`${i}-${j}`} position={[xW, 0.32, zW]} rotation={[Math.PI / 2, 0, 0]} castShadow>
+          <cylinderGeometry args={[0.32, 0.32, 0.26, 16]} />
+          <meshStandardMaterial color="#09090b" roughness={0.95} />
+        </mesh>
+      ))
+    )}
+
+    {/* Heavy Steel Truck Chassis Frame */}
+    <mesh position={[0.2, 0.45, 0]} castShadow>
+      <boxGeometry args={[2.7, 0.28, 0.95]} />
+      <meshStandardMaterial color="#1e293b" roughness={0.7} metalness={0.8} />
+    </mesh>
+
+    {/* Driver Cab (Front) */}
+    <group position={[-0.85, 0.95, 0]}>
+      <mesh castShadow>
+        <boxGeometry args={[0.95, 0.85, 1.15]} />
+        <meshStandardMaterial color="#ea580c" roughness={0.35} metalness={0.5} />
+      </mesh>
+      {/* Windshield */}
+      <mesh position={[-0.49, 0.15, 0]}>
+        <boxGeometry args={[0.02, 0.45, 1.0]} />
+        <meshPhysicalMaterial color="#38bdf8" transparent opacity={0.65} roughness={0.1} />
+      </mesh>
+      {/* Roof Amber Hazard Flasher */}
+      <mesh position={[0, 0.45, 0]}>
+        <cylinderGeometry args={[0.06, 0.06, 0.08, 10]} />
+        <meshStandardMaterial color="#f59e0b" emissive="#f59e0b" emissiveIntensity={2.0} />
+      </mesh>
+    </group>
+
+    {/* Tipper Ore Dump Bed (Tilted Back) */}
+    <group position={[0.65, 1.05, 0]} rotation={[0, 0, -0.08]}>
+      {/* Heavy Ribbed Dump Body */}
+      <mesh castShadow>
+        <boxGeometry args={[1.8, 0.75, 1.25]} />
+        <meshStandardMaterial color="#d97706" roughness={0.5} metalness={0.7} />
+      </mesh>
+      {/* Mined Raw Ore Payload Chunks inside tipper */}
+      <mesh position={[0, 0.25, 0]}>
+        <dodecahedronGeometry args={[0.65, 1]} />
+        <meshStandardMaterial color="#57534e" roughness={0.95} />
+      </mesh>
+    </group>
+  </group>
+);
+
+// ─── Mining Site Mobile Floodlight Tower ───────────────────────────────────────
+const MiningLightTower = ({ position }: { position: [number, number, number] }) => (
+  <group position={position} scale={0.75}>
+    {/* Trailer Base */}
+    <mesh position={[0, 0.2, 0]} castShadow>
+      <boxGeometry args={[0.8, 0.3, 0.6]} />
+      <meshStandardMaterial color="#eab308" roughness={0.4} />
+    </mesh>
+    {/* Trailer Wheels */}
+    {[-0.35, 0.35].map((z, i) => (
+      <mesh key={i} position={[0, 0.15, z]} rotation={[Math.PI / 2, 0, 0]} castShadow>
+        <cylinderGeometry args={[0.15, 0.15, 0.08, 12]} />
+        <meshStandardMaterial color="#09090b" roughness={0.9} />
+      </mesh>
+    ))}
+    {/* Telescoping Mast */}
+    <mesh position={[0, 1.8, 0]} castShadow>
+      <cylinderGeometry args={[0.04, 0.06, 3.2, 8]} />
+      <meshStandardMaterial color="#cbd5e1" metalness={0.9} roughness={0.2} />
+    </mesh>
+    {/* 4 Floodlight Fixtures */}
+    {[-0.15, 0.15].map((x, i) =>
+      [-0.15, 0.15].map((z, j) => (
+        <mesh key={`${i}-${j}`} position={[x, 3.4, z]} rotation={[0.4, 0, 0]} castShadow>
+          <boxGeometry args={[0.12, 0.10, 0.08]} />
+          <meshStandardMaterial color="#fef08a" emissive="#fef08a" emissiveIntensity={1.8} />
+        </mesh>
+      ))
+    )}
+  </group>
+);
+
 // ─── Distant Pine Tree Model ──────────────────────────────────────────────────
 const DistantPine = ({ position, scale = 1 }: { position: [number, number, number]; scale?: number }) => (
   <group position={position} scale={scale}>
-    {/* Trunk */}
     <mesh position={[0, 0.7, 0]} castShadow>
       <cylinderGeometry args={[0.08, 0.12, 1.4, 6]} />
       <meshStandardMaterial color="#451a03" roughness={0.9} />
     </mesh>
-    {/* Tier 1 Foliage */}
     <mesh position={[0, 1.5, 0]} castShadow>
       <coneGeometry args={[0.7, 1.3, 7]} />
       <meshStandardMaterial color="#14532d" roughness={0.9} />
     </mesh>
-    {/* Tier 2 Foliage */}
     <mesh position={[0, 2.2, 0]} castShadow>
       <coneGeometry args={[0.55, 1.1, 7]} />
       <meshStandardMaterial color="#166534" roughness={0.9} />
     </mesh>
-    {/* Tier 3 Foliage */}
     <mesh position={[0, 2.8, 0]} castShadow>
       <coneGeometry args={[0.38, 0.9, 7]} />
       <meshStandardMaterial color="#15803d" roughness={0.9} />
@@ -90,19 +276,16 @@ const DistantBroadleaf = ({ position, scale = 1 }: { position: [number, number, 
 // ─── Steel Lattice Transmission Pylon (Far Mining Infrastructure) ─────────────
 const TransmissionPylon = ({ position }: { position: [number, number, number] }) => (
   <group position={position} scale={0.85}>
-    {/* 4 Main Steel Legs */}
     <mesh position={[0, 4.0, 0]} castShadow>
       <cylinderGeometry args={[0.2, 0.9, 8.0, 4]} />
       <meshStandardMaterial color="#475569" roughness={0.4} metalness={0.8} />
     </mesh>
-    {/* Horizontal Crossarms */}
     {[-1.2, 0.5, 2.2].map((yOff, i) => (
       <mesh key={i} position={[0, 4.0 + yOff, 0]} rotation={[0, 0, Math.PI / 2]}>
         <cylinderGeometry args={[0.06, 0.06, 2.4 - i * 0.4, 6]} />
         <meshStandardMaterial color="#334155" roughness={0.3} metalness={0.9} />
       </mesh>
     ))}
-    {/* High-Voltage Power Lines */}
     <mesh position={[0, 6.2, 0]} rotation={[0, 0, Math.PI / 2]}>
       <cylinderGeometry args={[0.015, 0.015, 40.0, 4]} />
       <meshStandardMaterial color="#1e293b" roughness={0.2} metalness={0.9} />
@@ -134,12 +317,10 @@ const GlidingBirds = () => {
         [-2.4, 0.6, -1.0],
       ].map((pos, idx) => (
         <group key={idx} position={pos as [number, number, number]} scale={0.25} rotation={[0, 0.3, 0]}>
-          {/* Left Wing */}
           <mesh position={[-0.4, 0, 0]} rotation={[0, 0, 0.2]}>
             <boxGeometry args={[0.8, 0.02, 0.15]} />
             <meshBasicMaterial color="#1e293b" />
           </mesh>
-          {/* Right Wing */}
           <mesh position={[0.4, 0, 0]} rotation={[0, 0, -0.2]}>
             <boxGeometry args={[0.8, 0.02, 0.15]} />
             <meshBasicMaterial color="#1e293b" />
@@ -190,15 +371,29 @@ export const ScenicEnvironment = () => {
       </group>
 
       {/* ═══════════════════════════════════════════════════════════════════════
-          2. INDUSTRIAL INFRASTRUCTURE (Distant Left)
+          2. MINING SITE HEAVY MACHINERY (JCB Excavators, Tipper Lorries, Towers)
           ═══════════════════════════════════════════════════════════════════════ */}
-      <TransmissionPylon position={[-14, -2.2, -18]} />
-      <TransmissionPylon position={[-24, -2.2, -24]} />
+      {/* JCB Heavy Excavator working on left quarry ridge */}
+      <JCBExcavator position={[-10.5, -1.9, -15]} rotation={[0, 0.45, 0]} scale={0.9} />
+
+      {/* Heavy Mining Tipper Lorry / Dump Truck on haul road */}
+      <MiningLorry position={[-6.8, -2.15, -13]} rotation={[0, -0.55, 0]} scale={0.88} />
+
+      {/* Second Tipper Lorry further along the haul path */}
+      <MiningLorry position={[-13.5, -2.15, -18]} rotation={[0, 0.25, 0]} scale={0.75} />
+
+      {/* Mobile Site Light Tower */}
+      <MiningLightTower position={[-4.8, -2.2, -11]} />
 
       {/* ═══════════════════════════════════════════════════════════════════════
-          3. DISTANT FORESTS & VEGETATION
+          3. INDUSTRIAL INFRASTRUCTURE (Distant Left)
           ═══════════════════════════════════════════════════════════════════════ */}
-      {/* Right Green Forest Belt */}
+      <TransmissionPylon position={[-16, -2.2, -19]} />
+      <TransmissionPylon position={[-26, -2.2, -25]} />
+
+      {/* ═══════════════════════════════════════════════════════════════════════
+          4. DISTANT FORESTS & VEGETATION (East Sector)
+          ═══════════════════════════════════════════════════════════════════════ */}
       {[
         { pos: [6.5, -2.2, -10], s: 1.1, type: 'pine' },
         { pos: [8.0, -2.2, -12], s: 1.3, type: 'broad' },
@@ -214,17 +409,8 @@ export const ScenicEnvironment = () => {
         )
       ))}
 
-      {/* Left Sparse Vegetation transitioning to Quarry */}
-      {[
-        { pos: [-6.8, -2.2, -10], s: 0.85 },
-        { pos: [-9.0, -2.2, -12], s: 1.0 },
-        { pos: [-11.5, -2.2, -14], s: 1.15 },
-      ].map((item, idx) => (
-        <DistantPine key={`left-${idx}`} position={item.pos as [number, number, number]} scale={item.s} />
-      ))}
-
       {/* ═══════════════════════════════════════════════════════════════════════
-          4. ATMOSPHERIC DRIFTING CLOUDS & BIRDS
+          5. ATMOSPHERIC DRIFTING CLOUDS & BIRDS
           ═══════════════════════════════════════════════════════════════════════ */}
       <CloudCluster position={[-18, 9.0, -18]} scale={1.4} />
       <CloudCluster position={[4, 11.5, -22]} scale={1.8} />
@@ -233,9 +419,8 @@ export const ScenicEnvironment = () => {
       <GlidingBirds />
 
       {/* ═══════════════════════════════════════════════════════════════════════
-          5. SURROUNDING TERRAIN & ROCK OUTCROPS
+          6. SURROUNDING TERRAIN & ROCK OUTCROPS
           ═══════════════════════════════════════════════════════════════════════ */}
-      {/* Natural Landscape Soil Ground Ring */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2.23, 0]} receiveShadow>
         <planeGeometry args={[120, 80]} />
         <meshStandardMaterial
