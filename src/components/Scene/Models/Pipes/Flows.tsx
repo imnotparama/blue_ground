@@ -210,16 +210,21 @@ export const Flows = () => {
     updateParticles(intakeParticlesRef, curves.intakeCurve, particleConfig.intake.progress);
     updateParticles(filterParticlesRef, curves.filterCurve, particleConfig.filter.progress);
 
-    const isRecirculating = dualVerificationMode && (recirculationTriggered || metrics.turbidity2 > 1.0);
+    const isRecirculating = dualVerificationMode && (recirculationTriggered || (metrics.tds2 || 0) > 100 || (metrics.turbidity2 || 0) > 1.0);
 
     if (metrics.waterQuality === 'EXCELLENT') {
       updateParticles(directParticlesRef, curves.directCurve, particleConfig.direct.progress);
     } else {
       updateParticles(pumpParticlesRef, curves.pumpCurve, particleConfig.pump.progress);
-      if (isRecirculating) {
-        updateParticles(recircParticlesRef, curves.recirculationCurve, particleConfig.recirc.progress);
+      if (dualVerificationMode) {
+        if (isRecirculating) {
+          updateParticles(recircParticlesRef, curves.recirculationCurve, particleConfig.recirc.progress);
+        } else {
+          updateParticles(directParticlesRef, curves.tank2DeliveryCurve, particleConfig.direct.progress);
+        }
       } else {
-        updateParticles(directParticlesRef, curves.tank2DeliveryCurve, particleConfig.direct.progress);
+        // Setup 1 Direct Single-Pass to Primary Clean Tank
+        updateParticles(directParticlesRef, curves.directCurve, particleConfig.direct.progress);
       }
     }
 

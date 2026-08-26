@@ -274,11 +274,11 @@ export const Dashboard = () => {
                     <Activity className="w-3.5 h-3.5 text-purple-400" /> Tank 2 Verification Array
                   </h2>
                   <span className={`text-[8px] font-mono px-1.5 py-0.2 rounded font-bold ${
-                    (metrics.recirculationActive || recirculationTriggered || (metrics.turbidity2 || 0) > 1.0)
+                    (metrics.recirculationActive || recirculationTriggered || (metrics.tds2 || 0) > 100 || (metrics.turbidity2 || 0) > 1.0)
                       ? 'bg-rose-950 text-rose-300 border border-rose-500/40 animate-pulse'
                       : 'bg-emerald-950 text-emerald-300 border border-emerald-500/40'
                   }`}>
-                    {(metrics.recirculationActive || recirculationTriggered || (metrics.turbidity2 || 0) > 1.0) ? 'RECIRCULATING' : 'POTABLE PASS'}
+                    {(metrics.recirculationActive || recirculationTriggered || (metrics.tds2 || 0) > 100 || (metrics.turbidity2 || 0) > 1.0) ? 'RECIRCULATING (HIGH TDS)' : 'POTABLE PASS (TDS OK)'}
                   </span>
                 </div>
                 <div className="grid grid-cols-3 gap-1.5 text-center font-mono">

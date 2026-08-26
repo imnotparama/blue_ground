@@ -92,13 +92,14 @@ const InteractiveSensor: React.FC<InteractiveSensorProps> = ({
 };
 
 export const Sensors = () => {
-  const { exploded, metrics } = useSystemState();
+  const { exploded, metrics, dualVerificationMode } = useSystemState();
 
   const flowRotorRef = useRef<THREE.Group>(null);
   const floatRingRef = useRef<THREE.Mesh>(null);
   const probeGroupRef = useRef<THREE.Group>(null);
   const flowGroupRef = useRef<THREE.Group>(null);
   const floatGroupRef = useRef<THREE.Group>(null);
+  const sensor2GroupRef = useRef<THREE.Group>(null);
 
   useFrame((state, delta) => {
     // Flow sensor turbine rotation
@@ -115,6 +116,13 @@ export const Sensors = () => {
         waterHeight,
         1.0 - Math.exp(-4.0 * delta)
       );
+    }
+
+    if (sensor2GroupRef.current) {
+      const targetScale = dualVerificationMode ? 1.0 : 0.001;
+      const damp = 1.0 - Math.exp(-8 * delta);
+      sensor2GroupRef.current.scale.setScalar(THREE.MathUtils.lerp(sensor2GroupRef.current.scale.x, targetScale, damp));
+      sensor2GroupRef.current.visible = sensor2GroupRef.current.scale.x > 0.05;
     }
 
     // Exploded View offset
@@ -362,7 +370,7 @@ export const Sensors = () => {
              Center: [-1.85, 0.15, 0]
              Sensors: TDS #2, pH #2, Turbidity #2, Float #2
           ═══════════════════════════════════════════════════════════════════════ */}
-      <group position={[-1.85, 0.15, 0]}>
+      <group ref={sensor2GroupRef} position={[-1.85, 0.15, 0]}>
         {/* TDS Probe #2 */}
         <InteractiveSensor id="tds2" preset="TANK2_VERIFICATION" position={[0.10, 0.05, 0]}>
           <mesh castShadow>

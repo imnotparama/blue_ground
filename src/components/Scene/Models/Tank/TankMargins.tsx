@@ -125,7 +125,7 @@ const TankMarginBox: React.FC<TankMarginBoxProps> = ({
 
 // ─── Main TankMargins Manager Component ───────────────────────────────────────
 export const TankMargins = () => {
-  const { tanksOnly } = useSystemState();
+  const { tanksOnly, dualVerificationMode } = useSystemState();
 
   if (!tanksOnly) return null;
 
@@ -180,16 +180,18 @@ export const TankMargins = () => {
       />
 
       {/* 5. POST-FILTRATION TANK 2 (Sensor Suite #2 & Recirculation Diverter) */}
-      <TankMarginBox
-        center={[-1.85, 0.15, 0]}
-        size={[0.72, 0.56, 0.62]}
-        title="Tank 2 (Verification Chamber)"
-        capacity="20 Liters"
-        role="Post-RO Quality Verification"
-        dimensions="0.68m × 0.52m × 0.58m"
-        color="#a855f7"
-        badgeBg="rgba(168, 85, 247, 0.20)"
-      />
+      {dualVerificationMode && (
+        <TankMarginBox
+          center={[-1.85, 0.15, 0]}
+          size={[0.72, 0.56, 0.62]}
+          title="Tank 2 (Verification Chamber)"
+          capacity="20 Liters"
+          role="Post-RO Quality Verification"
+          dimensions="0.68m × 0.52m × 0.58m"
+          color="#a855f7"
+          badgeBg="rgba(168, 85, 247, 0.20)"
+        />
+      )}
     </group>
   );
 };

@@ -187,8 +187,12 @@ export const WaterTrackerHUD = () => {
     prevWaterStage,
     autoPlayWater,
     setAutoPlayWater,
+    dualVerificationMode,
+    setDualVerificationMode,
     recirculationTriggered,
     setRecirculationTriggered,
+    setTank2Tds,
+    metrics,
   } = useSystemState();
 
   const [soundEnabled, setSoundEnabled] = useState(true);
@@ -401,47 +405,81 @@ export const WaterTrackerHUD = () => {
               <div className="flex flex-col gap-0.5">
                 <div className="flex items-center gap-2">
                   <span className="font-bold text-xs text-white font-mono">
-                    {waterTrackStage === 6 && recirculationTriggered ? 'Stage 6: Closed-Loop Recirculation' : currentStage.title}
+                    {waterTrackStage === 6
+                      ? !dualVerificationMode
+                        ? 'Setup 1: Direct Single-Pass to 250L Storage'
+                        : recirculationTriggered || metrics.tds2 > 100
+                        ? 'Setup 2: Recirculation Return (High TDS Fail)'
+                        : 'Setup 2: Tank 2 TDS Verified (Potable Pass)'
+                      : currentStage.title}
                   </span>
                   <span className={`text-[9px] font-mono px-2 py-0.5 rounded-full border uppercase font-bold ${
-                    waterTrackStage === 6 && recirculationTriggered ? 'text-amber-400 bg-amber-950/80 border-amber-500/40' : currentStage.statusColor
+                    waterTrackStage === 6 && (recirculationTriggered || metrics.tds2 > 100)
+                      ? 'text-amber-400 bg-amber-950/80 border-amber-500/40'
+                      : currentStage.statusColor
                   }`}>
-                    {waterTrackStage === 6 && recirculationTriggered ? 'RE-FILTERING' : currentStage.status}
+                    {waterTrackStage === 6 && (recirculationTriggered || metrics.tds2 > 100) ? 'RE-FILTERING' : currentStage.status}
                   </span>
                 </div>
                 <p className="text-[11px] font-mono text-zinc-400 leading-relaxed">
-                  {waterTrackStage === 6 && recirculationTriggered
-                    ? 'Sensor Array #2 detected sub-standard permeate in Tank 2. Solenoid diverter routed fluid into the recirculation loop back to RO pump for secondary multi-pass filtration.'
+                  {waterTrackStage === 6
+                    ? !dualVerificationMode
+                      ? 'Setup 1 Standard Pipeline: Direct cascade from RO filter outlet into Primary 250L Reservoir with 254nm UV-C germicidal disinfection.'
+                      : recirculationTriggered || metrics.tds2 > 100
+                      ? 'Setup 2 Dual-Verification: TDS Sensor #2 sensed elevated dissolved solids (185 ppm > 100 ppm threshold). Solenoid diverter routed fluid into the closed-loop return pipe back to RO pump for secondary re-filtration.'
+                      : 'Setup 2 Dual-Verification: TDS Sensor #2 verified potable purity (28 ppm < 100 ppm). Pure water cascades from Tank 2 into the Primary 250L Reservoir for UV-C disinfection.'
                     : currentStage.description}
                 </p>
 
-                {/* Stage 6 Interactive Decision Branch Switcher */}
+                {/* Stage 6 Interactive Setup & Verification Outcome Switcher */}
                 {waterTrackStage === 6 && (
-                  <div className="flex items-center gap-2 pt-2 mt-1 border-t border-white/10">
-                    <span className="text-[10px] font-mono text-zinc-400 font-semibold">Verification Outcome:</span>
-                    <button
-                      onClick={() => setRecirculationTriggered(false)}
-                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border font-mono text-[10px] font-bold transition-all cursor-pointer ${
-                        !recirculationTriggered
-                          ? 'bg-emerald-500/20 border-emerald-400 text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.3)]'
-                          : 'bg-zinc-900 border-white/10 text-zinc-500 hover:text-white'
-                      }`}
-                    >
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                      <span>PASS ➔ CLEAN TANK</span>
-                    </button>
+                  <div className="flex flex-wrap items-center gap-2 pt-2 mt-1 border-t border-white/10">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[10px] font-mono text-zinc-400 font-semibold">Mode:</span>
+                      <button
+                        onClick={() => setDualVerificationMode(!dualVerificationMode)}
+                        className={`px-2 py-0.5 rounded-md font-mono text-[9px] font-bold border transition-all cursor-pointer ${
+                          !dualVerificationMode
+                            ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300'
+                            : 'bg-purple-500/20 border-purple-400 text-purple-300'
+                        }`}
+                      >
+                        {dualVerificationMode ? 'Setup 2: Tank 2' : 'Setup 1: Direct'}
+                      </button>
+                    </div>
 
-                    <button
-                      onClick={() => setRecirculationTriggered(true)}
-                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border font-mono text-[10px] font-bold transition-all cursor-pointer ${
-                        recirculationTriggered
-                          ? 'bg-amber-500/25 border-amber-400 text-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.3)]'
-                          : 'bg-zinc-900 border-white/10 text-zinc-500 hover:text-white'
-                      }`}
-                    >
-                      <Repeat className="w-3.5 h-3.5 text-amber-400 animate-spin-slow" style={{ animationDuration: '6s' }} />
-                      <span>FAIL ➔ RECIRCULATE TO RO</span>
-                    </button>
+                    {dualVerificationMode ? (
+                      <div className="flex items-center gap-1.5 pl-2 border-l border-white/10">
+                        <span className="text-[10px] font-mono text-zinc-400 font-semibold">TDS #2 Check:</span>
+                        <button
+                          onClick={() => setTank2Tds(28)}
+                          className={`flex items-center gap-1 px-2.5 py-1 rounded-lg border font-mono text-[10px] font-bold transition-all cursor-pointer ${
+                            metrics.tds2 <= 100
+                              ? 'bg-emerald-500/25 border-emerald-400 text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.3)]'
+                              : 'bg-zinc-900 border-white/10 text-zinc-500 hover:text-white'
+                          }`}
+                        >
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                          <span>TDS 28 ppm (Pass ➔ Tank)</span>
+                        </button>
+
+                        <button
+                          onClick={() => setTank2Tds(185)}
+                          className={`flex items-center gap-1 px-2.5 py-1 rounded-lg border font-mono text-[10px] font-bold transition-all cursor-pointer ${
+                            metrics.tds2 > 100
+                              ? 'bg-amber-500/25 border-amber-400 text-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.3)] animate-pulse'
+                              : 'bg-zinc-900 border-white/10 text-zinc-500 hover:text-white'
+                          }`}
+                        >
+                          <Repeat className="w-3.5 h-3.5 text-amber-400 animate-spin-slow" style={{ animationDuration: '6s' }} />
+                          <span>TDS 185 ppm (Fail ➔ Re-Filter)</span>
+                        </button>
+                      </div>
+                    ) : (
+                      <span className="text-[10px] font-mono text-cyan-400/80 italic">
+                        (Single-pass mode: Press &apos;V&apos; or toggle to Setup 2 for Tank 2 sensor verification)
+                      </span>
+                    )}
                   </div>
                 )}
               </div>

@@ -101,7 +101,7 @@ export const TopBar = () => {
           <span className={`text-[10px] px-1 py-0.2 rounded font-bold ${sidebarTab === 'TOOLS' ? 'bg-amber-950 text-amber-300 border border-amber-500/40' : 'bg-zinc-800 border border-zinc-700 text-zinc-400'}`}>S</span>
         </button>
 
-        {/* Toggle Dual Verification Loop Mode Button */}
+        {/* Toggle Setup 1 (Standard Direct) vs Setup 2 (Tank 2 Dual-Verif & Recirculation) */}
         <button
           onClick={() => setDualVerificationMode(!dualVerificationMode)}
           className={`flex items-center gap-2 px-3.5 py-2 rounded-full border transition-all text-xs font-mono tracking-wide cursor-pointer ${
@@ -109,10 +109,12 @@ export const TopBar = () => {
               ? 'bg-purple-500/25 border-purple-400 text-purple-300 shadow-[0_0_18px_rgba(168,85,247,0.35)]'
               : 'bg-zinc-900/80 border-zinc-700 text-zinc-400 hover:text-white hover:border-purple-500/40'
           }`}
-          title="Toggle Dual-Stage Verification Loop & Post-Filtration Tank 2 (Hotkey: V)"
+          title="Toggle Architecture: Setup 1 (Direct RO->Clean Tank) vs Setup 2 (Tank 2 TDS Verification & Recirculation) [Hotkey: V]"
         >
           <Repeat className={`w-3.5 h-3.5 ${dualVerificationMode ? 'text-purple-400 animate-spin-slow' : 'text-zinc-400'}`} style={{ animationDuration: '6s' }} />
-          <span className="hidden sm:inline font-semibold">{dualVerificationMode ? 'Dual Verif: ON' : 'Dual Verif'}</span>
+          <span className="hidden sm:inline font-semibold">
+            {dualVerificationMode ? 'Setup 2: Tank 2 Verif' : 'Setup 1: Direct'}
+          </span>
           <span className={`text-[10px] px-1 py-0.2 rounded font-bold ${dualVerificationMode ? 'bg-purple-950 text-purple-300 border border-purple-500/40' : 'bg-zinc-800 border border-zinc-700 text-zinc-400'}`}>V</span>
         </button>
 

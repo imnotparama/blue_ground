@@ -6,7 +6,7 @@ import { useSystemState } from '@/hooks/useSystemState';
 import * as THREE from 'three';
 
 export const Water = () => {
-  const { metrics, mode } = useSystemState();
+  const { metrics, mode, dualVerificationMode } = useSystemState();
 
   const primaryWaterRef = useRef<THREE.Mesh>(null);
   const secondaryWaterRef = useRef<THREE.Mesh>(null);
@@ -190,25 +190,27 @@ export const Water = () => {
 
       {/* ════════════════════════════════════════════════════════════════════
           C. POST-FILTRATION QUALITY TANK 2 WATER (Chamber 2 at x = -1.85)
-             Contains Post-RO crystal pure water undergoing 2nd sensor check
+             Contains Post-RO water undergoing TDS sensor check
           ════════════════════════════════════════════════════════════════════ */}
-      <group position={[-1.85, 0.15, 0]}>
-        <mesh position={[0, -0.02, 0]} castShadow receiveShadow>
-          <boxGeometry args={[0.62, 0.42, 0.52]} />
-          <meshPhysicalMaterial
-            color="#38bdf8"
-            transparent
-            opacity={0.62}
-            roughness={0.02}
-            metalness={0.05}
-            transmission={0.92}
-            thickness={0.10}
-            clearcoat={1.0}
-            clearcoatRoughness={0.02}
-            depthWrite={false}
-          />
-        </mesh>
-      </group>
+      {dualVerificationMode && (
+        <group position={[-1.85, 0.15, 0]}>
+          <mesh position={[0, -0.02, 0]} castShadow receiveShadow>
+            <boxGeometry args={[0.62, 0.42, 0.52]} />
+            <meshPhysicalMaterial
+              color={(metrics.tds2 || 0) > 100 ? '#f59e0b' : '#38bdf8'}
+              transparent
+              opacity={0.62}
+              roughness={0.02}
+              metalness={0.05}
+              transmission={0.92}
+              thickness={0.10}
+              clearcoat={1.0}
+              clearcoatRoughness={0.02}
+              depthWrite={false}
+            />
+          </mesh>
+        </group>
+      )}
     </group>
   );
 };

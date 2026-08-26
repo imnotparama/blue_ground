@@ -100,7 +100,7 @@ export const WaterDropletTracker = () => {
     }
   }, [waterTrackMode, waterTrackStage]);
 
-  const isRecirculating = waterTrackStage === 6 && (recirculationTriggered || metrics.recirculationActive);
+  const isRecirculating = waterTrackStage === 6 && dualVerificationMode && (recirculationTriggered || metrics.recirculationActive || (metrics.tds2 || 0) > 100);
 
   // ─── 1. Exact 3D Path Curves for Each Stage ─────────────────────────────────
   const stageCurves = useMemo(() => {
@@ -152,7 +152,18 @@ export const WaterDropletTracker = () => {
       new THREE.Vector3(-1.85, 0.15, 0),
     ], false, 'catmullrom', 0.05);
 
-    // Stage 6 Path A (Potable Pass): Tank 2 -> Clean 250L Reservoir + UV-C
+    // Stage 6 Setup 1 Direct: RO Outlet -> Primary 250L Reservoir
+    const stage6Direct = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(-1.85, 0.38, 0),
+      new THREE.Vector3(-1.95, 0.38, 0),
+      new THREE.Vector3(-1.95, 0.10, 0),
+      new THREE.Vector3(-1.60, -0.20, 0),
+      new THREE.Vector3(-1.10, -0.45, 0),
+      new THREE.Vector3(-0.70, -0.55, 0),
+      new THREE.Vector3(-0.40, -0.60, 0),
+    ], false, 'catmullrom', 0.05);
+
+    // Stage 6 Setup 2 Path A (Potable Pass): Tank 2 -> Clean 250L Reservoir + UV-C
     const stage6Pass = new THREE.CatmullRomCurve3([
       new THREE.Vector3(-1.85, 0.15, 0),
       new THREE.Vector3(-2.19, 0.03, 0),
@@ -162,7 +173,7 @@ export const WaterDropletTracker = () => {
       new THREE.Vector3(-0.40, -0.60, 0),
     ], false, 'catmullrom', 0.05);
 
-    // Stage 6 Path B (Sub-Standard Fail): Tank 2 -> Recirculation Return -> Pump -> RO Filter
+    // Stage 6 Setup 2 Path B (Sub-Standard Fail): Tank 2 -> Recirculation Return -> Pump -> RO Filter
     const stage6Recirc = new THREE.CatmullRomCurve3([
       new THREE.Vector3(-1.85, 0.15, 0),
       new THREE.Vector3(-1.70, -0.18, 0),
@@ -176,7 +187,16 @@ export const WaterDropletTracker = () => {
       new THREE.Vector3(-1.40, 0.38, 0),
     ], false, 'catmullrom', 0.05);
 
-    return { 1: stage1, 2: stage2, 3: stage3, 4: stage4, 5: stage5, 6: stage6Pass, '6_recirc': stage6Recirc };
+    return { 
+      1: stage1, 
+      2: stage2, 
+      3: stage3, 
+      4: stage4, 
+      5: stage5, 
+      6: stage6Pass, 
+      '6_direct': stage6Direct,
+      '6_recirc': stage6Recirc 
+    };
   }, []);
 
   // Trail history buffer (25 trailing positions)
@@ -189,8 +209,14 @@ export const WaterDropletTracker = () => {
     const progress = (time * 0.28) % 1.0;
 
     let activeCurve: THREE.CatmullRomCurve3;
-    if (waterTrackStage === 6 && isRecirculating) {
-      activeCurve = stageCurves['6_recirc'];
+    if (waterTrackStage === 6) {
+      if (!dualVerificationMode) {
+        activeCurve = stageCurves['6_direct'];
+      } else if (isRecirculating) {
+        activeCurve = stageCurves['6_recirc'];
+      } else {
+        activeCurve = stageCurves[6];
+      }
     } else {
       activeCurve = (stageCurves[waterTrackStage as keyof typeof stageCurves] as THREE.CatmullRomCurve3) || stageCurves[1];
     }

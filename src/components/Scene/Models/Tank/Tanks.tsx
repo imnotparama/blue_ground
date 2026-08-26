@@ -53,10 +53,12 @@ export const Tanks = () => {
     activeHotspot,
     setActiveHotspot,
     setCameraPreset,
+    dualVerificationMode,
   } = useSystemState();
 
   const mainTankRef = useRef<THREE.Group>(null);
   const sedTankRef = useRef<THREE.Group>(null);
+  const tank2Ref = useRef<THREE.Group>(null);
 
   const tankMatRef = useRef<THREE.MeshPhysicalMaterial>(null);
   const sedMatRef = useRef<THREE.MeshPhysicalMaterial>(null);
@@ -64,7 +66,7 @@ export const Tanks = () => {
   const [hoveredMain, setHoveredMain] = useState(false);
   const [hoveredSed, setHoveredSed] = useState(false);
 
-  useFrame(() => {
+  useFrame((_, delta) => {
     // Exploded View offset
     if (mainTankRef.current) {
       const targetY = exploded ? 0.15 : 0;
@@ -78,6 +80,13 @@ export const Tanks = () => {
       mainTankRef.current.scale.setScalar(
         THREE.MathUtils.lerp(mainTankRef.current.scale.x, targetScale, 0.12)
       );
+    }
+
+    if (tank2Ref.current) {
+      const targetScale = dualVerificationMode ? 1.0 : 0.001;
+      const damp = 1.0 - Math.exp(-8 * delta);
+      tank2Ref.current.scale.setScalar(THREE.MathUtils.lerp(tank2Ref.current.scale.x, targetScale, damp));
+      tank2Ref.current.visible = tank2Ref.current.scale.x > 0.05;
     }
 
     if (sedTankRef.current) {
@@ -384,6 +393,7 @@ export const Tanks = () => {
              Dual-Verification Closed-Loop Return System
           ════════════════════════════════════════════════════════════════════ */}
       <group
+        ref={tank2Ref}
         position={[-1.85, 0.15, 0]}
         onClick={(e) => {
           e.stopPropagation();

@@ -123,6 +123,7 @@ interface SystemStateContextType {
   setDualVerificationMode: (val: boolean) => void;
   recirculationTriggered: boolean;
   setRecirculationTriggered: (val: boolean) => void;
+  setTank2Tds: (tdsVal: number) => void;
   // Right Sidebar Tab: Live Telemetry vs Sensors & Tools
   sidebarTab: 'TELEMETRY' | 'TOOLS';
   setSidebarTab: (tab: 'TELEMETRY' | 'TOOLS') => void;
@@ -580,6 +581,16 @@ export const SystemStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  const setTank2Tds = (tdsVal: number) => {
+    setMetrics(prev => ({
+      ...prev,
+      tds2: tdsVal,
+      recirculationActive: tdsVal > 100,
+      turbidity2: tdsVal > 100 ? 4.5 : 0.15,
+    }));
+    setRecirculationTriggered(tdsVal > 100);
+  };
+
   const currentStepData = demoRunning ? presentationSteps[demoStep] : null;
 
   return (
@@ -619,6 +630,7 @@ export const SystemStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
         setDualVerificationMode,
         recirculationTriggered,
         setRecirculationTriggered,
+        setTank2Tds,
         sidebarTab,
         setSidebarTab,
         waterTrackMode,

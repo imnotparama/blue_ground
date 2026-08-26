@@ -28,6 +28,7 @@ export const SystemControls = () => {
     setCutaway, 
     transparent, 
     setTransparent, 
+    metrics,
     setMetrics,
     demoRunning, 
     landingVisited,
@@ -43,6 +44,7 @@ export const SystemControls = () => {
     setDualVerificationMode,
     recirculationTriggered,
     setRecirculationTriggered,
+    setTank2Tds,
     setCameraPreset,
   } = useSystemState();
 
@@ -198,18 +200,69 @@ export const SystemControls = () => {
               X-Ray Mode
             </button>
 
-            {/* Dual-Stage Verification Loop Mode Toggle */}
-            <button
-              onClick={() => setDualVerificationMode(!dualVerificationMode)}
-              className={`col-span-2 flex items-center justify-center gap-1.5 py-1.5 rounded-lg border text-[9px] font-mono font-bold tracking-wider transition-all cursor-pointer ${
-                dualVerificationMode
-                  ? 'bg-purple-500/25 text-purple-300 border-purple-400/60 shadow-[0_0_12px_rgba(168,85,247,0.25)]'
-                  : 'bg-white/2 border-white/5 text-zinc-400 hover:bg-white/5 hover:text-white'
-              }`}
-            >
-              <Repeat className={`w-3 h-3 ${dualVerificationMode ? 'text-purple-400' : 'text-zinc-400'}`} />
-              {dualVerificationMode ? 'Dual Verif Loop: ACTIVE (V)' : 'Dual Verification Loop (V)'}
-            </button>
+            {/* Pipeline Architecture Mode Switcher: Setup 1 vs Setup 2 */}
+            <div className="col-span-2 flex flex-col gap-1 p-2 rounded-xl bg-purple-950/20 border border-purple-500/30">
+              <div className="flex items-center justify-between text-[8px] font-mono text-purple-300 font-bold">
+                <span className="flex items-center gap-1">
+                  <Repeat className="w-3 h-3 text-purple-400" />
+                  PIPELINE ARCHITECTURE
+                </span>
+                <span className="text-[7px] px-1 py-0.2 rounded bg-purple-950 text-purple-300 border border-purple-500/40">HOTKEY: V</span>
+              </div>
+              <div className="grid grid-cols-2 gap-1 font-mono text-[8px]">
+                <button
+                  onClick={() => setDualVerificationMode(false)}
+                  className={`py-1 px-1.5 rounded-md border text-center transition-all cursor-pointer ${
+                    !dualVerificationMode
+                      ? 'bg-cyan-500/25 border-cyan-400 text-cyan-300 font-bold shadow-[0_0_8px_rgba(6,182,212,0.3)]'
+                      : 'bg-black/40 border-white/5 text-zinc-500 hover:text-white'
+                  }`}
+                  title="Setup 1: Direct RO -> Primary 250L Tank"
+                >
+                  Setup 1: Direct
+                </button>
+                <button
+                  onClick={() => setDualVerificationMode(true)}
+                  className={`py-1 px-1.5 rounded-md border text-center transition-all cursor-pointer ${
+                    dualVerificationMode
+                      ? 'bg-purple-500/25 border-purple-400 text-purple-300 font-bold shadow-[0_0_8px_rgba(168,85,247,0.3)]'
+                      : 'bg-black/40 border-white/5 text-zinc-500 hover:text-white'
+                  }`}
+                  title="Setup 2: RO -> Tank 2 TDS Verification -> Recirculate/Store"
+                >
+                  Setup 2: Tank 2 Verif
+                </button>
+              </div>
+
+              {/* In Setup 2: Live TDS Sensing Test Simulator */}
+              {dualVerificationMode && (
+                <div className="flex items-center justify-between gap-1 pt-1.5 border-t border-purple-500/20 mt-0.5">
+                  <span className="text-[8px] text-zinc-400 font-mono">TDS #2:</span>
+                  <button
+                    onClick={() => setTank2Tds(28)}
+                    className={`flex-1 py-0.5 rounded text-[8px] font-mono border transition-all cursor-pointer ${
+                      metrics.tds2 <= 100
+                        ? 'bg-emerald-500/30 border-emerald-400 text-emerald-300 font-bold shadow-[0_0_8px_rgba(16,185,129,0.25)]'
+                        : 'bg-zinc-900 border-white/5 text-zinc-500 hover:text-zinc-300'
+                    }`}
+                    title="Simulate Potable Pure Permeate (Pass to 250L Storage Tank)"
+                  >
+                    28 ppm (Pass)
+                  </button>
+                  <button
+                    onClick={() => setTank2Tds(185)}
+                    className={`flex-1 py-0.5 rounded text-[8px] font-mono border transition-all cursor-pointer ${
+                      metrics.tds2 > 100
+                        ? 'bg-amber-500/30 border-amber-400 text-amber-300 font-bold animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.25)]'
+                        : 'bg-zinc-900 border-white/5 text-zinc-500 hover:text-zinc-300'
+                    }`}
+                    title="Simulate High TDS Permeate (Fail -> Recirculate to RO Pump)"
+                  >
+                    185 ppm (Re-Filter)
+                  </button>
+                </div>
+              )}
+            </div>
 
             {/* Hotspot Dots / Clean Showroom View Toggle */}
             <button
