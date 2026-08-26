@@ -1,10 +1,81 @@
 'use client';
 
-import React, { useRef, useMemo } from 'react';
+import React, { useRef, useMemo, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useSystemState } from '@/hooks/useSystemState';
 import { Html } from '@react-three/drei';
+import { soundSynth } from '@/utils/audioSynthesizer';
 import * as THREE from 'three';
+
+// ─── Stage Metamorphosis Configurations ───────────────────────────────────────
+const STAGE_THEMES = {
+  1: {
+    color: '#d97706',
+    emissive: '#92400e',
+    ringColor: '#f59e0b',
+    trailColor: '#b45309',
+    particleSize: 0.045,
+    title: 'Raw Mineral Intake',
+    metric: '450+ NTU • Turbid Inflow',
+    badge: 'STAGE 1/6',
+    lightIntensity: 2.0,
+  },
+  2: {
+    color: '#eab308',
+    emissive: '#ca8a04',
+    ringColor: '#fde047',
+    trailColor: '#ca8a04',
+    particleSize: 0.040,
+    title: 'Primary Sedimentation',
+    metric: 'Gravity Settling • Grit Trap',
+    badge: 'STAGE 2/6',
+    lightIntensity: 2.2,
+  },
+  3: {
+    color: '#0284c7',
+    emissive: '#0369a1',
+    ringColor: '#38bdf8',
+    trailColor: '#0ea5e9',
+    particleSize: 0.035,
+    title: 'YF-S201 Flow Telemetry',
+    metric: '4.80 L/min Inline Rate',
+    badge: 'STAGE 3/6',
+    lightIntensity: 2.4,
+  },
+  4: {
+    color: '#06b6d4',
+    emissive: '#0891b2',
+    ringColor: '#22d3ee',
+    trailColor: '#06b6d4',
+    particleSize: 0.035,
+    title: 'IoT Probing Chamber',
+    metric: 'TDS: 145 ppm • pH: 7.21',
+    badge: 'STAGE 4/6',
+    lightIntensity: 2.5,
+  },
+  5: {
+    color: '#14b8a6',
+    emissive: '#0d9488',
+    ringColor: '#2dd4bf',
+    trailColor: '#14b8a6',
+    particleSize: 0.030,
+    title: '4-Stage RO Purifier',
+    metric: '0.0001μm Multi-Barrier',
+    badge: 'STAGE 5/6',
+    lightIntensity: 2.6,
+  },
+  6: {
+    color: '#38bdf8',
+    emissive: '#0284c7',
+    ringColor: '#34d399',
+    trailColor: '#38bdf8',
+    particleSize: 0.028,
+    title: 'Clean Storage & UV-C',
+    metric: '99.99% Sterile Drinking Water',
+    badge: 'STAGE 6/6',
+    lightIntensity: 2.8,
+  },
+};
 
 export const WaterDropletTracker = () => {
   const { waterTrackMode, waterTrackStage, metrics } = useSystemState();
@@ -12,6 +83,16 @@ export const WaterDropletTracker = () => {
   const dropletMeshRef = useRef<THREE.Group>(null);
   const ringRef = useRef<THREE.Mesh>(null);
   const trailRef = useRef<THREE.Points>(null);
+  const scanLaserRef = useRef<THREE.Group>(null);
+  const uvHaloRef = useRef<THREE.Mesh>(null);
+  const lightRef = useRef<THREE.PointLight>(null);
+
+  // Play audio synthesizer sound upon stage transition
+  useEffect(() => {
+    if (waterTrackMode) {
+      soundSynth.playStageSound(waterTrackStage);
+    }
+  }, [waterTrackMode, waterTrackStage]);
 
   // ─── 1. Exact 3D Path Curves for Each Stage ─────────────────────────────────
   const stageCurves = useMemo(() => {
@@ -76,14 +157,14 @@ export const WaterDropletTracker = () => {
     return { 1: stage1, 2: stage2, 3: stage3, 4: stage4, 5: stage5, 6: stage6 };
   }, []);
 
-  // Trail history buffer (20 trailing positions)
-  const trailPositions = useMemo(() => new Float32Array(20 * 3), []);
+  // Trail history buffer (25 trailing positions)
+  const trailPositions = useMemo(() => new Float32Array(25 * 3), []);
 
   useFrame((state) => {
     if (!waterTrackMode) return;
 
     const time = state.clock.getElapsedTime();
-    // Continuous loop progression through the active stage curve (loops every 3.5s)
+    // Continuous loop progression through the active stage curve
     const progress = (time * 0.28) % 1.0;
 
     const activeCurve = stageCurves[waterTrackStage as keyof typeof stageCurves] || stageCurves[1];
@@ -99,31 +180,36 @@ export const WaterDropletTracker = () => {
       ringRef.current.scale.set(pulse, pulse, pulse);
     }
 
+    // Stage 4: Optical laser scan cone pulsing
+    if (scanLaserRef.current && waterTrackStage === 4) {
+      scanLaserRef.current.rotation.y = time * 2.0;
+    }
+
+    // Stage 6: UV-C Germicidal ionization halo rotation
+    if (uvHaloRef.current && waterTrackStage === 6) {
+      uvHaloRef.current.rotation.z += 0.03;
+      const uvPulse = 1.0 + Math.sin(time * 8) * 0.12;
+      uvHaloRef.current.scale.set(uvPulse, uvPulse, uvPulse);
+    }
+
     // Update sparkling particle trail
     if (trailRef.current) {
       const positions = trailRef.current.geometry.attributes.position.array as Float32Array;
-      for (let i = 19; i > 0; i--) {
+      for (let i = 24; i > 0; i--) {
         positions[i * 3] = positions[(i - 1) * 3];
         positions[i * 3 + 1] = positions[(i - 1) * 3 + 1];
         positions[i * 3 + 2] = positions[(i - 1) * 3 + 2];
       }
-      positions[0] = point.x + (Math.random() - 0.5) * 0.04;
-      positions[1] = point.y + (Math.random() - 0.5) * 0.04;
-      positions[2] = point.z + (Math.random() - 0.5) * 0.04;
+      positions[0] = point.x + (Math.random() - 0.5) * 0.035;
+      positions[1] = point.y + (Math.random() - 0.5) * 0.035;
+      positions[2] = point.z + (Math.random() - 0.5) * 0.035;
       trailRef.current.geometry.attributes.position.needsUpdate = true;
     }
   });
 
   if (!waterTrackMode) return null;
 
-  const stageData = {
-    1: { title: 'Raw Intake Wellhead', metric: 'Mineral Runoff • 450 ppm', color: 'from-amber-500 to-orange-600', badge: 'STAGE 1/6' },
-    2: { title: 'Primary Sedimentation', metric: 'Gravity Settling • Grit Trap', color: 'from-amber-600 to-yellow-500', badge: 'STAGE 2/6' },
-    3: { title: 'YF-S201 Flow Telemetry', metric: `${metrics.flowRate.toFixed(1)} L/min Inline Rate`, color: 'from-cyan-500 to-blue-600', badge: 'STAGE 3/6' },
-    4: { title: 'IoT Probing Chamber', metric: `TDS: ${metrics.tds} • pH: ${metrics.ph.toFixed(1)}`, color: 'from-blue-500 to-cyan-400', badge: 'STAGE 4/6' },
-    5: { title: '4-Stage RO Purifier', metric: 'PP + CTO + RO + Post-C', color: 'from-cyan-400 to-teal-400', badge: 'STAGE 5/6' },
-    6: { title: 'Clean Storage & UV-C', metric: '254nm Active Sterilization', color: 'from-emerald-400 to-teal-300', badge: 'STAGE 6/6' },
-  }[waterTrackStage as 1 | 2 | 3 | 4 | 5 | 6] || { title: 'Water Tracking', metric: 'In Progress', color: 'from-cyan-500 to-blue-500', badge: 'FLOW ACTIVE' };
+  const currentTheme = STAGE_THEMES[waterTrackStage as 1 | 2 | 3 | 4 | 5 | 6] || STAGE_THEMES[1];
 
   return (
     <group>
@@ -132,42 +218,77 @@ export const WaterDropletTracker = () => {
         {/* Outer Pulsing Neon Tracking Ring */}
         <mesh ref={ringRef} rotation={[Math.PI / 2, 0, 0]}>
           <ringGeometry args={[0.08, 0.10, 24]} />
-          <meshBasicMaterial color="#38bdf8" side={THREE.DoubleSide} transparent opacity={0.8} />
+          <meshBasicMaterial color={currentTheme.ringColor} side={THREE.DoubleSide} transparent opacity={0.85} />
         </mesh>
 
-        {/* Luminous Inner Core Water Droplet */}
+        {/* Luminous Inner Core Water Droplet (Metamorphosis Shader Material) */}
         <mesh castShadow>
-          <sphereGeometry args={[0.055, 20, 20]} />
+          <sphereGeometry args={[0.058, 24, 24]} />
           <meshPhysicalMaterial
-            color="#38bdf8"
-            emissive="#0284c7"
-            emissiveIntensity={1.2}
-            roughness={0.1}
+            color={currentTheme.color}
+            emissive={currentTheme.emissive}
+            emissiveIntensity={1.4}
+            roughness={0.08}
             metalness={0.2}
-            transmission={0.8}
+            transmission={0.82}
             transparent
             opacity={0.95}
           />
         </mesh>
 
+        {/* Stage 4: Optical Laser Scan Beams (Probing Chamber Active Analysis) */}
+        {waterTrackStage === 4 && (
+          <group ref={scanLaserRef} position={[0, 0, 0]}>
+            {/* TDS Probe Blue Laser Line */}
+            <mesh position={[0, 0.12, 0]}>
+              <cylinderGeometry args={[0.003, 0.003, 0.24, 6]} />
+              <meshBasicMaterial color="#38bdf8" transparent opacity={0.8} />
+            </mesh>
+            {/* pH Sensor Magenta Scan Fan */}
+            <mesh position={[0.04, 0.10, 0]} rotation={[0, 0, 0.2]}>
+              <cylinderGeometry args={[0.003, 0.003, 0.20, 6]} />
+              <meshBasicMaterial color="#ec4899" transparent opacity={0.8} />
+            </mesh>
+            {/* Turbidity Yellow Probe Scan */}
+            <mesh position={[-0.04, 0.10, 0]} rotation={[0, 0, -0.2]}>
+              <cylinderGeometry args={[0.003, 0.003, 0.20, 6]} />
+              <meshBasicMaterial color="#eab308" transparent opacity={0.8} />
+            </mesh>
+          </group>
+        )}
+
+        {/* Stage 6: UV-C Germicidal Disinfection Ionization Aura */}
+        {waterTrackStage === 6 && (
+          <mesh ref={uvHaloRef} rotation={[Math.PI / 2, 0, 0]}>
+            <ringGeometry args={[0.12, 0.16, 24]} />
+            <meshBasicMaterial color="#a855f7" transparent opacity={0.65} side={THREE.DoubleSide} />
+          </mesh>
+        )}
+
         {/* Point Light Illuminating Immediate Plumbing */}
-        <pointLight color="#38bdf8" intensity={1.8} distance={1.2} decay={2} />
+        <pointLight
+          ref={lightRef}
+          color={currentTheme.color}
+          intensity={currentTheme.lightIntensity}
+          distance={1.4}
+          decay={2}
+        />
 
         {/* Floating 3D Micro-Label Follower Badge */}
         <Html
-          position={[0, 0.18, 0]}
+          position={[0, 0.20, 0]}
           center
           distanceFactor={6.5}
           style={{ pointerEvents: 'none', userSelect: 'none' }}
         >
           <div className="flex flex-col items-center gap-1 -translate-y-2 animate-bounce-subtle">
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/85 backdrop-blur-md border border-cyan-400/60 shadow-[0_0_15px_rgba(6,182,212,0.4)] whitespace-nowrap">
+            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/90 backdrop-blur-md border border-cyan-400/60 shadow-[0_0_18px_rgba(6,182,212,0.45)] whitespace-nowrap">
               <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
               <span className="text-[10px] font-bold font-mono text-cyan-300 uppercase tracking-wider">
-                {stageData.badge}
+                {currentTheme.badge}
               </span>
-              <span className="text-[10px] font-mono text-white/90">
-                {stageData.title}
+              <span className="text-[10px] font-mono text-white/90 font-medium">
+                {currentTheme.title}
               </span>
             </div>
             <div className="w-0.5 h-3 bg-gradient-to-b from-cyan-400 to-transparent" />
@@ -184,10 +305,10 @@ export const WaterDropletTracker = () => {
           />
         </bufferGeometry>
         <pointsMaterial
-          color="#38bdf8"
-          size={0.035}
+          color={currentTheme.trailColor}
+          size={currentTheme.particleSize}
           transparent
-          opacity={0.65}
+          opacity={0.7}
           blending={THREE.AdditiveBlending}
           depthWrite={false}
         />

@@ -1,8 +1,9 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSystemState } from '@/hooks/useSystemState';
+import { soundSynth } from '@/utils/audioSynthesizer';
 import {
   Droplets,
   ChevronLeft,
@@ -16,6 +17,10 @@ import {
   Sparkles,
   Gauge,
   Sliders,
+  Volume2,
+  VolumeX,
+  FlaskConical,
+  CheckCircle2,
 } from 'lucide-react';
 
 const STAGES = [
@@ -34,6 +39,15 @@ const STAGES = [
       { label: 'Raw Inflow Rate', value: '4.8 L/min' },
       { label: 'Suction Head', value: '-1.85m' },
     ],
+    chemistry: {
+      turbidityBefore: '450 NTU',
+      turbidityAfter: '450 NTU',
+      tdsBefore: '520 ppm',
+      tdsAfter: '520 ppm',
+      ph: '6.4 pH',
+      contaminants: 'Coarse Sand, Heavy Silt, Organic Debris',
+      action: 'Stainless 60-mesh suction filtration',
+    },
   },
   {
     stage: 2,
@@ -50,6 +64,15 @@ const STAGES = [
       { label: 'Bed Flow Velocity', value: '0.12 m/s' },
       { label: 'Bed Pressure', value: '1.2 Bar' },
     ],
+    chemistry: {
+      turbidityBefore: '450 NTU',
+      turbidityAfter: '42 NTU (90% Drop)',
+      tdsBefore: '520 ppm',
+      tdsAfter: '410 ppm',
+      ph: '6.8 pH',
+      contaminants: 'Suspended Solids, Clay Silt, Grit',
+      action: 'Tri-layer gravity bed stratification',
+    },
   },
   {
     stage: 3,
@@ -66,6 +89,15 @@ const STAGES = [
       { label: 'Pulse Frequency', value: '36.0 Hz' },
       { label: 'Calibration K-Factor', value: '7.5 Pulses/L' },
     ],
+    chemistry: {
+      turbidityBefore: '42 NTU',
+      turbidityAfter: '42 NTU',
+      tdsBefore: '410 ppm',
+      tdsAfter: '410 ppm',
+      ph: '6.8 pH',
+      contaminants: 'Volumetric Transfer Verification',
+      action: 'Hall-effect magnetic pulse logging',
+    },
   },
   {
     stage: 4,
@@ -82,6 +114,15 @@ const STAGES = [
       { label: 'pH Balance', value: '7.21 pH' },
       { label: 'Turbidity Clarity', value: '1.2 NTU' },
     ],
+    chemistry: {
+      turbidityBefore: '42 NTU',
+      turbidityAfter: '12 NTU (Intermediate)',
+      tdsBefore: '410 ppm',
+      tdsAfter: '320 ppm',
+      ph: '7.21 pH (Optimal)',
+      contaminants: 'Dissolved Minerals & Acidity Level',
+      action: 'Tri-sensor multi-spectrum optical probing',
+    },
   },
   {
     stage: 5,
@@ -98,6 +139,15 @@ const STAGES = [
       { label: 'Heavy Metal Rejection', value: '99.4%' },
       { label: 'Booster Pressure', value: '4.5 Bar' },
     ],
+    chemistry: {
+      turbidityBefore: '12 NTU',
+      turbidityAfter: '< 0.3 NTU (Crystal Clear)',
+      tdsBefore: '320 ppm',
+      tdsAfter: '145 ppm (Drinking Grade)',
+      ph: '7.25 pH',
+      contaminants: 'Arsenic, Lead, Microplastics, VOCs',
+      action: '4.5-Bar cross-flow semi-permeable reverse osmosis',
+    },
   },
   {
     stage: 6,
@@ -114,6 +164,15 @@ const STAGES = [
       { label: 'UV-C Wavelength', value: '254 nm' },
       { label: 'Total Potable Vol.', value: '250 Liters' },
     ],
+    chemistry: {
+      turbidityBefore: '< 0.3 NTU',
+      turbidityAfter: '0.1 NTU (Pristine)',
+      tdsBefore: '145 ppm',
+      tdsAfter: '145 ppm (Balanced Mineral)',
+      ph: '7.30 pH',
+      contaminants: 'E. Coli, Coliforms, Viruses, Cysts',
+      action: '254nm DNA/RNA microbial photo-oxidation',
+    },
   },
 ];
 
@@ -129,10 +188,20 @@ export const WaterTrackerHUD = () => {
     setAutoPlayWater,
   } = useSystemState();
 
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [showChemistry, setShowChemistry] = useState(false);
+
   if (!waterTrackMode) return null;
 
   const currentStage = STAGES[waterTrackStage - 1] || STAGES[0];
   const IconComponent = currentStage.icon;
+
+  const toggleSound = () => {
+    const next = !soundEnabled;
+    setSoundEnabled(next);
+    soundSynth.enabled = next;
+    if (next) soundSynth.playStageSound(waterTrackStage);
+  };
 
   return (
     <AnimatePresence>
@@ -147,7 +216,7 @@ export const WaterTrackerHUD = () => {
           {/* Top Neon Accent Glow Line */}
           <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent animate-pulse" />
 
-          {/* ─── Header: Mode Badge + Stage Navigator + Close Button ─── */}
+          {/* ─── Header: Mode Badge + Stepper Action Controls + Close Button ─── */}
           <div className="flex items-center justify-between gap-3 border-b border-white/10 pb-2.5">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.3)]">
@@ -168,8 +237,36 @@ export const WaterTrackerHUD = () => {
               </div>
             </div>
 
-            {/* Stepper Controls & Close */}
+            {/* Stepper Controls, Chemistry Button, Sound & Close */}
             <div className="flex items-center gap-2">
+              {/* Chemical Breakdown Toggle Button */}
+              <button
+                onClick={() => setShowChemistry(!showChemistry)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border font-mono text-xs font-semibold transition-all cursor-pointer ${
+                  showChemistry
+                    ? 'bg-purple-500/20 border-purple-400 text-purple-300 shadow-[0_0_12px_rgba(168,85,247,0.3)]'
+                    : 'bg-zinc-900 border-white/10 text-zinc-300 hover:text-white hover:bg-zinc-800'
+                }`}
+                title="View Stage Chemistry Purity Breakdown"
+              >
+                <FlaskConical className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">CHEMISTRY</span>
+              </button>
+
+              {/* Sound Synthesizer Toggle */}
+              <button
+                onClick={toggleSound}
+                className={`w-8 h-8 rounded-xl border flex items-center justify-center transition-all cursor-pointer ${
+                  soundEnabled
+                    ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300'
+                    : 'bg-zinc-900 border-white/10 text-zinc-500 hover:text-white'
+                }`}
+                title={soundEnabled ? 'Mute Stage Sound Synthesizer' : 'Enable Stage Sound Synthesizer'}
+              >
+                {soundEnabled ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
+              </button>
+
+              {/* Auto Tour Toggle */}
               <button
                 onClick={() => setAutoPlayWater(!autoPlayWater)}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border font-mono text-xs font-semibold transition-all cursor-pointer ${
@@ -181,7 +278,7 @@ export const WaterTrackerHUD = () => {
                 {autoPlayWater ? (
                   <>
                     <Pause className="w-3.5 h-3.5" />
-                    <span>PAUSE TOUR</span>
+                    <span>PAUSE</span>
                   </>
                 ) : (
                   <>
@@ -191,6 +288,7 @@ export const WaterTrackerHUD = () => {
                 )}
               </button>
 
+              {/* Close Button */}
               <button
                 onClick={() => setWaterTrackMode(false)}
                 className="w-8 h-8 rounded-xl bg-zinc-900 border border-white/10 hover:border-rose-500/50 hover:bg-rose-950/40 hover:text-rose-400 flex items-center justify-center text-zinc-400 transition-all cursor-pointer"
@@ -246,6 +344,49 @@ export const WaterTrackerHUD = () => {
               );
             })}
           </div>
+
+          {/* ─── Chemistry Purity Breakdown Drawer (Expandable) ─── */}
+          {showChemistry && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="bg-purple-950/30 border border-purple-500/30 rounded-xl p-3 flex flex-col gap-2 font-mono text-[11px]"
+            >
+              <div className="flex items-center justify-between border-b border-purple-500/20 pb-1.5">
+                <div className="flex items-center gap-1.5 text-purple-300 font-bold">
+                  <FlaskConical className="w-3.5 h-3.5" />
+                  <span>CHEMICAL PURITY METRICS — {currentStage.title}</span>
+                </div>
+                <span className="text-[10px] text-purple-400 bg-purple-950 px-2 py-0.5 rounded border border-purple-500/40">
+                  {currentStage.chemistry.action}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+                <div className="bg-black/40 border border-white/5 rounded-lg p-2 flex flex-col">
+                  <span className="text-[9px] text-zinc-500">TURBIDITY METAMORPHOSIS</span>
+                  <span className="text-amber-400 line-through text-[10px]">{currentStage.chemistry.turbidityBefore}</span>
+                  <span className="text-emerald-400 font-bold text-xs">{currentStage.chemistry.turbidityAfter}</span>
+                </div>
+                <div className="bg-black/40 border border-white/5 rounded-lg p-2 flex flex-col">
+                  <span className="text-[9px] text-zinc-500">TOTAL DISSOLVED SOLIDS</span>
+                  <span className="text-amber-400 line-through text-[10px]">{currentStage.chemistry.tdsBefore}</span>
+                  <span className="text-cyan-300 font-bold text-xs">{currentStage.chemistry.tdsAfter}</span>
+                </div>
+                <div className="bg-black/40 border border-white/5 rounded-lg p-2 flex flex-col">
+                  <span className="text-[9px] text-zinc-500">pH EQUILIBRIUM</span>
+                  <span className="text-white font-bold text-xs mt-1">{currentStage.chemistry.ph}</span>
+                </div>
+                <div className="bg-black/40 border border-white/5 rounded-lg p-2 flex flex-col">
+                  <span className="text-[9px] text-zinc-500">CONTAMINANTS FILTERED</span>
+                  <span className="text-purple-300 text-[10px] font-semibold truncate mt-1" title={currentStage.chemistry.contaminants}>
+                    {currentStage.chemistry.contaminants}
+                  </span>
+                </div>
+              </div>
+            </motion.div>
+          )}
 
           {/* ─── Active Stage Details & Telemetry Row ─── */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-zinc-900/60 border border-white/5 rounded-xl p-3">
