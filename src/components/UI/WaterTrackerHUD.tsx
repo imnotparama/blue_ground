@@ -21,6 +21,7 @@ import {
   VolumeX,
   FlaskConical,
   CheckCircle2,
+  Repeat,
 } from 'lucide-react';
 
 const STAGES = [
@@ -186,6 +187,8 @@ export const WaterTrackerHUD = () => {
     prevWaterStage,
     autoPlayWater,
     setAutoPlayWater,
+    recirculationTriggered,
+    setRecirculationTriggered,
   } = useSystemState();
 
   const [soundEnabled, setSoundEnabled] = useState(true);
@@ -398,15 +401,49 @@ export const WaterTrackerHUD = () => {
               <div className="flex flex-col gap-0.5">
                 <div className="flex items-center gap-2">
                   <span className="font-bold text-xs text-white font-mono">
-                    {currentStage.title}
+                    {waterTrackStage === 6 && recirculationTriggered ? 'Stage 6: Closed-Loop Recirculation' : currentStage.title}
                   </span>
-                  <span className={`text-[9px] font-mono px-2 py-0.5 rounded-full border uppercase font-bold ${currentStage.statusColor}`}>
-                    {currentStage.status}
+                  <span className={`text-[9px] font-mono px-2 py-0.5 rounded-full border uppercase font-bold ${
+                    waterTrackStage === 6 && recirculationTriggered ? 'text-amber-400 bg-amber-950/80 border-amber-500/40' : currentStage.statusColor
+                  }`}>
+                    {waterTrackStage === 6 && recirculationTriggered ? 'RE-FILTERING' : currentStage.status}
                   </span>
                 </div>
                 <p className="text-[11px] font-mono text-zinc-400 leading-relaxed">
-                  {currentStage.description}
+                  {waterTrackStage === 6 && recirculationTriggered
+                    ? 'Sensor Array #2 detected sub-standard permeate in Tank 2. Solenoid diverter routed fluid into the recirculation loop back to RO pump for secondary multi-pass filtration.'
+                    : currentStage.description}
                 </p>
+
+                {/* Stage 6 Interactive Decision Branch Switcher */}
+                {waterTrackStage === 6 && (
+                  <div className="flex items-center gap-2 pt-2 mt-1 border-t border-white/10">
+                    <span className="text-[10px] font-mono text-zinc-400 font-semibold">Verification Outcome:</span>
+                    <button
+                      onClick={() => setRecirculationTriggered(false)}
+                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border font-mono text-[10px] font-bold transition-all cursor-pointer ${
+                        !recirculationTriggered
+                          ? 'bg-emerald-500/20 border-emerald-400 text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.3)]'
+                          : 'bg-zinc-900 border-white/10 text-zinc-500 hover:text-white'
+                      }`}
+                    >
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>PASS ➔ CLEAN TANK</span>
+                    </button>
+
+                    <button
+                      onClick={() => setRecirculationTriggered(true)}
+                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border font-mono text-[10px] font-bold transition-all cursor-pointer ${
+                        recirculationTriggered
+                          ? 'bg-amber-500/25 border-amber-400 text-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.3)]'
+                          : 'bg-zinc-900 border-white/10 text-zinc-500 hover:text-white'
+                      }`}
+                    >
+                      <Repeat className="w-3.5 h-3.5 text-amber-400 animate-spin-slow" style={{ animationDuration: '6s' }} />
+                      <span>FAIL ➔ RECIRCULATE TO RO</span>
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
 
