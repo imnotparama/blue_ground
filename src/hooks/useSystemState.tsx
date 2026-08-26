@@ -102,6 +102,9 @@ interface SystemStateContextType {
   setActiveHotspot: (id: string | null) => void;
   showHotspots: boolean;
   setShowHotspots: (val: boolean) => void;
+  // Tank Isolation & Boundary Margin Mode
+  tanksOnly: boolean;
+  setTanksOnly: (val: boolean) => void;
 }
 
 const SystemStateContext = createContext<SystemStateContextType | undefined>(undefined);
@@ -458,12 +461,19 @@ export const SystemStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
   };
 
   const [showHotspots, setShowHotspots] = useState(true);
+  const [tanksOnly, setTanksOnly] = useState(false);
 
-  // Global Hotkey 'H' to toggle hotspots on/off
+  // Global Hotkeys: 'H' for Hotspots, 'T' for Tanks Only mode
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore key events when user is typing in an input
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+
       if (e.key === 'h' || e.key === 'H') {
         setShowHotspots(prev => !prev);
+      }
+      if (e.key === 't' || e.key === 'T') {
+        setTanksOnly(prev => !prev);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -503,6 +513,8 @@ export const SystemStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
         setActiveHotspot,
         showHotspots,
         setShowHotspots,
+        tanksOnly,
+        setTanksOnly,
       }}
     >
       {children}

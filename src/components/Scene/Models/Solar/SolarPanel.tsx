@@ -6,7 +6,7 @@ import { useSystemState } from '@/hooks/useSystemState';
 import * as THREE from 'three';
 
 export const SolarPanel = () => {
-  const { exploded, activeHotspot, setActiveHotspot, setCameraPreset } = useSystemState();
+  const { exploded, activeHotspot, setActiveHotspot, setCameraPreset, tanksOnly } = useSystemState();
   const groupRef = useRef<THREE.Group>(null);
   const textureRef = useRef<THREE.CanvasTexture | null>(null);
   const [hovered, setHovered] = useState(false);
@@ -95,8 +95,8 @@ export const SolarPanel = () => {
       groupRef.current.scale.setScalar(THREE.MathUtils.lerp(groupRef.current.scale.x, targetScale, damp * 1.5));
     }
 
-    const isDimmed = activeHotspot !== null && activeHotspot !== 'solar' && activeHotspot !== 'solar_panel';
-    const targetOpacity = isDimmed ? 0.15 : 1.0;
+    const isDimmed = tanksOnly || (activeHotspot !== null && activeHotspot !== 'solar' && activeHotspot !== 'solar_panel');
+    const targetOpacity = isDimmed ? 0.08 : 1.0;
 
     for (let i = 0; i < materialsRef.current.length; i++) {
       const mat = materialsRef.current[i];

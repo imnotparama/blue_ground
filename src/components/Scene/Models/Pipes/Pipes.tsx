@@ -123,14 +123,23 @@ const SolenoidValve = ({
 };
 
 export const Pipes = () => {
-  const { mode, setActiveHotspot, setCameraPreset } = useSystemState();
+  const { mode, setActiveHotspot, setCameraPreset, tanksOnly } = useSystemState();
+  const groupRef = useRef<THREE.Group>(null);
 
   const isDirectValveOpen = mode !== 'TURBIDITY' && mode !== 'CLEANING' && mode !== 'PUMP_FAILURE';
   const isDrainValveOpen = mode === 'CLEANING';
   const isTapOpen = mode !== 'PUMP_FAILURE';
 
+  useFrame((_, delta) => {
+    if (!groupRef.current) return;
+    const targetScale = tanksOnly ? 0.001 : 1.0;
+    const damp = 1.0 - Math.exp(-8 * delta);
+    groupRef.current.scale.setScalar(THREE.MathUtils.lerp(groupRef.current.scale.x, targetScale, damp));
+    groupRef.current.visible = groupRef.current.scale.x > 0.05;
+  });
+
   return (
-    <group>
+    <group ref={groupRef}>
       {/* ══════════════════════════════════════════════════════════════════════
           1. INTAKE: BOREWELL [2.8, -1.8] → SEDIMENTATION TANK TOP [1.9, 0.78]
           ══════════════════════════════════════════════════════════════════════ */}

@@ -10,11 +10,12 @@ import {
   Cloud, 
   CloudRain, 
   Moon, 
-  Play,
-  Pause,
-  Compass,
-  Eye,
-  EyeOff
+  Play, 
+  Pause, 
+  Compass, 
+  Eye, 
+  EyeOff,
+  Layers
 } from 'lucide-react';
 
 export const TopBar = () => {
@@ -28,7 +29,9 @@ export const TopBar = () => {
     mode,
     landingVisited,
     showHotspots,
-    setShowHotspots
+    setShowHotspots,
+    tanksOnly,
+    setTanksOnly
   } = useSystemState();
 
   const envs: { mode: EnvironmentalMode; icon: React.ReactNode; label: string }[] = [
@@ -55,6 +58,21 @@ export const TopBar = () => {
 
       {/* Center demo action & clean view toggle (pointers enabled) */}
       <div className="flex items-center gap-3 pointer-events-auto">
+        {/* Toggle Tanks Only / Margin View Button */}
+        <button
+          onClick={() => setTanksOnly(!tanksOnly)}
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-full border transition-all text-xs font-mono tracking-wide cursor-pointer ${
+            tanksOnly
+              ? 'bg-emerald-500/20 border-emerald-400/50 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.25)]'
+              : 'bg-zinc-900/80 border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-500'
+          }`}
+          title="Toggle Tanks Only & Volume Margins Mode (Hotkey: T)"
+        >
+          <Layers className={`w-3.5 h-3.5 ${tanksOnly ? 'text-emerald-400 animate-pulse' : 'text-zinc-400'}`} />
+          <span className="hidden sm:inline font-semibold">{tanksOnly ? 'Tanks Margins: ON' : 'Tanks Only'}</span>
+          <span className={`text-[10px] px-1 py-0.2 rounded font-bold ${tanksOnly ? 'bg-emerald-950 text-emerald-300 border border-emerald-500/40' : 'bg-zinc-800 border border-zinc-700 text-zinc-400'}`}>T</span>
+        </button>
+
         {/* Toggle Details / Clean View Button */}
         <button
           onClick={() => setShowHotspots(!showHotspots)}

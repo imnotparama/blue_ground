@@ -17,7 +17,7 @@ interface InteractiveSensorProps {
 const InteractiveSensor: React.FC<InteractiveSensorProps> = ({
   id, preset, position, rotation = [0, 0, 0], children,
 }) => {
-  const { setActiveHotspot, setCameraPreset, activeHotspot, metrics } = useSystemState();
+  const { setActiveHotspot, setCameraPreset, activeHotspot, metrics, tanksOnly } = useSystemState();
   const [hovered, setHovered] = useState(false);
   const groupRef = useRef<THREE.Group>(null);
   const isActive = activeHotspot === id;
@@ -40,8 +40,8 @@ const InteractiveSensor: React.FC<InteractiveSensorProps> = ({
 
   useFrame((_, delta) => {
     if (!groupRef.current) return;
-    const isDimmed = activeHotspot !== null && activeHotspot !== id;
-    const targetOpacity = isDimmed ? 0.15 : 1.0;
+    const isDimmed = tanksOnly || (activeHotspot !== null && activeHotspot !== id);
+    const targetOpacity = isDimmed ? 0.08 : 1.0;
     const damp = 1.0 - Math.exp(-8 * delta);
 
     for (let i = 0; i < materialsRef.current.length; i++) {

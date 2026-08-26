@@ -11,7 +11,8 @@ import {
   Play, 
   Compass, 
   Database,
-  Cpu
+  Cpu,
+  Layers
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -29,7 +30,9 @@ export const SystemControls = () => {
     demoRunning, 
     landingVisited,
     showHotspots,
-    setShowHotspots
+    setShowHotspots,
+    tanksOnly,
+    setTanksOnly
   } = useSystemState();
 
   if (!landingVisited || demoRunning) return null; // Hide controls during landing or guided tour
@@ -179,6 +182,19 @@ export const SystemControls = () => {
             >
               {showHotspots ? <Eye className="w-3 h-3 text-cyan-400" /> : <EyeOff className="w-3 h-3 text-amber-400" />}
               {showHotspots ? 'Hotspot Details: VISIBLE' : 'Clean Showroom View (No Dots)'}
+            </button>
+
+            {/* Tanks Only & Vessel Boundary Margins Mode */}
+            <button
+              onClick={() => setTanksOnly(!tanksOnly)}
+              className={`col-span-2 flex items-center justify-center gap-1.5 py-1.5 rounded-lg border text-[9px] font-mono font-bold tracking-wider transition-all cursor-pointer ${
+                tanksOnly
+                  ? 'bg-emerald-500/25 text-emerald-300 border-emerald-500/50 shadow-[0_0_12px_rgba(16,185,129,0.25)]'
+                  : 'bg-white/2 border-white/5 text-zinc-400 hover:bg-white/5 hover:text-white'
+              }`}
+            >
+              <Layers className={`w-3 h-3 ${tanksOnly ? 'text-emerald-400' : 'text-zinc-400'}`} />
+              {tanksOnly ? 'Tanks Margins: ISOLATED (T)' : 'Show Tanks Only (T)'}
             </button>
           </div>
         </div>
