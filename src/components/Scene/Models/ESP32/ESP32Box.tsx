@@ -31,17 +31,21 @@ export const ESP32Box = () => {
       ctx.fillStyle = '#0284c7';
       ctx.fillRect(0, 0, 128, 16);
       ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 9px monospace';
+      ctx.font = 'bold 8px monospace';
       ctx.fillText('LEVIATHAN IoT', 4, 11);
+
+      ctx.fillStyle = '#f8fafc';
+      ctx.font = 'bold 7px monospace';
+      ctx.fillText('DEV: PARAMESHWARAN S', 4, 26);
 
       ctx.fillStyle = '#38bdf8';
       ctx.font = '8px monospace';
-      ctx.fillText(`FLOW : ${metrics.flowRate.toFixed(1)} L/M`, 6, 36);
-      ctx.fillText(`TDS  : ${metrics.tds} PPM`, 6, 49);
+      ctx.fillText(`FLOW : ${metrics.flowRate.toFixed(1)} L/M`, 6, 38);
+      ctx.fillText(`TDS  : ${metrics.tds} PPM`, 6, 50);
       ctx.fillText(`TURB : ${metrics.turbidity.toFixed(1)} NTU`, 6, 62);
-      ctx.fillText(`pH   : ${metrics.ph.toFixed(2)}`, 6, 75);
-      ctx.fillText(`SOLAR: ${metrics.solarWatts.toFixed(0)}W`, 6, 88);
-      ctx.fillText(`BATT : ${Math.round(metrics.batteryPercent)}%`, 6, 101);
+      ctx.fillText(`pH   : ${metrics.ph.toFixed(2)}`, 6, 74);
+      ctx.fillText(`SOLAR: ${metrics.solarWatts.toFixed(0)}W`, 6, 86);
+      ctx.fillText(`BATT : ${Math.round(metrics.batteryPercent)}%`, 6, 98);
 
       ctx.fillStyle = metrics.waterQuality === 'EXCELLENT' ? '#10b981' : '#f59e0b';
       ctx.fillRect(0, 114, 128, 14);
