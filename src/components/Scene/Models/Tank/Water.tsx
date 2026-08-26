@@ -10,9 +10,12 @@ export const Water = () => {
 
   const primaryWaterRef = useRef<THREE.Mesh>(null);
   const secondaryWaterRef = useRef<THREE.Mesh>(null);
+  const sedWaterRef = useRef<THREE.Mesh>(null);
 
   const primaryMatRef = useRef<THREE.MeshPhysicalMaterial>(null);
   const secondaryMatRef = useRef<THREE.MeshPhysicalMaterial>(null);
+  const sedMatRef = useRef<THREE.MeshPhysicalMaterial>(null);
+  const tank2MatRef = useRef<THREE.MeshPhysicalMaterial>(null);
 
   const primaryBubblesRef = useRef<THREE.Points>(null);
   const secondaryBubblesRef = useRef<THREE.Points>(null);
@@ -47,7 +50,6 @@ export const Water = () => {
 
   useFrame((state, delta) => {
     // 1. Primary Tank Water Level (Clean Water Storage)
-    // Floor is at y = -1.65, max top is y = 0.0 (max height = 1.60)
     const fillFraction = Math.max(metrics.waterLevel / 100, 0.08);
     const currentHeight = fillFraction * 1.55;
     const dampFactor = 1.0 - Math.exp(-4.0 * delta);
@@ -61,20 +63,33 @@ export const Water = () => {
       primaryWaterRef.current.position.y = -1.65 + primaryWaterRef.current.scale.y / 2;
     }
 
-    // 2. Turbidity color transition for Secondary Raw Compartment
-    const isTurbid = metrics.turbidity > 12 || mode === 'TURBIDITY';
-    const targetRawColor = isTurbid ? new THREE.Color('#78350f') : new THREE.Color('#0d9488');
+    // 2. Turbidity color transition for Sedimentation & Secondary Raw Compartments
+    const isTurbid = metrics.turbidity > 10 || mode === 'TURBIDITY';
+    const targetSedColor = isTurbid ? new THREE.Color('#92400e') : new THREE.Color('#0284c7');
+    const targetRawColor = isTurbid ? new THREE.Color('#b45309') : new THREE.Color('#0d9488');
+
+    if (sedMatRef.current) {
+      sedMatRef.current.color.lerp(targetSedColor, dampFactor);
+      sedMatRef.current.opacity = THREE.MathUtils.lerp(sedMatRef.current.opacity, isTurbid ? 0.88 : 0.60, dampFactor);
+    }
 
     if (secondaryMatRef.current) {
       secondaryMatRef.current.color.lerp(targetRawColor, dampFactor);
       secondaryMatRef.current.opacity = THREE.MathUtils.lerp(
         secondaryMatRef.current.opacity,
-        isTurbid ? 0.78 : 0.55,
+        isTurbid ? 0.82 : 0.55,
         dampFactor
       );
     }
 
-    // 3. Animate Primary Bubbles
+    // 3. Tank 2 Water Color (Amber for High TDS / Recirculate vs Azure Blue for Potable Pass)
+    if (tank2MatRef.current) {
+      const isTank2HighTds = (metrics.tds2 || 0) > 100;
+      const targetTank2Color = isTank2HighTds ? new THREE.Color('#f59e0b') : new THREE.Color('#38bdf8');
+      tank2MatRef.current.color.lerp(targetTank2Color, dampFactor);
+    }
+
+    // 4. Animate Primary Bubbles
     if (primaryBubblesRef.current && primaryWaterRef.current) {
       const positions = primaryBubblesRef.current.geometry.attributes.position.array as Float32Array;
       const topY = -1.65 + currentHeight;
@@ -90,7 +105,7 @@ export const Water = () => {
       primaryBubblesRef.current.geometry.attributes.position.needsUpdate = true;
     }
 
-    // 4. Animate Secondary Bubbles
+    // 5. Animate Secondary Bubbles
     if (secondaryBubblesRef.current) {
       const positions = secondaryBubblesRef.current.geometry.attributes.position.array as Float32Array;
       const topY = 0.50;
@@ -189,7 +204,29 @@ export const Water = () => {
       </group>
 
       {/* ════════════════════════════════════════════════════════════════════
-          C. POST-FILTRATION QUALITY TANK 2 WATER (Chamber 2 at x = -1.85)
+          C. SEDIMENTATION TANK RAW WATER (Grit & Sediment Settling Cylinder)
+             Center: [1.90, 0.05, 0]
+          ════════════════════════════════════════════════════════════════════ */}
+      <group position={[1.90, 0.05, 0]}>
+        <mesh ref={sedWaterRef} castShadow receiveShadow>
+          <cylinderGeometry args={[0.26, 0.26, 1.25, 24]} />
+          <meshPhysicalMaterial
+            ref={sedMatRef}
+            color="#0284c7"
+            transparent
+            opacity={0.65}
+            roughness={0.08}
+            metalness={0.05}
+            transmission={0.80}
+            thickness={0.12}
+            clearcoat={1.0}
+            depthWrite={false}
+          />
+        </mesh>
+      </group>
+
+      {/* ════════════════════════════════════════════════════════════════════
+          D. POST-FILTRATION QUALITY TANK 2 WATER (Chamber 2 at x = -1.85)
              Contains Post-RO water undergoing TDS sensor check
           ════════════════════════════════════════════════════════════════════ */}
       {dualVerificationMode && (
@@ -197,6 +234,7 @@ export const Water = () => {
           <mesh position={[0, -0.02, 0]} castShadow receiveShadow>
             <boxGeometry args={[0.62, 0.42, 0.52]} />
             <meshPhysicalMaterial
+              ref={tank2MatRef}
               color={(metrics.tds2 || 0) > 100 ? '#f59e0b' : '#38bdf8'}
               transparent
               opacity={0.62}

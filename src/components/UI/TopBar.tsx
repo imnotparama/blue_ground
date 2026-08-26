@@ -20,17 +20,20 @@ import {
   Droplets,
   Repeat,
   FlaskConical,
+  Sparkles,
 } from 'lucide-react';
 
 export const TopBar = () => {
   const { 
     metrics, 
+    setMetrics,
     envMode, 
     setEnvMode, 
     demoRunning, 
     startDemo, 
     stopDemo,
     mode,
+    setMode,
     landingVisited,
     showHotspots,
     setShowHotspots,
@@ -42,7 +45,47 @@ export const TopBar = () => {
     setWaterTrackMode,
     dualVerificationMode,
     setDualVerificationMode,
+    setRecirculationTriggered,
+    setCameraPreset,
   } = useSystemState();
+
+  const runSim1 = () => {
+    setDualVerificationMode(false);
+    setRecirculationTriggered(false);
+    setMode('NORMAL');
+    setCameraPreset('OVERVIEW');
+    setMetrics(prev => ({
+      ...prev,
+      turbidity: 2.8,
+      tds: 190,
+      ph: 7.22,
+      waterQuality: 'EXCELLENT',
+      flowRate: 4.8,
+      pumpRpm: 1800,
+      uvStatus: 'ON',
+      recirculationActive: false,
+    }));
+  };
+
+  const runSim2 = () => {
+    setDualVerificationMode(true);
+    setRecirculationTriggered(true);
+    setMode('TURBIDITY');
+    setCameraPreset('TANK2_VERIFICATION');
+    setMetrics(prev => ({
+      ...prev,
+      turbidity: 44.0,
+      tds: 680,
+      tds2: 185,
+      turbidity2: 4.5,
+      ph: 6.25,
+      waterQuality: 'POOR',
+      flowRate: 3.8,
+      pumpRpm: 2200,
+      uvStatus: 'ON',
+      recirculationActive: true,
+    }));
+  };
 
   const envs: { mode: EnvironmentalMode; icon: React.ReactNode; label: string }[] = [
     { mode: 'SUNNY', icon: <Sun className="w-4 h-4" />, label: 'Sunny' },
@@ -116,6 +159,26 @@ export const TopBar = () => {
             {dualVerificationMode ? 'Setup 2: Tank 2 Verif' : 'Setup 1: Direct'}
           </span>
           <span className={`text-[10px] px-1 py-0.2 rounded font-bold ${dualVerificationMode ? 'bg-purple-950 text-purple-300 border border-purple-500/40' : 'bg-zinc-800 border border-zinc-700 text-zinc-400'}`}>V</span>
+        </button>
+
+        {/* Quick Simulation 1: Clean Borewell -> Setup 1 */}
+        <button
+          onClick={runSim1}
+          className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-cyan-500/40 bg-cyan-950/60 hover:bg-cyan-900/80 text-cyan-300 text-xs font-mono font-bold transition-all shadow-[0_0_12px_rgba(6,182,212,0.2)] cursor-pointer"
+          title="Simulate Clean/Moderate Borewell Inflow (Setup 1 Direct Purification)"
+        >
+          <Sparkles className="w-3 h-3 text-cyan-400" />
+          <span>Sim 1: Borewell</span>
+        </button>
+
+        {/* Quick Simulation 2: Mining Slurry -> Setup 2 Loop */}
+        <button
+          onClick={runSim2}
+          className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-amber-500/40 bg-amber-950/60 hover:bg-amber-900/80 text-amber-300 text-xs font-mono font-bold transition-all shadow-[0_0_12px_rgba(245,158,11,0.2)] cursor-pointer"
+          title="Simulate Contaminated Mining Slurry Inflow (Setup 2 Tank 2 TDS Check & Recirculation Loop)"
+        >
+          <Repeat className="w-3 h-3 text-amber-400" />
+          <span>Sim 2: Mining Slurry</span>
         </button>
 
         {/* Toggle Tanks Only / Margin View Button */}

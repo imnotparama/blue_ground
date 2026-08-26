@@ -139,19 +139,46 @@ export const SystemControls = () => {
     }));
   };
 
-  const triggerRecirculation = () => {
-    setDualVerificationMode(true);
-    setRecirculationTriggered(true);
-    setCameraPreset('RECIRCULATION_LOOP');
+  // ─── WATER CLEANLINESS SIMULATIONS ───
+  // Simulation 1: Clean/Moderate Borewell Inflow -> Treated via Setup 1 (Direct Single-Pass)
+  const triggerSimulation1 = () => {
+    setDualVerificationMode(false);
+    setRecirculationTriggered(false);
+    setMode('NORMAL');
+    setCameraPreset('OVERVIEW');
     setMetrics(prev => ({
       ...prev,
-      turbidity: 24.0,
-      turbidity2: 4.8, // Sub-standard post-RO water
-      tds2: 180,
+      turbidity: 2.8, // Clear blue/cyan sedimentation & raw chamber
+      tds: 190,
+      ph: 7.22,
+      temperature: 24.0,
+      waterQuality: 'EXCELLENT',
+      flowRate: 4.8,
+      pumpRpm: 1800,
+      uvStatus: 'ON',
+      recirculationActive: false,
+    }));
+  };
+
+  // Simulation 2: Bad Mining Slurry Water -> Treated via Setup 2 (Tank 2 TDS Check & Recirculation Loop)
+  const triggerSimulation2 = () => {
+    setDualVerificationMode(true);
+    setRecirculationTriggered(true);
+    setMode('TURBIDITY');
+    setCameraPreset('TANK2_VERIFICATION');
+    setMetrics(prev => ({
+      ...prev,
+      turbidity: 44.0, // Dark turbid muddy brown in sedimentation & Chamber 1
+      tds: 680,
+      tds2: 185, // Sub-standard post-RO permeate (amber water in Tank 2)
+      turbidity2: 4.5,
+      ph: 6.25,
+      temperature: 25.4,
       waterQuality: 'POOR',
+      flowRate: 3.8,
+      pumpRpm: 2200,
+      uvStatus: 'ON',
       recirculationActive: true,
-      flowRate: 3.6,
-      pumpRpm: 2100,
     }));
   };
 
@@ -324,29 +351,49 @@ export const SystemControls = () => {
             <Settings className="w-3 h-3 text-zinc-500" /> Preset Scenarios
           </span>
           <div className="flex flex-col gap-1.5 font-mono text-[9px]">
-            {/* Presets */}
+            {/* Simulation 1: Clean Borewell -> Setup 1 */}
+            <button
+              onClick={triggerSimulation1}
+              className={`w-full text-left p-2 rounded-xl border flex flex-col gap-0.5 transition-all cursor-pointer ${
+                !dualVerificationMode && metrics.turbidity < 5
+                  ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300 shadow-[0_0_12px_rgba(6,182,212,0.25)]'
+                  : 'bg-white/2 border-white/5 text-zinc-400 hover:bg-white/5 hover:text-white'
+              }`}
+            >
+              <div className="flex items-center justify-between font-bold text-[9px]">
+                <span>🌟 Sim 1: Clean Borewell Water</span>
+                <span className="text-[8px] px-1.5 py-0.2 rounded bg-cyan-950 text-cyan-300 border border-cyan-500/30">SETUP 1 DIRECT</span>
+              </div>
+              <span className="text-[8px] text-zinc-400">Clear Inflow ➔ Direct RO ➔ 250L Potable</span>
+            </button>
+
+            {/* Simulation 2: Mining Slurry Runoff -> Setup 2 Loop */}
+            <button
+              onClick={triggerSimulation2}
+              className={`w-full text-left p-2 rounded-xl border flex flex-col gap-0.5 transition-all cursor-pointer ${
+                dualVerificationMode && metrics.turbidity > 20
+                  ? 'bg-amber-500/20 border-amber-400 text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.25)]'
+                  : 'bg-white/2 border-white/5 text-zinc-400 hover:bg-white/5 hover:text-white'
+              }`}
+            >
+              <div className="flex items-center justify-between font-bold text-[9px]">
+                <span>⚡ Sim 2: Mining Slurry Runoff</span>
+                <span className="text-[8px] px-1.5 py-0.2 rounded bg-amber-950 text-amber-300 border border-amber-500/30">SETUP 2 LOOP</span>
+              </div>
+              <span className="text-[8px] text-zinc-400">Muddy Inflow ➔ Tank 2 Check ➔ Re-Filter Loop</span>
+            </button>
+
+            {/* Other System Presets */}
             <button
               onClick={triggerNormal}
               className={`w-full text-left px-2.5 py-1.5 rounded-lg border flex items-center justify-between transition-all cursor-pointer ${
-                mode === 'NORMAL' 
+                mode === 'NORMAL' && !dualVerificationMode && metrics.turbidity >= 5
                   ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 font-bold' 
                   : 'bg-white/2 border-white/5 text-zinc-400 hover:bg-white/5 hover:text-white'
               }`}
             >
               <span>🟢 Normal Operations</span>
               <span>NOMINAL</span>
-            </button>
-
-            <button
-              onClick={triggerRecirculation}
-              className={`w-full text-left px-2.5 py-1.5 rounded-lg border flex items-center justify-between transition-all cursor-pointer ${
-                recirculationTriggered
-                  ? 'bg-purple-500/15 border-purple-500/40 text-purple-300 font-bold shadow-[0_0_10px_rgba(168,85,247,0.2)]'
-                  : 'bg-white/2 border-white/5 text-zinc-400 hover:bg-white/5 hover:text-white'
-              }`}
-            >
-              <span>🔄 Tank 2 Recirculation</span>
-              <span>RE-FILTER</span>
             </button>
 
             <button
