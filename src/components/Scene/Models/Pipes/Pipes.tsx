@@ -157,6 +157,29 @@ export const Pipes = () => {
           document.body.style.cursor = 'default';
         }}
       >
+        {/* Stainless Steel Borewell / Raw Intake Wellhead */}
+        <group position={[2.8, -1.95, 0]}>
+          <mesh castShadow receiveShadow>
+            <cylinderGeometry args={[0.34, 0.38, 0.12, 24]} />
+            <meshStandardMaterial color="#475569" roughness={0.3} metalness={0.8} />
+          </mesh>
+          <mesh position={[0, 0.07, 0]} castShadow>
+            <cylinderGeometry args={[0.36, 0.36, 0.025, 24]} />
+            <meshStandardMaterial color="#94a3b8" roughness={0.15} metalness={0.9} />
+          </mesh>
+          <mesh position={[0, 0.06, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+            <circleGeometry args={[0.32, 24]} />
+            <meshPhysicalMaterial
+              color="#0e7490"
+              transparent
+              opacity={0.80}
+              roughness={0.1}
+              metalness={0.1}
+              transmission={0.5}
+            />
+          </mesh>
+        </group>
+
         {/* Foot valve strainer inside borewell */}
         <mesh position={[2.8, -1.85, 0]} castShadow>
           <cylinderGeometry args={[0.045, 0.045, 0.15, 12, 3, true]} />
