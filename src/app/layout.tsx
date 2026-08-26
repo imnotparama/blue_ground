@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AURA Purify — Smart Solar IoT Water Purification Experience",
-  description: "An interactive, Apple-inspired 3D digital-twin showcasing a smart solar-powered IoT water filtration and purification system.",
-  authors: [{ name: "AURA Systems" }],
+  title: "blueground Leviathan — Smart Solar IoT Water Purification System",
+  description: "An interactive, Apple-inspired 3D digital-twin showcasing the blueground Leviathan solar-powered IoT water filtration and purification system designed for mining and remote communities.",
+  authors: [{ name: "blueground" }],
 };
 
 export default function RootLayout({

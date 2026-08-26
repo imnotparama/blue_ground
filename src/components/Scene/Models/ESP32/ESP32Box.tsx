@@ -32,7 +32,7 @@ export const ESP32Box = () => {
       ctx.fillRect(0, 0, 128, 16);
       ctx.fillStyle = '#ffffff';
       ctx.font = 'bold 9px monospace';
-      ctx.fillText('AURA PURIFY IoT', 4, 11);
+      ctx.fillText('LEVIATHAN IoT', 4, 11);
 
       ctx.fillStyle = '#38bdf8';
       ctx.font = '8px monospace';

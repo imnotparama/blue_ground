@@ -130,82 +130,73 @@ const defaultMetrics: SystemMetrics = {
   waterQuality: 'EXCELLENT',
 };
 
-// Guided AI Presentation Steps
+// Guided AI Presentation Steps — SIH Mining & Remote Communities Story
 const presentationSteps: PresentationStep[] = [
   {
     target: 'OVERVIEW',
-    title: 'Smart Water Purification System',
-    description: 'Welcome to the premium Apple-inspired 3D experience. This IoT-enabled water purifier is self-sustaining and solar-powered. Let\'s take a tour of the system.',
-    duration: 6000,
-  },
-  {
-    target: 'SOLAR',
-    title: 'Monocrystalline Solar Array',
-    description: 'The system is crowned by a high-efficiency solar panel. Under sunny conditions, it outputs up to 60W, harvesting energy to power the ESP32 controller, water pump, and UV sterilizer.',
-    duration: 5000,
-    actions: (setMetrics, setMode) => {
-      setMode('NORMAL');
-      setMetrics(prev => ({ ...prev, solarWatts: 58, batteryPercent: Math.min(prev.batteryPercent + 1, 100) }));
-    },
-  },
-  {
-    target: 'BATTERY',
-    title: 'Smart Lithium Storage Enclosure',
-    description: 'A custom battery enclosure houses high-capacity lithium cells. It regulates power delivery, tracks charging status, and provides 24-hour backup energy storage.',
-    duration: 5000,
-  },
-  {
-    target: 'ESP32',
-    title: 'ESP32 IoT Central Core',
-    description: 'The brain of the system is an ESP32 microcontroller, housed inside a dustproof electronics box. It polls sensors, regulates pump speeds, drives the TFT display, and syncs data to the cloud.',
-    duration: 5500,
-  },
-  {
-    target: 'SECONDARY_TANK',
-    title: 'Secondary Monitoring Tank',
-    description: 'Raw water fills this upper-right secondary chamber. Embedded TDS, pH, and Turbidity probes analyze chemical and physical water quality before any filtration begins.',
-    duration: 5500,
-  },
-  {
-    target: 'PUMP',
-    title: 'High-Efficiency Filtration Pump',
-    description: 'Inside the secondary tank, a submerged water pump activates. It pushes raw water upward through the pipe, passing the external flow sensor toward the filter housing.',
-    duration: 5000,
-    actions: (setMetrics) => {
-      setMetrics(prev => ({ ...prev, pumpRpm: 2400, flowRate: 5.2, uvStatus: 'ON' }));
-    },
-  },
-  {
-    target: 'FLOW_SENSOR',
-    title: 'Inline Flow Rate Sensor',
-    description: 'A physical flow-wheel sensor monitors real-time volumetric throughput (L/min). Any drop in flow speed triggers a warning on the ESP32 and alerts maintenance.',
-    duration: 4500,
-  },
-  {
-    target: 'FILTER_HOUSING',
-    title: 'Sedimentation & Multi-Layer Filter',
-    description: 'Water enters the external filtration housing, gravity-filtering through Coarse Mesh, Gravel, Sand, Activated Carbon, and Fine Filters to strip away physical particles and contaminants.',
+    title: 'The Challenge: Mining Water Pollution',
+    description: 'In open-cast mining sites and remote off-grid communities, heavy mineral runoff and high turbidity contaminate local water sources. blueground Leviathan is an autonomous, solar-powered IoT water purification system engineered to solve this crisis.',
     duration: 6500,
   },
   {
-    target: 'RETURN_PIPE',
-    title: 'Purified Return Pipe',
-    description: 'Pure, sparkling water leaves the filter base and returns through the PVC return pipe, cascading back into the main storage chamber.',
+    target: 'INTAKE_PIPE',
+    title: 'Phase 1: Raw Intake from Mining Runoff Pit',
+    description: 'The system draws contaminated slurry water directly from open-cast settling ponds and borewells, passing through industrial strainer foot valves into the primary filtration circuit.',
+    duration: 5500,
+  },
+  {
+    target: 'SEDIMENTATION_TANK',
+    title: 'Phase 2: Gravitational Sedimentation Trap',
+    description: 'Raw water enters the primary sedimentation vessel. Multi-density settling layers of coarse aggregate, gravel, and activated carbon trap heavy suspended solids and mining grit.',
+    duration: 6000,
+  },
+  {
+    target: 'FLOW_SENSOR',
+    title: 'Phase 3: Real-Time Flow Telemetry',
+    description: 'As settled water leaves the sedimentation tank, an inline Hall-effect flow sensor measures volumetric inflow rate (L/min), providing live throughput telemetry to the ESP32.',
     duration: 5000,
   },
   {
+    target: 'SECONDARY_TANK',
+    title: 'Phase 4: Sensor Quality & Dual Routing',
+    description: 'Water fills the secondary quality analysis chamber where immersed TDS, pH, and optical Turbidity probes evaluate purity in real time. Good water drops directly to storage; bad water is routed to RO filtration.',
+    duration: 6500,
+  },
+  {
+    target: 'FILTER_HOUSING',
+    title: 'Phase 5: 4-Stage RO Multi-Barrier Purifier',
+    description: 'When water quality is sub-standard, the filtration pump pushes water through the multi-stage RO filter (PP sediment, CTO carbon, RO membrane, post-mineralizer) with real-time pressure dial feedback.',
+    duration: 6500,
+  },
+  {
     target: 'PRIMARY_TANK',
-    title: 'Primary Storage Water Tank',
-    description: 'A spacious transparent main reservoir holds the clean water. An internal float sensor monitors capacity, and a drain valve at the bottom allows for automatic flushing and cleaning.',
+    title: 'Phase 6: Clean Storage & UV-C Sterilization',
+    description: 'Purified water cascades into the 250-liter primary clean reservoir. A high-output germicidal UV-C emitter sterilizes pathogens while a float switch continuously tracks reservoir volume.',
     duration: 6000,
     actions: (setMetrics) => {
-      setMetrics(prev => ({ ...prev, waterLevel: 75, waterQuality: 'EXCELLENT' }));
+      setMetrics(prev => ({ ...prev, waterLevel: 78, waterQuality: 'EXCELLENT' }));
     },
   },
   {
+    target: 'SOLAR',
+    title: 'Phase 7: 100% Autonomous Solar Energy',
+    description: 'Powered entirely by rooftop monocrystalline photovoltaics and smart lithium storage, Leviathan operates 24/7 off-grid without requiring diesel generators or grid connectivity.',
+    duration: 5500,
+    actions: (setMetrics, setMode) => {
+      setMode('NORMAL');
+      setMetrics(prev => ({ ...prev, solarWatts: 56, batteryPercent: Math.min(prev.batteryPercent + 2, 100) }));
+    },
+  },
+  {
+    target: 'DISPLAY',
+    title: 'Phase 8: Edge IoT Diagnostics & Cloud Sync',
+    description: 'The ESP32 controller renders live water metrics on its 1.8 TFT color screen and transmits encrypted telemetry to remote cloud monitoring dashboards for mining supervisors.',
+    duration: 5500,
+  },
+  {
     target: 'OVERVIEW',
-    title: 'Eco-System Fully Operational',
-    description: 'All nodes are online. The system is operating at 98% filter efficiency. You can now explore the system manually, toggle visual modes, or run specific operational simulations.',
+    title: 'The Impact: Safe Drinking Water Restored',
+    description: 'Safe, certified drinking water is dispensed to local mining workers and remote communities. Explore the 3D twin freely, press "T" for Tanks Only Margins, or press "H" for Clean Showroom View.',
     duration: 7000,
   },
 ];

@@ -24,7 +24,7 @@ const Scene = dynamic(
           <div className="w-12 h-12 rounded-full border-2 border-zinc-800 border-t-cyan-400 animate-spin" style={{ animationDuration: '0.8s' }} />
         </div>
         <p className="text-zinc-500 text-[10px] font-mono tracking-[0.3em] mt-6 uppercase animate-pulse">
-          INITIALIZING AURA 3D CANVAS ENGINE
+          INITIALIZING LEVIATHAN 3D CANVAS ENGINE
         </p>
       </div>
     ),
@@ -63,7 +63,7 @@ const HomePageContent = () => {
 
       {/* Decorative ambient elements (Apple aesthetics) */}
       <div className="fixed bottom-4 left-6 z-10 pointer-events-none text-[10px] font-mono text-zinc-600 tracking-wider">
-        © 2026 AURA SYSTEMS INC. ALL RIGHTS RESERVED.
+        © 2026 BLUEGROUND LEVIATHAN • SMART SOLAR IOT WATER PURIFICATION
       </div>
       <div className="fixed bottom-4 right-6 z-10 pointer-events-none text-[10px] font-mono text-zinc-600 tracking-wider">
         LATITUDE: 13.0827° N / LONGITUDE: 80.2707° E

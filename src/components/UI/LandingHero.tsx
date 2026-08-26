@@ -57,7 +57,7 @@ export const LandingHero = () => {
               transition={{ delay: 0.4, duration: 0.6 }}
               className="text-zinc-400 text-sm sm:text-base font-light leading-relaxed max-w-lg mb-10"
             >
-              Experience blueground by Team Leviathan: a self-sustaining, solar-powered IoT water purification system. An interactive 3D digital-twin built for engineering visualization and telemetry diagnostics.
+              <strong className="text-white font-medium">blueground Leviathan</strong>: A self-sustaining, solar-powered IoT water purification system engineered for open-cast mining sites and off-grid rural communities. An Apple-style interactive 3D digital twin with live telemetry diagnostics.
             </motion.p>
 
             {/* Quick Feature Grid */}
