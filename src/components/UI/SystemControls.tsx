@@ -12,7 +12,8 @@ import {
   Compass, 
   Database,
   Cpu,
-  Layers
+  Layers,
+  Droplets,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -34,7 +35,9 @@ export const SystemControls = () => {
     tanksOnly,
     setTanksOnly,
     sidebarTab,
-    setSidebarTab
+    setSidebarTab,
+    waterTrackMode,
+    setWaterTrackMode,
   } = useSystemState();
 
   if (!landingVisited || demoRunning) return null; // Hide controls during landing or guided tour
@@ -210,6 +213,19 @@ export const SystemControls = () => {
             >
               <Wrench className={`w-3 h-3 ${sidebarTab === 'TOOLS' ? 'text-amber-400' : 'text-zinc-400'}`} />
               {sidebarTab === 'TOOLS' ? 'Sensors & Tools: OPEN (S)' : 'Sensors & Tools List (S)'}
+            </button>
+
+            {/* Water Flow Journey Focus Mode */}
+            <button
+              onClick={() => setWaterTrackMode(!waterTrackMode)}
+              className={`col-span-2 flex items-center justify-center gap-1.5 py-1.5 rounded-lg border text-[9px] font-mono font-bold tracking-wider transition-all cursor-pointer ${
+                waterTrackMode
+                  ? 'bg-cyan-500/25 text-cyan-300 border-cyan-400/60 shadow-[0_0_12px_rgba(6,182,212,0.25)]'
+                  : 'bg-white/2 border-white/5 text-zinc-400 hover:bg-white/5 hover:text-white'
+              }`}
+            >
+              <Droplets className={`w-3 h-3 ${waterTrackMode ? 'text-cyan-400 animate-bounce-subtle' : 'text-zinc-400'}`} />
+              {waterTrackMode ? 'Water Flow Tour: ACTIVE (W)' : 'Water Flow Journey (W)'}
             </button>
           </div>
         </div>

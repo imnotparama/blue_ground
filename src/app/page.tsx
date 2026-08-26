@@ -9,6 +9,7 @@ import { Dashboard } from '@/components/UI/Dashboard';
 import { BottomDetailCard } from '@/components/UI/BottomDetailCard';
 import { SystemControls } from '@/components/UI/SystemControls';
 import { LandingHero } from '@/components/UI/LandingHero';
+import { WaterTrackerHUD } from '@/components/UI/WaterTrackerHUD';
 
 // Dynamically import the 3D Scene with SSR disabled to prevent WebGL hydration mismatches in Next.js
 const Scene = dynamic(
@@ -57,6 +58,9 @@ const HomePageContent = () => {
 
       {/* Narrative AI Presentation card overlay */}
       <PresentationOverlay />
+
+      {/* Interactive Water Flow Tracker Stepper HUD (Focus View Mode) */}
+      <WaterTrackerHUD />
 
       {/* Fullscreen cinematic landing intro cover */}
       <LandingHero />

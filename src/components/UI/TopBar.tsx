@@ -16,7 +16,8 @@ import {
   Eye, 
   EyeOff,
   Layers,
-  Wrench
+  Wrench,
+  Droplets,
 } from 'lucide-react';
 
 export const TopBar = () => {
@@ -34,7 +35,9 @@ export const TopBar = () => {
     tanksOnly,
     setTanksOnly,
     sidebarTab,
-    setSidebarTab
+    setSidebarTab,
+    waterTrackMode,
+    setWaterTrackMode,
   } = useSystemState();
 
   const envs: { mode: EnvironmentalMode; icon: React.ReactNode; label: string }[] = [
@@ -60,7 +63,22 @@ export const TopBar = () => {
       </div>
 
       {/* Center demo action & clean view toggle (pointers enabled) */}
-      <div className="flex items-center gap-3 pointer-events-auto">
+      <div className="flex items-center gap-2.5 pointer-events-auto">
+        {/* Toggle Water Flow Focus View Button */}
+        <button
+          onClick={() => setWaterTrackMode(!waterTrackMode)}
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-full border transition-all text-xs font-mono tracking-wide cursor-pointer ${
+            waterTrackMode
+              ? 'bg-cyan-500/25 border-cyan-400 text-cyan-300 shadow-[0_0_18px_rgba(6,182,212,0.35)]'
+              : 'bg-zinc-900/80 border-zinc-700 text-zinc-400 hover:text-white hover:border-cyan-500/40'
+          }`}
+          title="Toggle Interactive Water Flow Focus Journey (Hotkey: W)"
+        >
+          <Droplets className={`w-3.5 h-3.5 ${waterTrackMode ? 'text-cyan-400 animate-bounce-subtle' : 'text-zinc-400'}`} />
+          <span className="hidden sm:inline font-semibold">{waterTrackMode ? 'Water Flow: ON' : 'Water Flow'}</span>
+          <span className={`text-[10px] px-1 py-0.2 rounded font-bold ${waterTrackMode ? 'bg-cyan-950 text-cyan-300 border border-cyan-500/40' : 'bg-zinc-800 border border-zinc-700 text-zinc-400'}`}>W</span>
+        </button>
+
         {/* Toggle Sensors & Tools Inventory View Button */}
         <button
           onClick={() => setSidebarTab(sidebarTab === 'TOOLS' ? 'TELEMETRY' : 'TOOLS')}

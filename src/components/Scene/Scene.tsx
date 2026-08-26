@@ -19,6 +19,7 @@ import { Pipes } from './Models/Pipes/Pipes';
 // Flow and environment simulations imported for Phase 3
 import { Water } from './Models/Tank/Water';
 import { TankMargins } from './Models/Tank/TankMargins';
+import { WaterDropletTracker } from './Models/Tank/WaterDropletTracker';
 import { Flows } from './Models/Pipes/Flows';
 import { AmbientLife } from './Environment/AmbientLife';
 import { Hotspots } from './Environment/Hotspots';
@@ -130,6 +131,7 @@ export const Scene = () => {
           {/* Render dynamic fluids and current animations */}
           <Water />
           <TankMargins />
+          <WaterDropletTracker />
           <Flows />
 
           {/* Vision Pro style hotspots */}

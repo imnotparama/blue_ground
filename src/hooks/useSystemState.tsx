@@ -38,7 +38,13 @@ export type CameraPreset =
   | 'SECONDARY_TANK'
   | 'INTAKE_PIPE'
   | 'RETURN_PIPE'
-  | 'DRAIN_VALVE';
+  | 'DRAIN_VALVE'
+  | 'WATER_STAGE_1'
+  | 'WATER_STAGE_2'
+  | 'WATER_STAGE_3'
+  | 'WATER_STAGE_4'
+  | 'WATER_STAGE_5'
+  | 'WATER_STAGE_6';
 
 // Sensor and operational metrics structure
 export interface SystemMetrics {
@@ -108,6 +114,15 @@ interface SystemStateContextType {
   // Right Sidebar Tab: Live Telemetry vs Sensors & Tools
   sidebarTab: 'TELEMETRY' | 'TOOLS';
   setSidebarTab: (tab: 'TELEMETRY' | 'TOOLS') => void;
+  // Water Flow View Focus Mode (Journey of a Water Packet)
+  waterTrackMode: boolean;
+  setWaterTrackMode: (val: boolean) => void;
+  waterTrackStage: number; // 1 to 6
+  setWaterTrackStage: (stage: number) => void;
+  nextWaterStage: () => void;
+  prevWaterStage: () => void;
+  autoPlayWater: boolean;
+  setAutoPlayWater: (val: boolean) => void;
 }
 
 const SystemStateContext = createContext<SystemStateContextType | undefined>(undefined);
@@ -458,7 +473,58 @@ export const SystemStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const [tanksOnly, setTanksOnly] = useState(false);
   const [sidebarTab, setSidebarTab] = useState<'TELEMETRY' | 'TOOLS'>('TELEMETRY');
 
-  // Global Hotkeys: 'H' for Hotspots, 'T' for Tanks Only, 'S' for Sensors & Tools
+  // Water Flow View Focus Mode
+  const [waterTrackMode, setWaterTrackModeState] = useState(false);
+  const [waterTrackStage, setWaterTrackStageState] = useState(1);
+  const [autoPlayWater, setAutoPlayWater] = useState(false);
+
+  const setWaterTrackStage = (stage: number) => {
+    const clamped = Math.max(1, Math.min(6, stage));
+    setWaterTrackStageState(clamped);
+    setCameraPreset(`WATER_STAGE_${clamped}` as CameraPreset);
+  };
+
+  const setWaterTrackMode = (val: boolean) => {
+    setWaterTrackModeState(val);
+    if (val) {
+      setWaterTrackStage(1);
+      setCameraPreset('WATER_STAGE_1');
+    } else {
+      setAutoPlayWater(false);
+      setCameraPreset('OVERVIEW');
+    }
+  };
+
+  const nextWaterStage = () => {
+    if (waterTrackStage < 6) {
+      setWaterTrackStage(waterTrackStage + 1);
+    } else {
+      setWaterTrackStage(1); // loop back to raw intake
+    }
+  };
+
+  const prevWaterStage = () => {
+    if (waterTrackStage > 1) {
+      setWaterTrackStage(waterTrackStage - 1);
+    } else {
+      setWaterTrackStage(6);
+    }
+  };
+
+  // Auto-play timer for water flow focus journey
+  useEffect(() => {
+    if (!waterTrackMode || !autoPlayWater) return;
+    const interval = setInterval(() => {
+      setWaterTrackStageState(prev => {
+        const next = prev < 6 ? prev + 1 : 1;
+        setCameraPreset(`WATER_STAGE_${next}` as CameraPreset);
+        return next;
+      });
+    }, 5500);
+    return () => clearInterval(interval);
+  }, [waterTrackMode, autoPlayWater]);
+
+  // Global Hotkeys: 'H' for Hotspots, 'T' for Tanks Only, 'S' for Sensors & Tools, 'W' for Water Flow Focus
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Ignore key events when user is typing in an input
@@ -472,6 +538,19 @@ export const SystemStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
       }
       if (e.key === 's' || e.key === 'S') {
         setSidebarTab(prev => (prev === 'TOOLS' ? 'TELEMETRY' : 'TOOLS'));
+      }
+      if (e.key === 'w' || e.key === 'W') {
+        setWaterTrackModeState(prev => {
+          const next = !prev;
+          if (next) {
+            setWaterTrackStageState(1);
+            setCameraPreset('WATER_STAGE_1');
+          } else {
+            setAutoPlayWater(false);
+            setCameraPreset('OVERVIEW');
+          }
+          return next;
+        });
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -515,6 +594,14 @@ export const SystemStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
         setTanksOnly,
         sidebarTab,
         setSidebarTab,
+        waterTrackMode,
+        setWaterTrackMode,
+        waterTrackStage,
+        setWaterTrackStage,
+        nextWaterStage,
+        prevWaterStage,
+        autoPlayWater,
+        setAutoPlayWater,
       }}
     >
       {children}

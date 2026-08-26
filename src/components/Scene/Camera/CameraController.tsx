@@ -97,6 +97,30 @@ export const CAMERA_PRESETS: Record<CameraPreset, { position: [number, number, n
     position: [-2.62, -1.2, 1.2],
     target: [-2.62, -1.45, 0],
   },
+  WATER_STAGE_1: {
+    position: [2.8, 0.0, 2.2],
+    target: [2.8, -0.4, 0],
+  },
+  WATER_STAGE_2: {
+    position: [1.9, 0.15, 2.0],
+    target: [1.9, 0.05, 0],
+  },
+  WATER_STAGE_3: {
+    position: [1.35, 0.35, 1.5],
+    target: [1.35, 0.30, 0],
+  },
+  WATER_STAGE_4: {
+    position: [0.45, 0.30, 1.8],
+    target: [0.45, 0.28, 0],
+  },
+  WATER_STAGE_5: {
+    position: [-1.40, 0.42, 1.8],
+    target: [-1.40, 0.38, 0],
+  },
+  WATER_STAGE_6: {
+    position: [-0.70, -0.40, 2.6],
+    target: [-0.70, -0.55, 0],
+  },
 };
 
 export const CameraController = () => {
