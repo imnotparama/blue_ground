@@ -126,20 +126,11 @@ const TankMarginBox: React.FC<TankMarginBoxProps> = ({
 // ─── Main TankMargins Manager Component ───────────────────────────────────────
 export const TankMargins = () => {
   const { tanksOnly } = useSystemState();
-  const groupRef = useRef<THREE.Group>(null);
 
-  useFrame((_, delta) => {
-    if (!groupRef.current) return;
-    const targetScale = tanksOnly ? 1.0 : 0.001;
-    const damp = 1.0 - Math.exp(-8 * delta);
-    groupRef.current.scale.setScalar(
-      THREE.MathUtils.lerp(groupRef.current.scale.x, targetScale, damp)
-    );
-    groupRef.current.visible = groupRef.current.scale.x > 0.01;
-  });
+  if (!tanksOnly) return null;
 
   return (
-    <group ref={groupRef} visible={false}>
+    <group>
       {/* 1. PRIMARY TANK (Clean Drinking Water Storage Reservoir) */}
       <TankMarginBox
         center={[-0.7, -0.55, 0]}

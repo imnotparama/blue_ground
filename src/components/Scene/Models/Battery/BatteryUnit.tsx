@@ -58,7 +58,7 @@ export const BatteryUnit = () => {
 
     for (let i = 0; i < materialsRef.current.length; i++) {
       const mat = materialsRef.current[i];
-      mat.transparent = true;
+      mat.transparent = isDimmed;
       mat.opacity = THREE.MathUtils.lerp(mat.opacity, targetOpacity, damp);
 
       if (mat.emissive) {

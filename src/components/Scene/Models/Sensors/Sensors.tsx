@@ -47,7 +47,7 @@ const InteractiveSensor: React.FC<InteractiveSensorProps> = ({
     for (let i = 0; i < materialsRef.current.length; i++) {
       const item = materialsRef.current[i];
       const mat = item.mat;
-      mat.transparent = true;
+      mat.transparent = isDimmed;
       mat.opacity = THREE.MathUtils.lerp(mat.opacity, targetOpacity, damp);
       
       if (mat.emissive) {
