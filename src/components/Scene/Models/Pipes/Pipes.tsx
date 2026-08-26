@@ -304,39 +304,52 @@ export const Pipes = () => {
         {hydroGeneratorMode ? (
           <group>
             {/* Deep-Well Manual Hand Pump & Animated Field Operator Character */}
-            <HandPumpWithOperator pos={[2.8, -1.95, 0]} />
+            <HandPumpWithOperator pos={[2.80, -1.95, 0]} />
+
+            {/* Direct Intake Spout Connector & Union Flange from Hand Pump Outlet */}
+            <mesh position={[2.52, -1.09, 0]} castShadow>
+              <cylinderGeometry args={[0.038, 0.038, 0.04, 16]} />
+              <meshStandardMaterial color="#334155" roughness={0.3} metalness={0.85} />
+            </mesh>
+
+            {/* Lower suction intake pipe from Hand Pump spout up to Hydro Motor */}
+            <PipeSeg pos={[2.52, -0.74, 0]} len={0.66} r={0.030} mat="gray" />
+            <TeflonRing pos={[2.52, -0.62, 0]} />
 
             {/* In-Line Hydro Power Turbine Generator Motor */}
-            <HydroTurbineMotor pos={[2.8, -0.40, 0]} />
+            <HydroTurbineMotor pos={[2.52, -0.40, 0]} />
 
-            {/* Upper discharge pipe rising from motor up to elbow */}
-            <TeflonRing pos={[2.8, -0.15, 0]} />
-            <PipeSeg pos={[2.8, 0.30, 0]} len={0.92} r={0.030} mat="gray" />
-            <PipeClamp pos={[2.8, 0.20, 0]} rot={[0, 0, 0]} />
+            {/* Upper discharge pipe rising from motor up to overhead elbow */}
+            <TeflonRing pos={[2.52, -0.18, 0]} />
+            <PipeSeg pos={[2.52, 0.30, 0]} len={0.96} r={0.030} mat="gray" />
+            <PipeClamp pos={[2.52, 0.40, 0]} rot={[0, 0, 0]} />
 
             {/* Heavy-Duty Conduit Cable Clamping along vertical pipe */}
-            <mesh position={[2.8, 0.50, 0.05]} castShadow>
+            <mesh position={[2.52, 0.50, 0.05]} castShadow>
               <boxGeometry args={[0.016, 0.40, 0.016]} />
               <meshStandardMaterial color="#0f172a" roughness={0.7} />
             </mesh>
+
+            {/* Top Elbow and Horizontal Feed into Sedimentation Tank */}
+            <PipeElbow pos={[2.52, 0.78, 0]} r={0.034} mat="gray" />
+            <TeflonRing pos={[2.52, 0.74, 0]} />
+            <PipeSeg pos={[2.21, 0.78, 0]} len={0.62} r={0.030} rot={[0, 0, Math.PI / 2]} mat="gray" />
+            <TeflonRing pos={[2.0, 0.78, 0]} rot={[0, 0, Math.PI / 2]} />
           </group>
         ) : (
-          /* Standard Borewell Riser Pipe */
+          /* Standard Borewell Riser Pipe Setup */
           <group>
             <PipeSeg pos={[2.8, -0.50, 0]} len={2.55} r={0.030} mat="gray" />
             <PipeClamp pos={[2.8, 0.20, 0]} rot={[0, 0, 0]} />
+            <PipeElbow pos={[2.8, 0.78, 0]} r={0.034} mat="gray" />
+            <TeflonRing pos={[2.8, 0.74, 0]} />
+            <PipeSeg pos={[2.35, 0.78, 0]} len={0.90} r={0.030} rot={[0, 0, Math.PI / 2]} mat="gray" />
+            <TeflonRing pos={[2.0, 0.78, 0]} rot={[0, 0, Math.PI / 2]} />
           </group>
         )}
 
-        <PipeElbow pos={[2.8, 0.78, 0]} r={0.034} mat="gray" />
-        <TeflonRing pos={[2.8, 0.74, 0]} />
-
-        {/* Horizontal run to Sedimentation top */}
-        <PipeSeg pos={[2.35, 0.78, 0]} len={0.90} r={0.030} rot={[0, 0, Math.PI / 2]} mat="gray" />
-        <TeflonRing pos={[2.0, 0.78, 0]} rot={[0, 0, Math.PI / 2]} />
+        {/* Common Drop into Sedimentation Tank Top Cap */}
         <PipeElbow pos={[1.90, 0.78, 0]} r={0.034} mat="gray" />
-
-        {/* Drop into Sedimentation Tank Top Cap */}
         <PipeSeg pos={[1.90, 0.76, 0]} len={0.04} r={0.030} mat="gray" />
       </group>
 

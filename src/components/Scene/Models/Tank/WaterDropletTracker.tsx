@@ -83,7 +83,8 @@ export const WaterDropletTracker = () => {
     waterTrackStage, 
     metrics, 
     dualVerificationMode, 
-    recirculationTriggered 
+    recirculationTriggered,
+    hydroGeneratorMode,
   } = useSystemState();
 
   const dropletMeshRef = useRef<THREE.Group>(null);
@@ -104,15 +105,24 @@ export const WaterDropletTracker = () => {
 
   // ─── 1. Exact 3D Path Curves for Each Stage ─────────────────────────────────
   const stageCurves = useMemo(() => {
-    // Stage 1: Raw Borewell Intake -> Top of Sedimentation Tank
-    const stage1 = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(2.8, -1.85, 0),
-      new THREE.Vector3(2.8, -0.50, 0),
-      new THREE.Vector3(2.8, 0.78, 0),
-      new THREE.Vector3(2.35, 0.78, 0),
-      new THREE.Vector3(1.90, 0.78, 0),
-      new THREE.Vector3(1.90, 0.70, 0),
-    ], false, 'catmullrom', 0.05);
+    // Stage 1: Raw Borewell / Hand Pump Intake -> Top of Sedimentation Tank
+    const stage1 = hydroGeneratorMode
+      ? new THREE.CatmullRomCurve3([
+          new THREE.Vector3(2.52, -1.09, 0),
+          new THREE.Vector3(2.52, -0.40, 0),
+          new THREE.Vector3(2.52, 0.78, 0),
+          new THREE.Vector3(2.21, 0.78, 0),
+          new THREE.Vector3(1.90, 0.78, 0),
+          new THREE.Vector3(1.90, 0.70, 0),
+        ], false, 'catmullrom', 0.05)
+      : new THREE.CatmullRomCurve3([
+          new THREE.Vector3(2.8, -1.85, 0),
+          new THREE.Vector3(2.8, -0.50, 0),
+          new THREE.Vector3(2.8, 0.78, 0),
+          new THREE.Vector3(2.35, 0.78, 0),
+          new THREE.Vector3(1.90, 0.78, 0),
+          new THREE.Vector3(1.90, 0.70, 0),
+        ], false, 'catmullrom', 0.05);
 
     // Stage 2: Sedimentation Tank Internal Settling Downward
     const stage2 = new THREE.CatmullRomCurve3([
@@ -198,7 +208,7 @@ export const WaterDropletTracker = () => {
       '6_direct': stage6Direct,
       '6_recirc': stage6Recirc 
     };
-  }, []);
+  }, [hydroGeneratorMode]);
 
   // Trail history buffer (25 trailing positions)
   const trailPositions = useMemo(() => new Float32Array(25 * 3), []);

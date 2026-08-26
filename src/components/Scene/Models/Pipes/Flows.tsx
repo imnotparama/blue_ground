@@ -65,15 +65,24 @@ export const Flows = () => {
 
   // 1. DEFINE EXACT 3D PATH CURVES FOR WATER PIPING
   const curves = useMemo(() => {
-    // A. Borewell to Sedimentation Tank top
-    const intakeCurve = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(2.8, -1.8, 0),
-      new THREE.Vector3(2.8, -0.5, 0),
-      new THREE.Vector3(2.8, 0.78, 0),
-      new THREE.Vector3(2.35, 0.78, 0),
-      new THREE.Vector3(1.90, 0.78, 0),
-      new THREE.Vector3(1.90, 0.72, 0),
-    ], false, 'catmullrom', 0.02);
+    // A. Borewell / Hand Pump to Sedimentation Tank top
+    const intakeCurve = hydroGeneratorMode
+      ? new THREE.CatmullRomCurve3([
+          new THREE.Vector3(2.52, -1.09, 0),
+          new THREE.Vector3(2.52, -0.40, 0),
+          new THREE.Vector3(2.52, 0.78, 0),
+          new THREE.Vector3(2.21, 0.78, 0),
+          new THREE.Vector3(1.90, 0.78, 0),
+          new THREE.Vector3(1.90, 0.72, 0),
+        ], false, 'catmullrom', 0.02)
+      : new THREE.CatmullRomCurve3([
+          new THREE.Vector3(2.8, -1.8, 0),
+          new THREE.Vector3(2.8, -0.5, 0),
+          new THREE.Vector3(2.8, 0.78, 0),
+          new THREE.Vector3(2.35, 0.78, 0),
+          new THREE.Vector3(1.90, 0.78, 0),
+          new THREE.Vector3(1.90, 0.72, 0),
+        ], false, 'catmullrom', 0.02);
 
     // B. Sedimentation Tank to Secondary Compartment via Flow Sensor
     const filterCurve = new THREE.CatmullRomCurve3([
@@ -121,7 +130,7 @@ export const Flows = () => {
     ], false, 'catmullrom', 0.02);
 
     return { intakeCurve, filterCurve, directCurve, pumpCurve, tank2DeliveryCurve, recirculationCurve };
-  }, []);
+  }, [hydroGeneratorMode]);
 
   // 2. INITIALIZE FLOW PARTICLE SYSTEMS
   const particleConfig = useMemo(() => {
@@ -167,14 +176,14 @@ export const Flows = () => {
       new THREE.Vector3(-2.1, -0.40, 0.3),
     ]);
     const hydroToBatt = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(2.8, -0.22, 0.09),
-      new THREE.Vector3(2.8, 0.78, 0.05),
+      new THREE.Vector3(2.52, -0.22, 0.09),
+      new THREE.Vector3(2.52, 0.78, 0.05),
       new THREE.Vector3(1.2, 0.78, 0.05),
       new THREE.Vector3(-0.65, 0.75, 0),
     ]);
 
     return { solarToBatt, battToEsp, espToFlow, espToUv, espToFloat, hydroToBatt };
-  }, []);
+  }, [hydroGeneratorMode]);
 
   const wirePoints = useMemo(() => {
     return {
