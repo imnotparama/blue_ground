@@ -249,6 +249,16 @@ const componentCatalog: Record<string, ComponentDetail> = {
     processRole: 'Hydraulic energy recovery unit. Converts raw intake flow pressure directly into electrical energy to charge the battery bank.',
     getLiveReadout: (m) => `Hydro Generation: +${(m.hydroWatts || 0).toFixed(1)}W | Battery Charge Rate: +${((m.hydroWatts || 0) / 12).toFixed(2)}A`,
   },
+  hand_pump: {
+    name: 'India Mark II Deep-Well Hand Pump',
+    purpose: 'Provides manual mechanical deep-well water extraction from underground aquifers or settling ponds.',
+    principle: 'Lever arm actuates a vertical connecting rod and down-hole cylinder plunger with leather/nitrile bucket seals.',
+    specifications: ['Stroke length: 100–125 mm', 'Material: Hot-dip galvanized cast steel', 'Handle mechanical advantage: ~4:1'],
+    power: 'Manual mechanical human power (0W electrical)',
+    maintenance: '95% - Inspect plunger seals annually',
+    processRole: 'Primary manual intake mechanism. Lifts raw subterranean water and discharges it through the hydro turbine and sedimentation trap.',
+    getLiveReadout: (m) => `Intake Throughput: ${m.flowRate.toFixed(1)} L/min | Mechanism Status: OPERATIONAL`,
+  },
 };
 
 export const BottomDetailCard = () => {

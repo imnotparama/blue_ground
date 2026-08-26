@@ -215,6 +215,17 @@ export const TOOLS_CATALOG: ToolItem[] = [
     getLiveValue: (m) => `+${(m.hydroWatts || 0).toFixed(1)}W Generation`,
     getStatus: (m) => (m.hydroWatts || 0) > 0 ? { label: 'CHARGING BATTERY', color: 'text-cyan-400 bg-cyan-950/60 border-cyan-500/40 animate-pulse' } : { label: 'STANDBY', color: 'text-zinc-400 bg-zinc-900 border-zinc-700' },
   },
+  {
+    id: 'hand_pump',
+    preset: 'HYDRO_GENERATOR',
+    name: 'India Mark II Deep-Well Hand Pump',
+    category: 'HYDRAULICS',
+    model: 'Standard Cast-Iron / Galvanized Deep-Well Cylinder',
+    spec: 'Manual Reciprocating Plunger • Reinforced Gusset Base • Slanted Head',
+    location: 'Intake Ground Pedestal (x = 2.80, y = -1.95)',
+    getLiveValue: (m) => `Pumping Flow: ${m.flowRate.toFixed(1)} L/min`,
+    getStatus: (m) => m.flowRate > 0 ? { label: 'STROKE ACTIVE', color: 'text-emerald-400 bg-emerald-950/60 border-emerald-500/40' } : { label: 'READY', color: 'text-zinc-400 bg-zinc-900 border-zinc-700' },
+  },
 
   // ─── VESSELS & FILTERS ───
   {
