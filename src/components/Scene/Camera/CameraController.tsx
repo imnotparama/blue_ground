@@ -14,8 +14,8 @@ interface ControlsInterface {
 
 export const CAMERA_PRESETS: Record<CameraPreset, { position: [number, number, number]; target: [number, number, number] }> = {
   OVERVIEW: {
-    position: [0.0, 0.7, 6.8],
-    target: [0.0, -0.45, 0],
+    position: [0.0, 0.25, 4.3],
+    target: [0.0, -0.30, 0],
   },
   SOLAR: {
     position: [-1.65, 1.4, 1.3],

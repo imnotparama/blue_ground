@@ -1,7 +1,7 @@
 'use client';
 
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, ContactShadows } from '@react-three/drei';
+import { OrbitControls, ContactShadows, Sky } from '@react-three/drei';
 import { CameraController } from './Camera/CameraController';
 import { SceneLighting } from './Lighting/SceneLighting';
 import { useSystemState } from '@/hooks/useSystemState';
@@ -32,7 +32,7 @@ export const Scene = () => {
       className="w-full h-full relative select-none"
       style={{
         background:
-          'radial-gradient(circle at 50% 25%, #0f172a 0%, #090e1a 45%, #030712 100%)',
+          'linear-gradient(180deg, #38bdf8 0%, #7dd3fc 35%, #bae6fd 65%, #e0f2fe 85%, #f8fafc 100%)',
       }}
     >
       {/* 3D R3F Canvas with high-DPI crispness and smooth performance */}
@@ -45,41 +45,51 @@ export const Scene = () => {
           powerPreference: 'high-performance',
           stencil: false,
           depth: true,
-          toneMappingExposure: 1.35,
+          toneMappingExposure: 1.25,
         }}
         camera={{
           fov: 46,
           near: 0.1,
           far: 100,
-          position: [0.0, 0.8, 6.8],
+          position: [0.0, 0.25, 4.3],
         }}
         className="w-full h-full"
       >
+        {/* Realistic Atmospheric Sky Dome */}
+        <Sky
+          distance={450000}
+          sunPosition={[10, 14, -4]}
+          inclination={0.6}
+          azimuth={0.25}
+          turbidity={5}
+          rayleigh={0.9}
+        />
+
         {/* Soft atmospheric depth haze */}
-        <fog attach="fog" args={['#090e1a', 15, 50]} />
+        <fog attach="fog" args={['#e0f2fe', 25, 90]} />
 
         {/* Lighting setup */}
         <SceneLighting />
 
-        {/* Infinite Sleek Studio Floor */}
+        {/* Expansive Natural Ground */}
         <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2.24, 0]} receiveShadow>
-          <planeGeometry args={[200, 200]} />
+          <planeGeometry args={[300, 300]} />
           <meshStandardMaterial
-            color="#0b1120"
-            roughness={0.85}
-            metalness={0.15}
+            color="#94a3b8"
+            roughness={0.92}
+            metalness={0.05}
           />
         </mesh>
 
-        {/* Clean Architectural Platform with Subtle Glow */}
+        {/* Clean Architectural Platform with Subtle Shadow */}
         <mesh position={[-0.5, -2.22, -0.1]} receiveShadow castShadow>
           <boxGeometry args={[9.4, 0.08, 2.6]} />
-          <meshStandardMaterial color="#1e293b" roughness={0.7} metalness={0.3} />
+          <meshStandardMaterial color="#f8fafc" roughness={0.7} metalness={0.15} />
         </mesh>
-        {/* Platform Cyan Edge Trim */}
+        {/* Platform Accent Edge Trim */}
         <mesh position={[-0.5, -2.20, 1.25]} castShadow>
           <boxGeometry args={[9.4, 0.06, 0.06]} />
-          <meshStandardMaterial color="#06b6d4" roughness={0.2} metalness={0.8} />
+          <meshStandardMaterial color="#0284c7" roughness={0.3} metalness={0.7} />
         </mesh>
 
         {/* Camera state transitions controller */}
