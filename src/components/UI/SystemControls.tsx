@@ -5,6 +5,7 @@ import { useSystemState, SystemMode } from '@/hooks/useSystemState';
 import { 
   Wrench, 
   Eye, 
+  EyeOff,
   Settings, 
   Sparkles, 
   Play, 
@@ -26,7 +27,9 @@ export const SystemControls = () => {
     setTransparent, 
     setMetrics,
     demoRunning, 
-    landingVisited 
+    landingVisited,
+    showHotspots,
+    setShowHotspots
   } = useSystemState();
 
   if (!landingVisited || demoRunning) return null; // Hide controls during landing or guided tour
@@ -163,6 +166,19 @@ export const SystemControls = () => {
             >
               <Cpu className="w-3 h-3" />
               X-Ray Mode
+            </button>
+
+            {/* Hotspot Dots / Clean Showroom View Toggle */}
+            <button
+              onClick={() => setShowHotspots(!showHotspots)}
+              className={`col-span-2 flex items-center justify-center gap-1.5 py-1.5 rounded-lg border text-[9px] font-mono font-bold tracking-wider transition-all cursor-pointer ${
+                !showHotspots
+                  ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-[0_0_8px_rgba(245,158,11,0.15)]'
+                  : 'bg-cyan-500/10 text-cyan-300 border-cyan-500/30 hover:bg-cyan-500/20'
+              }`}
+            >
+              {showHotspots ? <Eye className="w-3 h-3 text-cyan-400" /> : <EyeOff className="w-3 h-3 text-amber-400" />}
+              {showHotspots ? 'Hotspot Details: VISIBLE' : 'Clean Showroom View (No Dots)'}
             </button>
           </div>
         </div>

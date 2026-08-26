@@ -48,6 +48,40 @@ const PipeElbow = ({
   </mesh>
 );
 
+// ─── Realistic Threaded PTFE Teflon Tape Ring ─────────────────────────────────
+const TeflonRing = ({
+  pos,
+  rot = [0, 0, 0] as [number, number, number],
+}: {
+  pos: [number, number, number];
+  rot?: [number, number, number];
+}) => (
+  <mesh position={pos} rotation={rot}>
+    <cylinderGeometry args={[0.026, 0.026, 0.012, 12]} />
+    <meshStandardMaterial color="#ffffff" roughness={0.95} />
+  </mesh>
+);
+
+// ─── Heavy-Duty Industrial Pipe Mounting Saddle Clamp ──────────────────────────
+const PipeClamp = ({
+  pos,
+  rot = [0, 0, 0] as [number, number, number],
+}: {
+  pos: [number, number, number];
+  rot?: [number, number, number];
+}) => (
+  <group position={pos} rotation={rot}>
+    <mesh castShadow>
+      <torusGeometry args={[0.033, 0.007, 6, 16]} />
+      <meshStandardMaterial color="#0284c7" roughness={0.35} metalness={0.8} />
+    </mesh>
+    <mesh position={[0, 0, -0.035]} castShadow>
+      <boxGeometry args={[0.024, 0.024, 0.025]} />
+      <meshStandardMaterial color="#475569" roughness={0.3} metalness={0.9} />
+    </mesh>
+  </group>
+);
+
 // ─── Solenoid Valve Component ─────────────────────────────────────────────────
 const SolenoidValve = ({
   pos,
@@ -120,12 +154,15 @@ export const Pipes = () => {
           <meshStandardMaterial color="#94a3b8" roughness={0.3} metalness={0.9} wireframe />
         </mesh>
 
-        {/* Vertical Riser */}
+        {/* Vertical Riser with support clamp */}
         <PipeSeg pos={[2.8, -0.50, 0]} len={2.55} r={0.030} mat="gray" />
+        <PipeClamp pos={[2.8, 0.20, 0]} rot={[0, 0, 0]} />
         <PipeElbow pos={[2.8, 0.78, 0]} r={0.034} mat="gray" />
+        <TeflonRing pos={[2.8, 0.74, 0]} />
 
         {/* Horizontal run to Sedimentation top */}
         <PipeSeg pos={[2.35, 0.78, 0]} len={0.90} r={0.030} rot={[0, 0, Math.PI / 2]} mat="gray" />
+        <TeflonRing pos={[2.0, 0.78, 0]} rot={[0, 0, Math.PI / 2]} />
         <PipeElbow pos={[1.90, 0.78, 0]} r={0.034} mat="gray" />
 
         {/* Drop into Sedimentation Tank Top Cap */}
@@ -151,9 +188,11 @@ export const Pipes = () => {
       >
         {/* Pipe between Sedimentation Tank and Flow Sensor */}
         <PipeSeg pos={[1.56, 0.30, 0]} len={0.18} rot={[0, 0, Math.PI / 2]} />
+        <TeflonRing pos={[1.60, 0.30, 0]} rot={[0, 0, Math.PI / 2]} />
 
         {/* Pipe between Flow Sensor and Secondary Tank Inlet */}
         <PipeSeg pos={[1.20, 0.30, 0]} len={0.36} rot={[0, 0, Math.PI / 2]} />
+        <TeflonRing pos={[1.05, 0.30, 0]} rot={[0, 0, Math.PI / 2]} />
       </group>
 
       {/* ══════════════════════════════════════════════════════════════════════
@@ -162,6 +201,7 @@ export const Pipes = () => {
           ══════════════════════════════════════════════════════════════════════ */}
       <group>
         <SolenoidValve pos={[0.5, 0.0, 0]} rot={[Math.PI / 2, 0, 0]} open={isDirectValveOpen} />
+        <TeflonRing pos={[0.5, -0.04, 0]} />
         <PipeSeg pos={[0.5, -0.15, 0]} len={0.24} />
       </group>
 
@@ -172,12 +212,14 @@ export const Pipes = () => {
         {/* Pipe from Pump Outlet rising into Filtration Tank Inlet */}
         <PipeSeg pos={[-0.35, 0.24, 0]} len={0.18} />
         <PipeElbow pos={[-0.35, 0.40, 0]} />
+        <TeflonRing pos={[-0.35, 0.33, 0]} />
         <PipeSeg pos={[-0.33, 0.40, 0]} len={0.05} rot={[0, 0, Math.PI / 2]} />
 
         {/* (Water flows through the RO Filtration Tank from x = -0.31 to -1.39) */}
 
         {/* Pipe from Filtration Tank Outlet dropping into Primary Clean Storage */}
         <PipeSeg pos={[-1.39, 0.40, 0]} len={0.06} rot={[0, 0, Math.PI / 2]} />
+        <TeflonRing pos={[-1.40, 0.40, 0]} rot={[0, 0, Math.PI / 2]} />
         <PipeElbow pos={[-1.42, 0.40, 0]} />
         <PipeSeg pos={[-1.42, 0.20, 0]} len={0.38} />
       </group>

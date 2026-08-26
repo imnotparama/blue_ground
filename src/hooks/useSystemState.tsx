@@ -100,6 +100,8 @@ interface SystemStateContextType {
   // Hotspot interaction
   activeHotspot: string | null;
   setActiveHotspot: (id: string | null) => void;
+  showHotspots: boolean;
+  setShowHotspots: (val: boolean) => void;
 }
 
 const SystemStateContext = createContext<SystemStateContextType | undefined>(undefined);
@@ -455,6 +457,19 @@ export const SystemStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
     }
   };
 
+  const [showHotspots, setShowHotspots] = useState(true);
+
+  // Global Hotkey 'H' to toggle hotspots on/off
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'h' || e.key === 'H') {
+        setShowHotspots(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   const currentStepData = demoRunning ? presentationSteps[demoStep] : null;
 
   return (
@@ -486,6 +501,8 @@ export const SystemStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
         currentStepData,
         activeHotspot,
         setActiveHotspot,
+        showHotspots,
+        setShowHotspots,
       }}
     >
       {children}

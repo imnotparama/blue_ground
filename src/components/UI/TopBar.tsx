@@ -12,7 +12,9 @@ import {
   Moon, 
   Play,
   Pause,
-  Compass
+  Compass,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 
 export const TopBar = () => {
@@ -24,7 +26,9 @@ export const TopBar = () => {
     startDemo, 
     stopDemo,
     mode,
-    landingVisited
+    landingVisited,
+    showHotspots,
+    setShowHotspots
   } = useSystemState();
 
   const envs: { mode: EnvironmentalMode; icon: React.ReactNode; label: string }[] = [
@@ -49,12 +53,27 @@ export const TopBar = () => {
         </div>
       </div>
 
-      {/* Center demo action / info (pointers enabled) */}
-      <div className="flex items-center gap-4 pointer-events-auto">
+      {/* Center demo action & clean view toggle (pointers enabled) */}
+      <div className="flex items-center gap-3 pointer-events-auto">
+        {/* Toggle Details / Clean View Button */}
+        <button
+          onClick={() => setShowHotspots(!showHotspots)}
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-full border transition-all text-xs font-mono tracking-wide cursor-pointer ${
+            showHotspots
+              ? 'bg-cyan-500/15 border-cyan-400/40 text-cyan-300 shadow-[0_0_12px_rgba(6,182,212,0.2)]'
+              : 'bg-zinc-900/80 border-zinc-700 text-zinc-400 hover:text-white'
+          }`}
+          title="Toggle Inspection Dots & Labels (Hotkey: H)"
+        >
+          {showHotspots ? <Eye className="w-3.5 h-3.5 text-cyan-400" /> : <EyeOff className="w-3.5 h-3.5 text-zinc-400" />}
+          <span className="hidden sm:inline font-semibold">{showHotspots ? 'Details: ON' : 'Clean View'}</span>
+          <span className="text-[10px] px-1 py-0.2 rounded bg-zinc-800 border border-zinc-700 text-zinc-400">H</span>
+        </button>
+
         {!demoRunning ? (
           <button
             onClick={startDemo}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-cyan-500/80 to-blue-600/80 hover:from-cyan-500 hover:to-blue-600 border border-cyan-400/20 text-white font-medium text-xs tracking-wider uppercase transition-all shadow-[0_0_15px_rgba(6,182,212,0.25)] hover:scale-105"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-cyan-500/80 to-blue-600/80 hover:from-cyan-500 hover:to-blue-600 border border-cyan-400/20 text-white font-medium text-xs tracking-wider uppercase transition-all shadow-[0_0_15px_rgba(6,182,212,0.25)] hover:scale-105 cursor-pointer"
           >
             <Play className="w-3.5 h-3.5 fill-white" />
             Start Guided Demo
@@ -62,7 +81,7 @@ export const TopBar = () => {
         ) : (
           <button
             onClick={stopDemo}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-red-950/75 border border-red-500/30 hover:bg-red-900/80 text-red-200 font-medium text-xs tracking-wider uppercase transition-all"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-red-950/75 border border-red-500/30 hover:bg-red-900/80 text-red-200 font-medium text-xs tracking-wider uppercase transition-all cursor-pointer"
           >
             <Pause className="w-3.5 h-3.5 fill-red-200" />
             End Demo Tour

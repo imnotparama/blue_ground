@@ -155,10 +155,10 @@ const hotspotsList: HotspotConfig[] = [
 ];
 
 export const Hotspots = () => {
-  const { landingVisited, demoRunning, activeHotspot, setActiveHotspot, setCameraPreset, metrics, mode } = useSystemState();
+  const { landingVisited, demoRunning, activeHotspot, setActiveHotspot, setCameraPreset, metrics, mode, showHotspots } = useSystemState();
   const [hoveredId, setHoveredId] = useState<string | null>(null);
 
-  if (!landingVisited || demoRunning) return null;
+  if (!landingVisited || demoRunning || !showHotspots) return null;
 
   return (
     <group>

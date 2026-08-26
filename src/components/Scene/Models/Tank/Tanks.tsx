@@ -208,6 +208,67 @@ export const Tanks = () => {
           />
         </mesh>
 
+        {/* ─── PHOTOREALISTIC HARDWARE & SCALE ETCHINGS ─── */}
+        {/* 1. Laser-etched Metric Volume Graduation Marks on Front Acrylic Face */}
+        <group position={[-TW / 2 + 0.35, 0, TD / 2 + 0.002]}>
+          {[-0.95, -0.70, -0.45, -0.20, 0.05, 0.30].map((yTick, idx) => (
+            <group key={idx} position={[0, yTick, 0]}>
+              {/* Major tick bar */}
+              <mesh position={[0.04, 0, 0]}>
+                <boxGeometry args={[0.08, 0.004, 0.001]} />
+                <meshStandardMaterial color="#38bdf8" roughness={0.3} metalness={0.8} />
+              </mesh>
+              {/* Minor sub-ticks */}
+              {idx < 5 && (
+                <mesh position={[0.02, 0.125, 0]}>
+                  <boxGeometry args={[0.04, 0.002, 0.001]} />
+                  <meshStandardMaterial color="#0284c7" roughness={0.3} metalness={0.8} />
+                </mesh>
+              )}
+            </group>
+          ))}
+        </group>
+
+        {/* 2. Stainless Steel Hex Bolts with Nylon Washers on Lid and Frame */}
+        {[-TW / 2 + 0.1, -TW / 4, 0, TW / 4, TW / 2 - 0.1].map((bx, bIdx) => (
+          <group key={`bolt-${bIdx}`}>
+            {/* Top front rim hex bolts */}
+            <mesh position={[bx, TH / 2 + 0.012, TD / 2]} rotation={[0, 0, 0]} castShadow>
+              <cylinderGeometry args={[0.014, 0.014, 0.018, 6]} />
+              <meshStandardMaterial color="#cbd5e1" roughness={0.2} metalness={0.95} />
+            </mesh>
+            {/* Bottom front rim hex bolts */}
+            <mesh position={[bx, -TH / 2 - 0.012, TD / 2]} rotation={[0, 0, 0]} castShadow>
+              <cylinderGeometry args={[0.014, 0.014, 0.018, 6]} />
+              <meshStandardMaterial color="#cbd5e1" roughness={0.2} metalness={0.95} />
+            </mesh>
+          </group>
+        ))}
+
+        {/* 3. Translucent Silicone Gasket Seal Line along Divider Shelf */}
+        <mesh position={[0.45, 0.545, 0]}>
+          <boxGeometry args={[1.72, 0.008, TD - 0.02]} />
+          <meshPhysicalMaterial color="#f0fdf4" transparent opacity={0.65} roughness={0.8} />
+        </mesh>
+
+        {/* 4. Heavy-Duty Rubber Vibration Dampener Feet with Leveling Studs */}
+        {[-TW / 2 + 0.15, TW / 2 - 0.15].map((fx) =>
+          [-TD / 2 + 0.15, TD / 2 - 0.15].map((fz) => (
+            <group key={`foot-${fx}-${fz}`} position={[fx, -TH / 2 - 0.05, fz]}>
+              {/* Stainless threaded leveling stud */}
+              <mesh position={[0, 0.025, 0]} castShadow>
+                <cylinderGeometry args={[0.012, 0.012, 0.05, 12]} />
+                <meshStandardMaterial color="#94a3b8" roughness={0.2} metalness={0.95} />
+              </mesh>
+              {/* Rubber elastomer foot */}
+              <mesh position={[0, -0.01, 0]} castShadow>
+                <cylinderGeometry args={[0.065, 0.075, 0.03, 16]} />
+                <meshStandardMaterial color="#0f172a" roughness={0.95} metalness={0.05} />
+              </mesh>
+            </group>
+          ))
+        )}
+
         {/* Direct Passage Valve (Good quality water drop) */}
         <group position={[1.2, 0.55, 0]}>
           <mesh position={[0, -0.08, 0]} castShadow>
