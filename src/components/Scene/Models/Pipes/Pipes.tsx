@@ -4,6 +4,7 @@ import React, { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useSystemState } from '@/hooks/useSystemState';
 import * as THREE from 'three';
+import { HandPumpWithOperator } from '../HandPump/HandPumpWithOperator';
 
 // ─── Shared Pipe Materials ────────────────────────────────────────────────────
 const WhitePvc = () => (
@@ -140,117 +141,6 @@ const SolenoidValve = ({
         <boxGeometry args={[0.11, 0.012, 0.018]} />
         <meshStandardMaterial color="#ef4444" roughness={0.3} metalness={0.5} />
       </mesh>
-    </group>
-  );
-};
-
-// ─── India Mark Deep-Well Hand Pump Component (Matching User Diagram) ────────
-const HandPump = ({ pos }: { pos: [number, number, number] }) => {
-  const leverRef = useRef<THREE.Group>(null);
-  const { metrics } = useSystemState();
-
-  useFrame((state) => {
-    const time = state.clock.getElapsedTime();
-    if (leverRef.current && metrics.flowRate > 0) {
-      // Gentle realistic pumping stroke oscillation when water flow is active
-      leverRef.current.rotation.z = Math.sin(time * 3.5) * 0.08;
-    }
-  });
-
-  return (
-    <group position={pos}>
-      {/* 1. Square Ground Baseplate with Corner Mounting Bolts */}
-      <mesh position={[0, 0.01, 0]} castShadow receiveShadow>
-        <boxGeometry args={[0.34, 0.02, 0.34]} />
-        <meshStandardMaterial color="#475569" roughness={0.4} metalness={0.8} />
-      </mesh>
-
-      {/* 4 Corner Anchor Bolts */}
-      {[
-        [-0.13, -0.13],
-        [0.13, -0.13],
-        [-0.13, 0.13],
-        [0.13, 0.13],
-      ].map(([bx, bz], i) => (
-        <mesh key={i} position={[bx, 0.025, bz]} castShadow>
-          <cylinderGeometry args={[0.012, 0.012, 0.02, 8]} />
-          <meshStandardMaterial color="#94a3b8" roughness={0.2} metalness={0.9} />
-        </mesh>
-      ))}
-
-      {/* 4 Triangular Support Gusset Ribs */}
-      {[0, Math.PI / 2, Math.PI, (3 * Math.PI) / 2].map((ang, i) => (
-        <group key={i} rotation={[0, ang, 0]}>
-          <mesh position={[0.065, 0.07, 0]} castShadow>
-            <boxGeometry args={[0.07, 0.12, 0.008]} />
-            <meshStandardMaterial color="#475569" roughness={0.4} metalness={0.8} />
-          </mesh>
-        </group>
-      ))}
-
-      {/* 2. Lower Stand Column (Pedestal Cylinder) */}
-      <mesh position={[0, 0.36, 0]} castShadow>
-        <cylinderGeometry args={[0.065, 0.072, 0.70, 20]} />
-        <meshStandardMaterial color="#64748b" roughness={0.35} metalness={0.8} />
-      </mesh>
-
-      {/* 3. Flanged Mid-Collar Joint */}
-      <mesh position={[0, 0.71, 0]} castShadow>
-        <boxGeometry args={[0.16, 0.025, 0.16]} />
-        <meshStandardMaterial color="#334155" roughness={0.3} metalness={0.85} />
-      </mesh>
-
-      {/* 4. Upper Water Chamber Cylinder */}
-      <mesh position={[0, 0.83, 0]} castShadow>
-        <cylinderGeometry args={[0.075, 0.075, 0.22, 20]} />
-        <meshStandardMaterial color="#64748b" roughness={0.35} metalness={0.8} />
-      </mesh>
-
-      {/* 5. Discharge Spout (Water Outlet Nozzle) */}
-      <group position={[-0.08, 0.78, 0]}>
-        {/* Horizontal Spout Pipe extending toward system */}
-        <mesh position={[-0.08, 0, 0]} rotation={[0, 0, Math.PI / 2]} castShadow>
-          <cylinderGeometry args={[0.030, 0.030, 0.16, 16]} />
-          <meshStandardMaterial color="#475569" roughness={0.3} metalness={0.85} />
-        </mesh>
-        {/* Downward Angled Discharge Nozzle */}
-        <mesh position={[-0.16, -0.04, 0]} castShadow>
-          <cylinderGeometry args={[0.032, 0.026, 0.08, 16]} />
-          <meshStandardMaterial color="#334155" roughness={0.25} metalness={0.9} />
-        </mesh>
-      </group>
-
-      {/* 6. Slanted Pump Head Box (Matching User Image Diagram) */}
-      <group position={[-0.02, 1.05, 0]} rotation={[0, 0, -0.20]}>
-        <mesh castShadow>
-          <boxGeometry args={[0.13, 0.24, 0.12]} />
-          <meshStandardMaterial color="#475569" roughness={0.35} metalness={0.8} />
-        </mesh>
-
-        {/* Two Pivot Pin Rivets on Head Box (as in uploaded drawing) */}
-        <mesh position={[-0.02, 0.04, 0]} rotation={[Math.PI / 2, 0, 0]} castShadow>
-          <cylinderGeometry args={[0.012, 0.012, 0.126, 12]} />
-          <meshStandardMaterial color="#0f172a" roughness={0.2} metalness={0.95} />
-        </mesh>
-        <mesh position={[0.02, -0.03, 0]} rotation={[Math.PI / 2, 0, 0]} castShadow>
-          <cylinderGeometry args={[0.012, 0.012, 0.126, 12]} />
-          <meshStandardMaterial color="#0f172a" roughness={0.2} metalness={0.95} />
-        </mesh>
-
-        {/* 7. Long Operating Lever Handle Arm */}
-        <group ref={leverRef} position={[0, 0.04, 0]}>
-          {/* Lever Bar extending upward/left */}
-          <mesh position={[0.38, 0.24, 0]} rotation={[0, 0, 0.58]} castShadow>
-            <cylinderGeometry args={[0.014, 0.014, 0.92, 12]} />
-            <meshStandardMaterial color="#94a3b8" roughness={0.2} metalness={0.9} />
-          </mesh>
-          {/* Handle Grip Sleeve at end */}
-          <mesh position={[0.78, 0.50, 0]} rotation={[0, 0, 0.58]} castShadow>
-            <cylinderGeometry args={[0.020, 0.020, 0.15, 12]} />
-            <meshStandardMaterial color="#0f172a" roughness={0.6} metalness={0.3} />
-          </mesh>
-        </group>
-      </group>
     </group>
   );
 };
@@ -413,8 +303,8 @@ export const Pipes = () => {
         {/* ─── HYDRO-POWER MOTOR GENERATOR & HAND PUMP SETUP ─── */}
         {hydroGeneratorMode ? (
           <group>
-            {/* Deep-Well Manual Hand Pump (Matching User Blueprint) */}
-            <HandPump pos={[2.8, -1.95, 0]} />
+            {/* Deep-Well Manual Hand Pump & Animated Field Operator Character */}
+            <HandPumpWithOperator pos={[2.8, -1.95, 0]} />
 
             {/* In-Line Hydro Power Turbine Generator Motor */}
             <HydroTurbineMotor pos={[2.8, -0.40, 0]} />
