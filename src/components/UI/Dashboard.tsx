@@ -9,9 +9,11 @@ import {
   Thermometer, 
   ChevronRight,
   Sparkles,
-  TrendingUp
+  TrendingUp,
+  Wrench
 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import { SensorsAndTools } from './SensorsAndTools';
 
 // Small inline sparkline SVG chart
 const Sparkline = ({ data, color }: { data: number[]; color: string }) => {
@@ -54,7 +56,7 @@ const Sparkline = ({ data, color }: { data: number[]; color: string }) => {
 };
 
 export const Dashboard = () => {
-  const { metrics, mode, demoRunning, landingVisited } = useSystemState();
+  const { metrics, mode, demoRunning, landingVisited, sidebarTab, setSidebarTab } = useSystemState();
   const [collapsed, setCollapsed] = React.useState(false);
 
   // Live sliding window telemetry history
@@ -102,7 +104,7 @@ export const Dashboard = () => {
           {collapsed ? (
             <div className="flex flex-col items-center justify-center gap-0.5">
               <TrendingUp className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
-              <span className="text-[6px] text-cyan-400 font-mono tracking-tighter">TELE</span>
+              <span className="text-[6px] text-cyan-400 font-mono tracking-tighter">DIAG</span>
             </div>
           ) : (
             <ChevronRight className="w-4 h-4 text-zinc-300" />
@@ -112,29 +114,66 @@ export const Dashboard = () => {
         {/* Sidebar Diagnostics Content */}
         <motion.div
           animate={{ 
-            x: collapsed ? 370 : 0, 
+            x: collapsed ? 410 : 0, 
             opacity: collapsed ? 0 : 1 
           }}
           transition={{ type: 'spring', damping: 24, stiffness: 150 }}
-          className="w-[340px] max-h-[82vh] overflow-y-auto pointer-events-auto shadow-[0_24px_48px_rgba(0,0,0,0.5)] rounded-2xl"
+          className="w-[360px] max-h-[82vh] overflow-y-auto pointer-events-auto shadow-[0_24px_48px_rgba(0,0,0,0.5)] rounded-2xl"
         >
-          <div className="glass-panel rounded-2xl p-5 border border-white/10 relative overflow-hidden flex flex-col gap-5 bg-zinc-950/75 backdrop-blur-md">
+          <div className="glass-panel rounded-2xl p-4 border border-white/10 relative overflow-hidden flex flex-col gap-4 bg-zinc-950/85 backdrop-blur-md">
             
-            {/* Title / Header */}
-            <div className="flex items-center justify-between">
-              <div className="flex flex-col">
-                <span className="text-[10px] font-bold text-cyan-400 tracking-[0.2em] font-mono uppercase flex items-center gap-1">
-                  <Sparkles className="w-3 h-3 text-cyan-400" /> Live Diagnostics
-                </span>
-                <h1 className="text-sm font-semibold text-white tracking-wide mt-0.5">System Twin Telemetry</h1>
+            {/* Header: Title + Tab Switcher */}
+            <div className="flex flex-col gap-2.5">
+              <div className="flex items-center justify-between">
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-bold text-cyan-400 tracking-[0.2em] font-mono uppercase flex items-center gap-1">
+                    <Sparkles className="w-3 h-3 text-cyan-400" /> Leviathan IoT Core
+                  </span>
+                  <h1 className="text-sm font-semibold text-white tracking-wide mt-0.5">
+                    {sidebarTab === 'TELEMETRY' ? 'System Twin Telemetry' : 'Sensors & Tools Catalog'}
+                  </h1>
+                </div>
+                <div className="flex flex-col items-end">
+                  <span className="text-[8px] font-mono text-zinc-500 uppercase">SYS HEALTH</span>
+                  <span className={`text-xs font-bold font-mono ${metrics.batteryPercent > 10 && mode !== 'PUMP_FAILURE' ? 'text-emerald-400' : 'text-amber-400'}`}>
+                    {metrics.batteryPercent < 10 || mode === 'PUMP_FAILURE' ? '68%' : '98%'}
+                  </span>
+                </div>
               </div>
-              <div className="flex flex-col items-end">
-                <span className="text-[8px] font-mono text-zinc-500 uppercase">SYS HEALTH</span>
-                <span className={`text-xs font-bold font-mono ${metrics.batteryPercent > 10 && mode !== 'PUMP_FAILURE' ? 'text-emerald-400' : 'text-amber-400'}`}>
-                  {metrics.batteryPercent < 10 || mode === 'PUMP_FAILURE' ? '68%' : '98%'}
-                </span>
+
+              {/* Segmented Tab Switcher */}
+              <div className="grid grid-cols-2 p-1 rounded-xl bg-zinc-900/90 border border-white/10">
+                <button
+                  onClick={() => setSidebarTab('TELEMETRY')}
+                  className={`flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+                    sidebarTab === 'TELEMETRY'
+                      ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-[0_0_10px_rgba(6,182,212,0.2)]'
+                      : 'text-zinc-400 hover:text-white'
+                  }`}
+                >
+                  <TrendingUp className="w-3.5 h-3.5" />
+                  <span>Telemetry</span>
+                </button>
+                <button
+                  onClick={() => setSidebarTab('TOOLS')}
+                  className={`flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+                    sidebarTab === 'TOOLS'
+                      ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-[0_0_10px_rgba(245,158,11,0.2)]'
+                      : 'text-zinc-400 hover:text-white'
+                  }`}
+                >
+                  <Wrench className="w-3.5 h-3.5" />
+                  <span>Sensors & Tools</span>
+                  <span className="text-[9px] px-1 py-0.2 rounded bg-zinc-800 text-zinc-400 border border-zinc-700">S</span>
+                </button>
               </div>
             </div>
+
+            {/* TAB CONTENT: SENSORS & TOOLS VS TELEMETRY */}
+            {sidebarTab === 'TOOLS' ? (
+              <SensorsAndTools />
+            ) : (
+              <>
 
             {/* ======================================================== */}
             {/* A. POWER SYSTEM MATRIX */}
@@ -262,6 +301,8 @@ export const Dashboard = () => {
                 <span>{Math.round((metrics.waterLevel / 100) * metrics.tankCapacity)}L / {metrics.tankCapacity}L</span>
               </div>
             </div>
+            </>
+            )}
           </div>
         </motion.div>
 

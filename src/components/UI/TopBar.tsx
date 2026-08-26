@@ -15,7 +15,8 @@ import {
   Compass, 
   Eye, 
   EyeOff,
-  Layers
+  Layers,
+  Wrench
 } from 'lucide-react';
 
 export const TopBar = () => {
@@ -31,7 +32,9 @@ export const TopBar = () => {
     showHotspots,
     setShowHotspots,
     tanksOnly,
-    setTanksOnly
+    setTanksOnly,
+    sidebarTab,
+    setSidebarTab
   } = useSystemState();
 
   const envs: { mode: EnvironmentalMode; icon: React.ReactNode; label: string }[] = [
@@ -58,6 +61,21 @@ export const TopBar = () => {
 
       {/* Center demo action & clean view toggle (pointers enabled) */}
       <div className="flex items-center gap-3 pointer-events-auto">
+        {/* Toggle Sensors & Tools Inventory View Button */}
+        <button
+          onClick={() => setSidebarTab(sidebarTab === 'TOOLS' ? 'TELEMETRY' : 'TOOLS')}
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-full border transition-all text-xs font-mono tracking-wide cursor-pointer ${
+            sidebarTab === 'TOOLS'
+              ? 'bg-amber-500/20 border-amber-400/50 text-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.25)]'
+              : 'bg-zinc-900/80 border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-500'
+          }`}
+          title="Toggle Sensors & Tools Hardware Inventory (Hotkey: S)"
+        >
+          <Wrench className={`w-3.5 h-3.5 ${sidebarTab === 'TOOLS' ? 'text-amber-400 animate-pulse' : 'text-zinc-400'}`} />
+          <span className="hidden sm:inline font-semibold">{sidebarTab === 'TOOLS' ? 'Tools View: ON' : 'Sensors & Tools'}</span>
+          <span className={`text-[10px] px-1 py-0.2 rounded font-bold ${sidebarTab === 'TOOLS' ? 'bg-amber-950 text-amber-300 border border-amber-500/40' : 'bg-zinc-800 border border-zinc-700 text-zinc-400'}`}>S</span>
+        </button>
+
         {/* Toggle Tanks Only / Margin View Button */}
         <button
           onClick={() => setTanksOnly(!tanksOnly)}

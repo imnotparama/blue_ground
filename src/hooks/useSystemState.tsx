@@ -105,6 +105,9 @@ interface SystemStateContextType {
   // Tank Isolation & Boundary Margin Mode
   tanksOnly: boolean;
   setTanksOnly: (val: boolean) => void;
+  // Right Sidebar Tab: Live Telemetry vs Sensors & Tools
+  sidebarTab: 'TELEMETRY' | 'TOOLS';
+  setSidebarTab: (tab: 'TELEMETRY' | 'TOOLS') => void;
 }
 
 const SystemStateContext = createContext<SystemStateContextType | undefined>(undefined);
@@ -453,8 +456,9 @@ export const SystemStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
   const [showHotspots, setShowHotspots] = useState(true);
   const [tanksOnly, setTanksOnly] = useState(false);
+  const [sidebarTab, setSidebarTab] = useState<'TELEMETRY' | 'TOOLS'>('TELEMETRY');
 
-  // Global Hotkeys: 'H' for Hotspots, 'T' for Tanks Only mode
+  // Global Hotkeys: 'H' for Hotspots, 'T' for Tanks Only, 'S' for Sensors & Tools
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Ignore key events when user is typing in an input
@@ -465,6 +469,9 @@ export const SystemStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
       }
       if (e.key === 't' || e.key === 'T') {
         setTanksOnly(prev => !prev);
+      }
+      if (e.key === 's' || e.key === 'S') {
+        setSidebarTab(prev => (prev === 'TOOLS' ? 'TELEMETRY' : 'TOOLS'));
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -506,6 +513,8 @@ export const SystemStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
         setShowHotspots,
         tanksOnly,
         setTanksOnly,
+        sidebarTab,
+        setSidebarTab,
       }}
     >
       {children}
