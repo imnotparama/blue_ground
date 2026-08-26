@@ -97,6 +97,14 @@ export const CAMERA_PRESETS: Record<CameraPreset, { position: [number, number, n
     position: [-2.62, -1.2, 1.2],
     target: [-2.62, -1.45, 0],
   },
+  TANK2_VERIFICATION: {
+    position: [-1.85, 0.45, 1.6],
+    target: [-1.85, 0.15, 0],
+  },
+  RECIRCULATION_LOOP: {
+    position: [-1.20, 0.55, 1.5],
+    target: [-1.20, 0.35, 0],
+  },
   WATER_STAGE_1: {
     position: [2.8, 0.0, 2.2],
     target: [2.8, -0.4, 0],

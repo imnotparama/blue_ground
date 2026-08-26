@@ -134,22 +134,22 @@ export const WaterDropletTracker = () => {
       new THREE.Vector3(0.05, 0.08, 0),
     ], false, 'catmullrom', 0.05);
 
-    // Stage 5: High-Pressure Pump through 4-Stage RO Multi-Barrier
+    // Stage 5: High-Pressure Pump through 4-Stage RO Multi-Barrier -> Tank 2
     const stage5 = new THREE.CatmullRomCurve3([
       new THREE.Vector3(0.05, 0.08, 0),
       new THREE.Vector3(0.05, 0.38, 0),
       new THREE.Vector3(-0.45, 0.38, 0),
       new THREE.Vector3(-0.95, 0.38, 0),
       new THREE.Vector3(-1.85, 0.38, 0),
-      new THREE.Vector3(-1.95, 0.38, 0),
-      new THREE.Vector3(-1.95, 0.10, 0),
+      new THREE.Vector3(-1.85, 0.15, 0),
     ], false, 'catmullrom', 0.05);
 
-    // Stage 6: Cascading into Primary 250L Clean Storage Reservoir & UV-C
+    // Stage 6: Post-RO Verification in Tank 2 -> Clean Storage / Recirculation Loop
     const stage6 = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(-1.95, 0.10, 0),
-      new THREE.Vector3(-1.60, -0.20, 0),
-      new THREE.Vector3(-1.10, -0.45, 0),
+      new THREE.Vector3(-1.85, 0.15, 0),
+      new THREE.Vector3(-2.19, 0.03, 0),
+      new THREE.Vector3(-2.27, -0.20, 0),
+      new THREE.Vector3(-1.60, -0.45, 0),
       new THREE.Vector3(-0.70, -0.55, 0),
       new THREE.Vector3(-0.40, -0.60, 0),
     ], false, 'catmullrom', 0.05);

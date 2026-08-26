@@ -238,7 +238,7 @@ export const Pipes = () => {
       </group>
 
       {/* ══════════════════════════════════════════════════════════════════════
-          4. BAD WATER FILTRATION LOOP: PUMP [0.05, 0.08] → RO FILTRATION TANK [-1.40, 0.38] → PRIMARY TANK [-1.95]
+          4. BAD WATER FILTRATION LOOP: PUMP [0.05, 0.08] → RO FILTRATION TANK [-1.40, 0.38] → TANK 2 INLET [-1.85]
           ══════════════════════════════════════════════════════════════════════ */}
       <group>
         {/* Pipe from Pump Outlet rising up to elbow */}
@@ -252,11 +252,35 @@ export const Pipes = () => {
 
         {/* (Water flows through the RO Filtration Tank from x = -0.95 to -1.85) */}
 
-        {/* Pipe from Filtration Tank Outlet dropping into Primary Clean Storage */}
-        <PipeSeg pos={[-1.90, 0.38, 0]} len={0.10} rot={[0, 0, Math.PI / 2]} />
-        <TeflonRing pos={[-1.88, 0.38, 0]} rot={[0, 0, Math.PI / 2]} />
-        <PipeElbow pos={[-1.95, 0.38, 0]} />
-        <PipeSeg pos={[-1.95, 0.19, 0]} len={0.38} />
+        {/* Pipe from Filtration Tank Outlet dropping into Post-Filtration Tank 2 Inlet */}
+        <PipeSeg pos={[-1.85, 0.38, 0]} len={0.10} rot={[0, 0, Math.PI / 2]} />
+        <TeflonRing pos={[-1.85, 0.38, 0]} rot={[0, 0, Math.PI / 2]} />
+        <PipeElbow pos={[-1.85, 0.38, 0]} />
+        <PipeSeg pos={[-1.85, 0.30, 0]} len={0.16} />
+
+        {/* Tank 2 Clean Delivery Line (Path A: Post-RO Confirmed Pure -> Primary Clean Tank) */}
+        <PipeSeg pos={[-2.19, 0.03, 0]} len={0.16} rot={[0, 0, Math.PI / 2]} />
+        <PipeElbow pos={[-2.27, 0.03, 0]} />
+        <PipeSeg pos={[-2.27, -0.25, 0]} len={0.56} />
+
+        {/* Tank 2 Recirculation Return Loop (Path B: Still Sub-Standard -> Return to RO Pump Intake) */}
+        <group
+          onClick={(e) => {
+            e.stopPropagation();
+            setActiveHotspot('recirculation_loop');
+            setCameraPreset('RECIRCULATION_LOOP');
+          }}
+        >
+          {/* Recirculation Drop Pipe */}
+          <PipeSeg pos={[-1.70, -0.18, 0]} len={0.14} />
+          <PipeElbow pos={[-1.70, -0.25, 0]} />
+          {/* Solenoid Diverter Valve on Recirculation Loop */}
+          <SolenoidValve pos={[-1.50, -0.25, 0]} open={true} />
+          {/* Horizontal Recirculation Return Line Spanning Right to Pump Inlet */}
+          <PipeSeg pos={[-0.75, -0.25, 0]} len={1.50} rot={[0, 0, Math.PI / 2]} mat="gray" />
+          <PipeElbow pos={[0.05, -0.25, 0]} />
+          <PipeSeg pos={[0.05, -0.08, 0]} len={0.34} mat="gray" />
+        </group>
       </group>
 
       {/* ══════════════════════════════════════════════════════════════════════

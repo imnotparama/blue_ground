@@ -376,6 +376,68 @@ export const Tanks = () => {
           <meshStandardMaterial color="#0369a1" roughness={0.4} metalness={0.6} />
         </mesh>
       </group>
+
+      {/* ════════════════════════════════════════════════════════════════════
+          3. POST-FILTRATION QUALITY VERIFICATION TANK 2 (Chamber 2)
+             Center: [-1.85, 0.15, 0]
+             Houses Sensor Suite #2 (TDS #2, pH #2, Turbidity #2)
+             Dual-Verification Closed-Loop Return System
+          ════════════════════════════════════════════════════════════════════ */}
+      <group
+        position={[-1.85, 0.15, 0]}
+        onClick={(e) => {
+          e.stopPropagation();
+          setActiveHotspot('tank2_verification');
+          setCameraPreset('TANK2_VERIFICATION');
+        }}
+      >
+        {/* Transparent Polycarbonate Vessel Body */}
+        <mesh castShadow receiveShadow>
+          <boxGeometry args={[0.68, 0.52, 0.58]} />
+          <meshPhysicalMaterial
+            color="#06b6d4"
+            transparent
+            opacity={transparent || cutaway ? 0.08 : 0.40}
+            roughness={0.08}
+            metalness={0.1}
+            transmission={0.88}
+            side={THREE.DoubleSide}
+            depthWrite={false}
+          />
+        </mesh>
+
+        {/* Structural Edge Framing & Bevel Corners */}
+        <FrameCorner x={-0.34} y={0} z={-0.29} h={0.52} />
+        <FrameCorner x={0.34} y={0} z={-0.29} h={0.52} />
+        <FrameCorner x={-0.34} y={0} z={0.29} h={0.52} />
+        <FrameCorner x={0.34} y={0} z={0.29} h={0.52} />
+
+        {/* Top Rim & Lid Bezel */}
+        <mesh position={[0, 0.26, 0]} castShadow>
+          <boxGeometry args={[0.70, 0.03, 0.60]} />
+          <meshStandardMaterial color="#0e7490" roughness={0.3} metalness={0.7} />
+        </mesh>
+        {/* Bottom Mounting Flange Base */}
+        <mesh position={[0, -0.26, 0]} castShadow>
+          <boxGeometry args={[0.72, 0.04, 0.62]} />
+          <meshStandardMaterial color="#1e293b" roughness={0.4} metalness={0.8} />
+        </mesh>
+
+        {/* Inlet Port from RO Purifier (Right Wall, x = 0.34, y = 0.16) */}
+        <PipeNozzle pos={[0.34, 0.16, 0]} rot={[0, 0, -Math.PI / 2]} />
+
+        {/* Clean Outlet Port to Primary Tank (Left Wall, x = -0.34, y = -0.12) */}
+        <PipeNozzle pos={[-0.34, -0.12, 0]} rot={[0, 0, Math.PI / 2]} />
+
+        {/* Recirculation Return Port (Bottom Outlet, y = -0.26, x = 0.15) */}
+        <PipeNozzle pos={[0.15, -0.26, 0]} rot={[Math.PI, 0, 0]} />
+
+        {/* Diagnostic Chamber Micro-Label Plaque */}
+        <mesh position={[0, 0.18, 0.295]} castShadow>
+          <boxGeometry args={[0.42, 0.08, 0.01]} />
+          <meshStandardMaterial color="#0891b2" roughness={0.3} metalness={0.7} />
+        </mesh>
+      </group>
     </group>
   );
 };

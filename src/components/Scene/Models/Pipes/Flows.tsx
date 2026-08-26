@@ -37,12 +37,13 @@ const TubeFlowShader = {
 };
 
 export const Flows = () => {
-  const { metrics, mode, envMode } = useSystemState();
+  const { metrics, mode, envMode, dualVerificationMode, recirculationTriggered } = useSystemState();
 
   const intakeParticlesRef = useRef<THREE.Points>(null);
   const filterParticlesRef = useRef<THREE.Points>(null);
   const directParticlesRef = useRef<THREE.Points>(null);
   const pumpParticlesRef = useRef<THREE.Points>(null);
+  const recircParticlesRef = useRef<THREE.Points>(null);
 
   const intakeTubeMatRef = useRef<THREE.ShaderMaterial>(null);
   const filterTubeMatRef = useRef<THREE.ShaderMaterial>(null);
@@ -80,18 +81,33 @@ export const Flows = () => {
       new THREE.Vector3(0.70, -0.25, 0),
     ], false, 'catmullrom', 0.02);
 
-    // D. Pump [0.05, 0.08] -> RO Filtration Tank [-1.40, 0.38] -> Primary Tank [-1.95] (Bad water)
+    // D. Pump [0.05, 0.08] -> RO Filtration Tank [-1.40, 0.38] -> Tank 2 Inlet [-1.85, 0.15]
     const pumpCurve = new THREE.CatmullRomCurve3([
       new THREE.Vector3(0.05, 0.08, 0),
       new THREE.Vector3(0.05, 0.38, 0),
       new THREE.Vector3(-0.45, 0.38, 0),
       new THREE.Vector3(-0.95, 0.38, 0),
       new THREE.Vector3(-1.85, 0.38, 0),
-      new THREE.Vector3(-1.95, 0.38, 0),
-      new THREE.Vector3(-1.95, 0.10, 0),
+      new THREE.Vector3(-1.85, 0.15, 0),
     ], false, 'catmullrom', 0.02);
 
-    return { intakeCurve, filterCurve, directCurve, pumpCurve };
+    // E. Tank 2 to Primary Clean Reservoir (Good Post-RO Water)
+    const tank2DeliveryCurve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(-2.19, 0.03, 0),
+      new THREE.Vector3(-2.27, 0.03, 0),
+      new THREE.Vector3(-2.27, -0.45, 0),
+    ], false, 'catmullrom', 0.02);
+
+    // F. Tank 2 Recirculation Return Loop (Sub-Standard Post-RO Water -> RO Pump)
+    const recirculationCurve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(-1.70, -0.18, 0),
+      new THREE.Vector3(-1.70, -0.25, 0),
+      new THREE.Vector3(-0.85, -0.25, 0),
+      new THREE.Vector3(0.05, -0.25, 0),
+      new THREE.Vector3(0.05, 0.08, 0),
+    ], false, 'catmullrom', 0.02);
+
+    return { intakeCurve, filterCurve, directCurve, pumpCurve, tank2DeliveryCurve, recirculationCurve };
   }, []);
 
   // 2. INITIALIZE FLOW PARTICLE SYSTEMS
@@ -110,6 +126,7 @@ export const Flows = () => {
       filter: init(25),
       direct: init(15),
       pump: init(35),
+      recirc: init(30),
     };
   }, []);
 
@@ -193,10 +210,17 @@ export const Flows = () => {
     updateParticles(intakeParticlesRef, curves.intakeCurve, particleConfig.intake.progress);
     updateParticles(filterParticlesRef, curves.filterCurve, particleConfig.filter.progress);
 
+    const isRecirculating = dualVerificationMode && (recirculationTriggered || metrics.turbidity2 > 1.0);
+
     if (metrics.waterQuality === 'EXCELLENT') {
       updateParticles(directParticlesRef, curves.directCurve, particleConfig.direct.progress);
     } else {
       updateParticles(pumpParticlesRef, curves.pumpCurve, particleConfig.pump.progress);
+      if (isRecirculating) {
+        updateParticles(recircParticlesRef, curves.recirculationCurve, particleConfig.recirc.progress);
+      } else {
+        updateParticles(directParticlesRef, curves.tank2DeliveryCurve, particleConfig.direct.progress);
+      }
     }
 
     // Power wiring animations
@@ -310,15 +334,27 @@ export const Flows = () => {
           <pointsMaterial color="#10b981" size={0.035} transparent opacity={0.85} depthWrite={false} />
         </points>
       ) : (
-        <points ref={pumpParticlesRef}>
-          <bufferGeometry>
-            <bufferAttribute
-              attach="attributes-position"
-              args={[particleConfig.pump.positions, 3]}
-            />
-          </bufferGeometry>
-          <pointsMaterial color="#38bdf8" size={0.035} transparent opacity={0.85} depthWrite={false} />
-        </points>
+        <>
+          <points ref={pumpParticlesRef}>
+            <bufferGeometry>
+              <bufferAttribute
+                attach="attributes-position"
+                args={[particleConfig.pump.positions, 3]}
+              />
+            </bufferGeometry>
+            <pointsMaterial color="#38bdf8" size={0.035} transparent opacity={0.85} depthWrite={false} />
+          </points>
+
+          <points ref={recircParticlesRef}>
+            <bufferGeometry>
+              <bufferAttribute
+                attach="attributes-position"
+                args={[particleConfig.recirc.positions, 3]}
+              />
+            </bufferGeometry>
+            <pointsMaterial color="#f59e0b" size={0.035} transparent opacity={0.85} depthWrite={false} />
+          </points>
+        </>
       )}
 
       {/* Electrical Power & Signal Wiring */}

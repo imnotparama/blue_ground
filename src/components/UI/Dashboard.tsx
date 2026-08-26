@@ -56,7 +56,16 @@ const Sparkline = ({ data, color }: { data: number[]; color: string }) => {
 };
 
 export const Dashboard = () => {
-  const { metrics, mode, demoRunning, landingVisited, sidebarTab, setSidebarTab } = useSystemState();
+  const { 
+    metrics, 
+    mode, 
+    demoRunning, 
+    landingVisited, 
+    sidebarTab, 
+    setSidebarTab,
+    dualVerificationMode,
+    recirculationTriggered,
+  } = useSystemState();
   const [collapsed, setCollapsed] = React.useState(false);
 
   // Live sliding window telemetry history
@@ -218,12 +227,15 @@ export const Dashboard = () => {
             </div>
 
             {/* ======================================================== */}
-            {/* B. CHEMICAL ANALYSIS LOOP */}
+            {/* B. CHEMICAL ANALYSIS LOOP (Stage 1 Intake Chamber) */}
             {/* ======================================================== */}
             <div className="flex flex-col gap-2">
-              <h2 className="text-[9px] font-bold text-zinc-400 tracking-wider uppercase font-mono flex items-center gap-1.5 border-b border-white/5 pb-1">
-                <Activity className="w-3.5 h-3.5 text-cyan-400" /> Chemical & Clarity
-              </h2>
+              <div className="flex items-center justify-between border-b border-white/5 pb-1">
+                <h2 className="text-[9px] font-bold text-zinc-400 tracking-wider uppercase font-mono flex items-center gap-1.5">
+                  <Activity className="w-3.5 h-3.5 text-cyan-400" /> Stage 1 Chamber Sensors
+                </h2>
+                <span className="text-[8px] font-mono px-1.5 py-0.2 rounded bg-cyan-950 text-cyan-300 border border-cyan-500/30">PRE-RO</span>
+              </div>
               <div className="grid grid-cols-2 gap-2">
                 <div className="bg-white/2 p-2.5 rounded-xl border border-white/5 flex flex-col gap-0.5">
                   <span className="text-[8px] text-zinc-500 font-mono">TDS PURITY</span>
@@ -251,6 +263,42 @@ export const Dashboard = () => {
                 </div>
               </div>
             </div>
+
+            {/* ======================================================== */}
+            {/* B2. STAGE 2 VERIFICATION ARRAY (Tank 2 Post-RO Chamber) */}
+            {/* ======================================================== */}
+            {dualVerificationMode && (
+              <div className="flex flex-col gap-2 p-2.5 rounded-xl bg-purple-950/20 border border-purple-500/30">
+                <div className="flex items-center justify-between border-b border-purple-500/20 pb-1">
+                  <h2 className="text-[9px] font-bold text-purple-300 tracking-wider uppercase font-mono flex items-center gap-1.5">
+                    <Activity className="w-3.5 h-3.5 text-purple-400" /> Tank 2 Verification Array
+                  </h2>
+                  <span className={`text-[8px] font-mono px-1.5 py-0.2 rounded font-bold ${
+                    (metrics.recirculationActive || recirculationTriggered || (metrics.turbidity2 || 0) > 1.0)
+                      ? 'bg-rose-950 text-rose-300 border border-rose-500/40 animate-pulse'
+                      : 'bg-emerald-950 text-emerald-300 border border-emerald-500/40'
+                  }`}>
+                    {(metrics.recirculationActive || recirculationTriggered || (metrics.turbidity2 || 0) > 1.0) ? 'RECIRCULATING' : 'POTABLE PASS'}
+                  </span>
+                </div>
+                <div className="grid grid-cols-3 gap-1.5 text-center font-mono">
+                  <div className="bg-black/40 p-1.5 rounded-lg border border-white/5">
+                    <span className="text-[8px] text-zinc-500 block">POST-RO TDS</span>
+                    <span className="text-xs font-bold text-cyan-300">{metrics.tds2 || 28} ppm</span>
+                  </div>
+                  <div className="bg-black/40 p-1.5 rounded-lg border border-white/5">
+                    <span className="text-[8px] text-zinc-500 block">POST-RO pH</span>
+                    <span className="text-xs font-bold text-pink-300">{(metrics.ph2 || 7.35).toFixed(2)}</span>
+                  </div>
+                  <div className="bg-black/40 p-1.5 rounded-lg border border-white/5">
+                    <span className="text-[8px] text-zinc-500 block">POST-RO TURB</span>
+                    <span className={`text-xs font-bold ${((metrics.turbidity2 || 0) > 1.0) ? 'text-amber-400' : 'text-emerald-300'}`}>
+                      {(metrics.turbidity2 || 0.15).toFixed(2)} NTU
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* ======================================================== */}
             {/* C. HYDRAULICS LOOP */}

@@ -5,15 +5,16 @@ import { useSystemState, SystemMode } from '@/hooks/useSystemState';
 import { 
   Wrench, 
   Eye, 
-  EyeOff,
+  EyeOff, 
   Settings, 
   Sparkles, 
   Play, 
   Compass, 
-  Database,
-  Cpu,
-  Layers,
+  Database, 
+  Cpu, 
+  Layers, 
   Droplets,
+  Repeat,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -38,6 +39,11 @@ export const SystemControls = () => {
     setSidebarTab,
     waterTrackMode,
     setWaterTrackMode,
+    dualVerificationMode,
+    setDualVerificationMode,
+    recirculationTriggered,
+    setRecirculationTriggered,
+    setCameraPreset,
   } = useSystemState();
 
   if (!landingVisited || demoRunning) return null; // Hide controls during landing or guided tour
@@ -131,6 +137,22 @@ export const SystemControls = () => {
     }));
   };
 
+  const triggerRecirculation = () => {
+    setDualVerificationMode(true);
+    setRecirculationTriggered(true);
+    setCameraPreset('RECIRCULATION_LOOP');
+    setMetrics(prev => ({
+      ...prev,
+      turbidity: 24.0,
+      turbidity2: 4.8, // Sub-standard post-RO water
+      tds2: 180,
+      waterQuality: 'POOR',
+      recirculationActive: true,
+      flowRate: 3.6,
+      pumpRpm: 2100,
+    }));
+  };
+
   return (
     <div className="fixed left-6 bottom-6 z-30 pointer-events-none select-none w-full max-w-[280px]">
       <div className="glass-panel rounded-2xl p-4 border border-white/10 relative overflow-hidden pointer-events-auto flex flex-col gap-4 bg-zinc-950/75 backdrop-blur-md shadow-[0_16px_36px_rgba(0,0,0,0.5)]">
@@ -176,6 +198,19 @@ export const SystemControls = () => {
               X-Ray Mode
             </button>
 
+            {/* Dual-Stage Verification Loop Mode Toggle */}
+            <button
+              onClick={() => setDualVerificationMode(!dualVerificationMode)}
+              className={`col-span-2 flex items-center justify-center gap-1.5 py-1.5 rounded-lg border text-[9px] font-mono font-bold tracking-wider transition-all cursor-pointer ${
+                dualVerificationMode
+                  ? 'bg-purple-500/25 text-purple-300 border-purple-400/60 shadow-[0_0_12px_rgba(168,85,247,0.25)]'
+                  : 'bg-white/2 border-white/5 text-zinc-400 hover:bg-white/5 hover:text-white'
+              }`}
+            >
+              <Repeat className={`w-3 h-3 ${dualVerificationMode ? 'text-purple-400' : 'text-zinc-400'}`} />
+              {dualVerificationMode ? 'Dual Verif Loop: ACTIVE (V)' : 'Dual Verification Loop (V)'}
+            </button>
+
             {/* Hotspot Dots / Clean Showroom View Toggle */}
             <button
               onClick={() => setShowHotspots(!showHotspots)}
@@ -194,7 +229,7 @@ export const SystemControls = () => {
               onClick={() => setTanksOnly(!tanksOnly)}
               className={`col-span-2 flex items-center justify-center gap-1.5 py-1.5 rounded-lg border text-[9px] font-mono font-bold tracking-wider transition-all cursor-pointer ${
                 tanksOnly
-                  ? 'bg-emerald-500/25 text-emerald-300 border-emerald-500/50 shadow-[0_0_12px_rgba(16,185,129,0.25)]'
+                  ? 'bg-emerald-500/25 text-emerald-300 border-emerald-500/50 shadow-[0_0_12px_rgba(168,85,129,0.25)]'
                   : 'bg-white/2 border-white/5 text-zinc-400 hover:bg-white/5 hover:text-white'
               }`}
             >
@@ -247,6 +282,18 @@ export const SystemControls = () => {
             >
               <span>🟢 Normal Operations</span>
               <span>NOMINAL</span>
+            </button>
+
+            <button
+              onClick={triggerRecirculation}
+              className={`w-full text-left px-2.5 py-1.5 rounded-lg border flex items-center justify-between transition-all cursor-pointer ${
+                recirculationTriggered
+                  ? 'bg-purple-500/15 border-purple-500/40 text-purple-300 font-bold shadow-[0_0_10px_rgba(168,85,247,0.2)]'
+                  : 'bg-white/2 border-white/5 text-zinc-400 hover:bg-white/5 hover:text-white'
+              }`}
+            >
+              <span>🔄 Tank 2 Recirculation</span>
+              <span>RE-FILTER</span>
             </button>
 
             <button

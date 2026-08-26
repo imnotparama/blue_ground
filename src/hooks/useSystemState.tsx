@@ -39,6 +39,8 @@ export type CameraPreset =
   | 'INTAKE_PIPE'
   | 'RETURN_PIPE'
   | 'DRAIN_VALVE'
+  | 'TANK2_VERIFICATION'
+  | 'RECIRCULATION_LOOP'
   | 'WATER_STAGE_1'
   | 'WATER_STAGE_2'
   | 'WATER_STAGE_3'
@@ -57,6 +59,11 @@ export interface SystemMetrics {
   tds: number; // ppm
   turbidity: number; // NTU
   temperature: number; // °C
+  // Secondary Sensor Suite (Tank 2 Post-RO Verification)
+  tds2: number; // Post-RO TDS ppm
+  ph2: number; // Post-RO pH
+  turbidity2: number; // Post-RO NTU
+  recirculationActive: boolean; // Closed-loop recirculation active
   pumpRpm: number;
   filterHealth: number; // 0 to 100
   uvStatus: 'ON' | 'OFF';
@@ -111,6 +118,11 @@ interface SystemStateContextType {
   // Tank Isolation & Boundary Margin Mode
   tanksOnly: boolean;
   setTanksOnly: (val: boolean) => void;
+  // Dual-Stage Verification Loop & Post-Filtration Tank 2
+  dualVerificationMode: boolean;
+  setDualVerificationMode: (val: boolean) => void;
+  recirculationTriggered: boolean;
+  setRecirculationTriggered: (val: boolean) => void;
   // Right Sidebar Tab: Live Telemetry vs Sensors & Tools
   sidebarTab: 'TELEMETRY' | 'TOOLS';
   setSidebarTab: (tab: 'TELEMETRY' | 'TOOLS') => void;
@@ -138,6 +150,10 @@ const defaultMetrics: SystemMetrics = {
   tds: 145,
   turbidity: 1.2,
   temperature: 24.5,
+  tds2: 28,
+  ph2: 7.35,
+  turbidity2: 0.15,
+  recirculationActive: false,
   pumpRpm: 1800,
   filterHealth: 98,
   uvStatus: 'ON',
@@ -473,6 +489,10 @@ export const SystemStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const [tanksOnly, setTanksOnly] = useState(false);
   const [sidebarTab, setSidebarTab] = useState<'TELEMETRY' | 'TOOLS'>('TELEMETRY');
 
+  // Dual-Stage Verification Loop & Post-Filtration Tank 2
+  const [dualVerificationMode, setDualVerificationMode] = useState(false);
+  const [recirculationTriggered, setRecirculationTriggered] = useState(false);
+
   // Water Flow View Focus Mode
   const [waterTrackMode, setWaterTrackModeState] = useState(false);
   const [waterTrackStage, setWaterTrackStageState] = useState(1);
@@ -524,7 +544,7 @@ export const SystemStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
     return () => clearInterval(interval);
   }, [waterTrackMode, autoPlayWater]);
 
-  // Global Hotkeys: 'H' for Hotspots, 'T' for Tanks Only, 'S' for Sensors & Tools, 'W' for Water Flow Focus
+  // Global Hotkeys: 'H' for Hotspots, 'T' for Tanks Only, 'S' for Sensors & Tools, 'W' for Water Flow Focus, 'V' for Dual Verification
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Ignore key events when user is typing in an input
@@ -538,6 +558,9 @@ export const SystemStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
       }
       if (e.key === 's' || e.key === 'S') {
         setSidebarTab(prev => (prev === 'TOOLS' ? 'TELEMETRY' : 'TOOLS'));
+      }
+      if (e.key === 'v' || e.key === 'V') {
+        setDualVerificationMode(prev => !prev);
       }
       if (e.key === 'w' || e.key === 'W') {
         setWaterTrackModeState(prev => {
@@ -592,6 +615,10 @@ export const SystemStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
         setShowHotspots,
         tanksOnly,
         setTanksOnly,
+        dualVerificationMode,
+        setDualVerificationMode,
+        recirculationTriggered,
+        setRecirculationTriggered,
         sidebarTab,
         setSidebarTab,
         waterTrackMode,

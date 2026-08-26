@@ -356,6 +356,69 @@ export const Sensors = () => {
           </mesh>
         </InteractiveSensor>
       </group>
+
+      {/* ═══════════════════════════════════════════════════════════════════════
+          4. SECONDARY SENSOR SUITE #2 (Inside Post-Filtration Tank 2)
+             Center: [-1.85, 0.15, 0]
+             Sensors: TDS #2, pH #2, Turbidity #2, Float #2
+          ═══════════════════════════════════════════════════════════════════════ */}
+      <group position={[-1.85, 0.15, 0]}>
+        {/* TDS Probe #2 */}
+        <InteractiveSensor id="tds2" preset="TANK2_VERIFICATION" position={[0.10, 0.05, 0]}>
+          <mesh castShadow>
+            <cylinderGeometry args={[0.016, 0.016, 0.18, 12]} />
+            <meshStandardMaterial color="#0284c7" roughness={0.3} metalness={0.8} />
+          </mesh>
+          <mesh position={[-0.005, -0.10, 0]} castShadow>
+            <cylinderGeometry args={[0.002, 0.002, 0.035, 8]} />
+            <meshStandardMaterial color="#e2e8f0" metalness={0.98} roughness={0.1} />
+          </mesh>
+          <mesh position={[0.005, -0.10, 0]} castShadow>
+            <cylinderGeometry args={[0.002, 0.002, 0.035, 8]} />
+            <meshStandardMaterial color="#e2e8f0" metalness={0.98} roughness={0.1} />
+          </mesh>
+        </InteractiveSensor>
+
+        {/* pH Probe #2 */}
+        <InteractiveSensor id="ph2" preset="TANK2_VERIFICATION" position={[0, 0.05, 0]}>
+          <mesh castShadow>
+            <cylinderGeometry args={[0.015, 0.015, 0.20, 12]} />
+            <meshStandardMaterial color="#09090b" roughness={0.4} />
+          </mesh>
+          <mesh position={[0, -0.11, 0]}>
+            <sphereGeometry args={[0.012, 12, 12]} />
+            <meshPhysicalMaterial color="#38bdf8" roughness={0.05} transmission={0.9} transparent opacity={0.85} />
+          </mesh>
+        </InteractiveSensor>
+
+        {/* Turbidity Sensor #2 */}
+        <InteractiveSensor id="turbidity2" preset="TANK2_VERIFICATION" position={[-0.10, 0.05, 0]}>
+          <mesh castShadow>
+            <cylinderGeometry args={[0.018, 0.018, 0.16, 12]} />
+            <meshStandardMaterial color="#1e293b" roughness={0.35} metalness={0.7} />
+          </mesh>
+          <mesh position={[0, -0.09, 0]}>
+            <boxGeometry args={[0.024, 0.024, 0.024]} />
+            <meshStandardMaterial color="#0284c7" roughness={0.4} />
+          </mesh>
+        </InteractiveSensor>
+
+        {/* Mini Float Sensor #2 */}
+        <mesh position={[-0.22, 0.0, 0.12]} castShadow>
+          <cylinderGeometry args={[0.005, 0.005, 0.32, 8]} />
+          <meshStandardMaterial color="#94a3b8" metalness={0.95} />
+        </mesh>
+        <mesh position={[-0.22, 0.02, 0.12]} castShadow>
+          <cylinderGeometry args={[0.022, 0.022, 0.03, 12]} />
+          <meshStandardMaterial color="#10b981" roughness={0.4} />
+        </mesh>
+
+        {/* Sensor Wiring Harness Tube back to ESP32 */}
+        <mesh position={[0, 0.28, 0]} rotation={[0, 0, Math.PI / 2]}>
+          <cylinderGeometry args={[0.008, 0.008, 0.35, 8]} />
+          <meshStandardMaterial color="#09090b" roughness={0.8} />
+        </mesh>
+      </group>
     </group>
   );
 };

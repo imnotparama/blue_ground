@@ -187,6 +187,28 @@ export const Water = () => {
           />
         </points>
       </group>
+
+      {/* ════════════════════════════════════════════════════════════════════
+          C. POST-FILTRATION QUALITY TANK 2 WATER (Chamber 2 at x = -1.85)
+             Contains Post-RO crystal pure water undergoing 2nd sensor check
+          ════════════════════════════════════════════════════════════════════ */}
+      <group position={[-1.85, 0.15, 0]}>
+        <mesh position={[0, -0.02, 0]} castShadow receiveShadow>
+          <boxGeometry args={[0.62, 0.42, 0.52]} />
+          <meshPhysicalMaterial
+            color="#38bdf8"
+            transparent
+            opacity={0.62}
+            roughness={0.02}
+            metalness={0.05}
+            transmission={0.92}
+            thickness={0.10}
+            clearcoat={1.0}
+            clearcoatRoughness={0.02}
+            depthWrite={false}
+          />
+        </mesh>
+      </group>
     </group>
   );
 };
