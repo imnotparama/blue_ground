@@ -252,9 +252,9 @@ export const Tanks = () => {
           </group>
         ))}
 
-        {/* 3. Translucent Silicone Gasket Seal Line along Divider Shelf */}
-        <mesh position={[0.45, 0.545, 0]}>
-          <boxGeometry args={[1.72, 0.008, TD - 0.02]} />
+        {/* 3. Translucent Silicone Gasket Seal Line along Secondary Divider Shelf */}
+        <mesh position={[1.15, 0.545, 0]}>
+          <boxGeometry args={[1.10, 0.008, TD - 0.02]} />
           <meshPhysicalMaterial color="#f0fdf4" transparent opacity={0.65} roughness={0.8} />
         </mesh>
 
@@ -275,18 +275,6 @@ export const Tanks = () => {
             </group>
           ))
         )}
-
-        {/* Direct Passage Valve (Good quality water drop) */}
-        <group position={[1.2, 0.55, 0]}>
-          <mesh position={[0, -0.08, 0]} castShadow>
-            <cylinderGeometry args={[0.03, 0.03, 0.16, 12]} />
-            <meshPhysicalMaterial color="#f0f9ff" transparent opacity={0.6} transmission={0.85} depthWrite={false} />
-          </mesh>
-          <mesh position={[0, -0.06, 0]} rotation={[0, 0, Math.PI / 2]} castShadow>
-            <cylinderGeometry args={[0.038, 0.038, 0.07, 12]} />
-            <meshStandardMaterial color="#1e293b" roughness={0.3} metalness={0.85} />
-          </mesh>
-        </group>
 
         {/* INLETS & OUTLETS */}
         {/* A. Secondary Compartment Inlet (from Sedimentation / Flow sensor) */}

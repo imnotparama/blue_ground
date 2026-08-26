@@ -209,10 +209,10 @@ export const Pipes = () => {
           4. BAD WATER FILTRATION LOOP: PUMP [0.05, 0.08] → RO FILTRATION TANK [-1.40, 0.38] → PRIMARY TANK [-1.95]
           ══════════════════════════════════════════════════════════════════════ */}
       <group>
-        {/* Pipe from Pump Outlet rising up */}
-        <PipeSeg pos={[0.05, 0.23, 0]} len={0.16} />
+        {/* Pipe from Pump Outlet rising up to elbow */}
+        <PipeSeg pos={[0.05, 0.27, 0]} len={0.22} />
         <PipeElbow pos={[0.05, 0.38, 0]} />
-        <TeflonRing pos={[0.05, 0.32, 0]} />
+        <TeflonRing pos={[0.05, 0.36, 0]} />
 
         {/* Horizontal pipe spanning left across open gap to RO Filtration Tank Inlet */}
         <PipeSeg pos={[-0.45, 0.38, 0]} len={1.00} rot={[0, 0, Math.PI / 2]} />
