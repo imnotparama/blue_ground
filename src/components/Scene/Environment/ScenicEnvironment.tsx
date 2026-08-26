@@ -2,7 +2,6 @@
 
 import React, { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { useSystemState } from '@/hooks/useSystemState';
 import * as THREE from 'three';
 
 // ─── Smooth Procedural Cloud Cluster ──────────────────────────────────────────
@@ -153,10 +152,6 @@ const GlidingBirds = () => {
 
 // ─── Main Scenic Environment Component ─────────────────────────────────────────
 export const ScenicEnvironment = () => {
-  const { tanksOnly } = useSystemState();
-
-  if (tanksOnly) return null; // Margins isolation view hides background landscape
-
   return (
     <group>
       {/* ═══════════════════════════════════════════════════════════════════════
