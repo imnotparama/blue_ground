@@ -291,11 +291,11 @@ export const SensorsAndTools = () => {
       </div>
 
       {/* Component Cards Scrollable List */}
-      <div className="flex flex-col gap-2 overflow-y-auto pr-1 flex-1 custom-scrollbar max-h-[58vh]">
+      <div className="flex flex-col gap-1.5 overflow-y-auto pr-1 flex-1 custom-scrollbar max-h-[52vh]">
         {filteredTools.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12 text-zinc-500 font-mono text-center gap-2">
-            <Search className="w-6 h-6 stroke-1 text-zinc-600" />
-            <p className="text-[11px]">No components match "{searchQuery}"</p>
+          <div className="flex flex-col items-center justify-center py-10 text-zinc-500 font-mono text-center gap-2">
+            <Search className="w-5 h-5 stroke-1 text-zinc-600" />
+            <p className="text-[10px]">No components match "{searchQuery}"</p>
           </div>
         ) : (
           filteredTools.map((tool) => {
@@ -309,10 +309,10 @@ export const SensorsAndTools = () => {
                 whileHover={{ scale: 1.01 }}
                 whileTap={{ scale: 0.99 }}
                 onClick={() => handleToolClick(tool)}
-                className={`p-3 rounded-xl border transition-all cursor-pointer flex flex-col gap-1.5 relative overflow-hidden ${
+                className={`p-2.5 rounded-xl border transition-all cursor-pointer flex flex-col gap-1 relative overflow-hidden ${
                   isSelected
-                    ? 'bg-cyan-950/40 border-cyan-400/60 shadow-[0_0_18px_rgba(6,182,212,0.25)] ring-1 ring-cyan-400/50'
-                    : 'bg-zinc-900/70 border-white/5 hover:border-cyan-500/30 hover:bg-zinc-900/90'
+                    ? 'bg-cyan-950/40 border-cyan-400/60 shadow-[0_0_15px_rgba(6,182,212,0.25)] ring-1 ring-cyan-400/50'
+                    : 'bg-zinc-900/60 border-white/5 hover:border-cyan-500/30 hover:bg-zinc-900/90'
                 }`}
               >
                 {/* Active Indicator Top Glow Line */}
@@ -320,36 +320,25 @@ export const SensorsAndTools = () => {
                   <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent" />
                 )}
 
-                {/* Header: Title + Status Badge */}
+                {/* Header: Title + Live Telemetry Pill */}
                 <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    <Crosshair className={`w-3.5 h-3.5 ${isSelected ? 'text-cyan-400 animate-spin-slow' : 'text-zinc-500'}`} />
-                    <span className="font-bold text-white text-[11px] tracking-wide font-mono">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <Crosshair className={`w-3 h-3 shrink-0 ${isSelected ? 'text-cyan-400 animate-spin-slow' : 'text-zinc-500'}`} />
+                    <span className="font-bold text-white text-[11px] tracking-wide font-mono truncate">
                       {tool.name}
                     </span>
                   </div>
-                  <span className={`text-[9px] font-mono px-2 py-0.5 rounded-full border uppercase font-semibold ${status.color}`}>
+                  <span className="text-[9px] font-mono font-bold text-emerald-300 bg-emerald-950/70 px-1.5 py-0.5 rounded border border-emerald-500/30 shrink-0">
+                    {liveVal}
+                  </span>
+                </div>
+
+                {/* Subtitle: Model & Spec */}
+                <div className="flex items-center justify-between text-[9px] font-mono text-zinc-400 pl-4.5">
+                  <span className="text-zinc-300 truncate max-w-[170px]">{tool.model}</span>
+                  <span className={`px-1.5 py-0.2 rounded-full border uppercase text-[8px] font-semibold ${status.color}`}>
                     {status.label}
                   </span>
-                </div>
-
-                {/* Model & Technical Spec */}
-                <div className="flex flex-col text-[10px] font-mono text-zinc-400 pl-5.5">
-                  <span className="text-zinc-300 font-semibold">{tool.model}</span>
-                  <span className="text-zinc-500 text-[9px] truncate">{tool.spec}</span>
-                </div>
-
-                {/* Footer: Location & Live Telemetry + Locate 3D Action */}
-                <div className="flex items-center justify-between pt-1.5 border-t border-white/5 pl-5.5 mt-0.5">
-                  <span className="text-[9px] font-mono text-cyan-300/80 truncate max-w-[160px]">
-                    📍 {tool.location}
-                  </span>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] font-mono font-bold text-emerald-400 bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-500/30">
-                      {liveVal}
-                    </span>
-                    <ChevronRight className="w-3.5 h-3.5 text-zinc-500 group-hover:text-cyan-400" />
-                  </div>
                 </div>
               </motion.div>
             );

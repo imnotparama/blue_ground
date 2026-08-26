@@ -33,7 +33,7 @@ export const Scene = () => {
       className="w-full h-full relative select-none"
       style={{
         background:
-          'linear-gradient(180deg, #87ceeb 0%, #bfdbfe 40%, #dbeafe 65%, #dcfce7 85%, #bbf7d0 100%)',
+          'radial-gradient(ellipse at 60% 15%, #bfdbfe 0%, #93c5fd 40%, #cbd5e1 75%, #94a3b8 100%)',
       }}
     >
       {/* 3D R3F Canvas with high-DPI crispness and smooth performance */}
@@ -46,76 +46,42 @@ export const Scene = () => {
           powerPreference: 'high-performance',
           stencil: false,
           depth: true,
-          toneMappingExposure: 1.3,
+          toneMappingExposure: 1.2,
         }}
         camera={{
-          fov: 48,
+          fov: 46,
           near: 0.1,
-          far: 80,
-          position: [0.0, 1.5, 11.0],
+          far: 100,
+          position: [0.0, 0.8, 6.8],
         }}
         className="w-full h-full"
       >
-        {/* Light outdoor haze — very subtle */}
-        <fog attach="fog" args={['#e0f2fe', 20, 60]} />
+        {/* Soft atmospheric depth haze */}
+        <fog attach="fog" args={['#cbd5e1', 18, 55]} />
 
         {/* Lighting setup */}
         <SceneLighting />
 
-        {/* Sunny Green Grassy Ground */}
+        {/* Natural Ground Surface */}
         <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2.24, 0]} receiveShadow>
           <planeGeometry args={[200, 200]} />
           <meshStandardMaterial
-            color="#4ade80"
-            roughness={0.92}
+            color="#64748b"
+            roughness={0.95}
             metalness={0.0}
           />
         </mesh>
 
-        {/* Concrete Installation Platform — wider to span all 3 tanks */}
+        {/* Clean Architectural Concrete Installation Platform */}
         <mesh position={[-0.5, -2.22, -0.1]} receiveShadow castShadow>
-          <boxGeometry args={[10.0, 0.07, 2.8]} />
-          <meshStandardMaterial color="#d1d5db" roughness={0.85} metalness={0.05} />
+          <boxGeometry args={[9.2, 0.08, 2.6]} />
+          <meshStandardMaterial color="#cbd5e1" roughness={0.8} metalness={0.1} />
         </mesh>
-        {/* Platform edge border strip */}
-        <mesh position={[-0.5, -2.20, 1.45]} castShadow>
-          <boxGeometry args={[10.0, 0.06, 0.12]} />
-          <meshStandardMaterial color="#f59e0b" roughness={0.8} metalness={0.1} />
+        {/* Platform safety border strip */}
+        <mesh position={[-0.5, -2.20, 1.25]} castShadow>
+          <boxGeometry args={[9.2, 0.06, 0.08]} />
+          <meshStandardMaterial color="#f59e0b" roughness={0.7} metalness={0.2} />
         </mesh>
-
-        {/* Stone Borewell / Water Wellhead Source — far right at x = 2.8 */}
-        <group position={[2.8, -2.1, 0.0]}>
-          <mesh castShadow receiveShadow>
-            <cylinderGeometry args={[0.32, 0.34, 0.35, 16, 1, false]} />
-            <meshStandardMaterial color="#78716c" roughness={0.92} />
-          </mesh>
-          <mesh position={[0, 0.18, 0]} castShadow>
-            <cylinderGeometry args={[0.35, 0.35, 0.025, 12]} />
-            <meshStandardMaterial color="#4b5563" roughness={0.3} metalness={0.8} />
-          </mesh>
-          <mesh position={[0, 0.1, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-            <circleGeometry args={[0.3, 16]} />
-            <meshPhysicalMaterial
-              color="#0e7490"
-              transparent opacity={0.75}
-              transmission={0.9} roughness={0.08}
-            />
-          </mesh>
-        </group>
-
-        {/* Distant trees backdrop (billboard-style cylinders + cones) */}
-        {([-8,-6,-4, 6, 8, 10, 12] as number[]).map((x, i) => (
-          <group key={i} position={[x, -1.5, -6]}>
-            <mesh castShadow>
-              <cylinderGeometry args={[0.18, 0.22, 1.2, 8]} />
-              <meshStandardMaterial color="#713f12" roughness={0.9} />
-            </mesh>
-            <mesh position={[0, 1.2, 0]} castShadow>
-              <coneGeometry args={[0.7 + i * 0.05, 2.0 + i * 0.1, 8]} />
-              <meshStandardMaterial color="#166534" roughness={0.95} />
-            </mesh>
-          </group>
-        ))}
 
         {/* Camera state transitions controller */}
         <CameraController />
