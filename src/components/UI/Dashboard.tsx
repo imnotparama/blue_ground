@@ -65,6 +65,7 @@ export const Dashboard = () => {
     setSidebarTab,
     dualVerificationMode,
     recirculationTriggered,
+    hydroGeneratorMode,
   } = useSystemState();
   const [collapsed, setCollapsed] = React.useState(false);
 
@@ -213,13 +214,21 @@ export const Dashboard = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 mt-2 pt-2 border-t border-white/5 text-center">
+                <div className={`grid ${hydroGeneratorMode ? 'grid-cols-3' : 'grid-cols-2'} gap-2 mt-2 pt-2 border-t border-white/5 text-center`}>
                   <div>
                     <span className="text-[8px] text-zinc-500 font-mono block">SOLAR INPUT</span>
                     <span className="text-xs font-bold font-mono text-amber-300">{metrics.solarWatts.toFixed(1)}W</span>
                   </div>
+                  {hydroGeneratorMode && (
+                    <div className="bg-blue-950/40 p-1 rounded-lg border border-blue-500/30">
+                      <span className="text-[8px] text-blue-300 font-mono block">HYDRO GEN</span>
+                      <span className="text-xs font-bold font-mono text-cyan-300 animate-pulse">
+                        +{(metrics.hydroWatts || 28.5).toFixed(1)}W
+                      </span>
+                    </div>
+                  )}
                   <div>
-                    <span className="text-[8px] text-zinc-500 font-mono block">DISCHARGE LOAD</span>
+                    <span className="text-[8px] text-zinc-500 font-mono block">DISCHARGE</span>
                     <span className="text-xs font-bold font-mono text-zinc-300">{metrics.currentDraw.toFixed(1)}W</span>
                   </div>
                 </div>

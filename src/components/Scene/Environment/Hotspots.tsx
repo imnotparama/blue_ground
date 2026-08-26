@@ -168,6 +168,14 @@ const hotspotsList: HotspotConfig[] = [
     getStatus: (m) => (m.recirculationActive || (m.tds2 || 0) > 100) ? { label: 'RE-FILTERING', color: 'text-purple-400 animate-pulse' } : { label: 'STANDBY', color: 'text-zinc-500' },
     getSub: () => 'Returns to RO Filter Inlet',
   },
+  {
+    id: 'hydro_generator',
+    preset: 'HYDRO_GENERATOR',
+    position: [2.8, -0.40, 0.25],
+    label: 'Hydro-Power Motor Generator',
+    getStatus: (m) => (m.hydroWatts || 0) > 0 ? { label: 'HARVESTING ENERGY', color: 'text-cyan-400 animate-pulse' } : { label: 'STANDBY', color: 'text-zinc-500' },
+    getSub: (m) => `Output: +${(m.hydroWatts || 0).toFixed(1)}W Clean Power`,
+  },
 ];
 
 export const Hotspots = () => {

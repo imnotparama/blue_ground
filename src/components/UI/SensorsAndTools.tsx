@@ -204,6 +204,17 @@ export const TOOLS_CATALOG: ToolItem[] = [
     getLiveValue: (m) => `Status: ${m.uvStatus}`,
     getStatus: (m) => m.uvStatus === 'ON' ? { label: 'STERILIZING ACTIVE', color: 'text-violet-400 bg-violet-950/60 border-violet-500/40' } : { label: 'OFF', color: 'text-zinc-400 bg-zinc-900 border-zinc-700' },
   },
+  {
+    id: 'hydro_generator',
+    preset: 'HYDRO_GENERATOR',
+    name: 'Hydro-Power Turbine Motor & Harvester',
+    category: 'HYDRAULICS',
+    model: 'High-Head Micro Hydro-Electric Generator & Pump Motor',
+    spec: '12V / 35W Max • Water Vortex Impeller • Direct Battery Charging',
+    location: 'Intake Hydraulic Column (x = 2.80, y = -0.40)',
+    getLiveValue: (m) => `+${(m.hydroWatts || 0).toFixed(1)}W Generation`,
+    getStatus: (m) => (m.hydroWatts || 0) > 0 ? { label: 'CHARGING BATTERY', color: 'text-cyan-400 bg-cyan-950/60 border-cyan-500/40 animate-pulse' } : { label: 'STANDBY', color: 'text-zinc-400 bg-zinc-900 border-zinc-700' },
+  },
 
   // ─── VESSELS & FILTERS ───
   {

@@ -41,6 +41,7 @@ export type CameraPreset =
   | 'DRAIN_VALVE'
   | 'TANK2_VERIFICATION'
   | 'RECIRCULATION_LOOP'
+  | 'HYDRO_GENERATOR'
   | 'WATER_STAGE_1'
   | 'WATER_STAGE_2'
   | 'WATER_STAGE_3'
@@ -52,6 +53,7 @@ export type CameraPreset =
 export interface SystemMetrics {
   batteryPercent: number;
   solarWatts: number;
+  hydroWatts: number; // Hydro-electric turbine generation in Watts
   currentDraw: number;
   waterLevel: number; // 0 to 100
   flowRate: number; // L/min
@@ -124,6 +126,9 @@ interface SystemStateContextType {
   recirculationTriggered: boolean;
   setRecirculationTriggered: (val: boolean) => void;
   setTank2Tds: (tdsVal: number) => void;
+  // Hydro-Power Motor Energy Harvesting Toggle (Borewell -> Hydro Motor Battery Charge)
+  hydroGeneratorMode: boolean;
+  setHydroGeneratorMode: (val: boolean) => void;
   // Right Sidebar Tab: Live Telemetry vs Sensors & Tools
   sidebarTab: 'TELEMETRY' | 'TOOLS';
   setSidebarTab: (tab: 'TELEMETRY' | 'TOOLS') => void;
@@ -144,6 +149,7 @@ const SystemStateContext = createContext<SystemStateContextType | undefined>(und
 const defaultMetrics: SystemMetrics = {
   batteryPercent: 88,
   solarWatts: 45,
+  hydroWatts: 0,
   currentDraw: 12,
   waterLevel: 65,
   flowRate: 4.8,
@@ -178,6 +184,15 @@ const presentationSteps: PresentationStep[] = [
     title: 'Phase 1: Raw Intake from Mining Runoff Pit',
     description: 'The system draws contaminated slurry water directly from open-cast settling ponds and borewells, passing through industrial strainer foot valves into the primary filtration circuit.',
     duration: 5500,
+  },
+  {
+    target: 'HYDRO_GENERATOR',
+    title: 'Phase 1B: Hydro-Power Energy Harvester',
+    description: 'An inline micro-hydro turbine generator recovers kinetic flow energy directly from the incoming water stream, generating +28.5W of supplementary power transmitted via overhead conduit to charge the lithium battery system.',
+    duration: 6000,
+    actions: (setMetrics) => {
+      setMetrics(prev => ({ ...prev, hydroWatts: 28.5, batteryPercent: Math.min(prev.batteryPercent + 1, 100) }));
+    },
   },
   {
     target: 'SEDIMENTATION_TANK',
@@ -494,10 +509,21 @@ export const SystemStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const [dualVerificationMode, setDualVerificationMode] = useState(false);
   const [recirculationTriggered, setRecirculationTriggered] = useState(false);
 
+  // Hydro-Power Motor Energy Harvesting Toggle (Borewell -> Hydro Motor Battery Charge)
+  const [hydroGeneratorMode, setHydroGeneratorMode] = useState(false);
+
   // Water Flow View Focus Mode
   const [waterTrackMode, setWaterTrackModeState] = useState(false);
   const [waterTrackStage, setWaterTrackStageState] = useState(1);
   const [autoPlayWater, setAutoPlayWater] = useState(false);
+
+  // Sync Hydro-Electric Generation Telemetry Watts
+  useEffect(() => {
+    setMetrics(prev => ({
+      ...prev,
+      hydroWatts: hydroGeneratorMode ? Math.round(Math.max(prev.flowRate, 3.5) * 5.8 * 10) / 10 : 0,
+    }));
+  }, [hydroGeneratorMode]);
 
   const setWaterTrackStage = (stage: number) => {
     const clamped = Math.max(1, Math.min(6, stage));
@@ -545,7 +571,7 @@ export const SystemStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
     return () => clearInterval(interval);
   }, [waterTrackMode, autoPlayWater]);
 
-  // Global Hotkeys: 'H' for Hotspots, 'T' for Tanks Only, 'S' for Sensors & Tools, 'W' for Water Flow Focus, 'V' for Dual Verification
+  // Global Hotkeys: 'H' for Hotspots, 'T' for Tanks Only, 'S' for Sensors & Tools, 'W' for Water Flow Focus, 'V' for Dual Verification, 'G' for Hydro Generator
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Ignore key events when user is typing in an input
@@ -562,6 +588,9 @@ export const SystemStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
       }
       if (e.key === 'v' || e.key === 'V') {
         setDualVerificationMode(prev => !prev);
+      }
+      if (e.key === 'g' || e.key === 'G') {
+        setHydroGeneratorMode(prev => !prev);
       }
       if (e.key === 'w' || e.key === 'W') {
         setWaterTrackModeState(prev => {
@@ -631,6 +660,8 @@ export const SystemStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
         recirculationTriggered,
         setRecirculationTriggered,
         setTank2Tds,
+        hydroGeneratorMode,
+        setHydroGeneratorMode,
         sidebarTab,
         setSidebarTab,
         waterTrackMode,

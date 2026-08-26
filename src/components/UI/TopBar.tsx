@@ -21,6 +21,7 @@ import {
   Repeat,
   FlaskConical,
   Sparkles,
+  Zap,
 } from 'lucide-react';
 
 export const TopBar = () => {
@@ -47,6 +48,8 @@ export const TopBar = () => {
     setDualVerificationMode,
     setRecirculationTriggered,
     setCameraPreset,
+    hydroGeneratorMode,
+    setHydroGeneratorMode,
   } = useSystemState();
 
   const runSim1 = () => {
@@ -179,6 +182,23 @@ export const TopBar = () => {
         >
           <Repeat className="w-3 h-3 text-amber-400" />
           <span>Sim 2: Mining Slurry</span>
+        </button>
+
+        {/* Toggle Hydro Power Motor Generator Mode Button */}
+        <button
+          onClick={() => setHydroGeneratorMode(!hydroGeneratorMode)}
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-full border transition-all text-xs font-mono tracking-wide cursor-pointer ${
+            hydroGeneratorMode
+              ? 'bg-blue-500/25 border-blue-400 text-blue-300 shadow-[0_0_18px_rgba(59,130,246,0.35)]'
+              : 'bg-zinc-900/80 border-zinc-700 text-zinc-400 hover:text-white hover:border-blue-500/40'
+          }`}
+          title="Toggle Hydro-Power Motor Energy Harvesting Generator & Battery Charging (Hotkey: G)"
+        >
+          <Zap className={`w-3.5 h-3.5 ${hydroGeneratorMode ? 'text-cyan-400 animate-pulse' : 'text-zinc-400'}`} />
+          <span className="hidden sm:inline font-semibold">
+            {hydroGeneratorMode ? `Hydro Gen: +${(metrics.hydroWatts || 28.5).toFixed(1)}W` : 'Hydro Gen'}
+          </span>
+          <span className={`text-[10px] px-1 py-0.2 rounded font-bold ${hydroGeneratorMode ? 'bg-blue-950 text-blue-300 border border-blue-500/40' : 'bg-zinc-800 border border-zinc-700 text-zinc-400'}`}>G</span>
         </button>
 
         {/* Toggle Tanks Only / Margin View Button */}

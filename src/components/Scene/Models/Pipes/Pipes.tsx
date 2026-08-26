@@ -144,8 +144,94 @@ const SolenoidValve = ({
   );
 };
 
+// ─── Hydro-Power Turbine Generator Motor Component ─────────────────────────────
+const HydroTurbineMotor = ({ pos }: { pos: [number, number, number] }) => {
+  const impellerRef = useRef<THREE.Group>(null);
+  const { metrics } = useSystemState();
+
+  useFrame((_, delta) => {
+    if (impellerRef.current && metrics.flowRate > 0) {
+      impellerRef.current.rotation.y += metrics.flowRate * 5.0 * delta;
+    }
+  });
+
+  return (
+    <group position={pos}>
+      {/* Heavy-Duty Cast Motor Stator Housing with Cooling Fins */}
+      <mesh castShadow>
+        <cylinderGeometry args={[0.085, 0.085, 0.42, 16]} />
+        <meshStandardMaterial color="#0284c7" roughness={0.3} metalness={0.8} />
+      </mesh>
+
+      {/* Radial Motor Cooling Fins */}
+      {[0, Math.PI / 4, Math.PI / 2, (3 * Math.PI) / 4].map((ang, i) => (
+        <mesh key={i} rotation={[0, ang, 0]} castShadow>
+          <boxGeometry args={[0.19, 0.36, 0.008]} />
+          <meshStandardMaterial color="#0369a1" roughness={0.4} metalness={0.7} />
+        </mesh>
+      ))}
+
+      {/* Top Generator Stator Cap */}
+      <mesh position={[0, 0.23, 0]} castShadow>
+        <cylinderGeometry args={[0.095, 0.085, 0.06, 16]} />
+        <meshStandardMaterial color="#1e293b" roughness={0.2} metalness={0.9} />
+      </mesh>
+
+      {/* Waterproof Electrical Power Terminal Box */}
+      <group position={[0, 0.18, 0.09]}>
+        <mesh castShadow>
+          <boxGeometry args={[0.07, 0.08, 0.05]} />
+          <meshStandardMaterial color="#0f172a" roughness={0.5} />
+        </mesh>
+        {/* Glowing Hydro Energy Generation LED */}
+        <mesh position={[0, 0.02, 0.026]}>
+          <sphereGeometry args={[0.008, 10, 10]} />
+          <meshBasicMaterial color="#22c55e" />
+        </mesh>
+      </group>
+
+      {/* Transparent Hydro-Vortex Viewport Window */}
+      <mesh position={[0, 0, 0]}>
+        <cylinderGeometry args={[0.088, 0.088, 0.14, 16, 1, true]} />
+        <meshPhysicalMaterial color="#38bdf8" transparent opacity={0.65} transmission={0.9} roughness={0.05} />
+      </mesh>
+
+      {/* Spinning Internal Turbine Impeller Runner */}
+      <group ref={impellerRef} position={[0, 0, 0]}>
+        <mesh castShadow>
+          <cylinderGeometry args={[0.02, 0.02, 0.12, 10]} />
+          <meshStandardMaterial color="#ca8a04" roughness={0.2} metalness={0.95} />
+        </mesh>
+        {[0, (2 * Math.PI) / 3, (4 * Math.PI) / 3].map((angle, i) => (
+          <mesh key={i} rotation={[0, angle, 0.4]} position={[0, 0, 0]} castShadow>
+            <boxGeometry args={[0.065, 0.08, 0.005]} />
+            <meshStandardMaterial color="#eab308" roughness={0.2} metalness={0.9} />
+          </mesh>
+        ))}
+      </group>
+
+      {/* Heavy Flange Couplings */}
+      <mesh position={[0, -0.22, 0]} castShadow>
+        <cylinderGeometry args={[0.095, 0.095, 0.03, 16]} />
+        <meshStandardMaterial color="#334155" roughness={0.3} metalness={0.85} />
+      </mesh>
+      <mesh position={[0, 0.22, 0]} castShadow>
+        <cylinderGeometry args={[0.095, 0.095, 0.03, 16]} />
+        <meshStandardMaterial color="#334155" roughness={0.3} metalness={0.85} />
+      </mesh>
+    </group>
+  );
+};
+
 export const Pipes = () => {
-  const { mode, setActiveHotspot, setCameraPreset, tanksOnly, dualVerificationMode } = useSystemState();
+  const { 
+    mode, 
+    setActiveHotspot, 
+    setCameraPreset, 
+    tanksOnly, 
+    dualVerificationMode,
+    hydroGeneratorMode 
+  } = useSystemState();
   const groupRef = useRef<THREE.Group>(null);
 
   const isDirectValveOpen = mode !== 'TURBIDITY' && mode !== 'CLEANING' && mode !== 'PUMP_FAILURE';
@@ -163,13 +249,18 @@ export const Pipes = () => {
   return (
     <group ref={groupRef}>
       {/* ══════════════════════════════════════════════════════════════════════
-          1. INTAKE: BOREWELL [2.8, -1.8] → SEDIMENTATION TANK TOP [1.9, 0.78]
+          1. INTAKE: BOREWELL / HYDRO-POWER GENERATOR MOTOR [2.8, -1.8] → SEDIMENTATION TANK [1.9, 0.78]
           ══════════════════════════════════════════════════════════════════════ */}
       <group
         onClick={(e) => {
           e.stopPropagation();
-          setActiveHotspot('intake_pipe');
-          setCameraPreset('INTAKE_PIPE');
+          if (hydroGeneratorMode) {
+            setActiveHotspot('hydro_generator');
+            setCameraPreset('HYDRO_GENERATOR');
+          } else {
+            setActiveHotspot('intake_pipe');
+            setCameraPreset('INTAKE_PIPE');
+          }
         }}
         onPointerOver={(e) => {
           e.stopPropagation();
@@ -208,9 +299,35 @@ export const Pipes = () => {
           <meshStandardMaterial color="#94a3b8" roughness={0.3} metalness={0.9} wireframe />
         </mesh>
 
-        {/* Vertical Riser with support clamp */}
-        <PipeSeg pos={[2.8, -0.50, 0]} len={2.55} r={0.030} mat="gray" />
-        <PipeClamp pos={[2.8, 0.20, 0]} rot={[0, 0, 0]} />
+        {/* ─── HYDRO-POWER MOTOR GENERATOR TOGGLE ─── */}
+        {hydroGeneratorMode ? (
+          <group>
+            {/* Lower suction intake pipe up to motor */}
+            <PipeSeg pos={[2.8, -1.25, 0]} len={1.05} r={0.032} mat="gray" />
+            <TeflonRing pos={[2.8, -0.65, 0]} />
+
+            {/* In-Line Hydro Power Turbine Generator Motor */}
+            <HydroTurbineMotor pos={[2.8, -0.40, 0]} />
+
+            {/* Upper discharge pipe rising from motor up to elbow */}
+            <TeflonRing pos={[2.8, -0.15, 0]} />
+            <PipeSeg pos={[2.8, 0.30, 0]} len={0.92} r={0.030} mat="gray" />
+            <PipeClamp pos={[2.8, 0.20, 0]} rot={[0, 0, 0]} />
+
+            {/* Heavy-Duty Conduit Cable Clamping along vertical pipe */}
+            <mesh position={[2.8, 0.50, 0.05]} castShadow>
+              <boxGeometry args={[0.016, 0.40, 0.016]} />
+              <meshStandardMaterial color="#0f172a" roughness={0.7} />
+            </mesh>
+          </group>
+        ) : (
+          /* Standard Borewell Riser Pipe */
+          <group>
+            <PipeSeg pos={[2.8, -0.50, 0]} len={2.55} r={0.030} mat="gray" />
+            <PipeClamp pos={[2.8, 0.20, 0]} rot={[0, 0, 0]} />
+          </group>
+        )}
+
         <PipeElbow pos={[2.8, 0.78, 0]} r={0.034} mat="gray" />
         <TeflonRing pos={[2.8, 0.74, 0]} />
 

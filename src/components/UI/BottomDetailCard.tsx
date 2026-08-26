@@ -219,6 +219,36 @@ const componentCatalog: Record<string, ComponentDetail> = {
     processRole: 'Discharge tap. Controls outlet flow and handles the self-cleaning tank draining program.',
     getLiveReadout: (m) => m.mode === 'CLEANING' ? 'Valve Status: OPEN (Draining loop active)' : 'Valve Status: CLOSED',
   },
+  tank2_verification: {
+    name: 'Tank 2 (Post-RO Verification Chamber)',
+    purpose: 'Performs secondary verification of mineral TDS and pH before water is allowed into the 250L Potable Reservoir.',
+    principle: 'Intermediate containment vessel fitted with automated drain diverter valve and secondary sensor suite.',
+    specifications: ['Capacity: 25 Liters', 'Sensor array: TDS Probe #2 & pH Probe #2', 'Diverter action: 12V Fast Solenoid'],
+    power: 'Passive verification vessel',
+    maintenance: '99% - Verify calibration monthly',
+    processRole: 'Quality gatekeeper. Approves pure water for potable consumption or reroutes sub-standard water back into the filtration intake.',
+    getLiveReadout: (m) => `Post-RO TDS: ${m.tds2 || 28} ppm | Quality Decision: ${(m.tds2 || 28) <= 100 ? 'PASS ➔ CLEAN TANK' : 'FAIL ➔ RECIRCULATE'}`,
+  },
+  recirculation_loop: {
+    name: 'Closed-Loop Recirculation Riser & Booster',
+    purpose: 'Diverts sub-standard permeate water from Tank 2 back into the RO Filtration Tank Inlet for multi-pass re-purification.',
+    principle: 'Mini inline DC booster pump and check-valved riser line that lifts rejected water into the RO cartridge intake manifold.',
+    specifications: ['Flow capacity: 6.5 L/min', 'Pump: 12V 18W Brushless DC Booster', 'Return manifold: 3-Way PipeTee Junction'],
+    power: 'Active load: 18.0W when recirculating',
+    maintenance: '96% - Inspect diverter valve seals',
+    processRole: 'Closed-loop fail-safe. Ensures 0% polluted or sub-standard permeate water ever reaches the clean drinking reservoir.',
+    getLiveReadout: (m) => (m.recirculationActive || (m.tds2 || 0) > 100) ? 'Recirculation Active: Re-Filtering through RO Media' : 'Status: Standby (Permeate Purity Nominal)',
+  },
+  hydro_generator: {
+    name: 'Hydro-Power Turbine Generator Motor',
+    purpose: 'Harvests kinetic and gravitational water flow energy to charge the on-board Lithium battery system.',
+    principle: 'High-head water vortex spins an internal turbine impeller runner, turning a permanent-magnet dynamo generator stator.',
+    specifications: ['Output: 12V DC / up to 35W Peak', 'Impeller: Vortex runner', 'Coupling: In-line hydraulic flange', 'Charging wire: High-flex copper harness'],
+    power: 'Energy generation: +15W to +35W clean power',
+    maintenance: '98% - Dynamo bearings sealed (10,000 hrs)',
+    processRole: 'Hydraulic energy recovery unit. Converts raw intake flow pressure directly into electrical energy to charge the battery bank.',
+    getLiveReadout: (m) => `Hydro Generation: +${(m.hydroWatts || 0).toFixed(1)}W | Battery Charge Rate: +${((m.hydroWatts || 0) / 12).toFixed(2)}A`,
+  },
 };
 
 export const BottomDetailCard = () => {

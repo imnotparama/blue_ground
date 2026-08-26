@@ -37,7 +37,14 @@ const TubeFlowShader = {
 };
 
 export const Flows = () => {
-  const { metrics, mode, envMode, dualVerificationMode, recirculationTriggered } = useSystemState();
+  const { 
+    metrics, 
+    mode, 
+    envMode, 
+    dualVerificationMode, 
+    recirculationTriggered, 
+    hydroGeneratorMode 
+  } = useSystemState();
 
   const intakeParticlesRef = useRef<THREE.Points>(null);
   const filterParticlesRef = useRef<THREE.Points>(null);
@@ -51,6 +58,7 @@ export const Flows = () => {
 
   const solarPowerRef = useRef<any>(null);
   const battPowerRef = useRef<any>(null);
+  const hydroPowerRef = useRef<any>(null);
   const espToFlowRef = useRef<any>(null);
   const espToUvRef = useRef<any>(null);
   const espToFloatRef = useRef<any>(null);
@@ -158,8 +166,14 @@ export const Flows = () => {
       new THREE.Vector3(-1.0, 0.60, 0.2),
       new THREE.Vector3(-2.1, -0.40, 0.3),
     ]);
+    const hydroToBatt = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(2.8, -0.22, 0.09),
+      new THREE.Vector3(2.8, 0.78, 0.05),
+      new THREE.Vector3(1.2, 0.78, 0.05),
+      new THREE.Vector3(-0.65, 0.75, 0),
+    ]);
 
-    return { solarToBatt, battToEsp, espToFlow, espToUv, espToFloat };
+    return { solarToBatt, battToEsp, espToFlow, espToUv, espToFloat, hydroToBatt };
   }, []);
 
   const wirePoints = useMemo(() => {
@@ -169,6 +183,7 @@ export const Flows = () => {
       flow: wires.espToFlow.getPoints(10),
       uv: wires.espToUv.getPoints(10),
       float: wires.espToFloat.getPoints(20),
+      hydro: wires.hydroToBatt.getPoints(25),
     };
   }, [wires]);
 
@@ -245,6 +260,12 @@ export const Flows = () => {
     if (battPowerRef.current && battPowerRef.current.material) {
       battPowerRef.current.material.dashOffset = isBatteryDischarging ? -time * 0.6 : 0;
       battPowerRef.current.material.opacity = isBatteryDischarging ? 0.9 : 0.05;
+    }
+
+    if (hydroPowerRef.current && hydroPowerRef.current.material) {
+      const isHydroCharging = hydroGeneratorMode && metrics.flowRate > 0.2;
+      hydroPowerRef.current.material.dashOffset = isHydroCharging ? -time * 1.6 : 0;
+      hydroPowerRef.current.material.opacity = isHydroCharging ? 0.95 : 0.02;
     }
 
     if (espToFlowRef.current && espToFlowRef.current.material) {
@@ -432,6 +453,21 @@ export const Flows = () => {
         transparent
         opacity={0.8}
       />
+
+      {hydroGeneratorMode && (
+        <Line
+          ref={hydroPowerRef}
+          points={wirePoints.hydro}
+          color="#38bdf8"
+          lineWidth={2.5}
+          dashed
+          dashScale={6}
+          dashSize={0.25}
+          gapSize={0.12}
+          transparent
+          opacity={0.95}
+        />
+      )}
     </group>
   );
 };

@@ -15,6 +15,7 @@ import {
   Layers, 
   Droplets,
   Repeat,
+  Zap,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -46,6 +47,8 @@ export const SystemControls = () => {
     setRecirculationTriggered,
     setTank2Tds,
     setCameraPreset,
+    hydroGeneratorMode,
+    setHydroGeneratorMode,
   } = useSystemState();
 
   if (!landingVisited || demoRunning) return null; // Hide controls during landing or guided tour
@@ -289,6 +292,30 @@ export const SystemControls = () => {
                   </button>
                 </div>
               )}
+            </div>
+
+            {/* Hydro-Power Motor Energy Harvesting Toggle */}
+            <div className="col-span-2 flex flex-col gap-1 p-2 rounded-xl bg-blue-950/20 border border-blue-500/30">
+              <div className="flex items-center justify-between text-[9px] font-mono">
+                <span className="font-bold text-blue-300 flex items-center gap-1">
+                  <Zap className="w-3 h-3 text-cyan-400" /> Hydro Turbine Gen:
+                </span>
+                <span className={`px-1.5 py-0.2 rounded font-bold text-[8px] ${
+                  hydroGeneratorMode ? 'bg-blue-950 text-cyan-300 border border-cyan-500/40 animate-pulse' : 'text-zinc-500'
+                }`}>
+                  {hydroGeneratorMode ? `+${(metrics.hydroWatts || 28.5).toFixed(1)}W ACTIVE` : 'OFF'}
+                </span>
+              </div>
+              <button
+                onClick={() => setHydroGeneratorMode(!hydroGeneratorMode)}
+                className={`w-full py-1 rounded-md border text-center font-mono text-[9px] font-bold transition-all cursor-pointer ${
+                  hydroGeneratorMode
+                    ? 'bg-blue-500/30 border-blue-400 text-blue-200 shadow-[0_0_10px_rgba(59,130,246,0.3)]'
+                    : 'bg-white/2 border-white/5 text-zinc-400 hover:bg-white/5 hover:text-white'
+                }`}
+              >
+                {hydroGeneratorMode ? '⚡ Hydro Generator: ON (G)' : 'Enable Hydro Turbine Power (G)'}
+              </button>
             </div>
 
             {/* Hotspot Dots / Clean Showroom View Toggle */}

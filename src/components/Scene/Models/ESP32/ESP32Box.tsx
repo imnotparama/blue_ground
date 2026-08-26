@@ -41,11 +41,15 @@ export const ESP32Box = () => {
       ctx.fillStyle = '#38bdf8';
       ctx.font = '8px monospace';
       ctx.fillText(`FLOW : ${metrics.flowRate.toFixed(1)} L/M`, 6, 38);
-      ctx.fillText(`TDS  : ${metrics.tds} PPM`, 6, 50);
-      ctx.fillText(`TURB : ${metrics.turbidity.toFixed(1)} NTU`, 6, 62);
-      ctx.fillText(`pH   : ${metrics.ph.toFixed(2)}`, 6, 74);
-      ctx.fillText(`SOLAR: ${metrics.solarWatts.toFixed(0)}W`, 6, 86);
-      ctx.fillText(`BATT : ${Math.round(metrics.batteryPercent)}%`, 6, 98);
+      ctx.fillText(`TDS  : ${metrics.tds} PPM`, 6, 49);
+      ctx.fillText(`TURB : ${metrics.turbidity.toFixed(1)} NTU`, 6, 60);
+      ctx.fillText(`pH   : ${metrics.ph.toFixed(2)}`, 6, 71);
+      ctx.fillText(`SOLAR: ${metrics.solarWatts.toFixed(0)}W`, 6, 82);
+      ctx.fillText(`BATT : ${Math.round(metrics.batteryPercent)}%`, 6, 93);
+      if ((metrics.hydroWatts || 0) > 0) {
+        ctx.fillStyle = '#22c55e';
+        ctx.fillText(`HYDRO: +${(metrics.hydroWatts || 0).toFixed(0)}W GEN`, 6, 104);
+      }
 
       ctx.fillStyle = metrics.waterQuality === 'EXCELLENT' ? '#10b981' : '#f59e0b';
       ctx.fillRect(0, 114, 128, 14);
