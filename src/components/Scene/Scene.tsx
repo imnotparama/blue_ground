@@ -33,7 +33,7 @@ export const Scene = () => {
       className="w-full h-full relative select-none"
       style={{
         background:
-          'radial-gradient(ellipse at 60% 15%, #bfdbfe 0%, #93c5fd 40%, #cbd5e1 75%, #94a3b8 100%)',
+          'radial-gradient(circle at 50% 25%, #0f172a 0%, #090e1a 45%, #030712 100%)',
       }}
     >
       {/* 3D R3F Canvas with high-DPI crispness and smooth performance */}
@@ -46,7 +46,7 @@ export const Scene = () => {
           powerPreference: 'high-performance',
           stencil: false,
           depth: true,
-          toneMappingExposure: 1.2,
+          toneMappingExposure: 1.35,
         }}
         camera={{
           fov: 46,
@@ -57,30 +57,30 @@ export const Scene = () => {
         className="w-full h-full"
       >
         {/* Soft atmospheric depth haze */}
-        <fog attach="fog" args={['#cbd5e1', 18, 55]} />
+        <fog attach="fog" args={['#090e1a', 15, 50]} />
 
         {/* Lighting setup */}
         <SceneLighting />
 
-        {/* Natural Ground Surface */}
+        {/* Infinite Sleek Studio Floor */}
         <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2.24, 0]} receiveShadow>
           <planeGeometry args={[200, 200]} />
           <meshStandardMaterial
-            color="#64748b"
-            roughness={0.95}
-            metalness={0.0}
+            color="#0b1120"
+            roughness={0.85}
+            metalness={0.15}
           />
         </mesh>
 
-        {/* Clean Architectural Concrete Installation Platform */}
+        {/* Clean Architectural Platform with Subtle Glow */}
         <mesh position={[-0.5, -2.22, -0.1]} receiveShadow castShadow>
-          <boxGeometry args={[9.2, 0.08, 2.6]} />
-          <meshStandardMaterial color="#cbd5e1" roughness={0.8} metalness={0.1} />
+          <boxGeometry args={[9.4, 0.08, 2.6]} />
+          <meshStandardMaterial color="#1e293b" roughness={0.7} metalness={0.3} />
         </mesh>
-        {/* Platform safety border strip */}
+        {/* Platform Cyan Edge Trim */}
         <mesh position={[-0.5, -2.20, 1.25]} castShadow>
-          <boxGeometry args={[9.2, 0.06, 0.08]} />
-          <meshStandardMaterial color="#f59e0b" roughness={0.7} metalness={0.2} />
+          <boxGeometry args={[9.4, 0.06, 0.06]} />
+          <meshStandardMaterial color="#06b6d4" roughness={0.2} metalness={0.8} />
         </mesh>
 
         {/* Camera state transitions controller */}

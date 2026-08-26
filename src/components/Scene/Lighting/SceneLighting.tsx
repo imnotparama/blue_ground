@@ -29,13 +29,13 @@ export const SceneLighting = () => {
     // Apply adjustments based on Environmental Mode
     switch (envMode) {
       case 'SUNNY':
-        sunColor = '#fff5d0';
-        sunIntensity = 8.0;
-        sunPosition = [10, 15, -5];
-        ambientColor = '#fff8e8';
-        ambientIntensity = 2.5;
-        rimColor = '#06b6d4';
-        rimIntensity = 2.0;
+        sunColor = '#ffffff';
+        sunIntensity = 4.2;
+        sunPosition = [8, 12, 6];
+        ambientColor = '#1e293b';
+        ambientIntensity = 1.4;
+        rimColor = '#38bdf8';
+        rimIntensity = 2.4;
         break;
       case 'MORNING':
         sunColor = '#fca5a5'; // Soft rose/golden light
