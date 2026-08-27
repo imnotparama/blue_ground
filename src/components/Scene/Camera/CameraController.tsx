@@ -106,8 +106,8 @@ export const CAMERA_PRESETS: Record<CameraPreset, { position: [number, number, n
     target: [-1.35, 0.12, 0],
   },
   HYDRO_GENERATOR: {
-    position: [3.15, -0.65, 2.25],
-    target: [2.90, -1.05, 0],
+    position: [3.20, -0.80, 2.40],
+    target: [2.85, -1.25, 0],
   },
   WATER_STAGE_1: {
     position: [2.8, 0.0, 2.2],

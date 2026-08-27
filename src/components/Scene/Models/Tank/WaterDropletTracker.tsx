@@ -108,7 +108,7 @@ export const WaterDropletTracker = () => {
     // Stage 1: Raw Borewell / Hand Pump Intake -> Top of Sedimentation Tank
     const stage1 = hydroGeneratorMode
       ? new THREE.CatmullRomCurve3([
-          new THREE.Vector3(2.52, -1.09, 0),
+          new THREE.Vector3(2.52, -1.27, 0),
           new THREE.Vector3(2.52, -0.40, 0),
           new THREE.Vector3(2.52, 0.78, 0),
           new THREE.Vector3(2.21, 0.78, 0),

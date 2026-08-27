@@ -303,17 +303,17 @@ export const Pipes = () => {
         {/* ─── HYDRO-POWER MOTOR GENERATOR & HAND PUMP SETUP ─── */}
         {hydroGeneratorMode ? (
           <group>
-            {/* Deep-Well Manual Hand Pump & Animated Field Operator Character */}
-            <HandPumpWithOperator pos={[2.80, -1.95, 0]} />
+            {/* Deep-Well Manual Hand Pump & Animated Field Operator Character sitting firmly on ground floor */}
+            <HandPumpWithOperator pos={[2.80, -2.18, 0]} />
 
             {/* Direct Intake Spout Connector & Union Flange from Hand Pump Outlet */}
-            <mesh position={[2.52, -1.09, 0]} castShadow>
+            <mesh position={[2.52, -1.22, 0]} castShadow>
               <cylinderGeometry args={[0.038, 0.038, 0.04, 16]} />
               <meshStandardMaterial color="#334155" roughness={0.3} metalness={0.85} />
             </mesh>
 
             {/* Lower suction intake pipe from Hand Pump spout up to Hydro Motor */}
-            <PipeSeg pos={[2.52, -0.74, 0]} len={0.66} r={0.030} mat="gray" />
+            <PipeSeg pos={[2.52, -0.81, 0]} len={0.78} r={0.030} mat="gray" />
             <TeflonRing pos={[2.52, -0.62, 0]} />
 
             {/* In-Line Hydro Power Turbine Generator Motor */}
