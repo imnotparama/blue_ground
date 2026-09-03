@@ -107,7 +107,8 @@ export const TopBar = () => {
         <Compass className="w-5 h-5 text-cyan-400 animate-spin-slow" style={{ animationDuration: '20s' }} />
         <span className="font-bold tracking-[0.25em] text-white text-sm">blue<span className="text-cyan-400">ground</span></span>
         <div className="flex items-center gap-1.5 border-l border-white/10 pl-3">
-          <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          <span className="text-[9px] tracking-wider text-emerald-300 font-mono font-bold px-1.5 py-0.5 rounded bg-emerald-500/15 border border-emerald-500/30">v1.0</span>
           <span className="text-[9px] tracking-widest text-zinc-400 font-mono uppercase font-bold">Leviathan</span>
         </div>
         <div className="hidden md:flex items-center gap-1.5 border-l border-white/10 pl-3">
