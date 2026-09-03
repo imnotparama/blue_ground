@@ -224,6 +224,51 @@ export const Tanks = () => {
           <meshStandardMaterial color="#06b6d4" emissive="#06b6d4" emissiveIntensity={0.8} />
         </mesh>
 
+        {/* ─── SECONDARY TANK INTERNAL VERTICAL FLOAT SWITCH PROBE ─── */}
+        <group position={[1.15, 0.85, 0]}>
+          {/* Vertical Stainless Probe Rod */}
+          <mesh castShadow>
+            <cylinderGeometry args={[0.006, 0.006, 0.48, 12]} />
+            <meshStandardMaterial color="#cbd5e1" roughness={0.2} metalness={0.95} />
+          </mesh>
+          {/* Top Cable Gland Mounting Collar */}
+          <mesh position={[0, 0.25, 0]} castShadow>
+            <cylinderGeometry args={[0.016, 0.016, 0.03, 12]} />
+            <meshStandardMaterial color="#1e293b" roughness={0.4} metalness={0.7} />
+          </mesh>
+          {/* Toroidal Magnetic Float Ring with Purity Indicator */}
+          <mesh position={[0, 0.05, 0]} castShadow>
+            <torusGeometry args={[0.022, 0.008, 12, 24]} />
+            <meshStandardMaterial color="#0284c7" roughness={0.3} metalness={0.6} />
+          </mesh>
+          {/* Laser-Etched Level Marker Rings along Probe */}
+          {[-0.15, -0.05, 0.05, 0.15].map((ly, lIdx) => (
+            <mesh key={lIdx} position={[0, ly, 0]}>
+              <cylinderGeometry args={[0.008, 0.008, 0.003, 12]} />
+              <meshStandardMaterial color="#38bdf8" emissive="#38bdf8" emissiveIntensity={0.6} />
+            </mesh>
+          ))}
+        </group>
+
+        {/* ─── SECONDARY TANK CLEAN WATER OUTLET SOLENOID VALVE ─── */}
+        <group position={[TW / 2 + 0.08, 0.65, 0]}>
+          {/* Heavy Brass Forged Valve Body */}
+          <mesh castShadow>
+            <boxGeometry args={[0.065, 0.065, 0.065]} />
+            <meshStandardMaterial color="#ca8a04" roughness={0.25} metalness={0.9} />
+          </mesh>
+          {/* IP65 Weatherproof Solenoid Coil Housing */}
+          <mesh position={[0, 0.055, 0]} castShadow>
+            <cylinderGeometry args={[0.024, 0.024, 0.065, 16]} />
+            <meshStandardMaterial color="#090d16" roughness={0.4} />
+          </mesh>
+          {/* Valve Energized LED Indicator (Emerald Green when Clean Outlet is open) */}
+          <mesh position={[0, 0.09, 0]}>
+            <sphereGeometry args={[0.006, 8, 8]} />
+            <meshStandardMaterial color="#10b981" emissive="#10b981" emissiveIntensity={2.5} />
+          </mesh>
+        </group>
+
         {/* ─── PHOTOREALISTIC HARDWARE & SCALE ETCHINGS ─── */}
         {/* 1. Laser-etched Metric Volume Graduation Marks on Front Acrylic Face */}
         <group position={[-TW / 2 + 0.35, 0, TD / 2 + 0.002]}>

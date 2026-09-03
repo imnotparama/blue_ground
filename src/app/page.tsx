@@ -67,12 +67,16 @@ const HomePageContent = () => {
 
       {/* Decorative ambient elements (Apple aesthetics) */}
       <div className="fixed bottom-4 left-6 z-10 pointer-events-none text-[10px] font-mono text-zinc-500 tracking-wider flex items-center gap-2">
-        <span>© 2026 BLUEGROUND LEVIATHAN</span>
+        <span>© 2026 BLUEGROUND LEVIATHAN v2.0</span>
+        <span className="text-zinc-700">•</span>
+        <span>SMART IOT SOLAR PURIFICATION LOOP</span>
         <span className="text-zinc-700">•</span>
         <span>ENGINEERED BY <strong className="text-cyan-400 font-bold">PARAMESHWARAN S</strong></span>
       </div>
-      <div className="fixed bottom-4 right-6 z-10 pointer-events-none text-[10px] font-mono text-zinc-600 tracking-wider">
-        LATITUDE: 13.0827° N / LONGITUDE: 80.2707° E
+      <div className="fixed bottom-4 right-6 z-10 pointer-events-none text-[10px] font-mono text-zinc-500 tracking-wider flex items-center gap-2">
+        <span className="text-zinc-400 font-semibold">BlueGround Leviathan – Water Guardian</span>
+        <span className="text-zinc-700">•</span>
+        <span className="text-cyan-400 font-mono font-bold">LAT 13.0827° N / LON 80.2707° E</span>
       </div>
     </main>
   );

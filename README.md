@@ -1,71 +1,93 @@
-# 🌊 BlueGround (Leviathan) — Version 1.0.0
+# 🌊 BlueGround (Leviathan) — Version 2.0.0
 
-> **Industrial IoT Water Purification, Multi-Barrier RO Filtration & Hydro-Energy Harvesting Digital Twin**  
-> **Lead Architect & Engineer:** **Parameshwaran S**
+> **Smart IoT Solar Water Purification, Multi-Barrier 4-Stage RO Rack & Antigravity Digital Twin**  
+> **Lead Architect & Engineer:** **Parameshwaran S**  
+> **Location Anchor:** `LAT 13.0827° N / LON 80.2707° E` (Chennai, India)
 
 ---
 
 ## 📌 Overview
 
-**BlueGround v1.0.0** is an interactive, photorealistic WebGL/Three.js digital twin of an off-grid solar- and hydro-powered water treatment system designed for mining, quarry, and rural borehole environments. It simulates complete real-time water quality analysis, physical multi-stage filtration, hydro-electric energy harvesting, and dual-sensor recirculation verification.
+**BlueGround Leviathan v2.0** represents the official upgrade of the interactive 3D digital twin to match the real physical hardware prototype: a solar-powered, ESP32-S3-controlled smart water purification, aquaculture, and telemetry station. It introduces the **bottom primary raw water reservoir**, the **back-mounted vertical 4-stage filtration rack** (Sediment, Chemo Block, RO Maxx, Final Guard / UV), the **elevated secondary clean water tank** with vertical float switch probe and solenoid valve, a **complete 9-sensor hardware deck**, and the cinematic **Antigravity Levitation View**.
 
 ---
 
-## ✨ Key Features (v1.0.0)
+## ✨ Version 2.0 Key Enhancements
 
-### 1. Dual Pipeline Architecture (Toggle with `V`)
-- **Setup 1 (Direct Clean Flow):**  
-  Raw borehole water passes through gravity sedimentation and multi-barrier filtration directly into the primary clean reservoir.
-- **Setup 2 (Dual Verification & Closed-Loop Recirculation):**  
-  Post-filtration water enters **Tank 2 Verification Chamber** where secondary TDS and turbidity sensors inspect purity. If TDS exceeds standard limits ($>100\text{ ppm}$), motorized solenoid valves automatically trigger an overhead riser loop, returning the water back to the RO filter media for re-purification.
+### 1. Back-Mounted 4-Stage Filtration Rack (Vertical Architecture)
+- Attached vertically on the rear extrusion frame with heavy aluminium brackets:
+  - **Stage 1: Sediment** — 5µm PP melt-blown pre-filter (`92% Health`), stops sand, rust, and coarse grit.
+  - **Stage 2: Chemo Block** — Extruded Activated Carbon Block (CTO) (`85% Health`), adsorbs chlorine, toxic organics, and mining runoff odors.
+  - **Stage 3: RO Maxx** — 0.0001µm Thin-Film Composite (TFC) reverse osmosis membrane (`79% Health`), desalinates and strips heavy metals.
+  - **Stage 4: Final Guard / UV** — Mineralizer cartridge & 254nm germicidal stainless UV-C disinfection chamber (`95% Health`) with live blue indicator light.
+- **3-Way Motorized Diverter Valves**: Located between stages with live status levers indicating Full Purification Chain, Bypass, and Maintenance Flush routing.
 
-### 2. Hydro-Power Generator & Deep-Well Hand Pump (Toggle with `G`)
-- **India Mark II Deep-Well Hand Pump:**  
-  Modeled to precise mechanical blueprint specifications: concrete foundation apron with drainage trough, triangular reinforcement gussets, lower pedestal stand, machined bolted mid-collar, brass stuffing gland, and slanted pump head with dual pivot trunnions.
-- **Animated 3D Field Operator:**  
-  A fully rigged, animated mining field worker in high-visibility safety workwear (PPE hard hat, tinted goggles, orange vest, cargo trousers, and work boots) actively pumping the lever handle.
-- **In-Line Hydro-Power Turbine Generator:**  
-  Water pumped through the intake drives a high-efficiency hydraulic turbine motor ($+28.5\text{ W}$), transmitting electrical energy via an overhead conduit cable directly into the LiFePO4 battery bank.
+### 2. Dual-Tank Stratification
+- **Primary Tank (Bottom Layer)**:
+  - Large rectangular, transparent acrylic raw water collection reservoir with volume graduation markings, structural corner extrusions, and vibration dampener feet.
+- **Secondary Tank (Top Layer / Top 1 - Purified Water Chamber)**:
+  - Clear tank elevated on an aluminium shelf above the middle control deck.
+  - Receives permeate from Stage 4 Final Guard.
+  - **Internal Vertical Float Switch Probe**: Polished stainless steel probe with toroidal magnetic float ring and graduated level markers (25%, 50%, 75%, 100%).
+  - **Clean Outlet Solenoid Valve**: Motorized brass solenoid valve with illuminated emerald LED indicator regulating flow to the external clean water tap.
 
-### 3. ESP32 Industrial IoT Controller & Telemetry
-- **Hardware Integration:** Dual-core ESP32 microcontroller with Wi-Fi/ESP-NOW communication, status LEDs, terminal blocks, and an animated 1.8" TFT display showing live voltage, flow rate, TDS, turbidity, and hydro-harvesting status.
-- **Power Grid Matrix:** Real-time power balance tracking solar PV input ($+50\text{ W}$), hydro turbine generation ($+28.5\text{ W}$), system discharge load, and battery state-of-charge.
+### 3. Front Middle Deck (Top 2) Control & 9-Sensor Real Hardware Suite
+- **ESP32-S3 IoT Central Controller Box**:
+  - Enclosure with glowing neon cyan border.
+  - **1.8-inch TFT LCD Display**: Renders real-time canvas telemetry (Flow, TDS, Turbidity, pH, Solar W, Battery %, Pump Rail V).
+  - **16-Channel Touch Sensor Strip**: Capacitive touch interface with gold-plated pads.
+- **Compact Prototype Sensor Array**:
+  1. **pH Sensor Probe**: Glass electrode bulb in sample flow cell.
+  2. **Turbidity Sensor Module**: Optical infrared phototransistor chamber.
+  3. **TDS / EC Sensor**: Dual titanium electrode pins.
+  4. **DS18B20 Temperature Probe**: Stainless steel waterproof capsule submerged in tank.
+  5. **YF-S401 Flow Sensor**: In-line turbine Hall-effect meter.
+  6. **Water Level Float Switch**: Vertical magnetic reed stem.
+  7. **BH1750 Ambient Light Sensor**: I2C digital lux sensor with hemispherical dome.
+  8. **0–25V Voltage Divider Sensor**: Monitors 24V pump and 5V logic rails.
+  9. **ACS712 Current Sensor**: Linear Hall-effect module measuring system draw.
+- **Ghosted Tracer Lines**: Semi-transparent glowing conduits linking sensors to their physical locations in the tanks, pipes, and power rails.
 
-### 4. Interactive "Journey of a Water Packet" (`W`)
-- Follow a water droplet across all 6 purification stages:
-  1. **Stage 1:** Borewell / Hand Pump Intake
-  2. **Stage 2:** Sedimentation & Gravity Grit Trap
-  3. **Stage 3:** Inline Flow Telemetry (YF-S201)
-  4. **Stage 4:** IoT Probing Chamber (TDS / pH / Turbidity)
-  5. **Stage 5:** High-Pressure RO & UV Disinfection
-  6. **Stage 6:** Final Verification & Reservoir Delivery / Closed-Loop Recirculation
-- Integrated Web Audio API synthesizer generates tonal audio feedback for each stage transition.
+### 4. Power Subsystem Visualization Slice
+- **Solar Input**: Monocrystalline PV input ($56.8\text{ W}$).
+- **1S5P Li-ion Battery Bank**: Transparent housing displaying 5 parallel lithium cells, nickel busbars, and 1S BMS protection board ($78\text{--}100\%$).
+- **DC-DC Converters**:
+  - **XL6009/XL6019 Boost Converter**: Steps battery up to **24.0V Pump Rail**.
+  - **LM2596/XL4015 Buck Converter**: Steps down to **5.0V Logic Rail**.
+  - **3.3V MCU Rail** powering ESP32-S3 logic.
+- Real-time color-coded power indicators: **Green** (Healthy), **Amber** (Low Battery), **Red** (Critical).
 
-### 5. Scenic Mining Environment & Atmospheric Lighting
-- Open-pit quarry background featuring low-poly excavators (JCB), heavy dump trucks, floodlight towers, and dust motes.
-- Real-time environmental presets: **Sunny**, **Golden Hour (Morning)**, **Overcast (Cloudy)**, **Rainy**, and **Night** mode with dynamic directional shadow mapping.
+### 5. Antigravity Levitation View (Toggle with `A`)
+- When enabled, the entire Leviathan rig (primary tank, back filter rack, secondary tank, sensors, pumps, and power slice) lifts into the air ($+0.42\text{m}$) and gently levitates with harmonic magnetic bobbing and slow oscillation.
+- All hydraulic piping remains fully connected and active.
+- Ground platform and background terrain dim into the background.
+- **Three Glowing Magnetic Energy Rings** surround the floating subsystems with 3D tags:
+  1. `[ ⚡ SOLAR & POWER GRID ]` (Amber)
+  2. `[ 🛡️ 4-STAGE MULTI-BARRIER FILTRATION ]` (Cyan)
+  3. `[ 💧 HYDRAULIC PURIFICATION LOOP ]` (Emerald)
 
 ---
 
-## ⌨️ Global Keyboard Hotkeys
+## ⌨️ Global Keyboard Hotkeys (v2.0)
 
 | Hotkey | Action |
 | :---: | :--- |
-| **`W`** | Toggle Interactive Water Flow Focus Journey |
-| **`G`** | Toggle Hydro-Power Turbine Generator & Hand Pump Mode |
-| **`V`** | Toggle Dual Pipeline Architecture (Setup 1 vs Setup 2) |
-| **`T`** | Toggle Tanks-Only Isolation Mode (Framed 3D Boundaries) |
+| **`A`** | **Toggle Antigravity Levitation Cinematic Mode** |
+| **`W`** | Toggle Interactive Water Flow Focus Journey (Stages 1–6) |
+| **`G`** | Toggle In-Line Hydro Turbine Generator & India Mark II Hand Pump |
+| **`V`** | Toggle Pipeline Architecture (Setup 1 Direct vs Setup 2 Dual Verification) |
+| **`T`** | Toggle Tanks Isolation Mode (Framed 3D Boundaries) |
 | **`H`** | Toggle Interactive Hotspot Badges & Telemetry Overlays |
 | **`S`** | Toggle Sensors & Tools Hardware Inventory Catalog |
-| **`1`** | Launch Simulation 1: High-Purity Water Flow (Setup 1) |
-| **`2`** | Launch Simulation 2: Mineral-Heavy Recirculation Flow (Setup 2) |
+| **`1`** | Launch Simulation 1: Clean Borewell Water Flow (Setup 1) |
+| **`2`** | Launch Simulation 2: Muddy Mining Slurry Recirculation (Setup 2) |
 
 ---
 
 ## 🛠️ Technology Stack
 
 - **Framework:** Next.js 16.3.3 (App Router, Turbopack)
-- **3D Graphics:** Three.js, React Three Fiber (`@react-three/fiber`), Drei (`@react-three/drei`)
+- **3D Engine:** Three.js, React Three Fiber (`@react-three/fiber`), Drei (`@react-three/drei`)
 - **Animation & Transitions:** Framer Motion, GSAP
 - **Styling:** Vanilla CSS, Tailwind CSS
 - **Audio Engine:** Custom Web Audio API Synthesizer (`audioSynthesizer.ts`)
@@ -75,17 +97,11 @@
 
 ## 🚀 Getting Started
 
-### Prerequisites
-- Node.js 18.0 or later
-- npm or pnpm
-
-### Installation
-
 ```bash
 # Clone the repository
 git clone https://github.com/imnotparama/blue_ground.git
 
-# Navigate to project directory
+# Navigate into project directory
 cd blue_ground
 
 # Install dependencies
@@ -96,24 +112,6 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-### Production Build
-
-```bash
-npm run build
-npm run start
-```
-
----
-
-## 📋 Versioning & Roadmap
-
-- **Version 1.0.0 (Current):**
-  - Full 3D Digital Twin with India Mark II Hand Pump, Animated Operator, In-line Hydro Generator, Setup 1 & Setup 2 dual-verification piping, and ESP32 telemetry.
-- **Upcoming Sessions (v1.1+ Roadmap):**
-  - Expanded IoT telemetry graphs and historical log export
-  - Additional environmental weather effects (fog density, dynamic water level physics)
-  - Enhanced mobile touch gestures and VR/AR preview modes
 
 ---
 

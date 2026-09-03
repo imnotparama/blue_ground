@@ -26,8 +26,11 @@ import { Hotspots } from './Environment/Hotspots';
 import { SupportRack } from './Environment/SupportRack';
 import { ScenicEnvironment } from './Environment/ScenicEnvironment';
 
+// Antigravity Levitation Rig
+import { AntigravityRig } from './Models/Antigravity/AntigravityRig';
+
 export const Scene = () => {
-  const { exploded, transparent, cutaway, mode } = useSystemState();
+  const { exploded, transparent, cutaway, mode, antigravityMode } = useSystemState();
 
   return (
     <div
@@ -115,31 +118,33 @@ export const Scene = () => {
         <AmbientLife />
         <ScenicEnvironment />
 
-        {/* Hardware Components Group */}
+        {/* Hardware Components Group with Antigravity Levitation Capability */}
         <group position={[0, -0.2, 0]}>
-          {/* Render the physical hardware system components */}
-          <Tanks />
-          <SolarPanel />
-          <BatteryUnit />
-          <ESP32Box />
-          <WaterPump />
-          <Sensors />
-          <FilterHousing />
-          <Pipes />
-          <SupportRack />
+          <AntigravityRig>
+            {/* Render the physical hardware system components */}
+            <Tanks />
+            <SolarPanel />
+            <BatteryUnit />
+            <ESP32Box />
+            <WaterPump />
+            <Sensors />
+            <FilterHousing />
+            <Pipes />
+            <SupportRack />
 
-          {/* Render dynamic fluids and current animations */}
-          <Water />
-          <TankMargins />
-          <WaterDropletTracker />
-          <Flows />
+            {/* Render dynamic fluids and current animations */}
+            <Water />
+            <TankMargins />
+            <WaterDropletTracker />
+            <Flows />
 
-          {/* Vision Pro style hotspots */}
-          <Hotspots />
+            {/* Vision Pro style hotspots */}
+            <Hotspots />
+          </AntigravityRig>
 
           {/* Subtle grid overlay on platform */}
           <gridHelper args={[10, 20, '#94a3b8', '#e2e8f0']} position={[-0.5, -2.18, 0]}>
-            <lineBasicMaterial attach="material" transparent opacity={0.08} />
+            <lineBasicMaterial attach="material" transparent opacity={antigravityMode ? 0.02 : 0.08} />
           </gridHelper>
         </group>
 

@@ -49,11 +49,24 @@ export const SystemControls = () => {
     setCameraPreset,
     hydroGeneratorMode,
     setHydroGeneratorMode,
+    antigravityMode,
+    setAntigravityMode,
   } = useSystemState();
 
   if (!landingVisited || demoRunning) return null; // Hide controls during landing or guided tour
 
   // Preset trigger handlers to simulate scenarios dynamically
+  const triggerSensorFault = () => {
+    setMetrics(prev => ({
+      ...prev,
+      tds: 999,
+      turbidity: 88.5,
+      ph: 12.8,
+      waterQuality: 'CRITICAL',
+      cloudSync: 'ERROR',
+    }));
+  };
+
   const triggerNormal = () => {
     setMode('NORMAL');
     setMetrics(prev => ({
@@ -201,6 +214,19 @@ export const SystemControls = () => {
             <Eye className="w-3 h-3 text-zinc-500" /> CAD Layer Views
           </span>
           <div className="grid grid-cols-2 gap-2">
+            {/* Antigravity Floating Mode Toggle */}
+            <button
+              onClick={() => setAntigravityMode(!antigravityMode)}
+              className={`col-span-2 flex items-center justify-center gap-2 py-2 px-3 rounded-xl border text-[9px] font-mono font-bold tracking-wider transition-all cursor-pointer ${
+                antigravityMode
+                  ? 'bg-gradient-to-r from-cyan-500/30 to-violet-500/30 text-cyan-200 border-cyan-400 shadow-[0_0_16px_rgba(6,182,212,0.4)] animate-pulse'
+                  : 'bg-white/5 border-white/10 text-zinc-300 hover:bg-white/10 hover:text-white'
+              }`}
+            >
+              <Sparkles className={`w-3.5 h-3.5 ${antigravityMode ? 'text-cyan-300 animate-spin-slow' : 'text-zinc-400'}`} />
+              <span>{antigravityMode ? 'Antigravity View: FLOATING (A)' : 'Toggle Antigravity View (A)'}</span>
+            </button>
+
             {/* Exploded View Toggle */}
             <button
               onClick={() => setExploded(!exploded)}
@@ -469,6 +495,14 @@ export const SystemControls = () => {
             >
               <span>🟤 Low Battery</span>
               <span>LOW POWER</span>
+            </button>
+
+            <button
+              onClick={triggerSensorFault}
+              className="w-full text-left px-2.5 py-1.5 rounded-lg border border-white/5 bg-white/2 text-zinc-400 hover:bg-white/5 hover:text-amber-400 flex items-center justify-between transition-all cursor-pointer"
+            >
+              <span>⚠️ Sensor Fault</span>
+              <span>CALIBRATE</span>
             </button>
           </div>
         </div>

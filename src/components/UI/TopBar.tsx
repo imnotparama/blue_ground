@@ -50,6 +50,8 @@ export const TopBar = () => {
     setCameraPreset,
     hydroGeneratorMode,
     setHydroGeneratorMode,
+    antigravityMode,
+    setAntigravityMode,
   } = useSystemState();
 
   const runSim1 = () => {
@@ -107,8 +109,8 @@ export const TopBar = () => {
         <Compass className="w-5 h-5 text-cyan-400 animate-spin-slow" style={{ animationDuration: '20s' }} />
         <span className="font-bold tracking-[0.25em] text-white text-sm">blue<span className="text-cyan-400">ground</span></span>
         <div className="flex items-center gap-1.5 border-l border-white/10 pl-3">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="text-[9px] tracking-wider text-emerald-300 font-mono font-bold px-1.5 py-0.5 rounded bg-emerald-500/15 border border-emerald-500/30">v1.0</span>
+          <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+          <span className="text-[9px] tracking-wider text-cyan-300 font-mono font-bold px-1.5 py-0.5 rounded bg-cyan-500/15 border border-cyan-500/30">v2.0</span>
           <span className="text-[9px] tracking-widest text-zinc-400 font-mono uppercase font-bold">Leviathan</span>
         </div>
         <div className="hidden md:flex items-center gap-1.5 border-l border-white/10 pl-3">
@@ -118,6 +120,21 @@ export const TopBar = () => {
 
       {/* Center demo action & clean view toggle (pointers enabled) */}
       <div className="flex items-center gap-2.5 pointer-events-auto">
+        {/* Toggle Antigravity View Button */}
+        <button
+          onClick={() => setAntigravityMode(!antigravityMode)}
+          className={`flex items-center gap-1.5 px-3 py-2 rounded-full border transition-all text-xs font-mono tracking-wide cursor-pointer ${
+            antigravityMode
+              ? 'bg-gradient-to-r from-cyan-500/30 to-violet-500/30 border-cyan-400 text-cyan-200 shadow-[0_0_15px_rgba(6,182,212,0.4)]'
+              : 'bg-zinc-900/80 border-zinc-700 text-zinc-400 hover:text-white hover:border-cyan-500/40'
+          }`}
+          title="Toggle Antigravity Cinematic View (Hotkey: A)"
+        >
+          <Sparkles className={`w-3.5 h-3.5 ${antigravityMode ? 'text-cyan-300 animate-spin-slow' : 'text-zinc-400'}`} />
+          <span className="hidden md:inline font-semibold">{antigravityMode ? 'Antigravity: ON' : 'Antigravity'}</span>
+          <span className={`text-[10px] px-1 py-0.2 rounded font-bold ${antigravityMode ? 'bg-cyan-950 text-cyan-300 border border-cyan-500/40' : 'bg-zinc-800 border border-zinc-700 text-zinc-400'}`}>A</span>
+        </button>
+
         {/* Toggle Water Flow Focus View Button */}
         <button
           onClick={() => setWaterTrackMode(!waterTrackMode)}

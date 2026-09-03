@@ -10,9 +10,15 @@ import {
   ChevronRight,
   Sparkles,
   TrendingUp,
-  Wrench
+  Wrench,
+  ShieldCheck,
+  ShieldAlert,
+  Sun,
+  BatteryCharging,
+  Cpu,
+  Radio,
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { SensorsAndTools } from './SensorsAndTools';
 
 // Small inline sparkline SVG chart
@@ -71,9 +77,9 @@ export const Dashboard = () => {
 
   // Live sliding window telemetry history
   const [history, setHistory] = useState<{ tds: number[]; ph: number[]; turbidity: number[]; flowRate: number[] }>({
-    tds: Array(12).fill(145),
-    ph: Array(12).fill(7.2),
-    turbidity: Array(12).fill(1.2),
+    tds: Array(12).fill(129),
+    ph: Array(12).fill(7.4),
+    turbidity: Array(12).fill(0.2),
     flowRate: Array(12).fill(4.8),
   });
 
@@ -98,8 +104,12 @@ export const Dashboard = () => {
       case 'GOOD': return 'text-cyan-400 border-cyan-500/20 bg-cyan-500/5';
       case 'POOR': return 'text-amber-400 border-amber-500/20 bg-amber-500/5 animate-pulse';
       case 'CRITICAL': return 'text-rose-400 border-rose-500/25 bg-rose-500/5 animate-pulse';
+      default: return 'text-emerald-400 border-emerald-500/20 bg-emerald-500/5';
     }
   };
+
+  const battColor = metrics.batteryPercent < 20 ? 'text-rose-400' : metrics.batteryPercent < 50 ? 'text-amber-400' : 'text-emerald-400';
+  const battBarColor = metrics.batteryPercent < 20 ? 'bg-rose-500' : metrics.batteryPercent < 50 ? 'bg-amber-500' : 'bg-emerald-500';
 
   return (
     <div className="fixed right-6 top-20 z-30 pointer-events-none select-none">
@@ -128,25 +138,27 @@ export const Dashboard = () => {
             opacity: collapsed ? 0 : 1 
           }}
           transition={{ type: 'spring', damping: 24, stiffness: 150 }}
-          className="w-[360px] max-h-[82vh] overflow-y-auto pointer-events-auto shadow-[0_24px_48px_rgba(0,0,0,0.5)] rounded-2xl"
+          className="w-[370px] max-h-[82vh] overflow-y-auto pointer-events-auto shadow-[0_24px_48px_rgba(0,0,0,0.5)] rounded-2xl"
         >
-          <div className="glass-panel rounded-2xl p-4 border border-white/10 relative overflow-hidden flex flex-col gap-4 bg-zinc-950/85 backdrop-blur-md">
+          <div className="glass-panel rounded-2xl p-4 border border-white/10 relative overflow-hidden flex flex-col gap-3.5 bg-zinc-950/85 backdrop-blur-md">
             
             {/* Header: Title + Tab Switcher */}
-            <div className="flex flex-col gap-2.5">
+            <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between">
                 <div className="flex flex-col">
                   <span className="text-[10px] font-bold text-cyan-400 tracking-[0.2em] font-mono uppercase flex items-center gap-1">
-                    <Sparkles className="w-3 h-3 text-cyan-400" /> Leviathan IoT Core
+                    <Sparkles className="w-3 h-3 text-cyan-400" /> SYSTEM TWIN TELEMETRY
                   </span>
-                  <h1 className="text-sm font-semibold text-white tracking-wide mt-0.5">
-                    {sidebarTab === 'TELEMETRY' ? 'System Twin Telemetry' : 'Sensors & Tools Catalog'}
+                  <h1 className="text-xs font-semibold text-white tracking-wide mt-0.5">
+                    {sidebarTab === 'TELEMETRY' ? 'BlueGround Leviathan v2.0' : 'Sensors & Tools Catalog'}
                   </h1>
                 </div>
                 <div className="flex flex-col items-end">
-                  <span className="text-[8px] font-mono text-zinc-500 uppercase">SYS HEALTH</span>
-                  <span className={`text-xs font-bold font-mono ${metrics.batteryPercent > 10 && mode !== 'PUMP_FAILURE' ? 'text-emerald-400' : 'text-amber-400'}`}>
-                    {metrics.batteryPercent < 10 || mode === 'PUMP_FAILURE' ? '68%' : '98%'}
+                  <span className="text-[8px] font-mono text-zinc-500 uppercase flex items-center gap-1">
+                    <Radio className="w-2.5 h-2.5 text-cyan-400 animate-pulse" /> ESP32-S3
+                  </span>
+                  <span className="text-[10px] font-bold font-mono text-emerald-400">
+                    SYNCED ({metrics.wifiSignal} dBm)
                   </span>
                 </div>
               </div>
@@ -186,85 +198,83 @@ export const Dashboard = () => {
               <>
 
             {/* ======================================================== */}
-            {/* A. POWER SYSTEM MATRIX */}
+            {/* A. POWER GRID METRICS */}
             {/* ======================================================== */}
-            <div className="flex flex-col gap-2">
-              <h2 className="text-[9px] font-bold text-zinc-400 tracking-wider uppercase font-mono flex items-center gap-1.5 border-b border-white/5 pb-1">
-                <Zap className="w-3.5 h-3.5 text-amber-400" /> Power Grid
+            <div className="flex flex-col gap-1.5">
+              <h2 className="text-[9px] font-bold text-zinc-400 tracking-wider uppercase font-mono flex items-center justify-between border-b border-white/5 pb-1">
+                <span className="flex items-center gap-1.5"><Zap className="w-3.5 h-3.5 text-amber-400" /> POWER GRID & DC-DC RAILS</span>
+                <span className={`text-[8px] font-bold font-mono ${battColor}`}>
+                  {metrics.batteryPercent < 20 ? 'CRITICAL' : metrics.batteryPercent < 50 ? 'LOW' : 'HEALTHY'}
+                </span>
               </h2>
-              <div className="grid grid-cols-1 gap-2 bg-white/2 p-3 rounded-xl border border-white/5">
+              <div className="grid grid-cols-1 gap-2 bg-white/2 p-2.5 rounded-xl border border-white/5">
                 <div>
-                  <div className="flex justify-between text-[10px] font-mono mb-1.5">
-                    <span className="text-zinc-500">BATTERY CAP</span>
-                    <span className={`font-semibold ${metrics.batteryPercent < 15 ? 'text-rose-400 animate-pulse' : 'text-zinc-300'}`}>
+                  <div className="flex justify-between text-[10px] font-mono mb-1">
+                    <span className="text-zinc-500">1S5P BATTERY BANK</span>
+                    <span className={`font-semibold ${battColor}`}>
                       {Math.round(metrics.batteryPercent)}%
                     </span>
                   </div>
                   <div className="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden">
                     <div 
-                      className={`h-full rounded-full transition-all duration-500 ${
-                        metrics.batteryPercent < 15 
-                          ? 'bg-red-500 animate-pulse' 
-                          : metrics.batteryPercent < 35 
-                          ? 'bg-amber-500' 
-                          : 'bg-emerald-500'
-                      }`}
+                      className={`h-full rounded-full transition-all duration-500 ${battBarColor}`}
                       style={{ width: `${metrics.batteryPercent}%` }}
                     />
                   </div>
                 </div>
 
-                <div className={`grid ${hydroGeneratorMode ? 'grid-cols-3' : 'grid-cols-2'} gap-2 mt-2 pt-2 border-t border-white/5 text-center`}>
+                <div className="grid grid-cols-3 gap-2 pt-1.5 border-t border-white/5 text-center font-mono">
                   <div>
-                    <span className="text-[8px] text-zinc-500 font-mono block">SOLAR INPUT</span>
-                    <span className="text-xs font-bold font-mono text-amber-300">{metrics.solarWatts.toFixed(1)}W</span>
+                    <span className="text-[8px] text-zinc-500 block">SOLAR INPUT</span>
+                    <span className="text-xs font-bold text-amber-300">{(metrics.solarWatts || 56.8).toFixed(1)}W</span>
                   </div>
-                  {hydroGeneratorMode && (
-                    <div className="bg-blue-950/40 p-1 rounded-lg border border-blue-500/30">
-                      <span className="text-[8px] text-blue-300 font-mono block">HYDRO GEN</span>
-                      <span className="text-xs font-bold font-mono text-cyan-300 animate-pulse">
-                        +{(metrics.hydroWatts || 28.5).toFixed(1)}W
-                      </span>
-                    </div>
-                  )}
                   <div>
-                    <span className="text-[8px] text-zinc-500 font-mono block">DISCHARGE</span>
-                    <span className="text-xs font-bold font-mono text-zinc-300">{metrics.currentDraw.toFixed(1)}W</span>
+                    <span className="text-[8px] text-zinc-500 block">DISCHARGE</span>
+                    <span className="text-xs font-bold text-zinc-300">{(metrics.dischargeWatts || 15.0).toFixed(1)}W</span>
                   </div>
+                  <div className="bg-cyan-950/30 rounded p-0.5 border border-cyan-500/20">
+                    <span className="text-[8px] text-cyan-400 block">PUMP RAIL</span>
+                    <span className="text-xs font-bold text-cyan-300">{(metrics.pumpRailVoltage || 24.0).toFixed(1)}V</span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 text-center font-mono text-[9px] text-zinc-400 pt-1 border-t border-white/5">
+                  <div>LOGIC RAIL: <strong className="text-emerald-400 font-bold">{(metrics.logicRailVoltage || 5.0).toFixed(1)}V</strong></div>
+                  <div>MCU RAIL: <strong className="text-emerald-400 font-bold">{(metrics.mcuRailVoltage || 3.3).toFixed(1)}V</strong></div>
                 </div>
               </div>
             </div>
 
             {/* ======================================================== */}
-            {/* B. CHEMICAL ANALYSIS LOOP (Stage 1 Intake Chamber) */}
+            {/* B. STAGE 1 CHAMBER SENSORS (CHEMICAL & PHYSICAL) */}
             {/* ======================================================== */}
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-1.5">
               <div className="flex items-center justify-between border-b border-white/5 pb-1">
                 <h2 className="text-[9px] font-bold text-zinc-400 tracking-wider uppercase font-mono flex items-center gap-1.5">
-                  <Activity className="w-3.5 h-3.5 text-cyan-400" /> Stage 1 Chamber Sensors
+                  <Activity className="w-3.5 h-3.5 text-cyan-400" /> STAGE 1 CHAMBER SENSORS
                 </h2>
-                <span className="text-[8px] font-mono px-1.5 py-0.2 rounded bg-cyan-950 text-cyan-300 border border-cyan-500/30">PRE-RO</span>
+                <span className="text-[8px] font-mono px-1.5 py-0.2 rounded bg-cyan-950 text-cyan-300 border border-cyan-500/30">RAW INTAKE</span>
               </div>
               <div className="grid grid-cols-2 gap-2">
-                <div className="bg-white/2 p-2.5 rounded-xl border border-white/5 flex flex-col gap-0.5">
-                  <span className="text-[8px] text-zinc-500 font-mono">TDS PURITY</span>
+                <div className="bg-white/2 p-2 rounded-xl border border-white/5 flex flex-col gap-0.5">
+                  <span className="text-[8px] text-zinc-500 font-mono">TDS PURITY (PPM)</span>
                   <span className="text-xs font-bold font-mono text-sky-400">{metrics.tds} ppm</span>
                   <Sparkline data={history.tds} color="#38bdf8" />
                 </div>
-                <div className="bg-white/2 p-2.5 rounded-xl border border-white/5 flex flex-col gap-0.5">
-                  <span className="text-[8px] text-zinc-500 font-mono">ACIDITY INDEX</span>
+                <div className="bg-white/2 p-2 rounded-xl border border-white/5 flex flex-col gap-0.5">
+                  <span className="text-[8px] text-zinc-500 font-mono">ACIDITY INDEX PH</span>
                   <span className="text-xs font-bold font-mono text-pink-400">{metrics.ph.toFixed(2)} pH</span>
                   <Sparkline data={history.ph} color="#f472b6" />
                 </div>
-                <div className="bg-white/2 p-2.5 rounded-xl border border-white/5 flex flex-col gap-0.5">
-                  <span className="text-[8px] text-zinc-500 font-mono">CLARITY (TURB)</span>
-                  <span className={`text-xs font-bold font-mono ${metrics.turbidity > 5.0 ? 'text-amber-400' : 'text-yellow-400'}`}>
+                <div className="bg-white/2 p-2 rounded-xl border border-white/5 flex flex-col gap-0.5">
+                  <span className="text-[8px] text-zinc-500 font-mono">CLARITY NTU</span>
+                  <span className={`text-xs font-bold font-mono ${metrics.turbidity > 5.0 ? 'text-amber-400' : 'text-emerald-400'}`}>
                     {metrics.turbidity.toFixed(1)} NTU
                   </span>
-                  <Sparkline data={history.turbidity} color="#fbbf24" />
+                  <Sparkline data={history.turbidity} color="#34d399" />
                 </div>
-                <div className="bg-white/2 p-2.5 rounded-xl border border-white/5 flex flex-col gap-0.5">
-                  <span className="text-[8px] text-zinc-500 font-mono">THERMAL DATA</span>
+                <div className="bg-white/2 p-2 rounded-xl border border-white/5 flex flex-col gap-0.5">
+                  <span className="text-[8px] text-zinc-500 font-mono">THERMAL DATA °C</span>
                   <span className="text-xs font-bold font-mono text-emerald-400">{metrics.temperature.toFixed(1)} °C</span>
                   <div className="w-full h-1 bg-zinc-800 rounded-full overflow-hidden mt-2">
                     <div className="h-full bg-emerald-500" style={{ width: `${(metrics.temperature / 50) * 100}%` }} />
@@ -274,88 +284,100 @@ export const Dashboard = () => {
             </div>
 
             {/* ======================================================== */}
-            {/* B2. STAGE 2 VERIFICATION ARRAY (Tank 2 Post-RO Chamber) */}
+            {/* C. HYDRAULICS LOOP & VALVE ROUTING */}
             {/* ======================================================== */}
-            {dualVerificationMode && (
-              <div className="flex flex-col gap-2 p-2.5 rounded-xl bg-purple-950/20 border border-purple-500/30">
-                <div className="flex items-center justify-between border-b border-purple-500/20 pb-1">
-                  <h2 className="text-[9px] font-bold text-purple-300 tracking-wider uppercase font-mono flex items-center gap-1.5">
-                    <Activity className="w-3.5 h-3.5 text-purple-400" /> Tank 2 Verification Array
-                  </h2>
-                  <span className={`text-[8px] font-mono px-1.5 py-0.2 rounded font-bold ${
-                    (metrics.recirculationActive || recirculationTriggered || (metrics.tds2 || 0) > 100 || (metrics.turbidity2 || 0) > 1.0)
-                      ? 'bg-rose-950 text-rose-300 border border-rose-500/40 animate-pulse'
-                      : 'bg-emerald-950 text-emerald-300 border border-emerald-500/40'
-                  }`}>
-                    {(metrics.recirculationActive || recirculationTriggered || (metrics.tds2 || 0) > 100 || (metrics.turbidity2 || 0) > 1.0) ? 'RECIRCULATING (HIGH TDS)' : 'POTABLE PASS (TDS OK)'}
-                  </span>
-                </div>
-                <div className="grid grid-cols-3 gap-1.5 text-center font-mono">
-                  <div className="bg-black/40 p-1.5 rounded-lg border border-white/5">
-                    <span className="text-[8px] text-zinc-500 block">POST-RO TDS</span>
-                    <span className="text-xs font-bold text-cyan-300">{metrics.tds2 || 28} ppm</span>
-                  </div>
-                  <div className="bg-black/40 p-1.5 rounded-lg border border-white/5">
-                    <span className="text-[8px] text-zinc-500 block">POST-RO pH</span>
-                    <span className="text-xs font-bold text-pink-300">{(metrics.ph2 || 7.35).toFixed(2)}</span>
-                  </div>
-                  <div className="bg-black/40 p-1.5 rounded-lg border border-white/5">
-                    <span className="text-[8px] text-zinc-500 block">POST-RO TURB</span>
-                    <span className={`text-xs font-bold ${((metrics.turbidity2 || 0) > 1.0) ? 'text-amber-400' : 'text-emerald-300'}`}>
-                      {(metrics.turbidity2 || 0.15).toFixed(2)} NTU
-                    </span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* ======================================================== */}
-            {/* C. HYDRAULICS LOOP */}
-            {/* ======================================================== */}
-            <div className="flex flex-col gap-2">
-              <h2 className="text-[9px] font-bold text-zinc-400 tracking-wider uppercase font-mono flex items-center gap-1.5 border-b border-white/5 pb-1">
-                <Droplet className="w-3.5 h-3.5 text-blue-400" /> Hydraulics Loop
+            <div className="flex flex-col gap-1.5">
+              <h2 className="text-[9px] font-bold text-zinc-400 tracking-wider uppercase font-mono flex items-center justify-between border-b border-white/5 pb-1">
+                <span className="flex items-center gap-1.5"><Droplet className="w-3.5 h-3.5 text-blue-400" /> HYDRAULICS LOOP</span>
+                <span className="text-[8px] font-mono text-cyan-300">YF-S401 ACTIVE</span>
               </h2>
-              <div className="bg-white/2 p-3 rounded-xl border border-white/5 flex flex-col gap-2">
-                <div className="grid grid-cols-2 gap-4 text-center items-center">
+              <div className="bg-white/2 p-2.5 rounded-xl border border-white/5 flex flex-col gap-2">
+                <div className="grid grid-cols-3 gap-2 text-center items-center">
                   <div>
                     <span className="text-[8px] text-zinc-500 font-mono block">INLINE FLOW</span>
-                    <span className="text-xs font-bold font-mono text-cyan-300">{metrics.flowRate.toFixed(2)} L/min</span>
-                    <Sparkline data={history.flowRate} color="#06b6d4" />
+                    <span className="text-xs font-bold font-mono text-cyan-300">{metrics.flowRate.toFixed(2)} L/m</span>
                   </div>
                   <div>
                     <span className="text-[8px] text-zinc-500 font-mono block">PUMP SPEED</span>
                     <span className="text-xs font-bold font-mono text-zinc-300">{metrics.pumpRpm} RPM</span>
-                    <div className="w-full h-1 bg-zinc-800 rounded-full overflow-hidden mt-3">
-                      <div className="h-full bg-cyan-500" style={{ width: `${(metrics.pumpRpm / 2400) * 100}%` }} />
-                    </div>
                   </div>
-                </div>
-                <div className="flex justify-between items-center pt-2 border-t border-white/5 text-[9px] font-mono">
-                  <span className="text-zinc-500">FILTER CARTRIDGE</span>
-                  <span className="text-zinc-300 font-semibold">{metrics.filterHealth}% HEALTH</span>
-                </div>
-                <div className="flex justify-between items-center text-[9px] font-mono">
-                  <span className="text-zinc-500">UV STERILIZATION</span>
-                  <span className={`font-semibold ${metrics.uvStatus === 'ON' ? 'text-violet-400 animate-pulse' : 'text-zinc-500'}`}>
-                    {metrics.uvStatus === 'ON' ? 'ACTIVE (UV-C)' : 'SHUT DOWN'}
-                  </span>
+                  <div>
+                    <span className="text-[8px] text-zinc-500 font-mono block">VALVE STATE</span>
+                    <span className="text-[10px] font-bold font-mono text-emerald-300">Clean Outlet</span>
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* ======================================================== */}
-            {/* D. SYSTEM CAPACITY & EST QUALITY */}
+            {/* D. 4-STAGE FILTER CARTRIDGE HEALTH BARS */}
             {/* ======================================================== */}
-            <div className="flex flex-col gap-2 text-[10px] font-mono pt-1">
-              <div className={`flex items-center justify-between border p-2.5 rounded-xl ${getQualityColor()}`}>
-                <span className="text-zinc-400 text-[8px] uppercase tracking-wider font-semibold">Quality Index:</span>
-                <span className="font-bold tracking-widest">{metrics.waterQuality}</span>
+            <div className="flex flex-col gap-1.5">
+              <h2 className="text-[9px] font-bold text-zinc-400 tracking-wider uppercase font-mono flex items-center justify-between border-b border-white/5 pb-1">
+                <span>FILTER CARTRIDGE HEALTH</span>
+                <span className="text-[8px] font-mono text-zinc-400">4-STAGE RACK</span>
+              </h2>
+              <div className="grid grid-cols-2 gap-2 bg-white/2 p-2.5 rounded-xl border border-white/5 text-[9px] font-mono">
+                <div>
+                  <div className="flex justify-between mb-0.5">
+                    <span className="text-zinc-400">Stage 1: Sediment</span>
+                    <strong className="text-sky-300">{metrics.stage1Health || 92}%</strong>
+                  </div>
+                  <div className="w-full h-1 bg-zinc-800 rounded-full overflow-hidden">
+                    <div className="h-full bg-sky-400" style={{ width: `${metrics.stage1Health || 92}%` }} />
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex justify-between mb-0.5">
+                    <span className="text-zinc-400">Stage 2: Chemo</span>
+                    <strong className="text-emerald-300">{metrics.stage2Health || 85}%</strong>
+                  </div>
+                  <div className="w-full h-1 bg-zinc-800 rounded-full overflow-hidden">
+                    <div className="h-full bg-emerald-400" style={{ width: `${metrics.stage2Health || 85}%` }} />
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex justify-between mb-0.5">
+                    <span className="text-zinc-400">Stage 3: RO Maxx</span>
+                    <strong className="text-cyan-300">{metrics.stage3Health || 79}%</strong>
+                  </div>
+                  <div className="w-full h-1 bg-zinc-800 rounded-full overflow-hidden">
+                    <div className="h-full bg-cyan-400" style={{ width: `${metrics.stage3Health || 79}%` }} />
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex justify-between mb-0.5">
+                    <span className="text-zinc-400">Stage 4: Final / UV</span>
+                    <strong className="text-violet-300">{metrics.stage4Health || 95}%</strong>
+                  </div>
+                  <div className="w-full h-1 bg-zinc-800 rounded-full overflow-hidden">
+                    <div className="h-full bg-violet-400" style={{ width: `${metrics.stage4Health || 95}%` }} />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* ======================================================== */}
+            {/* E. UV STERILIZATION & QUALITY INDEX */}
+            {/* ======================================================== */}
+            <div className="flex flex-col gap-2 text-[10px] font-mono pt-0.5">
+              {/* UV Sterilization Badge */}
+              <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-violet-950/30 border border-violet-500/30">
+                <span className="text-zinc-400 flex items-center gap-1.5 font-bold">
+                  <ShieldCheck className="w-4 h-4 text-violet-400" /> UV STERILIZATION
+                </span>
+                <span className={`font-bold tracking-wider ${metrics.uvStatus === 'ON' ? 'text-violet-300 animate-pulse' : 'text-zinc-500'}`}>
+                  {metrics.uvStatus === 'ON' ? 'UV: Active (Blue Light)' : 'UV: Inactive'}
+                </span>
               </div>
 
-              <div className="flex justify-between text-zinc-500 px-1 pt-1 text-[9px]">
-                <span>TANK CAPACITY</span>
-                <span>{Math.round((metrics.waterLevel / 100) * metrics.tankCapacity)}L / {metrics.tankCapacity}L</span>
+              {/* Overall Quality Index Badge */}
+              <div className={`flex items-center justify-between border p-2.5 rounded-xl ${getQualityColor()}`}>
+                <span className="text-zinc-300 text-[9px] uppercase tracking-wider font-semibold">QUALITY INDEX:</span>
+                <span className="font-bold tracking-widest">{metrics.waterQuality} (POTABLE)</span>
               </div>
             </div>
             </>

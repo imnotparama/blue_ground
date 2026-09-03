@@ -68,6 +68,17 @@ export interface SystemMetrics {
   recirculationActive: boolean; // Closed-loop recirculation active
   pumpRpm: number;
   filterHealth: number; // 0 to 100
+  // 4-Stage Filter Individual Health
+  stage1Health: number; // Sediment %
+  stage2Health: number; // Chemo Block %
+  stage3Health: number; // RO Maxx %
+  stage4Health: number; // Final Guard / UV %
+  // Power Distribution Rails
+  pumpRailVoltage: number; // 24.0 V
+  logicRailVoltage: number; // 5.0 V
+  mcuRailVoltage: number; // 3.3 V
+  dischargeWatts: number; // 15.0 W
+  valveState: 'CLEAN_OUTLET' | 'RECIRCULATION' | 'MAINTENANCE_FLUSH' | 'BYPASS';
   uvStatus: 'ON' | 'OFF';
   esp32Online: boolean;
   wifiSignal: number; // -30 to -90 dBm
@@ -98,6 +109,8 @@ interface SystemStateContextType {
   setCutaway: (val: boolean) => void;
   transparent: boolean;
   setTransparent: (val: boolean) => void;
+  antigravityMode: boolean;
+  setAntigravityMode: (val: boolean) => void;
   metrics: SystemMetrics;
   setMetrics: React.Dispatch<React.SetStateAction<SystemMetrics>>;
   // Landing screen state
@@ -145,27 +158,36 @@ interface SystemStateContextType {
 
 const SystemStateContext = createContext<SystemStateContextType | undefined>(undefined);
 
-// Initial metrics based on normal state
+// Initial metrics based on normal state (v2.0 specifications)
 const defaultMetrics: SystemMetrics = {
-  batteryPercent: 88,
-  solarWatts: 45,
-  hydroWatts: 0,
-  currentDraw: 12,
-  waterLevel: 65,
+  batteryPercent: 91,
+  solarWatts: 56.8,
+  hydroWatts: 28.5,
+  dischargeWatts: 15.0,
+  pumpRailVoltage: 24.0,
+  logicRailVoltage: 5.0,
+  mcuRailVoltage: 3.3,
+  currentDraw: 1.25,
+  waterLevel: 68,
   flowRate: 4.8,
-  ph: 7.2,
-  tds: 145,
-  turbidity: 1.2,
-  temperature: 24.5,
-  tds2: 28,
-  ph2: 7.35,
-  turbidity2: 0.15,
+  ph: 7.40,
+  tds: 129,
+  turbidity: 0.2,
+  temperature: 24.4,
+  tds2: 22,
+  ph2: 7.38,
+  turbidity2: 0.10,
   recirculationActive: false,
   pumpRpm: 1800,
-  filterHealth: 98,
+  filterHealth: 92,
+  stage1Health: 92,
+  stage2Health: 85,
+  stage3Health: 79,
+  stage4Health: 95,
+  valveState: 'CLEAN_OUTLET',
   uvStatus: 'ON',
   esp32Online: true,
-  wifiSignal: -55,
+  wifiSignal: -52,
   cloudSync: 'SYNCED',
   tankCapacity: 250,
   waterQuality: 'EXCELLENT',
@@ -503,6 +525,7 @@ export const SystemStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
   const [showHotspots, setShowHotspots] = useState(true);
   const [tanksOnly, setTanksOnly] = useState(false);
+  const [antigravityMode, setAntigravityMode] = useState(false);
   const [sidebarTab, setSidebarTab] = useState<'TELEMETRY' | 'TOOLS'>('TELEMETRY');
 
   // Dual-Stage Verification Loop & Post-Filtration Tank 2
@@ -571,12 +594,15 @@ export const SystemStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
     return () => clearInterval(interval);
   }, [waterTrackMode, autoPlayWater]);
 
-  // Global Hotkeys: 'H' for Hotspots, 'T' for Tanks Only, 'S' for Sensors & Tools, 'W' for Water Flow Focus, 'V' for Dual Verification, 'G' for Hydro Generator
+  // Global Hotkeys: 'H' for Hotspots, 'T' for Tanks Only, 'S' for Sensors & Tools, 'W' for Water Flow Focus, 'V' for Dual Verification, 'G' for Hydro Generator, 'A' for Antigravity Mode
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Ignore key events when user is typing in an input
       if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
 
+      if (e.key === 'a' || e.key === 'A') {
+        setAntigravityMode(prev => !prev);
+      }
       if (e.key === 'h' || e.key === 'H') {
         setShowHotspots(prev => !prev);
       }
@@ -637,6 +663,8 @@ export const SystemStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
         setCutaway,
         transparent,
         setTransparent,
+        antigravityMode,
+        setAntigravityMode,
         metrics,
         setMetrics,
         landingVisited,
