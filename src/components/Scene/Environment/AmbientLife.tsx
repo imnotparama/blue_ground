@@ -8,9 +8,9 @@ export const AmbientLife = () => {
   const pointsRef = useRef<THREE.Points>(null);
   const mistRef = useRef<THREE.Points>(null);
 
-  // 1. Generate 300 random floating dust particles
+  // 1. Generate 90 floating dust motes (optimized for 60fps on integrated GPUs)
   const particles = useMemo(() => {
-    const count = 300;
+    const count = 90;
     const positions = new Float32Array(count * 3);
     const velocities = new Float32Array(count * 3);
     
@@ -26,9 +26,9 @@ export const AmbientLife = () => {
     return { positions, velocities };
   }, []);
 
-  // 2. Generate 80 swirling water mist particles around the sedimentation filter (x=1.9, y in [-0.6, 0.6])
+  // 2. Generate 25 swirling water mist particles around the sedimentation filter
   const mist = useMemo(() => {
-    const count = 80;
+    const count = 25;
     const positions = new Float32Array(count * 3);
     const speeds = new Float32Array(count);
     for (let i = 0; i < count; i++) {

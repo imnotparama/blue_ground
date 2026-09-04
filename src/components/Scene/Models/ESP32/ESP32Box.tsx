@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useSystemState } from '@/hooks/useSystemState';
 import * as THREE from 'three';
@@ -17,11 +17,19 @@ export const ESP32Box = () => {
   const [hoveredBox, setHoveredBox] = useState(false);
   const [hoveredScreen, setHoveredScreen] = useState(false);
 
-  // Dynamic 1.8" TFT Display canvas rendering with v2.0 telemetry
-  useEffect(() => {
+  // Dynamic 1.8" TFT Display canvas rendering with v2.0 telemetry (reused canvas & texture)
+  const displayContext = useMemo(() => {
+    if (typeof document === 'undefined') return { canvas: null, texture: null };
     const canvas = document.createElement('canvas');
     canvas.width = 128;
     canvas.height = 128;
+    const texture = new THREE.CanvasTexture(canvas);
+    return { canvas, texture };
+  }, []);
+
+  useEffect(() => {
+    const { canvas, texture } = displayContext;
+    if (!canvas || !texture) return;
     const ctx = canvas.getContext('2d');
 
     if (ctx) {
@@ -65,11 +73,15 @@ export const ESP32Box = () => {
       ctx.font = 'bold 8px monospace';
       ctx.fillText(`QUALITY: ${metrics.waterQuality}`, 8, 124);
 
-      const texture = new THREE.CanvasTexture(canvas);
-      textureRef.current = texture;
-      canvasRef.current = canvas;
+      texture.needsUpdate = true;
     }
-  }, [metrics]);
+  }, [metrics, displayContext]);
+
+  useEffect(() => {
+    return () => {
+      displayContext.texture?.dispose();
+    };
+  }, [displayContext]);
 
   const materialsRef = useRef<THREE.MeshStandardMaterial[]>([]);
 
@@ -157,10 +169,10 @@ export const ESP32Box = () => {
           <meshStandardMaterial color="#1e293b" roughness={0.4} metalness={0.6} />
         </mesh>
         {/* Dynamic TFT Screen with Live Canvas Texture */}
-        {textureRef.current && (
+        {displayContext.texture && (
           <mesh position={[0, 0, 0.007]}>
             <planeGeometry args={[0.17, 0.17]} />
-            <meshBasicMaterial map={textureRef.current} />
+            <meshBasicMaterial map={displayContext.texture} />
           </mesh>
         )}
       </group>

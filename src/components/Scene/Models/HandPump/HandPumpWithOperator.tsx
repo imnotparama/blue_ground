@@ -221,8 +221,8 @@ export const HandPumpWithOperator = ({ pos = [2.80, -2.18, 0] as [number, number
               color="#38bdf8"
               transparent
               opacity={0.80}
-              transmission={0.90}
               roughness={0.04}
+              clearcoat={1.0}
             />
           </mesh>
         </group>
@@ -407,7 +407,7 @@ export const HandPumpWithOperator = ({ pos = [2.80, -2.18, 0] as [number, number
             {/* Industrial Safety Goggles */}
             <mesh position={[0, 0.05, 0.068]} castShadow>
               <boxGeometry args={[0.115, 0.036, 0.03]} />
-              <meshPhysicalMaterial color="#0284c7" roughness={0.08} transmission={0.75} />
+              <meshPhysicalMaterial color="#0284c7" roughness={0.08} transparent opacity={0.7} clearcoat={1.0} />
             </mesh>
 
             {/* High-Vis Yellow Hard Hat (Safety Helmet) */}

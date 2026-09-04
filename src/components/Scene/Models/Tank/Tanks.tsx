@@ -168,7 +168,6 @@ export const Tanks = () => {
             opacity={0.45}
             roughness={0.04}
             metalness={0.08}
-            transmission={0.88}
             thickness={0.06}
             clearcoat={1.0}
             clearcoatRoughness={0.02}
@@ -200,8 +199,8 @@ export const Tanks = () => {
             color="#e0f2fe"
             transparent
             opacity={0.4}
-            transmission={0.9}
             roughness={0.06}
+            clearcoat={1.0}
             depthWrite={false}
           />
         </mesh>
@@ -219,8 +218,8 @@ export const Tanks = () => {
             color="#e0f2fe"
             transparent
             opacity={0.4}
-            transmission={0.9}
             roughness={0.06}
+            clearcoat={1.0}
             depthWrite={false}
           />
         </mesh>
@@ -389,7 +388,7 @@ export const Tanks = () => {
             opacity={0.50}
             roughness={0.06}
             metalness={0.08}
-            transmission={0.85}
+            clearcoat={1.0}
             side={THREE.DoubleSide}
             depthWrite={false}
           />
@@ -462,7 +461,7 @@ export const Tanks = () => {
             opacity={transparent || cutaway ? 0.08 : 0.40}
             roughness={0.08}
             metalness={0.1}
-            transmission={0.88}
+            clearcoat={1.0}
             side={THREE.DoubleSide}
             depthWrite={false}
           />

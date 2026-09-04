@@ -149,6 +149,18 @@ export const Flows = () => {
     return { intakeCurve, filterCurve, directCurve, pumpCurve, tank2DeliveryCurve, recirculationCurve };
   }, [hydroGeneratorMode]);
 
+  // Pre-sample points along curves to avoid expensive CatmullRom spline evaluations in render loop
+  const sampledCurves = useMemo(() => {
+    return {
+      intake: curves.intakeCurve.getPoints(120),
+      filter: curves.filterCurve.getPoints(120),
+      direct: curves.directCurve.getPoints(120),
+      pump: curves.pumpCurve.getPoints(160),
+      tank2Delivery: curves.tank2DeliveryCurve.getPoints(120),
+      recirculation: curves.recirculationCurve.getPoints(160),
+    };
+  }, [curves]);
+
   // 2. INITIALIZE FLOW PARTICLE SYSTEMS
   const particleConfig = useMemo(() => {
     const init = (count: number) => {
@@ -235,17 +247,19 @@ export const Flows = () => {
       roTubeMatRef.current.uniforms.uFlowActive.value = metrics.waterQuality !== 'EXCELLENT' ? 1.0 : 0.0;
     }
 
-    const updateParticles = (ref: React.RefObject<THREE.Points | null>, curve: THREE.Curve<THREE.Vector3>, progress: Float32Array) => {
+    const updateParticles = (ref: React.RefObject<THREE.Points | null>, pts: THREE.Vector3[], progress: Float32Array) => {
       if (!ref.current) return;
       const positions = ref.current.geometry.attributes.position.array as Float32Array;
       const step = (metrics.flowRate / 5.0) * 0.22 * delta;
+      const len = pts.length - 1;
 
       for (let i = 0; i < progress.length; i++) {
         if (metrics.flowRate > 0) {
           progress[i] += step;
           if (progress[i] > 1.0) progress[i] = 0;
         }
-        const pt = curve.getPointAt(progress[i]);
+        const idx = Math.min(len, Math.max(0, Math.floor(progress[i] * len)));
+        const pt = pts[idx];
         positions[i * 3] = pt.x;
         positions[i * 3 + 1] = pt.y;
         positions[i * 3 + 2] = pt.z;
@@ -253,24 +267,24 @@ export const Flows = () => {
       ref.current.geometry.attributes.position.needsUpdate = true;
     };
 
-    updateParticles(intakeParticlesRef, curves.intakeCurve, particleConfig.intake.progress);
-    updateParticles(filterParticlesRef, curves.filterCurve, particleConfig.filter.progress);
+    updateParticles(intakeParticlesRef, sampledCurves.intake, particleConfig.intake.progress);
+    updateParticles(filterParticlesRef, sampledCurves.filter, particleConfig.filter.progress);
 
     const isRecirculating = dualVerificationMode && (recirculationTriggered || (metrics.tds2 || 0) > 100 || (metrics.turbidity2 || 0) > 1.0);
 
     if (metrics.waterQuality === 'EXCELLENT') {
-      updateParticles(directParticlesRef, curves.directCurve, particleConfig.direct.progress);
+      updateParticles(directParticlesRef, sampledCurves.direct, particleConfig.direct.progress);
     } else {
-      updateParticles(pumpParticlesRef, curves.pumpCurve, particleConfig.pump.progress);
+      updateParticles(pumpParticlesRef, sampledCurves.pump, particleConfig.pump.progress);
       if (dualVerificationMode) {
         if (isRecirculating) {
-          updateParticles(recircParticlesRef, curves.recirculationCurve, particleConfig.recirc.progress);
+          updateParticles(recircParticlesRef, sampledCurves.recirculation, particleConfig.recirc.progress);
         } else {
-          updateParticles(directParticlesRef, curves.tank2DeliveryCurve, particleConfig.direct.progress);
+          updateParticles(directParticlesRef, sampledCurves.tank2Delivery, particleConfig.direct.progress);
         }
       } else {
         // Setup 1 Direct Single-Pass to Primary Clean Tank
-        updateParticles(directParticlesRef, curves.directCurve, particleConfig.direct.progress);
+        updateParticles(directParticlesRef, sampledCurves.direct, particleConfig.direct.progress);
       }
     }
 

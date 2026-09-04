@@ -136,13 +136,11 @@ export const Water = () => {
             ref={primaryMatRef}
             color="#0284c7"
             transparent
-            opacity={0.58}
-            roughness={0.02}
+            opacity={0.65}
+            roughness={0.05}
             metalness={0.05}
-            transmission={0.88}
-            thickness={0.12}
             clearcoat={1.0}
-            clearcoatRoughness={0.02}
+            clearcoatRoughness={0.05}
             depthWrite={false}
           />
         </mesh>
@@ -176,11 +174,11 @@ export const Water = () => {
             ref={secondaryMatRef}
             color="#0d9488"
             transparent
-            opacity={0.52}
+            opacity={0.60}
             roughness={0.05}
             metalness={0.05}
-            transmission={0.82}
-            thickness={0.08}
+            clearcoat={1.0}
+            clearcoatRoughness={0.05}
             depthWrite={false}
           />
         </mesh>
@@ -214,11 +212,9 @@ export const Water = () => {
             ref={sedMatRef}
             color="#0284c7"
             transparent
-            opacity={0.65}
+            opacity={0.70}
             roughness={0.08}
             metalness={0.05}
-            transmission={0.80}
-            thickness={0.12}
             clearcoat={1.0}
             depthWrite={false}
           />
@@ -240,7 +236,6 @@ export const Water = () => {
               opacity={0.62}
               roughness={0.02}
               metalness={0.05}
-              transmission={0.92}
               thickness={0.10}
               clearcoat={1.0}
               clearcoatRoughness={0.02}

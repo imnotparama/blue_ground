@@ -194,7 +194,7 @@ const HydroTurbineMotor = ({ pos }: { pos: [number, number, number] }) => {
       {/* Transparent Hydro-Vortex Viewport Window */}
       <mesh position={[0, 0, 0]}>
         <cylinderGeometry args={[0.088, 0.088, 0.14, 16, 1, true]} />
-        <meshPhysicalMaterial color="#38bdf8" transparent opacity={0.65} transmission={0.9} roughness={0.05} />
+        <meshPhysicalMaterial color="#38bdf8" transparent opacity={0.65} roughness={0.05} clearcoat={1.0} />
       </mesh>
 
       {/* Spinning Internal Turbine Impeller Runner */}
@@ -290,7 +290,7 @@ export const Pipes = () => {
               opacity={0.80}
               roughness={0.1}
               metalness={0.1}
-              transmission={0.5}
+              clearcoat={1.0}
             />
           </mesh>
         </group>

@@ -43,7 +43,7 @@ export const Scene = () => {
       {/* 3D R3F Canvas with high-DPI crispness and smooth performance */}
       <Canvas
         shadows="soft"
-        dpr={[1, 2]}
+        dpr={[1, 1.5]}
         gl={{
           antialias: true,
           alpha: true,
@@ -148,14 +148,15 @@ export const Scene = () => {
           </gridHelper>
         </group>
 
-        {/* Soft Contact Shadows on the floor */}
+        {/* Soft Contact Shadows on the floor (baked frames={1} for silky 60fps) */}
         <ContactShadows
           position={[0, -2.19, 0]}
           opacity={0.65}
           scale={15}
           blur={2.4}
           far={4.5}
-          resolution={512}
+          resolution={256}
+          frames={1}
           color="#000000"
         />
       </Canvas>

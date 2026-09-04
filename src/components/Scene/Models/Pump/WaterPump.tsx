@@ -120,8 +120,8 @@ export const WaterPump = () => {
         <meshPhysicalMaterial 
           transparent 
           opacity={0.35} 
-          transmission={0.9} 
           roughness={0.05} 
+          clearcoat={1.0}
           side={THREE.DoubleSide} 
         />
       </mesh>

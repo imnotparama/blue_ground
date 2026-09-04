@@ -161,8 +161,8 @@ export const SceneLighting = () => {
         position={[8, 12, 5]}
         color="#fffaf0"
         castShadow
-        shadow-mapSize-width={2048}
-        shadow-mapSize-height={2048}
+        shadow-mapSize-width={1024}
+        shadow-mapSize-height={1024}
         shadow-camera-far={25}
         shadow-camera-left={-6}
         shadow-camera-right={6}

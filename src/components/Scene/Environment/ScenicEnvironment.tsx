@@ -98,7 +98,7 @@ const JCBExcavator = ({ position, rotation = [0, 0.6, 0], scale = 0.85 }: { posi
             opacity={0.65}
             roughness={0.1}
             metalness={0.8}
-            transmission={0.4}
+            clearcoat={1.0}
           />
         </mesh>
         {/* Roof Spotlight */}

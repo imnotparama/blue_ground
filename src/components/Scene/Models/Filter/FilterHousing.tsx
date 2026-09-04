@@ -337,10 +337,10 @@ export const FilterHousing = () => {
                     <boxGeometry args={[0.035, 0.38, 0.005]} />
                     <meshPhysicalMaterial 
                       color="#a855f7" 
-                      transmission={0.9} 
                       transparent 
                       opacity={0.85} 
                       roughness={0.05} 
+                      clearcoat={1.0}
                     />
                   </mesh>
                   {metrics.uvStatus === 'ON' && (
@@ -436,11 +436,11 @@ export const FilterHousing = () => {
 
             {/* ════════════════════════════════════════════════════════════════
                 INTERACTIVE 3D FLOATING INSTRUMENT CARD UNDER EACH CARTRIDGE
-                (Visible in Overview Twin Mode; FilterView uses dedicated HUD)
+                (Shown ONLY in Filter View Mode, hidden in Normal Mode)
                 ════════════════════════════════════════════════════════════════ */}
-            {!filterView && (
+            {filterView && (
               <Html
-                position={[0, -0.48, 0.10]}
+                position={[0, 0.48, 0.10]}
                 center
                 distanceFactor={5.6}
                 style={{ pointerEvents: 'auto', userSelect: 'none' }}

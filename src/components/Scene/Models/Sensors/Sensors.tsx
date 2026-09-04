@@ -97,7 +97,7 @@ export const Sensors = () => {
         {/* Glass Bulb Tip */}
         <mesh position={[0, -0.03, 0]}>
           <sphereGeometry args={[0.011, 16, 16]} />
-          <meshPhysicalMaterial color="#38bdf8" transmission={0.9} transparent opacity={0.8} roughness={0.1} />
+          <meshPhysicalMaterial color="#38bdf8" transparent opacity={0.8} roughness={0.1} clearcoat={1.0} />
         </mesh>
       </InteractiveSensor>
 
@@ -176,7 +176,7 @@ export const Sensors = () => {
         {/* Hemispherical Translucent Optical Diffuser */}
         <mesh position={[0, 0.022, 0]}>
           <sphereGeometry args={[0.010, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2]} />
-          <meshPhysicalMaterial color="#ffffff" transmission={0.7} transparent opacity={0.9} />
+          <meshStandardMaterial color="#ffffff" transparent opacity={0.85} roughness={0.25} />
         </mesh>
       </InteractiveSensor>
 

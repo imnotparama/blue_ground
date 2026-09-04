@@ -300,6 +300,8 @@ export const WaterDropletTracker = () => {
       }
     : baseTheme;
 
+  if (!waterTrackMode) return null;
+
   return (
     <group>
       {/* ─── Glowing Holographic Water Packet ─── */}
@@ -319,7 +321,7 @@ export const WaterDropletTracker = () => {
             emissiveIntensity={1.4}
             roughness={0.08}
             metalness={0.2}
-            transmission={0.82}
+            clearcoat={1.0}
             transparent
             opacity={0.95}
           />
