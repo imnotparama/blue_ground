@@ -18,14 +18,14 @@ interface InteractiveSensorProps {
 const InteractiveSensor: React.FC<InteractiveSensorProps> = ({
   id, preset, position, rotation = [0, 0, 0], label, children,
 }) => {
-  const { setActiveHotspot, setCameraPreset, activeHotspot, tanksOnly } = useSystemState();
+  const { setActiveHotspot, setCameraPreset, activeHotspot, tanksOnly, filterView } = useSystemState();
   const [hovered, setHovered] = useState(false);
   const groupRef = useRef<THREE.Group>(null);
   const isActive = activeHotspot === id;
 
   useFrame((_, delta) => {
     if (!groupRef.current) return;
-    const isDimmed = tanksOnly || (activeHotspot !== null && activeHotspot !== id);
+    const isDimmed = tanksOnly || filterView || (activeHotspot !== null && activeHotspot !== id);
     const damp = 1.0 - Math.exp(-8 * delta);
     const targetScale = hovered ? 1.08 : 1.0;
     groupRef.current.scale.setScalar(THREE.MathUtils.lerp(groupRef.current.scale.x, targetScale, damp * 1.5));

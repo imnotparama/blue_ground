@@ -231,7 +231,8 @@ export const Pipes = () => {
     setCameraPreset, 
     tanksOnly, 
     dualVerificationMode,
-    hydroGeneratorMode 
+    hydroGeneratorMode,
+    filterView,
   } = useSystemState();
   const groupRef = useRef<THREE.Group>(null);
 
@@ -390,48 +391,75 @@ export const Pipes = () => {
       </group>
 
       {/* ══════════════════════════════════════════════════════════════════════
-          4. BAD WATER FILTRATION LOOP & RECIRCULATION RETURN MANIFOLD
-             Pump [0.05, 0.08] → RO Filtration Tank [-1.40, 0.38] → Tank 2 [-1.85, 0.15]
-             Recirculation Loop: Tank 2 Bottom [-1.70, -0.22] → Return Riser [-0.88] → RO Inlet Manifold [-0.88, 0.38]
+          4. FOUR-STAGE SMART FILTRATION TRAIN HYDRAULIC PIPING & RECIRCULATION
+             Pump [0.05, 0.08, 0] → Riser [0.05, 0.79, 0] → Back Conduit [0.05, 0.79, -0.62] 
+             → Stage 1 SediShield [-1.36, 0.79, -0.62] → Stage 2 ChemoBlock [-0.92] 
+             → Stage 3 RO Maxx [-0.48] → Stage 4 FinalGuard UV [-0.04]
+             → Clean Delivery Line → Secondary Tank & Clean Potable Reservoir
           ══════════════════════════════════════════════════════════════════════ */}
       <group>
-        {/* Pipe from Pump Outlet rising up to elbow */}
-        <PipeSeg pos={[0.05, 0.27, 0]} len={0.22} />
-        <PipeElbow pos={[0.05, 0.38, 0]} />
-        <TeflonRing pos={[0.05, 0.36, 0]} />
+        {/* Vertical riser pipe from Pump Discharge rising up to overhead rack height */}
+        <PipeSeg pos={[0.05, 0.44, 0]} len={0.58} />
+        <TeflonRing pos={[0.05, 0.16, 0]} />
+        <PipeClamp pos={[0.05, 0.50, 0]} rot={[0, 0, 0]} />
+        <PipeElbow pos={[0.05, 0.79, 0]} />
+        <TeflonRing pos={[0.05, 0.76, 0]} />
 
-        {/* Horizontal pipe spanning left from Chamber 1 to RO Filtration Tank Inlet Manifold */}
-        <PipeSeg pos={[-0.41, 0.38, 0]} len={0.92} rot={[0, 0, Math.PI / 2]} />
-        <TeflonRing pos={[-0.88, 0.38, 0]} rot={[0, 0, Math.PI / 2]} />
+        {/* Depth pipe running backwards from Z=0 to Z=-0.62 (connecting to back-mounted filtration rack) */}
+        <PipeSeg pos={[0.05, 0.79, -0.31]} len={0.62} rot={[Math.PI / 2, 0, 0]} mat="gray" />
+        <PipeElbow pos={[0.05, 0.79, -0.62]} mat="gray" />
 
-        {/* ─── SETUP 1: Direct Single-Pass Piping (RO -> Primary Clean Tank) ─── */}
+        {/* Overhead manifold pipe running left across back rack to Stage 1 (SediShield) Inlet */}
+        <PipeSeg pos={[-0.655, 0.79, -0.62]} len={1.41} rot={[0, 0, Math.PI / 2]} mat="gray" />
+        <TeflonRing pos={[-1.30, 0.79, -0.62]} rot={[0, 0, Math.PI / 2]} />
+        
+        {/* Drop elbow into Stage 1 SediShield Top Manifold Cap */}
+        <PipeElbow pos={[-1.36, 0.79, -0.62]} />
+        <PipeSeg pos={[-1.36, 0.76, -0.62]} len={0.06} />
+
+        {/* ─── STAGE 4 (FINALGUARD UV) DISCHARGE LINE ─── */}
+        {/* Vertical riser out of Stage 4 FinalGuard UV */}
+        <PipeSeg pos={[-0.04, 0.76, -0.62]} len={0.06} />
+        <PipeElbow pos={[-0.04, 0.79, -0.62]} />
+
+        {/* Pipe running forward from Stage 4 back-rack (Z=-0.62) to front vessel plane (Z=0) */}
+        <PipeSeg pos={[-0.04, 0.79, -0.31]} len={0.62} rot={[Math.PI / 2, 0, 0]} />
+        <PipeElbow pos={[-0.04, 0.79, 0]} />
+        <TeflonRing pos={[-0.04, 0.79, -0.05]} rot={[Math.PI / 2, 0, 0]} />
+
+        {/* ─── SETUP 1: Direct Pure Water Feed into Secondary Top Tank & Potable Reservoir ─── */}
         {!dualVerificationMode ? (
           <group>
-            <PipeSeg pos={[-1.85, 0.38, 0]} len={0.10} rot={[0, 0, Math.PI / 2]} />
-            <TeflonRing pos={[-1.85, 0.38, 0]} rot={[0, 0, Math.PI / 2]} />
-            <PipeElbow pos={[-1.95, 0.38, 0]} />
-            <PipeSeg pos={[-1.95, 0.10, 0]} len={0.56} />
-            <PipeElbow pos={[-1.95, -0.20, 0]} />
-            <PipeSeg pos={[-1.60, -0.20, 0]} len={0.70} rot={[0, 0, Math.PI / 2]} />
+            {/* Horizontal feed into Secondary Top Compartment */}
+            <PipeSeg pos={[0.20, 0.79, 0]} len={0.48} rot={[0, 0, Math.PI / 2]} />
+            <SolenoidValve pos={[0.25, 0.79, 0]} rot={[0, 0, Math.PI / 2]} open={true} />
+            <PipeElbow pos={[0.44, 0.79, 0]} />
+            <PipeSeg pos={[0.44, 0.65, 0]} len={0.28} />
+
+            {/* Clean storage drop pipe cascading into Primary 250L Potable Reservoir */}
+            {!filterView && (
+              <>
+                <PipeSeg pos={[-0.60, 0.79, 0]} len={0.50} rot={[0, 0, Math.PI / 2]} />
+                <PipeElbow pos={[-0.85, 0.79, 0]} />
+                <PipeSeg pos={[-0.85, 0.35, 0]} len={0.88} />
+              </>
+            )}
           </group>
         ) : (
-          /* ─── SETUP 2: Dual-Stage Tank 2 & Recirculation Loop ─── */
+          /* ─── SETUP 2: Dual-Stage Tank 2 & Closed-Loop Recirculation ─── */
           <group>
-            {/* 3-Way T-Junction Manifold at RO Filtration Tank Inlet joining Pump line + Recirculation Return */}
-            <PipeTee pos={[-0.88, 0.38, 0]} rot={[0, 0, -Math.PI / 2]} />
+            {/* Feed line running left from Stage 4 into Tank 2 Inlet */}
+            <PipeSeg pos={[-0.945, 0.79, 0]} len={1.81} rot={[0, 0, Math.PI / 2]} />
+            <TeflonRing pos={[-1.85, 0.79, 0]} rot={[0, 0, Math.PI / 2]} />
+            <PipeElbow pos={[-1.85, 0.79, 0]} />
+            <PipeSeg pos={[-1.85, 0.48, 0]} len={0.62} />
 
-            {/* Pipe from Filtration Tank Outlet dropping into Post-Filtration Tank 2 Inlet */}
-            <PipeSeg pos={[-1.85, 0.38, 0]} len={0.10} rot={[0, 0, Math.PI / 2]} />
-            <TeflonRing pos={[-1.85, 0.38, 0]} rot={[0, 0, Math.PI / 2]} />
-            <PipeElbow pos={[-1.85, 0.38, 0]} />
-            <PipeSeg pos={[-1.85, 0.30, 0]} len={0.16} />
-
-            {/* Tank 2 Clean Delivery Line (Path A: Post-RO Confirmed Pure -> Primary Clean Tank) */}
+            {/* Tank 2 Clean Delivery Line (Path A: Confirmed Potable Pure -> Primary Clean Tank) */}
             <PipeSeg pos={[-2.19, 0.03, 0]} len={0.16} rot={[0, 0, Math.PI / 2]} />
             <PipeElbow pos={[-2.27, 0.03, 0]} />
             <PipeSeg pos={[-2.27, -0.25, 0]} len={0.56} />
 
-            {/* Tank 2 Closed-Loop Recirculation System (Path B: Sub-Standard -> Return to RO Filtration Inlet) */}
+            {/* Tank 2 Closed-Loop Recirculation System (Path B: Sub-Standard -> Return to Stage 1 SediShield Inlet) */}
             <group
               onClick={(e) => {
                 e.stopPropagation();
@@ -461,12 +489,14 @@ export const Pipes = () => {
               {/* Horizontal Recirculation Return Line Spanning Right to Filter Riser */}
               <PipeSeg pos={[-1.29, -0.22, 0]} len={0.82} rot={[0, 0, Math.PI / 2]} mat="gray" />
               
-              {/* Elbow turning upward into the RO filter inlet */}
+              {/* Elbow turning upward into the filtration train inlet */}
               <PipeElbow pos={[-0.88, -0.22, 0]} mat="gray" />
               
-              {/* Vertical Recirculation Return Riser Pipe feeding DIRECTLY into RO Filter Inlet Manifold */}
-              <PipeSeg pos={[-0.88, 0.08, 0]} len={0.60} mat="gray" />
-              <TeflonRing pos={[-0.88, 0.35, 0]} />
+              {/* Vertical Recirculation Return Riser Pipe feeding DIRECTLY into filtration train */}
+              <PipeSeg pos={[-0.88, 0.28, 0]} len={1.00} mat="gray" />
+              <TeflonRing pos={[-0.88, 0.76, 0]} />
+              <PipeElbow pos={[-0.88, 0.79, 0]} mat="gray" />
+              <PipeSeg pos={[-0.88, 0.79, -0.31]} len={0.62} rot={[Math.PI / 2, 0, 0]} mat="gray" />
             </group>
           </group>
         )}

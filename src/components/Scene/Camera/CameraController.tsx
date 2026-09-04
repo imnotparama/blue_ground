@@ -70,12 +70,12 @@ export const CAMERA_PRESETS: Record<CameraPreset, { position: [number, number, n
     target: [1.90, 0.05, 0],
   },
   FILTER_HOUSING: {
-    position: [-1.40, 0.65, 1.2],
-    target: [-1.40, 0.38, 0],
+    position: [-0.70, 0.60, 1.15],
+    target: [-0.70, 0.40, -0.62],
   },
   INSIDE_FILTER: {
-    position: [-1.40, 0.50, 0.8],
-    target: [-1.40, 0.38, 0],
+    position: [-0.70, 0.50, 0.45],
+    target: [-0.70, 0.45, -0.62],
   },
   PRIMARY_TANK: {
     position: [-0.7, -0.3, 3.2],
@@ -132,6 +132,26 @@ export const CAMERA_PRESETS: Record<CameraPreset, { position: [number, number, n
   WATER_STAGE_6: {
     position: [-0.70, -0.40, 2.6],
     target: [-0.70, -0.55, 0],
+  },
+  FILTER_VIEW: {
+    position: [-0.70, 0.52, 1.35],
+    target: [-0.70, 0.35, -0.62],
+  },
+  FILTER_STAGE_1: {
+    position: [-1.36, 0.48, 0.55],
+    target: [-1.36, 0.36, -0.62],
+  },
+  FILTER_STAGE_2: {
+    position: [-0.92, 0.48, 0.55],
+    target: [-0.92, 0.36, -0.62],
+  },
+  FILTER_STAGE_3: {
+    position: [-0.48, 0.48, 0.55],
+    target: [-0.48, 0.36, -0.62],
+  },
+  FILTER_STAGE_4: {
+    position: [-0.04, 0.48, 0.55],
+    target: [-0.04, 0.36, -0.62],
   },
 };
 

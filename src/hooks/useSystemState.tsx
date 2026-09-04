@@ -47,7 +47,12 @@ export type CameraPreset =
   | 'WATER_STAGE_3'
   | 'WATER_STAGE_4'
   | 'WATER_STAGE_5'
-  | 'WATER_STAGE_6';
+  | 'WATER_STAGE_6'
+  | 'FILTER_VIEW'
+  | 'FILTER_STAGE_1'
+  | 'FILTER_STAGE_2'
+  | 'FILTER_STAGE_3'
+  | 'FILTER_STAGE_4';
 
 // Sensor and operational metrics structure
 export interface SystemMetrics {
@@ -154,6 +159,11 @@ interface SystemStateContextType {
   prevWaterStage: () => void;
   autoPlayWater: boolean;
   setAutoPlayWater: (val: boolean) => void;
+  // 4-Stage Filter Focus View
+  filterView: boolean;
+  setFilterView: (val: boolean) => void;
+  filterStageFocus: number; // 0 = all 4, 1 = SediShield, 2 = ChemoBlock, 3 = RO Maxx, 4 = FinalGuard UV
+  setFilterStageFocus: (stage: number) => void;
 }
 
 const SystemStateContext = createContext<SystemStateContextType | undefined>(undefined);
@@ -182,7 +192,7 @@ const defaultMetrics: SystemMetrics = {
   filterHealth: 92,
   stage1Health: 92,
   stage2Health: 85,
-  stage3Health: 79,
+  stage3Health: 88,
   stage4Health: 95,
   valveState: 'CLEAN_OUTLET',
   uvStatus: 'ON',
@@ -236,8 +246,8 @@ const presentationSteps: PresentationStep[] = [
   },
   {
     target: 'FILTER_HOUSING',
-    title: 'Phase 5: 4-Stage RO Multi-Barrier Purifier',
-    description: 'When water quality is sub-standard, the filtration pump pushes water through the multi-stage RO filter (PP sediment, CTO carbon, RO membrane, post-mineralizer) with real-time pressure dial feedback.',
+    title: 'Phase 5: 4-Stage Smart Filtration Train',
+    description: 'Four-stage defense against borewell and mining water: Stage 1 SediShield blocks sand, silt and rust; Stage 2 ChemoBlock cuts chlorine, odor and chemicals; Stage 3 RO Maxx strips heavy metals and drops TDS by 96%; Stage 4 FinalGuard UV kills microbes before dispense into clean storage.',
     duration: 6500,
   },
   {
@@ -540,6 +550,10 @@ export const SystemStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const [waterTrackStage, setWaterTrackStageState] = useState(1);
   const [autoPlayWater, setAutoPlayWater] = useState(false);
 
+  // 4-Stage Filter Focus View
+  const [filterView, setFilterViewState] = useState(false);
+  const [filterStageFocus, setFilterStageFocusState] = useState(0);
+
   // Sync Hydro-Electric Generation Telemetry Watts
   useEffect(() => {
     setMetrics(prev => ({
@@ -547,6 +561,30 @@ export const SystemStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
       hydroWatts: hydroGeneratorMode ? Math.round(Math.max(prev.flowRate, 3.5) * 5.8 * 10) / 10 : 0,
     }));
   }, [hydroGeneratorMode]);
+
+  const setFilterStageFocus = (stage: number) => {
+    const clamped = Math.max(0, Math.min(4, stage));
+    setFilterStageFocusState(clamped);
+    if (clamped === 0) {
+      setCameraPreset('FILTER_VIEW');
+    } else {
+      setCameraPreset(`FILTER_STAGE_${clamped}` as CameraPreset);
+    }
+  };
+
+  const setFilterView = (val: boolean) => {
+    setFilterViewState(val);
+    if (val) {
+      // Exit competing focus modes
+      setWaterTrackModeState(false);
+      setAutoPlayWater(false);
+      setFilterStageFocusState(0);
+      setCameraPreset('FILTER_VIEW');
+    } else {
+      setFilterStageFocusState(0);
+      setCameraPreset('OVERVIEW');
+    }
+  };
 
   const setWaterTrackStage = (stage: number) => {
     const clamped = Math.max(1, Math.min(6, stage));
@@ -557,6 +595,7 @@ export const SystemStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const setWaterTrackMode = (val: boolean) => {
     setWaterTrackModeState(val);
     if (val) {
+      setFilterViewState(false);
       setWaterTrackStage(1);
       setCameraPreset('WATER_STAGE_1');
     } else {
@@ -622,6 +661,7 @@ export const SystemStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
         setWaterTrackModeState(prev => {
           const next = !prev;
           if (next) {
+            setFilterViewState(false);
             setWaterTrackStageState(1);
             setCameraPreset('WATER_STAGE_1');
           } else {
@@ -629,6 +669,31 @@ export const SystemStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
             setCameraPreset('OVERVIEW');
           }
           return next;
+        });
+      }
+      if (e.key === 'f' || e.key === 'F') {
+        setFilterViewState(prev => {
+          const next = !prev;
+          if (next) {
+            setWaterTrackModeState(false);
+            setAutoPlayWater(false);
+            setFilterStageFocusState(0);
+            setCameraPreset('FILTER_VIEW');
+          } else {
+            setFilterStageFocusState(0);
+            setCameraPreset('OVERVIEW');
+          }
+          return next;
+        });
+      }
+      if (e.key === 'Escape') {
+        setFilterViewState(prev => {
+          if (prev) {
+            setFilterStageFocusState(0);
+            setCameraPreset('OVERVIEW');
+            return false;
+          }
+          return prev;
         });
       }
     };
@@ -700,6 +765,10 @@ export const SystemStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
         prevWaterStage,
         autoPlayWater,
         setAutoPlayWater,
+        filterView,
+        setFilterView,
+        filterStageFocus,
+        setFilterStageFocus,
       }}
     >
       {children}

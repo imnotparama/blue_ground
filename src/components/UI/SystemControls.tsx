@@ -16,6 +16,7 @@ import {
   Droplets,
   Repeat,
   Zap,
+  Filter,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -51,6 +52,8 @@ export const SystemControls = () => {
     setHydroGeneratorMode,
     antigravityMode,
     setAntigravityMode,
+    filterView,
+    setFilterView,
   } = useSystemState();
 
   if (!landingVisited || demoRunning) return null; // Hide controls during landing or guided tour
@@ -394,6 +397,19 @@ export const SystemControls = () => {
             >
               <Droplets className={`w-3 h-3 ${waterTrackMode ? 'text-cyan-400 animate-bounce-subtle' : 'text-zinc-400'}`} />
               {waterTrackMode ? 'Water Flow Tour: ACTIVE (W)' : 'Water Flow Journey (W)'}
+            </button>
+
+            {/* 4-Stage Filter Rack Focus Mode */}
+            <button
+              onClick={() => setFilterView(!filterView)}
+              className={`col-span-2 flex items-center justify-center gap-1.5 py-1.5 rounded-lg border text-[9px] font-mono font-bold tracking-wider transition-all cursor-pointer ${
+                filterView
+                  ? 'bg-gradient-to-r from-cyan-500/25 to-emerald-500/25 text-cyan-200 border-cyan-400/60 shadow-[0_0_12px_rgba(6,182,212,0.25)] ring-1 ring-cyan-400'
+                  : 'bg-white/2 border-white/5 text-zinc-400 hover:bg-white/5 hover:text-white'
+              }`}
+            >
+              <Filter className={`w-3 h-3 ${filterView ? 'text-cyan-400 animate-pulse' : 'text-zinc-400'}`} />
+              {filterView ? '4-Stage Filter View: ACTIVE (F)' : '4-Stage Filter View (F)'}
             </button>
           </div>
         </div>

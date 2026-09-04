@@ -6,7 +6,7 @@ import { useSystemState } from '@/hooks/useSystemState';
 import * as THREE from 'three';
 
 export const SupportRack = () => {
-  const { activeHotspot, tanksOnly } = useSystemState();
+  const { activeHotspot, tanksOnly, filterView } = useSystemState();
   const rackRef = useRef<THREE.Group>(null);
 
   const materialsRef = useRef<THREE.MeshStandardMaterial[]>([]);
@@ -23,7 +23,7 @@ export const SupportRack = () => {
   }, []);
 
   useFrame((_, delta) => {
-    const isDimmed = tanksOnly || activeHotspot !== null;
+    const isDimmed = tanksOnly || filterView || activeHotspot !== null;
     const targetOpacity = isDimmed ? 0.08 : 1.0;
     const damp = 1.0 - Math.exp(-6 * delta);
     

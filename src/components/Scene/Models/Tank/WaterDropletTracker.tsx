@@ -54,15 +54,15 @@ const STAGE_THEMES = {
     lightIntensity: 2.5,
   },
   5: {
-    color: '#14b8a6',
-    emissive: '#0d9488',
-    ringColor: '#2dd4bf',
-    trailColor: '#14b8a6',
-    particleSize: 0.030,
-    title: '4-Stage RO Purifier',
-    metric: '0.0001μm Multi-Barrier',
+    color: '#06b6d4',
+    emissive: '#0284c7',
+    ringColor: '#38bdf8',
+    trailColor: '#0ea5e9',
+    particleSize: 0.032,
+    title: '4-Stage Smart Train (SediShield ➔ ChemoBlock ➔ RO Maxx ➔ FinalGuard UV)',
+    metric: 'TDS: 680 → 28 ppm (-96%) • Sterile UV-C Active',
     badge: 'STAGE 5/6',
-    lightIntensity: 2.6,
+    lightIntensity: 2.8,
   },
   6: {
     color: '#38bdf8',
@@ -70,7 +70,7 @@ const STAGE_THEMES = {
     ringColor: '#34d399',
     trailColor: '#38bdf8',
     particleSize: 0.028,
-    title: 'Clean Storage & UV-C',
+    title: 'Clean Storage & Dispense',
     metric: '99.99% Sterile Drinking Water',
     badge: 'STAGE 6/6',
     lightIntensity: 2.8,
@@ -152,25 +152,40 @@ export const WaterDropletTracker = () => {
       new THREE.Vector3(0.05, 0.08, 0),
     ], false, 'catmullrom', 0.05);
 
-    // Stage 5: High-Pressure Pump through 4-Stage RO Multi-Barrier -> Tank 2
+    // Stage 5: High-Pressure Pump through 4-Stage Smart Filtration Train -> Clean Outlet
     const stage5 = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(0.05, 0.08, 0),
-      new THREE.Vector3(0.05, 0.38, 0),
-      new THREE.Vector3(-0.45, 0.38, 0),
-      new THREE.Vector3(-0.95, 0.38, 0),
-      new THREE.Vector3(-1.85, 0.38, 0),
-      new THREE.Vector3(-1.85, 0.15, 0),
+      new THREE.Vector3(0.05, 0.08, 0),        // Pump outlet
+      new THREE.Vector3(0.05, 0.45, 0),        // Riser
+      new THREE.Vector3(0.05, 0.79, 0),        // Overhead elbow
+      new THREE.Vector3(0.05, 0.79, -0.62),    // Turn to back rack
+      new THREE.Vector3(-0.65, 0.79, -0.62),   // Rack conduit
+      new THREE.Vector3(-1.36, 0.79, -0.62),   // Stage 1 SediShield top inlet
+      new THREE.Vector3(-1.36, 0.45, -0.62),   // Stage 1 SediShield core (silt/rust trapped)
+      new THREE.Vector3(-1.14, 0.79, -0.62),   // Thin glowing jumper to Stage 2
+      new THREE.Vector3(-0.92, 0.79, -0.62),   // Stage 2 ChemoBlock top inlet
+      new THREE.Vector3(-0.92, 0.45, -0.62),   // Stage 2 ChemoBlock core (chemicals stripped)
+      new THREE.Vector3(-0.70, 0.79, -0.62),   // Thin glowing jumper to Stage 3
+      new THREE.Vector3(-0.48, 0.79, -0.62),   // Stage 3 RO Maxx top inlet
+      new THREE.Vector3(-0.48, 0.45, -0.62),   // Stage 3 RO Maxx membrane core (TDS dropped)
+      new THREE.Vector3(-0.26, 0.79, -0.62),   // Thin glowing jumper to Stage 4
+      new THREE.Vector3(-0.04, 0.79, -0.62),   // Stage 4 FinalGuard UV top inlet
+      new THREE.Vector3(-0.04, 0.45, -0.62),   // Stage 4 UV core (germicidal sterilization)
+      new THREE.Vector3(-0.04, 0.79, -0.62),   // Stage 4 top discharge
+      new THREE.Vector3(-0.04, 0.79, 0),       // Return forward to front plane
+      new THREE.Vector3(0.20, 0.79, 0),        // Feed to secondary compartment
+      new THREE.Vector3(0.44, 0.65, 0),        // Secondary tank clean inflow
     ], false, 'catmullrom', 0.05);
 
-    // Stage 6 Setup 1 Direct: RO Outlet -> Primary 250L Reservoir
+    // Stage 6 Setup 1 Direct: Secondary Tank -> Primary 250L Potable Reservoir
     const stage6Direct = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(-1.85, 0.38, 0),
-      new THREE.Vector3(-1.95, 0.38, 0),
-      new THREE.Vector3(-1.95, 0.10, 0),
-      new THREE.Vector3(-1.60, -0.20, 0),
-      new THREE.Vector3(-1.10, -0.45, 0),
-      new THREE.Vector3(-0.70, -0.55, 0),
-      new THREE.Vector3(-0.40, -0.60, 0),
+      new THREE.Vector3(0.44, 0.65, 0),
+      new THREE.Vector3(0.20, 0.55, 0),
+      new THREE.Vector3(-0.10, 0.35, 0),
+      new THREE.Vector3(-0.45, 0.0, 0),
+      new THREE.Vector3(-0.70, -0.35, 0),
+      new THREE.Vector3(-1.10, -0.65, 0),
+      new THREE.Vector3(-2.48, -1.45, 0),
+      new THREE.Vector3(-2.85, -1.72, 0),
     ], false, 'catmullrom', 0.05);
 
     // Stage 6 Setup 2 Path A (Potable Pass): Tank 2 -> Clean 250L Reservoir + UV-C

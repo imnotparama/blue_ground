@@ -22,6 +22,7 @@ import {
   FlaskConical,
   Sparkles,
   Zap,
+  Filter,
 } from 'lucide-react';
 
 export const TopBar = () => {
@@ -52,6 +53,8 @@ export const TopBar = () => {
     setHydroGeneratorMode,
     antigravityMode,
     setAntigravityMode,
+    filterView,
+    setFilterView,
   } = useSystemState();
 
   const runSim1 = () => {
@@ -133,6 +136,21 @@ export const TopBar = () => {
           <Sparkles className={`w-3.5 h-3.5 ${antigravityMode ? 'text-cyan-300 animate-spin-slow' : 'text-zinc-400'}`} />
           <span className="hidden md:inline font-semibold">{antigravityMode ? 'Antigravity: ON' : 'Antigravity'}</span>
           <span className={`text-[10px] px-1 py-0.2 rounded font-bold ${antigravityMode ? 'bg-cyan-950 text-cyan-300 border border-cyan-500/40' : 'bg-zinc-800 border border-zinc-700 text-zinc-400'}`}>A</span>
+        </button>
+
+        {/* Toggle 4-Stage Filter View Button */}
+        <button
+          onClick={() => setFilterView(!filterView)}
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-full border transition-all text-xs font-mono tracking-wide cursor-pointer ${
+            filterView
+              ? 'bg-gradient-to-r from-cyan-500/25 to-emerald-500/25 border-cyan-400 text-cyan-200 shadow-[0_0_18px_rgba(6,182,212,0.4)] ring-1 ring-cyan-400'
+              : 'bg-zinc-900/80 border-zinc-700 text-zinc-400 hover:text-white hover:border-cyan-500/40'
+          }`}
+          title="Toggle 4-Stage Smart Filtration Rack View (Hotkey: F)"
+        >
+          <Filter className={`w-3.5 h-3.5 ${filterView ? 'text-cyan-400 animate-pulse' : 'text-zinc-400'}`} />
+          <span className="hidden sm:inline font-semibold">{filterView ? 'Filter View: ON' : 'Filter View'}</span>
+          <span className={`text-[10px] px-1 py-0.2 rounded font-bold ${filterView ? 'bg-cyan-950 text-cyan-300 border border-cyan-500/40' : 'bg-zinc-800 border border-zinc-700 text-zinc-400'}`}>F</span>
         </button>
 
         {/* Toggle Water Flow Focus View Button */}

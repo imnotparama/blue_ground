@@ -98,14 +98,28 @@ export const Flows = () => {
       new THREE.Vector3(0.70, -0.25, 0),
     ], false, 'catmullrom', 0.02);
 
-    // D. Pump [0.05, 0.08] -> RO Filtration Tank [-1.40, 0.38] -> Tank 2 Inlet [-1.85, 0.15]
+    // D. Four-Stage Smart Filtration Train: Pump -> SediShield -> ChemoBlock -> RO Maxx -> FinalGuard UV -> Secondary Tank
     const pumpCurve = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(0.05, 0.08, 0),
-      new THREE.Vector3(0.05, 0.38, 0),
-      new THREE.Vector3(-0.45, 0.38, 0),
-      new THREE.Vector3(-0.95, 0.38, 0),
-      new THREE.Vector3(-1.85, 0.38, 0),
-      new THREE.Vector3(-1.85, 0.15, 0),
+      new THREE.Vector3(0.05, 0.08, 0),        // Pump outlet
+      new THREE.Vector3(0.05, 0.45, 0),        // Riser
+      new THREE.Vector3(0.05, 0.79, 0),        // Overhead elbow
+      new THREE.Vector3(0.05, 0.79, -0.62),    // Turn to back rack
+      new THREE.Vector3(-0.65, 0.79, -0.62),   // Top rack conduit
+      new THREE.Vector3(-1.36, 0.79, -0.62),   // Stage 1 SediShield top inlet
+      new THREE.Vector3(-1.36, 0.45, -0.62),   // Stage 1 SediShield core (silt/rust blocked)
+      new THREE.Vector3(-1.14, 0.79, -0.62),   // Thin glowing jumper to Stage 2
+      new THREE.Vector3(-0.92, 0.79, -0.62),   // Stage 2 ChemoBlock top inlet
+      new THREE.Vector3(-0.92, 0.45, -0.62),   // Stage 2 ChemoBlock core (chemicals stripped)
+      new THREE.Vector3(-0.70, 0.79, -0.62),   // Thin glowing jumper to Stage 3
+      new THREE.Vector3(-0.48, 0.79, -0.62),   // Stage 3 RO Maxx top inlet
+      new THREE.Vector3(-0.48, 0.45, -0.62),   // Stage 3 RO Maxx membrane core (TDS dropped)
+      new THREE.Vector3(-0.26, 0.79, -0.62),   // Thin glowing jumper to Stage 4
+      new THREE.Vector3(-0.04, 0.79, -0.62),   // Stage 4 FinalGuard UV top inlet
+      new THREE.Vector3(-0.04, 0.45, -0.62),   // Stage 4 UV sterilization core (microbes killed)
+      new THREE.Vector3(-0.04, 0.79, -0.62),   // Stage 4 top discharge
+      new THREE.Vector3(-0.04, 0.79, 0),       // Forward return to front plane
+      new THREE.Vector3(0.20, 0.79, 0),        // Feed to secondary compartment
+      new THREE.Vector3(0.44, 0.65, 0),        // Secondary tank clean inflow
     ], false, 'catmullrom', 0.02);
 
     // E. Tank 2 to Primary Clean Reservoir (Good Post-RO Water)
@@ -115,18 +129,21 @@ export const Flows = () => {
       new THREE.Vector3(-2.27, -0.45, 0),
     ], false, 'catmullrom', 0.02);
 
-    // F. Tank 2 Recirculation Return Loop (Sub-Standard Post-RO Water -> Riser -> RO Filter Inlet -> Filter Media)
+    // F. Tank 2 Recirculation Return Loop (Sub-Standard -> Return to Stage 1 SediShield Inlet)
     const recirculationCurve = new THREE.CatmullRomCurve3([
       new THREE.Vector3(-1.70, -0.11, 0),
       new THREE.Vector3(-1.70, -0.22, 0),
       new THREE.Vector3(-1.25, -0.22, 0),
       new THREE.Vector3(-0.88, -0.22, 0),
-      new THREE.Vector3(-0.88, 0.10, 0),
       new THREE.Vector3(-0.88, 0.38, 0),
-      new THREE.Vector3(-1.15, 0.38, 0),
-      new THREE.Vector3(-1.40, 0.38, 0),
-      new THREE.Vector3(-1.85, 0.38, 0),
-      new THREE.Vector3(-1.85, 0.15, 0),
+      new THREE.Vector3(-0.88, 0.79, 0),
+      new THREE.Vector3(-0.88, 0.79, -0.62),
+      new THREE.Vector3(-1.36, 0.79, -0.62),
+      new THREE.Vector3(-1.36, 0.45, -0.62),
+      new THREE.Vector3(-0.92, 0.45, -0.62),
+      new THREE.Vector3(-0.48, 0.45, -0.62),
+      new THREE.Vector3(-0.04, 0.45, -0.62),
+      new THREE.Vector3(-0.04, 0.79, 0),
     ], false, 'catmullrom', 0.02);
 
     return { intakeCurve, filterCurve, directCurve, pumpCurve, tank2DeliveryCurve, recirculationCurve };
@@ -338,7 +355,7 @@ export const Flows = () => {
       </mesh>
 
       <mesh>
-        <tubeGeometry args={[curves.pumpCurve, 30, 0.016, 8, false]} />
+        <tubeGeometry args={[curves.pumpCurve, 64, 0.016, 8, false]} />
         <primitive object={roShaderMat} ref={roTubeMatRef} attach="material" />
       </mesh>
 

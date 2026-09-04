@@ -6,7 +6,7 @@ import { useSystemState } from '@/hooks/useSystemState';
 import * as THREE from 'three';
 
 export const BatteryUnit = () => {
-  const { exploded, metrics, activeHotspot, setActiveHotspot, setCameraPreset, tanksOnly } = useSystemState();
+  const { exploded, metrics, activeHotspot, setActiveHotspot, setCameraPreset, tanksOnly, filterView } = useSystemState();
   const groupRef = useRef<THREE.Group>(null);
   const [hovered, setHovered] = useState(false);
   const ledRefs = useRef<(THREE.MeshStandardMaterial | null)[]>([]);
@@ -54,7 +54,7 @@ export const BatteryUnit = () => {
       }
     });
 
-    const isDimmed = tanksOnly || (activeHotspot !== null && activeHotspot !== 'battery' && activeHotspot !== 'battery_pack');
+    const isDimmed = tanksOnly || filterView || (activeHotspot !== null && activeHotspot !== 'battery' && activeHotspot !== 'battery_pack');
     const targetOpacity = isDimmed ? 0.08 : 1.0;
 
     for (let i = 0; i < materialsRef.current.length; i++) {

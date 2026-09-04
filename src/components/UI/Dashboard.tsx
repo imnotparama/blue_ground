@@ -17,6 +17,7 @@ import {
   BatteryCharging,
   Cpu,
   Radio,
+  Layers,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { SensorsAndTools } from './SensorsAndTools';
@@ -312,48 +313,104 @@ export const Dashboard = () => {
             {/* ======================================================== */}
             {/* D. 4-STAGE FILTER CARTRIDGE HEALTH BARS */}
             {/* ======================================================== */}
+            {/* ======================================================== */}
+            {/* D. FOUR-STAGE SMART FILTRATION TRAIN HEALTH */}
+            {/* ======================================================== */}
             <div className="flex flex-col gap-1.5">
               <h2 className="text-[9px] font-bold text-zinc-400 tracking-wider uppercase font-mono flex items-center justify-between border-b border-white/5 pb-1">
-                <span>FILTER CARTRIDGE HEALTH</span>
-                <span className="text-[8px] font-mono text-zinc-400">4-STAGE RACK</span>
+                <span className="flex items-center gap-1.5 text-cyan-400 font-bold">
+                  <Layers className="w-3.5 h-3.5 text-cyan-400" />
+                  4-STAGE SMART FILTRATION TRAIN
+                </span>
+                <span className="text-[8px] font-mono text-emerald-400 bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-500/30">
+                  DEFENSE ACTIVE
+                </span>
               </h2>
+
               <div className="grid grid-cols-2 gap-2 bg-white/2 p-2.5 rounded-xl border border-white/5 text-[9px] font-mono">
-                <div>
-                  <div className="flex justify-between mb-0.5">
-                    <span className="text-zinc-400">Stage 1: Sediment</span>
-                    <strong className="text-sky-300">{metrics.stage1Health || 92}%</strong>
+                {/* Stage 1: SediShield */}
+                <div className="flex flex-col gap-1 p-1.5 rounded-lg bg-black/40 border border-amber-500/20">
+                  <div className="flex items-center justify-between">
+                    <span className="flex items-center gap-1 font-bold text-amber-300">
+                      {/* Dust Cloud Icon */}
+                      <svg className="w-3 h-3 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
+                        <path d="M8 19h1" />
+                        <path d="M12 19h2" />
+                      </svg>
+                      SediShield
+                    </span>
+                    <strong className="text-amber-400">{metrics.stage1Health || 92}%</strong>
                   </div>
-                  <div className="w-full h-1 bg-zinc-800 rounded-full overflow-hidden">
-                    <div className="h-full bg-sky-400" style={{ width: `${metrics.stage1Health || 92}%` }} />
+                  <div className="text-[7.5px] text-zinc-400 font-sans leading-tight">
+                    Blocks dirt, silt and rust
+                  </div>
+                  <div className="w-full h-1 bg-zinc-800 rounded-full overflow-hidden mt-0.5">
+                    <div className="h-full bg-amber-400" style={{ width: `${metrics.stage1Health || 92}%` }} />
                   </div>
                 </div>
 
-                <div>
-                  <div className="flex justify-between mb-0.5">
-                    <span className="text-zinc-400">Stage 2: Chemo</span>
-                    <strong className="text-emerald-300">{metrics.stage2Health || 85}%</strong>
+                {/* Stage 2: ChemoBlock */}
+                <div className="flex flex-col gap-1 p-1.5 rounded-lg bg-black/40 border border-emerald-500/20">
+                  <div className="flex items-center justify-between">
+                    <span className="flex items-center gap-1 font-bold text-emerald-300">
+                      {/* Chemical / Drop Icon */}
+                      <svg className="w-3 h-3 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M10 2v7.31M14 2v7.31" />
+                        <path d="M8.5 2h7" />
+                        <path d="M14 9.3a6.5 6.5 0 1 1-4 0" />
+                        <circle cx="12" cy="15" r="1.5" fill="currentColor" />
+                      </svg>
+                      ChemoBlock
+                    </span>
+                    <strong className="text-emerald-400">{metrics.stage2Health || 85}%</strong>
                   </div>
-                  <div className="w-full h-1 bg-zinc-800 rounded-full overflow-hidden">
+                  <div className="text-[7.5px] text-zinc-400 font-sans leading-tight">
+                    Cuts chlorine, odour & chemicals
+                  </div>
+                  <div className="w-full h-1 bg-zinc-800 rounded-full overflow-hidden mt-0.5">
                     <div className="h-full bg-emerald-400" style={{ width: `${metrics.stage2Health || 85}%` }} />
                   </div>
                 </div>
 
-                <div>
-                  <div className="flex justify-between mb-0.5">
-                    <span className="text-zinc-400">Stage 3: RO Maxx</span>
-                    <strong className="text-cyan-300">{metrics.stage3Health || 79}%</strong>
+                {/* Stage 3: RO Maxx */}
+                <div className="flex flex-col gap-1 p-1.5 rounded-lg bg-black/40 border border-cyan-500/20">
+                  <div className="flex items-center justify-between">
+                    <span className="flex items-center gap-1 font-bold text-cyan-300">
+                      {/* Crystal Drop + TDS Icon */}
+                      <svg className="w-3 h-3 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
+                      </svg>
+                      RO Maxx
+                    </span>
+                    <strong className="text-cyan-400">{metrics.stage3Health || 88}%</strong>
                   </div>
-                  <div className="w-full h-1 bg-zinc-800 rounded-full overflow-hidden">
-                    <div className="h-full bg-cyan-400" style={{ width: `${metrics.stage3Health || 79}%` }} />
+                  <div className="text-[7.5px] text-cyan-300 font-sans leading-tight flex items-center justify-between">
+                    <span>Drops TDS & metals</span>
+                    <span className="font-mono font-bold text-[7px] text-cyan-400 bg-cyan-950 px-1 py-0.2 rounded border border-cyan-800/40">-96%</span>
+                  </div>
+                  <div className="w-full h-1 bg-zinc-800 rounded-full overflow-hidden mt-0.5">
+                    <div className="h-full bg-cyan-400" style={{ width: `${metrics.stage3Health || 88}%` }} />
                   </div>
                 </div>
 
-                <div>
-                  <div className="flex justify-between mb-0.5">
-                    <span className="text-zinc-400">Stage 4: Final / UV</span>
-                    <strong className="text-violet-300">{metrics.stage4Health || 95}%</strong>
+                {/* Stage 4: FinalGuard UV */}
+                <div className="flex flex-col gap-1 p-1.5 rounded-lg bg-black/40 border border-violet-500/20">
+                  <div className="flex items-center justify-between">
+                    <span className="flex items-center gap-1 font-bold text-violet-300">
+                      {/* UV Ray / Shield Icon */}
+                      <svg className="w-3 h-3 text-violet-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                        <path d="m9 12 2 2 4-4" />
+                      </svg>
+                      FinalGuard UV
+                    </span>
+                    <strong className="text-violet-400">{metrics.stage4Health || 95}%</strong>
                   </div>
-                  <div className="w-full h-1 bg-zinc-800 rounded-full overflow-hidden">
+                  <div className="text-[7.5px] text-zinc-400 font-sans leading-tight">
+                    Kills microbes before dispense
+                  </div>
+                  <div className="w-full h-1 bg-zinc-800 rounded-full overflow-hidden mt-0.5">
                     <div className="h-full bg-violet-400" style={{ width: `${metrics.stage4Health || 95}%` }} />
                   </div>
                 </div>

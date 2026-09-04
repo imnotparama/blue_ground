@@ -54,6 +54,7 @@ export const Tanks = () => {
     setActiveHotspot,
     setCameraPreset,
     dualVerificationMode,
+    filterView,
   } = useSystemState();
 
   const mainTankRef = useRef<THREE.Group>(null);
@@ -101,7 +102,13 @@ export const Tanks = () => {
 
     // Material transparency
     const isXray = transparent || cutaway;
-    const targetOpacity = isXray ? 0.08 : (activeHotspot !== null && activeHotspot !== 'primary_tank' && activeHotspot !== 'secondary_tank') ? 0.15 : 0.45;
+    const targetOpacity = filterView
+      ? 0.04
+      : isXray 
+      ? 0.08 
+      : (activeHotspot !== null && activeHotspot !== 'primary_tank' && activeHotspot !== 'secondary_tank') 
+      ? 0.15 
+      : 0.45;
     
     if (tankMatRef.current) {
       tankMatRef.current.opacity = THREE.MathUtils.lerp(tankMatRef.current.opacity, targetOpacity, 0.1);

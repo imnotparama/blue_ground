@@ -6,7 +6,7 @@ import { useSystemState } from '@/hooks/useSystemState';
 import * as THREE from 'three';
 
 export const ESP32Box = () => {
-  const { exploded, metrics, activeHotspot, setActiveHotspot, setCameraPreset, tanksOnly } = useSystemState();
+  const { exploded, metrics, activeHotspot, setActiveHotspot, setCameraPreset, tanksOnly, filterView } = useSystemState();
   
   const groupRef = useRef<THREE.Group>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -105,7 +105,7 @@ export const ESP32Box = () => {
       }
     }
 
-    const isDimmed = tanksOnly || (activeHotspot !== null && activeHotspot !== 'esp32' && activeHotspot !== 'tft_display');
+    const isDimmed = tanksOnly || filterView || (activeHotspot !== null && activeHotspot !== 'esp32' && activeHotspot !== 'tft_display');
     const targetOpacity = isDimmed ? 0.08 : 1.0;
 
     for (let i = 0; i < materialsRef.current.length; i++) {

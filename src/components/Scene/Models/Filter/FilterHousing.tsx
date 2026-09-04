@@ -2,6 +2,7 @@
 
 import React, { useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
+import { Html } from '@react-three/drei';
 import { useSystemState } from '@/hooks/useSystemState';
 import * as THREE from 'three';
 
@@ -16,9 +17,14 @@ export const FilterHousing = () => {
     mode, 
     metrics,
     tanksOnly,
+    filterView,
+    setFilterView,
+    filterStageFocus,
+    setFilterStageFocus,
   } = useSystemState();
   
   const mainGroupRef = useRef<THREE.Group>(null);
+  const glowPipeMatRef = useRef<THREE.MeshStandardMaterial>(null);
   const [hovered, setHovered] = useState<number | null>(null);
 
   useFrame((state, delta) => {
@@ -30,60 +36,95 @@ export const FilterHousing = () => {
       mainGroupRef.current.position.y = THREE.MathUtils.lerp(mainGroupRef.current.position.y, 0.45 + targetY, damp);
       mainGroupRef.current.position.z = THREE.MathUtils.lerp(mainGroupRef.current.position.z, -0.62 + targetZ, damp);
     }
+
+    if (glowPipeMatRef.current) {
+      // Dynamic pulsing glow along the thin inter-cartridge pipes
+      const pulse = 1.8 + Math.sin(time * 5.0) * 0.8;
+      glowPipeMatRef.current.emissiveIntensity = pulse;
+    }
   });
 
+  // 4-Stage Smart Filtration Train specifications
   const stages = [
     {
       id: 'stage1',
       num: 1,
       x: -0.66,
-      name: 'Stage 1: Sediment',
-      shortName: 'Sediment',
-      subtitle: '5µm PP Melt-Blown',
-      color: '#f8fafc',
-      stripColor: '#0284c7',
+      name: 'Stage 1 – SediShield',
+      boldName: 'SediShield',
+      roleTag: 'Blocks dirt, silt and rust',
+      fullTag: 'SediShield – Blocks dirt, silt and rust',
+      subtitle: 'Sediment Pre-Filter (5µm Melt-Blown PP)',
+      color: '#cbd5e1', // Rugged stone-cream base
+      accentColor: '#f97316', // Rugged amber-rust accent
+      stripColor: '#ea580c',
       health: metrics.stage1Health || 92,
-      desc: 'Removes silt, rust, and coarse mining particulate',
+      healthColor: 'text-amber-400',
+      barColor: 'bg-amber-400',
+      iconType: 'dust',
+      badgeText: 'Rugged First-Line Defense',
+      desc: 'Traps sand, rust, silt, and heavy suspended mining particles before they reach pumps.',
     },
     {
       id: 'stage2',
       num: 2,
       x: -0.22,
-      name: 'Stage 2: Chemo Block',
-      shortName: 'Chemo Block',
-      subtitle: 'Extruded Carbon CTO',
-      color: '#1e293b',
+      name: 'Stage 2 – ChemoBlock',
+      boldName: 'ChemoBlock',
+      roleTag: 'Cuts chlorine, odour and chemical load',
+      fullTag: 'ChemoBlock – Cuts chlorine, odour and chemical load',
+      subtitle: 'Activated Carbon & Chemical Guard (CTO Block)',
+      color: '#1e293b', // Deep charcoal body
+      accentColor: '#059669', // Deep emerald green
       stripColor: '#10b981',
       health: metrics.stage2Health || 85,
-      desc: 'Adsorbs chlorine, organic chemicals, and heavy odours',
+      healthColor: 'text-emerald-400',
+      barColor: 'bg-emerald-400',
+      iconType: 'chemical',
+      badgeText: 'Chemical & Odour Guard',
+      desc: 'Uses high-adsorption activated carbon to strip chlorine, colours, odour, and organic contaminants.',
     },
     {
       id: 'stage3',
       num: 3,
       x: 0.22,
-      name: 'Stage 3: RO Maxx',
-      shortName: 'RO Maxx',
-      subtitle: '0.0001µm TFC Membrane',
-      color: '#0369a1',
-      stripColor: '#06b6d4',
-      health: metrics.stage3Health || 79,
-      desc: 'High-rejection desalination & heavy metal stripping',
+      name: 'Stage 3 – RO Maxx',
+      boldName: 'RO Maxx',
+      roleTag: 'Drops TDS and heavy metals',
+      fullTag: 'RO Maxx – Drops TDS and heavy metals',
+      subtitle: 'High-Pressure RO Membrane (0.0001µm TFC)',
+      color: '#0369a1', // High-pressure ocean blue
+      accentColor: '#06b6d4', // Cyan high-pressure accent
+      stripColor: '#38bdf8',
+      health: metrics.stage3Health || 88,
+      healthColor: 'text-cyan-400',
+      barColor: 'bg-cyan-400',
+      iconType: 'tds',
+      badgeText: 'TDS: 680 → 28 ppm (-96%)',
+      desc: 'Core high-pressure reverse-osmosis stage stripping dissolved salts, hardness, and heavy metals.',
     },
     {
       id: 'stage4',
       num: 4,
       x: 0.66,
-      name: 'Stage 4: Final Guard / UV',
-      shortName: 'Final Guard',
-      subtitle: 'Mineralizer + UV-C',
-      color: '#e2e8f0',
-      stripColor: '#38bdf8',
+      name: 'Stage 4 – FinalGuard UV',
+      boldName: 'FinalGuard UV',
+      roleTag: 'Kills microbes before dispense',
+      fullTag: 'FinalGuard UV – Kills microbes before dispense',
+      subtitle: 'Microbial Disinfection (254nm Germicidal UV-C)',
+      color: '#94a3b8', // Sleek polished stainless/chrome
+      accentColor: '#818cf8', // Ultraviolet indigo glow
+      stripColor: '#a855f7',
       health: metrics.stage4Health || 95,
-      desc: 'Remineralization & 254nm germicidal disinfection',
+      healthColor: 'text-violet-400',
+      barColor: 'bg-violet-400',
+      iconType: 'uv',
+      badgeText: 'Final Safety Layer',
+      desc: 'Neutralizes bacteria, viruses, and microorganisms just before water enters secondary tank and outlet.',
     },
   ];
 
-  const isDimmed = tanksOnly || (activeHotspot !== null && activeHotspot !== 'filter_housing' && activeHotspot !== 'filtration_tank');
+  const isDimmed = !filterView && (tanksOnly || (activeHotspot !== null && activeHotspot !== 'filter_housing' && activeHotspot !== 'filtration_tank'));
 
   return (
     <group 
@@ -92,37 +133,51 @@ export const FilterHousing = () => {
       onClick={(e) => {
         e.stopPropagation();
         setActiveHotspot('filter_housing');
-        setCameraPreset('FILTER_HOUSING');
+        if (!filterView) {
+          setFilterView(true);
+          setFilterStageFocus(0);
+        }
       }}
     >
       {/* ════════════════════════════════════════════════════════════════════
           BACK-MOUNTED 4-STAGE FILTRATION RACK (ALUMINIUM HEAVY BRACKET)
           ════════════════════════════════════════════════════════════════════ */}
       {/* Upper & Lower Horizontal Anodized Aluminium Mounting Rails */}
-      <mesh position={[0, 0.36, -0.07]} castShadow>
-        <boxGeometry args={[1.75, 0.05, 0.03]} />
+      <mesh position={[0, 0.38, -0.08]} castShadow>
+        <boxGeometry args={[1.78, 0.05, 0.03]} />
         <meshStandardMaterial color="#334155" roughness={0.3} metalness={0.9} />
       </mesh>
-      <mesh position={[0, -0.36, -0.07]} castShadow>
-        <boxGeometry args={[1.75, 0.05, 0.03]} />
+      <mesh position={[0, -0.38, -0.08]} castShadow>
+        <boxGeometry args={[1.78, 0.05, 0.03]} />
         <meshStandardMaterial color="#334155" roughness={0.3} metalness={0.9} />
       </mesh>
 
-      {/* Structural Support Clamps linking to main rack */}
-      {[-0.82, 0.82].map((cx, i) => (
-        <mesh key={i} position={[cx, 0, -0.05]} castShadow>
-          <boxGeometry args={[0.04, 0.78, 0.02]} />
+      {/* Structural Support Clamps linking to main rig frame */}
+      {[-0.82, 0, 0.82].map((cx, i) => (
+        <mesh key={i} position={[cx, 0, -0.06]} castShadow>
+          <boxGeometry args={[0.04, 0.82, 0.02]} />
           <meshStandardMaterial color="#1e293b" roughness={0.4} metalness={0.85} />
         </mesh>
       ))}
 
+      {/* Rack Title Plaque */}
+      <mesh position={[0, 0.43, -0.07]}>
+        <boxGeometry args={[0.65, 0.04, 0.005]} />
+        <meshStandardMaterial color="#0f172a" roughness={0.5} metalness={0.8} />
+      </mesh>
+
       {/* ════════════════════════════════════════════════════════════════════
-          THE 4 VERTICAL CARTRIDGE HOUSINGS
+          THE 4 VERTICAL CARTRIDGE HOUSINGS (LEFT TO RIGHT)
           ════════════════════════════════════════════════════════════════════ */}
       {stages.map((st, i) => {
         const isHovered = hovered === i;
         const healthFrac = st.health / 100;
         const isUvStage = st.num === 4;
+        const isRoStage = st.num === 3;
+        const isChemoStage = st.num === 2;
+        const isSediStage = st.num === 1;
+
+        const isStageFocused = filterView && filterStageFocus === st.num;
 
         return (
           <group 
@@ -137,63 +192,161 @@ export const FilterHousing = () => {
               setHovered(null);
               document.body.style.cursor = 'default';
             }}
+            onClick={(e) => {
+              e.stopPropagation();
+              setActiveHotspot('filter_housing');
+              if (!filterView) {
+                setFilterView(true);
+                setFilterStageFocus(st.num);
+              } else {
+                if (filterStageFocus === st.num) {
+                  setFilterStageFocus(0);
+                } else {
+                  setFilterStageFocus(st.num);
+                }
+              }
+            }}
           >
             {/* Top Reinforced Manifold Cap with Inlet/Outlet Ports */}
             <mesh position={[0, 0.34, 0]} castShadow>
               <cylinderGeometry args={[0.078, 0.082, 0.09, 24]} />
-              <meshStandardMaterial color="#0f172a" roughness={0.35} metalness={0.8} />
+              <meshStandardMaterial color={isChemoStage ? "#064e3b" : isRoStage ? "#075985" : "#0f172a"} roughness={0.35} metalness={0.8} />
             </mesh>
-            {/* Pressure Relief Vent Valve on Cap */}
+
+            {/* Pressure Relief Vent Valve / Gauge Port on Cap */}
             <mesh position={[0, 0.39, 0]} castShadow>
               <cylinderGeometry args={[0.012, 0.012, 0.02, 12]} />
-              <meshStandardMaterial color="#ef4444" roughness={0.3} metalness={0.5} />
+              <meshStandardMaterial color={isRoStage ? "#0284c7" : "#ef4444"} roughness={0.3} metalness={0.6} />
             </mesh>
 
-            {/* Main Cylindrical Filter Cartridge Housing */}
-            <mesh position={[0, 0, 0]} castShadow receiveShadow>
-              <cylinderGeometry args={[0.072, 0.068, 0.60, 28]} />
-              <meshStandardMaterial 
-                color={st.color} 
-                roughness={0.35} 
-                metalness={isUvStage ? 0.95 : 0.4}
-                transparent={transparent || cutaway}
-                opacity={(transparent || cutaway) ? 0.25 : 1.0}
-              />
-            </mesh>
-
-            {/* Cartridge Status Color ID Identification Strip */}
-            <mesh position={[0, 0.20, 0]} castShadow>
-              <cylinderGeometry args={[0.073, 0.073, 0.035, 28]} />
-              <meshStandardMaterial color={st.stripColor} roughness={0.2} metalness={0.7} />
-            </mesh>
-
-            {/* Clear Viewing Window Slit */}
-            <mesh position={[0, -0.04, 0.069]} castShadow>
-              <boxGeometry args={[0.025, 0.36, 0.01]} />
-              <meshPhysicalMaterial 
-                color="#38bdf8" 
-                transmission={0.85} 
-                transparent 
-                opacity={0.85} 
-                roughness={0.1} 
-              />
-            </mesh>
-
-            {/* UV-C Internal Glow Emission for Stage 4 */}
-            {isUvStage && (
-              <group position={[0, -0.04, 0]}>
-                <mesh>
-                  <cylinderGeometry args={[0.025, 0.025, 0.45, 16]} />
+            {/* ─── STAGE-SPECIFIC DISTINCT CARTRIDGE CASING ─── */}
+            {isSediStage && (
+              /* Stage 1: SediShield — Rugged ribbed sediment pre-filter */
+              <group>
+                {/* Main Rugged Cylinder Body */}
+                <mesh position={[0, 0, 0]} castShadow receiveShadow>
+                  <cylinderGeometry args={[0.072, 0.070, 0.60, 28]} />
                   <meshStandardMaterial 
-                    color="#38bdf8" 
-                    emissive={metrics.uvStatus === 'ON' ? '#0284c7' : '#000000'}
-                    emissiveIntensity={metrics.uvStatus === 'ON' ? 2.5 : 0}
-                    roughness={0.2} 
+                    color="#e2e8f0" 
+                    roughness={0.5} 
+                    metalness={0.2}
+                    transparent={transparent || cutaway}
+                    opacity={(transparent || cutaway) ? 0.25 : 1.0}
                   />
                 </mesh>
-                {metrics.uvStatus === 'ON' && (
-                  <pointLight color="#38bdf8" intensity={1.2} distance={0.6} />
-                )}
+                {/* Heavy Industrial Protective Sediment Ribs / Rings */}
+                {[-0.20, -0.10, 0.0, 0.10, 0.20].map((ry, idx) => (
+                  <mesh key={idx} position={[0, ry, 0]} castShadow>
+                    <torusGeometry args={[0.073, 0.005, 8, 28]} />
+                    <meshStandardMaterial color="#d97706" roughness={0.4} metalness={0.7} />
+                  </mesh>
+                ))}
+                {/* Silt & Rust Trap Bottom Chamber */}
+                <mesh position={[0, -0.24, 0]} castShadow>
+                  <cylinderGeometry args={[0.074, 0.068, 0.08, 24]} />
+                  <meshStandardMaterial color="#b45309" roughness={0.4} metalness={0.5} />
+                </mesh>
+              </group>
+            )}
+
+            {isChemoStage && (
+              /* Stage 2: ChemoBlock — Deep charcoal & emerald green carbon block */
+              <group>
+                {/* Matte Deep Charcoal Body */}
+                <mesh position={[0, 0, 0]} castShadow receiveShadow>
+                  <cylinderGeometry args={[0.072, 0.068, 0.60, 28]} />
+                  <meshStandardMaterial 
+                    color="#09090b" 
+                    roughness={0.6} 
+                    metalness={0.3}
+                    transparent={transparent || cutaway}
+                    opacity={(transparent || cutaway) ? 0.25 : 1.0}
+                  />
+                </mesh>
+                {/* Deep Green Activated Carbon Media Core Band */}
+                <mesh position={[0, -0.02, 0]} castShadow>
+                  <cylinderGeometry args={[0.073, 0.073, 0.38, 28]} />
+                  <meshStandardMaterial color="#065f46" roughness={0.35} metalness={0.4} />
+                </mesh>
+                {/* Chemical Guard Rings */}
+                {[-0.18, 0.16].map((gy, idx) => (
+                  <mesh key={idx} position={[0, gy, 0]} castShadow>
+                    <cylinderGeometry args={[0.074, 0.074, 0.025, 28]} />
+                    <meshStandardMaterial color="#10b981" roughness={0.25} metalness={0.8} />
+                  </mesh>
+                ))}
+              </group>
+            )}
+
+            {isRoStage && (
+              /* Stage 3: RO Maxx — High-Pressure Blue Pressure Vessel */
+              <group>
+                {/* Ocean-Blue High-Pressure Cylindrical Shell */}
+                <mesh position={[0, 0, 0]} castShadow receiveShadow>
+                  <cylinderGeometry args={[0.075, 0.073, 0.60, 28]} />
+                  <meshStandardMaterial 
+                    color="#0284c7" 
+                    roughness={0.25} 
+                    metalness={0.6}
+                    transparent={transparent || cutaway}
+                    opacity={(transparent || cutaway) ? 0.25 : 1.0}
+                  />
+                </mesh>
+                {/* Stainless High-Pressure Retaining Clamps */}
+                {[-0.22, 0.22].map((py, idx) => (
+                  <mesh key={idx} position={[0, py, 0]} castShadow>
+                    <cylinderGeometry args={[0.077, 0.077, 0.03, 28]} />
+                    <meshStandardMaterial color="#cbd5e1" roughness={0.15} metalness={0.95} />
+                  </mesh>
+                ))}
+                {/* High Pressure Membrane Core Spine */}
+                <mesh position={[0, 0, 0]}>
+                  <cylinderGeometry args={[0.03, 0.03, 0.54, 16]} />
+                  <meshStandardMaterial color="#38bdf8" roughness={0.2} metalness={0.8} />
+                </mesh>
+              </group>
+            )}
+
+            {isUvStage && (
+              /* Stage 4: FinalGuard UV — Sleek Polished Stainless Steel & 254nm Quartz Tube */
+              <group>
+                {/* Sleek Mirror-Polished Stainless Steel Cylinder */}
+                <mesh position={[0, 0, 0]} castShadow receiveShadow>
+                  <cylinderGeometry args={[0.070, 0.068, 0.60, 32]} />
+                  <meshStandardMaterial 
+                    color="#e2e8f0" 
+                    roughness={0.08} 
+                    metalness={0.96}
+                    transparent={transparent || cutaway}
+                    opacity={(transparent || cutaway) ? 0.25 : 1.0}
+                  />
+                </mesh>
+                {/* Internal Luminous UV-C Quartz Tube */}
+                <group position={[0, -0.02, 0]}>
+                  <mesh>
+                    <cylinderGeometry args={[0.028, 0.028, 0.46, 20]} />
+                    <meshStandardMaterial 
+                      color="#818cf8" 
+                      emissive={metrics.uvStatus === 'ON' ? '#6366f1' : '#1e1b4b'}
+                      emissiveIntensity={metrics.uvStatus === 'ON' ? 3.0 : 0.2}
+                      roughness={0.1} 
+                    />
+                  </mesh>
+                  {/* Outer Quartz Sleeve Window */}
+                  <mesh position={[0, 0, 0.070]}>
+                    <boxGeometry args={[0.035, 0.38, 0.005]} />
+                    <meshPhysicalMaterial 
+                      color="#a855f7" 
+                      transmission={0.9} 
+                      transparent 
+                      opacity={0.85} 
+                      roughness={0.05} 
+                    />
+                  </mesh>
+                  {metrics.uvStatus === 'ON' && (
+                    <pointLight color="#818cf8" intensity={1.8} distance={0.8} />
+                  )}
+                </group>
               </group>
             )}
 
@@ -203,52 +356,61 @@ export const FilterHousing = () => {
               <meshStandardMaterial color="#0f172a" roughness={0.35} metalness={0.8} />
             </mesh>
 
-            {/* Filter Health Bar Plate on Front */}
-            <group position={[0, -0.16, 0.075]}>
+            {/* 3D Physical Health Bar Plate on Front Face of Cartridge */}
+            <group position={[0, -0.18, 0.075]}>
               {/* Backplate */}
               <mesh position={[0, 0, 0]}>
-                <boxGeometry args={[0.09, 0.022, 0.004]} />
+                <boxGeometry args={[0.096, 0.024, 0.004]} />
                 <meshStandardMaterial color="#09090b" roughness={0.8} />
               </mesh>
               {/* Health Progress Fill */}
-              <mesh position={[-0.042 + (healthFrac * 0.084) / 2, 0, 0.003]}>
-                <boxGeometry args={[healthFrac * 0.084, 0.014, 0.004]} />
+              <mesh position={[-0.044 + (healthFrac * 0.088) / 2, 0, 0.003]}>
+                <boxGeometry args={[healthFrac * 0.088, 0.016, 0.004]} />
                 <meshStandardMaterial 
-                  color={healthFrac > 0.8 ? '#10b981' : healthFrac > 0.5 ? '#f59e0b' : '#ef4444'} 
-                  emissive={healthFrac > 0.8 ? '#059669' : '#d97706'}
-                  emissiveIntensity={0.6}
+                  color={healthFrac > 0.85 ? '#10b981' : healthFrac > 0.6 ? '#f59e0b' : '#ef4444'} 
+                  emissive={healthFrac > 0.85 ? '#059669' : '#d97706'}
+                  emissiveIntensity={0.8}
                 />
               </mesh>
             </group>
 
-            {/* 3D Label Plaque for Cartridge Stage */}
-            <group position={[0, 0.08, 0.075]}>
+            {/* Hover / Active Focus Highlight Ring */}
+            {(isHovered || isStageFocused) && (
               <mesh position={[0, 0, 0]}>
-                <boxGeometry args={[0.11, 0.04, 0.004]} />
-                <meshStandardMaterial color="#1e293b" roughness={0.6} metalness={0.5} />
-              </mesh>
-            </group>
-
-            {/* Hover Highlight Ring */}
-            {isHovered && (
-              <mesh position={[0, 0, 0]}>
-                <cylinderGeometry args={[0.085, 0.085, 0.72, 24, 1, true]} />
-                <meshBasicMaterial color="#38bdf8" wireframe transparent opacity={0.4} />
+                <cylinderGeometry args={[0.088, 0.088, 0.76, 28, 1, true]} />
+                <meshBasicMaterial 
+                  color={isStageFocused ? '#06b6d4' : '#38bdf8'} 
+                  wireframe 
+                  transparent 
+                  opacity={isStageFocused ? 0.9 : 0.5} 
+                />
               </mesh>
             )}
 
             {/* ════════════════════════════════════════════════════════════════
-                3-WAY DYNAMIC ROUTING VALVES (Between Adjacent Filter Stages)
+                THIN GLOWING PIPES CONNECTING THE 4 CARTRIDGES IN SERIES
                 ════════════════════════════════════════════════════════════════ */}
             {i < 3 && (
               <group position={[0.22, 0.34, 0]}>
-                {/* Horizontal Inter-Stage Jumper Pipe */}
+                {/* Thin Structural Conduit */}
                 <mesh rotation={[0, 0, Math.PI / 2]} castShadow>
                   <cylinderGeometry args={[0.014, 0.014, 0.22, 12]} />
-                  <meshStandardMaterial color="#64748b" roughness={0.3} metalness={0.85} />
+                  <meshStandardMaterial color="#475569" roughness={0.3} metalness={0.85} />
                 </mesh>
 
-                {/* 3-Way Valve Brass Body */}
+                {/* Thin Glowing Fluid Pipe with Dynamic Pulse Illumination */}
+                <mesh rotation={[0, 0, Math.PI / 2]}>
+                  <cylinderGeometry args={[0.008, 0.008, 0.218, 12]} />
+                  <meshStandardMaterial 
+                    ref={glowPipeMatRef}
+                    color="#38bdf8" 
+                    emissive="#0284c7"
+                    emissiveIntensity={2.0}
+                    roughness={0.1}
+                  />
+                </mesh>
+
+                {/* 3-Way Valve Fitting at Jumper Junction */}
                 <mesh position={[0, 0, 0]} castShadow>
                   <sphereGeometry args={[0.022, 12, 12]} />
                   <meshStandardMaterial color="#ca8a04" roughness={0.25} metalness={0.9} />
@@ -258,7 +420,7 @@ export const FilterHousing = () => {
                   <meshStandardMaterial color="#64748b" roughness={0.3} metalness={0.85} />
                 </mesh>
 
-                {/* Valve Handle Lever (Changes angle/color on selection) */}
+                {/* Valve Handle Lever */}
                 <group position={[0, 0.024, 0]} rotation={[0, 0, mode === 'MAINTENANCE' ? Math.PI / 2 : 0]}>
                   <mesh position={[0.025, 0, 0]} castShadow>
                     <boxGeometry args={[0.055, 0.008, 0.012]} />
@@ -271,9 +433,150 @@ export const FilterHousing = () => {
                 </group>
               </group>
             )}
+
+            {/* ════════════════════════════════════════════════════════════════
+                INTERACTIVE 3D FLOATING INSTRUMENT CARD UNDER EACH CARTRIDGE
+                (Visible in Overview Twin Mode; FilterView uses dedicated HUD)
+                ════════════════════════════════════════════════════════════════ */}
+            {!filterView && (
+              <Html
+                position={[0, -0.48, 0.10]}
+                center
+                distanceFactor={5.6}
+                style={{ pointerEvents: 'auto', userSelect: 'none' }}
+              >
+              <div 
+                className={`flex flex-col items-center gap-1 transition-all duration-300 ${
+                  isHovered || isStageFocused ? 'scale-105 -translate-y-1' : 'opacity-95'
+                }`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActiveHotspot('filter_housing');
+                  if (!filterView) {
+                    setFilterView(true);
+                    setFilterStageFocus(st.num);
+                  } else {
+                    if (filterStageFocus === st.num) {
+                      setFilterStageFocus(0);
+                    } else {
+                      setFilterStageFocus(st.num);
+                    }
+                  }
+                }}
+              >
+                {/* Main Card Container */}
+                <div className={`flex flex-col gap-1 px-3 py-2 rounded-xl backdrop-blur-md shadow-[0_8px_32px_rgba(0,0,0,0.6)] min-w-[170px] max-w-[200px] cursor-pointer transition-all ${
+                  isStageFocused 
+                    ? 'bg-zinc-950/95 border-2 border-cyan-400 shadow-[0_0_25px_rgba(6,182,212,0.4)]' 
+                    : 'bg-black/90 border border-white/15 hover:border-cyan-400/60'
+                }`}>
+                  
+                  {/* Header: Stage Badge + Icon */}
+                  <div className="flex items-center justify-between gap-1.5 border-b border-white/10 pb-1">
+                    <div className="flex items-center gap-1.5">
+                      {/* Stage Specific Icon */}
+                      <span className="p-1 rounded-md bg-white/5 flex items-center justify-center">
+                        {st.iconType === 'dust' && (
+                          /* Dust Cloud Icon for SediShield */
+                          <svg className="w-3.5 h-3.5 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
+                            <path d="M8 19h1" />
+                            <path d="M12 19h2" />
+                            <path d="M17 19h1" />
+                          </svg>
+                        )}
+                        {st.iconType === 'chemical' && (
+                          /* Chemical / Drop Icon for ChemoBlock */
+                          <svg className="w-3.5 h-3.5 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M10 2v7.31M14 2v7.31" />
+                            <path d="M8.5 2h7" />
+                            <path d="M14 9.3a6.5 6.5 0 1 1-4 0" />
+                            <circle cx="12" cy="15" r="1.5" fill="currentColor" />
+                          </svg>
+                        )}
+                        {st.iconType === 'tds' && (
+                          /* Crystal-clear droplet with TDS digits for RO Maxx */
+                          <div className="flex items-center gap-0.5">
+                            <svg className="w-3.5 h-3.5 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
+                            </svg>
+                            <span className="text-[8px] font-black text-cyan-300 font-mono">TDS</span>
+                          </div>
+                        )}
+                        {st.iconType === 'uv' && (
+                          /* UV Ray / Shield Icon for FinalGuard UV */
+                          <svg className="w-3.5 h-3.5 text-violet-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                            <path d="m9 12 2 2 4-4" />
+                          </svg>
+                        )}
+                      </span>
+                      <span className="text-[9px] font-mono font-bold text-zinc-400 uppercase tracking-wide">
+                        STAGE {st.num}
+                      </span>
+                    </div>
+
+                    {/* Health percentage readout */}
+                    <span className={`text-[10px] font-mono font-extrabold ${st.healthColor}`}>
+                      {st.health}%
+                    </span>
+                  </div>
+
+                  {/* Bold Name */}
+                  <div className="text-[11px] font-extrabold text-white tracking-tight flex items-center justify-between">
+                    <span>{st.boldName}</span>
+                    {isRoStage && (
+                      <span className="text-[7.5px] px-1 py-0.2 rounded bg-cyan-950 text-cyan-300 border border-cyan-500/40 font-mono font-bold">
+                        -96% TDS
+                      </span>
+                    )}
+                  </div>
+
+                  {/* One-Line Role Tagline */}
+                  <div className="text-[8.5px] text-zinc-300 font-medium leading-tight">
+                    {st.roleTag}
+                  </div>
+
+                  {/* Health Bar under name */}
+                  <div className="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden mt-0.5 border border-white/5">
+                    <div 
+                      className={`h-full ${st.barColor} transition-all duration-500`}
+                      style={{ width: `${st.health}%` }}
+                    />
+                  </div>
+
+                  {/* Specific Metric or Highlight Banner */}
+                  {isRoStage && (
+                    <div className="text-[8px] font-mono text-cyan-300 bg-cyan-950/40 px-1.5 py-0.5 rounded border border-cyan-800/40 text-center font-bold">
+                      Inflow: 680 → 28 ppm
+                    </div>
+                  )}
+                  {isUvStage && (
+                    <div className="text-[8px] font-mono text-violet-300 bg-violet-950/40 px-1.5 py-0.5 rounded border border-violet-800/40 text-center font-bold">
+                      Final Safety Layer ➔ Dispense
+                    </div>
+                  )}
+                  {isSediStage && (
+                    <div className="text-[8px] font-mono text-amber-300 bg-amber-950/40 px-1.5 py-0.5 rounded border border-amber-800/40 text-center font-bold">
+                      Traps Sand & Mining Slurry
+                    </div>
+                  )}
+                  {isChemoStage && (
+                    <div className="text-[8px] font-mono text-emerald-300 bg-emerald-950/40 px-1.5 py-0.5 rounded border border-emerald-800/40 text-center font-bold">
+                      Active Carbon CTO Block
+                    </div>
+                  )}
+                </div>
+
+                {/* Subtle downward stem pointing to physical mount */}
+                <div className="w-0.5 h-2 bg-gradient-to-b from-white/20 to-transparent" />
+              </div>
+            </Html>
+            )}
           </group>
         );
       })}
     </group>
   );
 };
+

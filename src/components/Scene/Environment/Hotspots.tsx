@@ -67,10 +67,10 @@ const hotspotsList: HotspotConfig[] = [
   {
     id: 'filter_housing',
     preset: 'FILTER_HOUSING',
-    position: [-1.40, 0.40, 0.20],
-    label: 'RO Filtration Tank',
-    getStatus: (m, mode) => mode === 'TURBIDITY' ? { label: 'PURIFYING', color: 'text-amber-400 animate-pulse' } : { label: 'MULTI-STAGE ACTIVE', color: 'text-cyan-400' },
-    getSub: (m) => `${m.filterHealth}% Health (PP+CTO+RO)`,
+    position: [-0.70, 0.92, -0.60],
+    label: '4-Stage Smart Filtration Train',
+    getStatus: (m, mode) => mode === 'TURBIDITY' ? { label: 'PURIFYING (4-STAGE)', color: 'text-amber-400 animate-pulse' } : { label: '4-STAGE DEFENSE ACTIVE', color: 'text-cyan-400' },
+    getSub: () => 'SediShield • ChemoBlock • RO Maxx • FinalGuard UV',
   },
   {
     id: 'sedimentation_tank',
@@ -179,10 +179,10 @@ const hotspotsList: HotspotConfig[] = [
 ];
 
 export const Hotspots = () => {
-  const { landingVisited, demoRunning, activeHotspot, setActiveHotspot, setCameraPreset, metrics, mode, showHotspots } = useSystemState();
+  const { landingVisited, demoRunning, activeHotspot, setActiveHotspot, setCameraPreset, metrics, mode, showHotspots, filterView } = useSystemState();
   const [hoveredId, setHoveredId] = useState<string | null>(null);
 
-  if (!landingVisited || demoRunning || !showHotspots) return null;
+  if (!landingVisited || demoRunning || !showHotspots || filterView) return null;
 
   return (
     <group>

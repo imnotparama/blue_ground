@@ -6,7 +6,7 @@ import { useSystemState } from '@/hooks/useSystemState';
 import * as THREE from 'three';
 
 export const WaterPump = () => {
-  const { exploded, metrics, activeHotspot, setActiveHotspot, setCameraPreset, tanksOnly } = useSystemState();
+  const { exploded, metrics, activeHotspot, setActiveHotspot, setCameraPreset, tanksOnly, filterView } = useSystemState();
   
   const groupRef = useRef<THREE.Group>(null);
   const impellerRef = useRef<THREE.Group>(null);
@@ -51,7 +51,7 @@ export const WaterPump = () => {
       impellerRef.current.rotation.y += radPerSec * delta;
     }
 
-    const isDimmed = tanksOnly || (activeHotspot !== null && activeHotspot !== 'pump' && activeHotspot !== 'water_pump');
+    const isDimmed = tanksOnly || filterView || (activeHotspot !== null && activeHotspot !== 'pump' && activeHotspot !== 'water_pump');
     const targetOpacity = isDimmed ? 0.08 : 1.0;
 
     for (let i = 0; i < materialsRef.current.length; i++) {
