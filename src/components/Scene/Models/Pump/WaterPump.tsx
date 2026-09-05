@@ -37,8 +37,8 @@ export const WaterPump = () => {
     const vibZ = Math.sin(time * 100) * vibrationAmp;
 
     if (groupRef.current) {
-      groupRef.current.position.y = THREE.MathUtils.lerp(groupRef.current.position.y, 0.08 + targetY, damp);
-      groupRef.current.position.x = 0.05 + vibX;
+      groupRef.current.position.y = THREE.MathUtils.lerp(groupRef.current.position.y, 0.05 + targetY, damp);
+      groupRef.current.position.x = 1.35 + vibX;
       groupRef.current.position.z = vibZ;
 
       const targetScale = hovered ? 1.03 : 1.0;
@@ -91,12 +91,64 @@ export const WaterPump = () => {
   return (
     <group 
       ref={groupRef}
-      position={[0.05, 0.08, 0]}
+      position={[1.35, 0.05, 0]}
       onPointerOver={handlePointerOver}
       onPointerOut={handlePointerOut}
       onClick={handleClick}
     >
-      {/* Water Pump (for filtration) mounted on secondary compartment shelf */}
+      {/* ─── HEAVY-DUTY GROUNDED EQUIPMENT STAND & UNISTRUT CHASSIS ─── */}
+      {/* Heavy Steel Skid Base Plate */}
+      <mesh position={[0, -0.06, 0]} castShadow receiveShadow>
+        <boxGeometry args={[0.32, 0.025, 0.22]} />
+        <meshStandardMaterial color="#1e293b" roughness={0.35} metalness={0.85} />
+      </mesh>
+
+      {/* 4 Rubber Anti-Vibration Isolator Bushings */}
+      {[-0.10, 0.10].map((bx) =>
+        [-0.06, 0.06].map((bz) => (
+          <mesh key={`vib-${bx}-${bz}`} position={[bx, -0.04, bz]} castShadow>
+            <cylinderGeometry args={[0.016, 0.018, 0.025, 12]} />
+            <meshStandardMaterial color="#090d16" roughness={0.9} />
+          </mesh>
+        ))
+      )}
+
+      {/* Dual Vertical Structural Support Unistrut Legs down to Concrete Ground Floor (y = -1.75) */}
+      {[-0.11, 0.11].map((lx) => (
+        <group key={`leg-${lx}`} position={[lx, -0.88, 0]}>
+          {/* Vertical 40x40mm Structural Channel */}
+          <mesh castShadow receiveShadow>
+            <boxGeometry args={[0.038, 1.62, 0.038]} />
+            <meshStandardMaterial color="#334155" roughness={0.3} metalness={0.9} />
+          </mesh>
+          {/* Heavy Steel Base Flange on Floor */}
+          <mesh position={[0, -0.80, 0]} castShadow receiveShadow>
+            <boxGeometry args={[0.10, 0.02, 0.10]} />
+            <meshStandardMaterial color="#1e293b" roughness={0.4} metalness={0.8} />
+          </mesh>
+          {/* Floor Anchor Studs */}
+          {[-0.035, 0.035].map((ax) =>
+            [-0.035, 0.035].map((az) => (
+              <mesh key={`stud-${ax}-${az}`} position={[ax, -0.785, az]}>
+                <cylinderGeometry args={[0.006, 0.006, 0.012, 6]} />
+                <meshStandardMaterial color="#cbd5e1" roughness={0.2} metalness={0.95} />
+              </mesh>
+            ))
+          )}
+        </group>
+      ))}
+
+      {/* Cross Brace connecting Skid Stand to Main Tank Frame on left */}
+      <mesh position={[-0.20, -0.06, 0]} castShadow>
+        <boxGeometry args={[0.16, 0.03, 0.03]} />
+        <meshStandardMaterial color="#334155" roughness={0.3} metalness={0.9} />
+      </mesh>
+      <mesh position={[-0.20, -0.85, 0]} castShadow>
+        <boxGeometry args={[0.16, 0.03, 0.03]} />
+        <meshStandardMaterial color="#334155" roughness={0.3} metalness={0.9} />
+      </mesh>
+
+      {/* Main High-Pressure DC Booster Motor Body */}
       <mesh castShadow receiveShadow>
         <cylinderGeometry args={[0.07, 0.07, 0.15, 16]} />
         <meshStandardMaterial color="#1e293b" roughness={0.3} metalness={0.85} />

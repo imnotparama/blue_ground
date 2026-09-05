@@ -138,31 +138,31 @@ const STAGES_CONFIG: StageDetail[] = [
   },
   {
     num: 4,
-    name: 'Stage 4 – FinalGuard UV',
-    boldName: 'FinalGuard UV',
-    tagline: 'Kills microbes before dispense',
-    subtitle: 'Microbial Sanitization (254nm Germicidal UV-C)',
-    poreSize: 'Molecular Wave',
-    coreMedia: 'High-Output 254nm Quartz-Encapsulated Germicidal Lamp',
-    primaryRemoval: 'Bacteria, enteric viruses, coliforms, cysts, and pathogenic amoebae',
-    deltaP: '0.04 Bar',
-    flowVelocity: '0.28 m/s',
-    effScore: '99.99% Pathogen Kill',
-    statusBadge: 'FINAL SAFETY SHIELD',
+    name: 'Stage 4 – Active Copper Filter',
+    boldName: 'Active Copper',
+    tagline: 'Infuses copper ions & antimicrobial defense',
+    subtitle: 'Active Copper Infusion & Mineral Polishing',
+    poreSize: 'Sub-Micron Media',
+    coreMedia: 'High-Purity Active Copper (Cu²⁺) & Zinc Catalytic Media',
+    primaryRemoval: 'Residual bacteria, fungal spores, bio-film, and acidic mineral imbalance',
+    deltaP: '0.08 Bar',
+    flowVelocity: '0.24 m/s',
+    effScore: '99.8% Oligodynamic Disinfection',
+    statusBadge: 'COPPER INFUSION SHIELD',
     colorScheme: {
-      text: 'text-violet-400',
-      bg: 'bg-violet-950/60',
-      border: 'border-violet-500/40',
-      glow: 'shadow-[0_0_20px_rgba(168,85,247,0.3)]',
-      bar: 'bg-violet-400',
+      text: 'text-amber-400',
+      bg: 'bg-amber-950/60',
+      border: 'border-amber-500/40',
+      glow: 'shadow-[0_0_20px_rgba(245,158,11,0.3)]',
+      bar: 'bg-amber-400',
     },
-    overviewMetric: 'Germicidal Dosage: 42 mJ/cm²',
+    overviewMetric: 'Cu²⁺ Mineral Infusion: 0.05 mg/L (WHO Safe Grade)',
     description:
-      'The ultimate point-of-dispense safety barrier. Destroys microbial DNA and prevents bacterial regrowth in the secondary potable tank with zero chemicals, zero taste alteration, and instant activation.',
+      'The essential final mineral and antimicrobial guard. Enriches purified water with bio-available copper ions (Cu²⁺) imparting natural oligodynamic antibacterial protection, balancing alkaline pH, and creating crisp drinking water.',
     benefits: [
-      'Chemical-free sterilization: no chlorine byproduct toxicity',
-      'Destroys chlorine-resistant cysts like Cryptosporidium and Giardia',
-      'IoT lamp ballast monitoring with instant alert on tube degradation',
+      'Infuses active dietary copper ions for cellular metabolism and digestive wellness',
+      'Continuous oligodynamic antimicrobial action prevents tank bacterial regrowth',
+      'Neutralizes residual acidic RO bite and polishes water to sweet natural taste',
     ],
   },
 ];
@@ -334,8 +334,8 @@ export const FilterViewHUD: React.FC = () => {
               <span>3. RO Maxx (0.0001µm)</span>
             </div>
             <ChevronRight className="w-3.5 h-3.5 text-cyan-400/70 shrink-0" />
-            <div className="flex items-center gap-1 text-violet-300 whitespace-nowrap font-bold">
-              <span>4. FinalGuard UV (254nm)</span>
+            <div className="flex items-center gap-1 text-amber-300 whitespace-nowrap font-bold">
+              <span>4. Active Copper Filter</span>
             </div>
             <ChevronRight className="w-3.5 h-3.5 text-emerald-400/70 shrink-0" />
             <div className="flex items-center gap-1 text-emerald-400 whitespace-nowrap font-bold">

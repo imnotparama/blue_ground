@@ -394,24 +394,24 @@ export const Dashboard = () => {
                   </div>
                 </div>
 
-                {/* Stage 4: FinalGuard UV */}
-                <div className="flex flex-col gap-1 p-1.5 rounded-lg bg-black/40 border border-violet-500/20">
+                {/* Stage 4: Active Copper Filter */}
+                <div className="flex flex-col gap-1 p-1.5 rounded-lg bg-black/40 border border-amber-500/20">
                   <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-1 font-bold text-violet-300">
-                      {/* UV Ray / Shield Icon */}
-                      <svg className="w-3 h-3 text-violet-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                        <path d="m9 12 2 2 4-4" />
+                    <span className="flex items-center gap-1 font-bold text-amber-300">
+                      {/* Active Copper Cu2+ Molecule Icon */}
+                      <svg className="w-3 h-3 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="8" />
+                        <path d="M12 2v2M12 20v2M2 12h2M20 12h2" />
                       </svg>
-                      FinalGuard UV
+                      Active Copper
                     </span>
-                    <strong className="text-violet-400">{metrics.stage4Health || 95}%</strong>
+                    <strong className="text-amber-400">{metrics.stage4Health || 95}%</strong>
                   </div>
                   <div className="text-[7.5px] text-zinc-400 font-sans leading-tight">
-                    Kills microbes before dispense
+                    Infuses copper ions & antimicrobial polish
                   </div>
                   <div className="w-full h-1 bg-zinc-800 rounded-full overflow-hidden mt-0.5">
-                    <div className="h-full bg-violet-400" style={{ width: `${metrics.stage4Health || 95}%` }} />
+                    <div className="h-full bg-amber-400" style={{ width: `${metrics.stage4Health || 95}%` }} />
                   </div>
                 </div>
               </div>

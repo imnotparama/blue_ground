@@ -34,36 +34,36 @@ export const CAMERA_PRESETS: Record<CameraPreset, { position: [number, number, n
     target: [0.22, 0.74, 0.20],
   },
   FLOAT_SENSOR: {
-    position: [-2.1, -0.4, 1.2],
-    target: [-2.1, -0.65, 0.3],
+    position: [-1.10, 0.90, 1.1],
+    target: [-1.10, 0.60, 0],
   },
   PUMP: {
-    position: [0.05, 0.45, 0.8],
-    target: [0.05, 0.15, 0],
+    position: [1.35, 0.35, 1.1],
+    target: [1.35, 0.10, 0],
   },
   UV_LED: {
     position: [0.35, -0.2, 0.9],
     target: [0.35, -0.40, 0.25],
   },
   PH_SENSOR: {
-    position: [0.40, 0.5, 0.8],
-    target: [0.40, 0.25, 0.0],
+    position: [0.23, 0.78, 0.85],
+    target: [0.23, 0.58, 0.20],
   },
   TDS_SENSOR: {
-    position: [0.55, 0.5, 0.8],
-    target: [0.55, 0.25, 0.0],
+    position: [0.62, 0.78, 0.85],
+    target: [0.62, 0.58, 0.20],
   },
   TURBIDITY_SENSOR: {
-    position: [0.22, 0.5, 0.8],
-    target: [0.22, 0.25, 0.0],
+    position: [0.42, 0.78, 0.85],
+    target: [0.42, 0.58, 0.20],
   },
   TEMP_SENSOR: {
-    position: [0.40, 0.5, 0.8],
-    target: [0.40, 0.25, 0.0],
+    position: [0.80, 0.78, 0.85],
+    target: [0.80, 0.58, 0.20],
   },
   FLOW_SENSOR: {
-    position: [1.45, 0.55, 0.9],
-    target: [1.45, 0.30, 0.0],
+    position: [1.35, 0.50, 0.9],
+    target: [1.35, 0.30, 0.0],
   },
   SEDIMENTATION_TANK: {
     position: [1.90, 0.3, 1.8],
@@ -102,8 +102,8 @@ export const CAMERA_PRESETS: Record<CameraPreset, { position: [number, number, n
     target: [-1.85, 0.15, 0],
   },
   RECIRCULATION_LOOP: {
-    position: [-1.35, 0.25, 1.9],
-    target: [-1.35, 0.12, 0],
+    position: [-1.85, 0.15, 1.6],
+    target: [-1.85, -0.22, 0],
   },
   HYDRO_GENERATOR: {
     position: [3.20, -0.80, 2.40],
@@ -114,20 +114,20 @@ export const CAMERA_PRESETS: Record<CameraPreset, { position: [number, number, n
     target: [2.8, -0.4, 0],
   },
   WATER_STAGE_2: {
-    position: [1.9, 0.15, 2.0],
-    target: [1.9, 0.05, 0],
+    position: [1.90, 0.30, 1.8],
+    target: [1.90, 0.15, 0],
   },
   WATER_STAGE_3: {
-    position: [1.35, 0.35, 1.5],
-    target: [1.35, 0.30, 0],
+    position: [-0.70, 0.60, 1.25],
+    target: [-0.70, 0.40, -0.62],
   },
   WATER_STAGE_4: {
-    position: [0.45, 0.30, 1.8],
-    target: [0.45, 0.28, 0],
+    position: [-1.85, 0.45, 1.6],
+    target: [-1.85, 0.15, 0],
   },
   WATER_STAGE_5: {
-    position: [-1.40, 0.42, 1.8],
-    target: [-1.40, 0.38, 0],
+    position: [-1.45, 0.35, 1.7],
+    target: [-1.40, 0.15, -0.2],
   },
   WATER_STAGE_6: {
     position: [-0.70, -0.40, 2.6],
@@ -176,6 +176,8 @@ export const CameraController = () => {
         temp: 'TEMP_SENSOR',
         flow: 'FLOW_SENSOR',
         sedimentation_tank: 'SEDIMENTATION_TANK',
+        tank2_verification: 'TANK2_VERIFICATION',
+        recirculation_loop: 'RECIRCULATION_LOOP',
         filter_housing: 'FILTER_HOUSING',
         filtration_tank: 'FILTER_HOUSING',
         primary_tank: 'PRIMARY_TANK',

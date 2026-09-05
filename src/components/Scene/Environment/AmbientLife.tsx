@@ -26,7 +26,7 @@ export const AmbientLife = () => {
     return { positions, velocities };
   }, []);
 
-  // 2. Generate 25 swirling water mist particles around the sedimentation filter
+  // 2. Generate 25 swirling water mist particles around the Sedimentation Tank
   const mist = useMemo(() => {
     const count = 25;
     const positions = new Float32Array(count * 3);
@@ -64,7 +64,7 @@ export const AmbientLife = () => {
       pointsRef.current.geometry.attributes.position.needsUpdate = true;
     }
 
-    // B. Update Spiraling Water Mist around Sedimentation Filter
+    // B. Update Spiraling Water Mist around Sedimentation Tank
     if (mistRef.current) {
       const positions = mistRef.current.geometry.attributes.position.array as Float32Array;
       for (let i = 0; i < mist.positions.length / 3; i++) {

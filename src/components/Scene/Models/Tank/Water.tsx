@@ -34,16 +34,16 @@ export const Water = () => {
     return { positions, speeds };
   }, []);
 
-  // Bubble point particles inside secondary raw intake compartment
+  // Bubble point particles inside secondary raw settling chamber
   const secondaryBubblesData = useMemo(() => {
     const count = 50;
     const positions = new Float32Array(count * 3);
     const speeds = new Float32Array(count);
     for (let i = 0; i < count; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 1.2;
-      positions[i * 3 + 1] = Math.random() * 0.45 - 0.2;
+      positions[i * 3] = (Math.random() - 0.5) * 1.0;
+      positions[i * 3 + 1] = Math.random() * 0.44 + 0.06;
       positions[i * 3 + 2] = (Math.random() - 0.5) * 1.0;
-      speeds[i] = Math.random() * 0.20 + 0.08;
+      speeds[i] = Math.random() * 0.18 + 0.06;
     }
     return { positions, speeds };
   }, []);
@@ -63,7 +63,7 @@ export const Water = () => {
       primaryWaterRef.current.position.y = -1.65 + primaryWaterRef.current.scale.y / 2;
     }
 
-    // 2. Turbidity color transition for Sedimentation & Secondary Raw Compartments
+    // 2. Turbidity color transition for Sedimentation Tank & Secondary Raw Compartment
     const isTurbid = metrics.turbidity > 10 || mode === 'TURBIDITY';
     const targetSedColor = isTurbid ? new THREE.Color('#92400e') : new THREE.Color('#0284c7');
     const targetRawColor = isTurbid ? new THREE.Color('#b45309') : new THREE.Color('#0d9488');
@@ -77,7 +77,7 @@ export const Water = () => {
       secondaryMatRef.current.color.lerp(targetRawColor, dampFactor);
       secondaryMatRef.current.opacity = THREE.MathUtils.lerp(
         secondaryMatRef.current.opacity,
-        isTurbid ? 0.82 : 0.55,
+        isTurbid ? 0.85 : 0.62,
         dampFactor
       );
     }
@@ -108,13 +108,13 @@ export const Water = () => {
     // 5. Animate Secondary Bubbles
     if (secondaryBubblesRef.current) {
       const positions = secondaryBubblesRef.current.geometry.attributes.position.array as Float32Array;
-      const topY = 0.50;
+      const topY = 0.52;
 
       for (let i = 0; i < secondaryBubblesData.positions.length / 3; i++) {
         positions[i * 3 + 1] += secondaryBubblesData.speeds[i] * delta;
         if (positions[i * 3 + 1] > topY) {
-          positions[i * 3 + 1] = 0.08;
-          positions[i * 3] = (Math.random() - 0.5) * 1.2;
+          positions[i * 3 + 1] = 0.06;
+          positions[i * 3] = (Math.random() - 0.5) * 1.0;
           positions[i * 3 + 2] = (Math.random() - 0.5) * 1.0;
         }
       }
@@ -125,7 +125,7 @@ export const Water = () => {
   return (
     <group>
       {/* ════════════════════════════════════════════════════════════════════
-          A. PRIMARY TANK PURE WATER (Lower Clean Storage Compartment)
+          A. PRIMARY TANK PURE WATER (Clean Potable Storage Compartment)
              Bounds: x from -2.35 to 0.95 (center = -0.7), z from -0.6 to 0.6
           ════════════════════════════════════════════════════════════════════ */}
       <group position={[-0.7, 0, 0]}>
@@ -164,17 +164,17 @@ export const Water = () => {
       </group>
 
       {/* ════════════════════════════════════════════════════════════════════
-          B. SECONDARY COMPARTMENT WATER (Top Right Sensor Chamber)
-             Bounds: x from -0.08 to 0.98 (center = 0.45, width = 1.06), y = [0.05, 0.55]
+          B. SECONDARY COMPARTMENT RAW WATER (Raw Settling & Sensor Chamber)
+             Center: [0.45, 0.28, 0], Size: [1.06, 0.48, 1.20]
           ════════════════════════════════════════════════════════════════════ */}
       <group position={[0.45, 0, 0]}>
         <mesh ref={secondaryWaterRef} position={[0, 0.28, 0]} castShadow receiveShadow>
-          <boxGeometry args={[1.04, 0.46, 1.20]} />
+          <boxGeometry args={[1.06, 0.48, 1.20]} />
           <meshPhysicalMaterial
             ref={secondaryMatRef}
             color="#0d9488"
             transparent
-            opacity={0.60}
+            opacity={0.62}
             roughness={0.05}
             metalness={0.05}
             clearcoat={1.0}
@@ -183,7 +183,7 @@ export const Water = () => {
           />
         </mesh>
 
-        {/* Bubbles */}
+        {/* Secondary Tank Rising Micro-Bubbles */}
         <points ref={secondaryBubblesRef}>
           <bufferGeometry>
             <bufferAttribute
@@ -195,7 +195,7 @@ export const Water = () => {
             color="#bae6fd"
             size={0.02}
             transparent
-            opacity={0.6}
+            opacity={0.65}
             depthWrite={false}
           />
         </points>
@@ -212,38 +212,38 @@ export const Water = () => {
             ref={sedMatRef}
             color="#0284c7"
             transparent
-            opacity={0.70}
+            opacity={0.65}
             roughness={0.08}
             metalness={0.05}
+            thickness={0.12}
             clearcoat={1.0}
+            clearcoatRoughness={0.05}
             depthWrite={false}
           />
         </mesh>
       </group>
 
       {/* ════════════════════════════════════════════════════════════════════
-          D. POST-FILTRATION QUALITY TANK 2 WATER (Chamber 2 at x = -1.85)
-             Contains Post-RO water undergoing TDS sensor check
+          D. POST-FILTRATION QUALITY VERIFICATION TANK WATER (Chamber 2 at x = -1.85)
+             Contains water undergoing secondary sensor suite verification
           ════════════════════════════════════════════════════════════════════ */}
-      {dualVerificationMode && (
-        <group position={[-1.85, 0.15, 0]}>
-          <mesh position={[0, -0.02, 0]} castShadow receiveShadow>
-            <boxGeometry args={[0.62, 0.42, 0.52]} />
-            <meshPhysicalMaterial
-              ref={tank2MatRef}
-              color={(metrics.tds2 || 0) > 100 ? '#f59e0b' : '#38bdf8'}
-              transparent
-              opacity={0.62}
-              roughness={0.02}
-              metalness={0.05}
-              thickness={0.10}
-              clearcoat={1.0}
-              clearcoatRoughness={0.02}
-              depthWrite={false}
-            />
-          </mesh>
-        </group>
-      )}
+      <group position={[-1.85, 0.15, 0]}>
+        <mesh position={[0, -0.02, 0]} castShadow receiveShadow>
+          <boxGeometry args={[0.62, 0.42, 0.52]} />
+          <meshPhysicalMaterial
+            ref={tank2MatRef}
+            color={(metrics.tds2 || 0) > 100 ? '#f59e0b' : '#38bdf8'}
+            transparent
+            opacity={0.65}
+            roughness={0.02}
+            metalness={0.05}
+            thickness={0.10}
+            clearcoat={1.0}
+            clearcoatRoughness={0.02}
+            depthWrite={false}
+          />
+        </mesh>
+      </group>
     </group>
   );
 };

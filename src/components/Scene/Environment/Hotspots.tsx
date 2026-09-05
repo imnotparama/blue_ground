@@ -51,7 +51,7 @@ const hotspotsList: HotspotConfig[] = [
   {
     id: 'float',
     preset: 'FLOAT_SENSOR',
-    position: [-2.1, -0.65, 0.3],
+    position: [-1.10, 0.65, 0.10],
     label: 'Float Sensor',
     getStatus: (m) => m.waterLevel > 95 ? { label: 'LEVEL FULL', color: 'text-amber-400' } : { label: 'MONITORING', color: 'text-emerald-400' },
     getSub: (m) => `Level: ${m.waterLevel}%`,
@@ -59,8 +59,8 @@ const hotspotsList: HotspotConfig[] = [
   {
     id: 'pump',
     preset: 'PUMP',
-    position: [0.05, 0.20, 0],
-    label: 'Filtration Pump',
+    position: [1.35, 0.20, 0],
+    label: 'Booster Pump',
     getStatus: (m) => m.pumpRpm > 0 ? { label: 'RUNNING', color: 'text-emerald-400' } : { label: 'STANDBY', color: 'text-zinc-500' },
     getSub: (m) => `${m.pumpRpm} RPM`,
   },
@@ -70,15 +70,35 @@ const hotspotsList: HotspotConfig[] = [
     position: [-0.70, 0.92, -0.60],
     label: '4-Stage Smart Filtration Train',
     getStatus: (m, mode) => mode === 'TURBIDITY' ? { label: 'PURIFYING (4-STAGE)', color: 'text-amber-400 animate-pulse' } : { label: '4-STAGE DEFENSE ACTIVE', color: 'text-cyan-400' },
-    getSub: () => 'SediShield • ChemoBlock • RO Maxx • FinalGuard UV',
+    getSub: () => 'SediShield • ChemoBlock • RO Maxx • Active Copper',
   },
   {
     id: 'sedimentation_tank',
     preset: 'SEDIMENTATION_TANK',
-    position: [1.90, 0.05, 0.35],
+    position: [1.90, 0.40, 0.35],
     label: 'Sedimentation Tank',
-    getStatus: () => ({ label: 'SETTLING TRAP', color: 'text-cyan-400' }),
-    getSub: () => 'Primary Sand/Grit Filter',
+    getStatus: () => ({ label: 'PRIMARY SETTLING TRAP', color: 'text-cyan-400' }),
+    getSub: () => 'Multi-Layer Sand, Gravel & Grit Filter',
+  },
+  {
+    id: 'tank2_verification',
+    preset: 'TANK2_VERIFICATION',
+    position: [-1.85, 0.55, 0.45],
+    label: 'Quality Verification Chamber',
+    getStatus: (m) => m.tds > 100 
+      ? { label: 'RECIRCULATING (IMPURE)', color: 'text-amber-400 animate-pulse' } 
+      : { label: 'VERIFIED PURE', color: 'text-emerald-400' },
+    getSub: (m) => m.tds > 100 ? `${m.tds} ppm ➔ Stage 1 Re-Filter` : `${m.tds || 28} ppm ➔ Clean Potable`,
+  },
+  {
+    id: 'recirculation_loop',
+    preset: 'RECIRCULATION_LOOP',
+    position: [-1.85, -0.22, 0.10],
+    label: 'Recirculation Return Loop',
+    getStatus: (m) => m.tds > 100 
+      ? { label: 'ACTIVE (RE-FILTERING)', color: 'text-rose-400 animate-pulse' } 
+      : { label: 'STANDBY (SOLENOID CLOSED)', color: 'text-zinc-500' },
+    getSub: () => 'Direct Return to Stage 1 SediShield',
   },
   {
     id: 'uv',
@@ -91,34 +111,50 @@ const hotspotsList: HotspotConfig[] = [
   {
     id: 'ph',
     preset: 'PH_SENSOR',
-    position: [0.40, 0.25, 0.0],
-    label: 'pH Sensor',
+    position: [0.23, 0.65, 0.25],
+    label: 'pH Sensor Probe',
     getStatus: (m) => m.ph < 6.5 || m.ph > 8.5 ? { label: 'ALERT', color: 'text-rose-400' } : { label: 'SAFE', color: 'text-emerald-400' },
     getSub: (m) => `${m.ph.toFixed(2)} pH`,
   },
   {
-    id: 'tds',
-    preset: 'TDS_SENSOR',
-    position: [0.55, 0.25, 0.0],
-    label: 'TDS Sensor',
-    getStatus: (m) => m.tds > 300 ? { label: 'ALERT', color: 'text-rose-400' } : { label: 'SAFE', color: 'text-emerald-400' },
-    getSub: (m) => `${m.tds} ppm`,
-  },
-  {
     id: 'turbidity',
     preset: 'TURBIDITY_SENSOR',
-    position: [0.22, 0.25, 0.0],
+    position: [0.42, 0.65, 0.25],
     label: 'Turbidity Sensor',
     getStatus: (m) => m.turbidity > 5.0 ? { label: 'WARNING', color: 'text-amber-400' } : { label: 'SAFE', color: 'text-emerald-400' },
     getSub: (m) => `${m.turbidity.toFixed(1)} NTU`,
   },
   {
+    id: 'tds',
+    preset: 'TDS_SENSOR',
+    position: [0.62, 0.65, 0.25],
+    label: 'TDS Sensor Probe',
+    getStatus: (m) => m.tds > 300 ? { label: 'ALERT', color: 'text-rose-400' } : { label: 'SAFE', color: 'text-emerald-400' },
+    getSub: (m) => `${m.tds} ppm`,
+  },
+  {
+    id: 'temp_sensor',
+    preset: 'TEMP_SENSOR',
+    position: [0.80, 0.65, 0.25],
+    label: 'Temperature Sensor',
+    getStatus: (m) => ({ label: 'NOMINAL', color: 'text-emerald-400' }),
+    getSub: (m) => `${m.temperature.toFixed(1)}°C`,
+  },
+  {
     id: 'flow',
     preset: 'FLOW_SENSOR',
-    position: [1.45, 0.30, 0.05],
+    position: [1.35, 0.35, 0.05],
     label: 'Flow Sensor',
     getStatus: (m) => m.flowRate > 0 ? { label: 'FLOWING', color: 'text-emerald-400' } : { label: 'STANDBY', color: 'text-zinc-500' },
     getSub: (m) => `${m.flowRate.toFixed(1)} L/min`,
+  },
+  {
+    id: 'secondary_tank',
+    preset: 'SECONDARY_TANK',
+    position: [0.45, 0.35, 0.70],
+    label: 'Secondary Tank (Settling)',
+    getStatus: (m) => m.turbidity > 10 ? { label: 'TURBID SETTLING', color: 'text-amber-400' } : { label: 'SETTLING NOMINAL', color: 'text-teal-400' },
+    getSub: () => '35L Settling & Analytical Deck',
   },
   {
     id: 'primary_tank',
@@ -127,14 +163,6 @@ const hotspotsList: HotspotConfig[] = [
     label: 'Primary Tank (Clean Storage)',
     getStatus: () => ({ label: 'RESERVOIR', color: 'text-cyan-400' }),
     getSub: (m) => `${m.waterLevel}% Purified Storage`,
-  },
-  {
-    id: 'secondary_tank',
-    preset: 'SECONDARY_TANK',
-    position: [0.45, 0.28, 0.70],
-    label: 'Secondary Compartment',
-    getStatus: () => ({ label: 'SENSOR CHAMBER', color: 'text-cyan-400' }),
-    getSub: () => 'Quality Analysis Compartment',
   },
   {
     id: 'intake_pipe',
@@ -196,7 +224,6 @@ export const Hotspots = () => {
           <group key={spot.id} position={spot.position}>
             <Html
               center
-              distanceFactor={8}
               zIndexRange={[100, 0]}
               style={{
                 transition: 'all 0.2s ease-out',

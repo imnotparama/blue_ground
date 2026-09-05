@@ -15,53 +15,53 @@ const STAGE_THEMES = {
     ringColor: '#f59e0b',
     trailColor: '#b45309',
     particleSize: 0.045,
-    title: 'Raw Mineral Intake',
-    metric: '450+ NTU • Turbid Inflow',
-    badge: 'STAGE 1/6',
+    title: 'Raw Subterranean Intake',
+    metric: '450+ NTU • Borewell / Rural Slurry Inflow',
+    badge: 'STAGE 1/6: RAW INTAKE',
     lightIntensity: 2.0,
   },
   2: {
     color: '#eab308',
     emissive: '#ca8a04',
     ringColor: '#fde047',
-    trailColor: '#ca8a04',
-    particleSize: 0.040,
-    title: 'Primary Sedimentation',
-    metric: 'Gravity Settling • Grit Trap',
-    badge: 'STAGE 2/6',
-    lightIntensity: 2.2,
-  },
-  3: {
-    color: '#0284c7',
-    emissive: '#0369a1',
-    ringColor: '#38bdf8',
-    trailColor: '#0ea5e9',
-    particleSize: 0.035,
-    title: 'YF-S201 Flow Telemetry',
-    metric: '4.80 L/min Inline Rate',
-    badge: 'STAGE 3/6',
+    trailColor: '#eab308',
+    particleSize: 0.038,
+    title: 'Sedimentation Tank & Flow Telemetry',
+    metric: 'Gravitational Grit Trap • 4.80 L/min Hall Sensor',
+    badge: 'STAGE 2/6: SEDIMENTATION & TELEMETRY',
     lightIntensity: 2.4,
   },
-  4: {
-    color: '#06b6d4',
-    emissive: '#0891b2',
-    ringColor: '#22d3ee',
-    trailColor: '#06b6d4',
-    particleSize: 0.035,
-    title: 'IoT Probing Chamber',
-    metric: 'TDS: 145 ppm • pH: 7.21',
-    badge: 'STAGE 4/6',
-    lightIntensity: 2.5,
-  },
-  5: {
+  3: {
     color: '#06b6d4',
     emissive: '#0284c7',
     ringColor: '#38bdf8',
     trailColor: '#0ea5e9',
+    particleSize: 0.034,
+    title: '4-Stage Smart Filtration Train',
+    metric: 'SediShield ➔ ChemoBlock ➔ RO Maxx ➔ Active Copper',
+    badge: 'STAGE 3/6: 4-STAGE FILTRATION',
+    lightIntensity: 2.8,
+  },
+  4: {
+    color: '#8b5cf6',
+    emissive: '#6d28d9',
+    ringColor: '#a855f7',
+    trailColor: '#8b5cf6',
+    particleSize: 0.035,
+    title: 'Quality Verification Chamber',
+    metric: 'TDS #2, pH #2 & Turbidity Sensor Suite',
+    badge: 'STAGE 4/6: DUAL VERIFICATION',
+    lightIntensity: 2.6,
+  },
+  5: {
+    color: '#10b981',
+    emissive: '#059669',
+    ringColor: '#34d399',
+    trailColor: '#10b981',
     particleSize: 0.032,
-    title: '4-Stage Smart Train (SediShield ➔ ChemoBlock ➔ RO Maxx ➔ FinalGuard UV)',
-    metric: 'TDS: 680 → 28 ppm (-96%) • Sterile UV-C Active',
-    badge: 'STAGE 5/6',
+    title: 'Quality Decision Gate',
+    metric: 'Pure ➔ Clean Reservoir | Impure ➔ Recirculate',
+    badge: 'STAGE 5/6: DECISION GATE',
     lightIntensity: 2.8,
   },
   6: {
@@ -70,9 +70,9 @@ const STAGE_THEMES = {
     ringColor: '#34d399',
     trailColor: '#38bdf8',
     particleSize: 0.028,
-    title: 'Clean Storage & Dispense',
-    metric: '99.99% Sterile Drinking Water',
-    badge: 'STAGE 6/6',
+    title: 'Primary Clean Water Reservoir',
+    metric: '250L Potable Water • Continuous Monitoring',
+    badge: 'STAGE 6/6: POTABLE RESERVOIR',
     lightIntensity: 2.8,
   },
 };
@@ -82,7 +82,6 @@ export const WaterDropletTracker = () => {
     waterTrackMode, 
     waterTrackStage, 
     metrics, 
-    dualVerificationMode, 
     recirculationTriggered,
     hydroGeneratorMode,
   } = useSystemState();
@@ -101,116 +100,95 @@ export const WaterDropletTracker = () => {
     }
   }, [waterTrackMode, waterTrackStage]);
 
-  const isRecirculating = waterTrackStage === 6 && dualVerificationMode && (recirculationTriggered || metrics.recirculationActive || (metrics.tds2 || 0) > 100);
+  const isRecirculating = (metrics.tds2 || 0) > 100 || (metrics.turbidity2 || 0) > 1.0 || recirculationTriggered;
 
   // ─── 1. Exact 3D Path Curves for Each Stage ─────────────────────────────────
   const stageCurves = useMemo(() => {
-    // Stage 1: Raw Borewell / Hand Pump Intake -> Top of Sedimentation Tank
+    // Stage 1: Raw Borewell / Hand Pump Intake -> Riser -> Top of Sedimentation Tank
     const stage1 = hydroGeneratorMode
       ? new THREE.CatmullRomCurve3([
           new THREE.Vector3(2.52, -1.27, 0),
           new THREE.Vector3(2.52, -0.40, 0),
           new THREE.Vector3(2.52, 0.78, 0),
-          new THREE.Vector3(2.21, 0.78, 0),
-          new THREE.Vector3(1.90, 0.78, 0),
-          new THREE.Vector3(1.90, 0.70, 0),
+          new THREE.Vector3(2.18, 0.78, 0),
         ], false, 'catmullrom', 0.05)
       : new THREE.CatmullRomCurve3([
           new THREE.Vector3(2.8, -1.85, 0),
           new THREE.Vector3(2.8, -0.50, 0),
           new THREE.Vector3(2.8, 0.78, 0),
-          new THREE.Vector3(2.35, 0.78, 0),
-          new THREE.Vector3(1.90, 0.78, 0),
-          new THREE.Vector3(1.90, 0.70, 0),
+          new THREE.Vector3(2.18, 0.78, 0),
         ], false, 'catmullrom', 0.05);
 
-    // Stage 2: Sedimentation Tank Internal Settling Downward
+    // Stage 2: Sedimentation Tank Settling Beds -> Flow Sensor -> Booster Pump Inlet
     const stage2 = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(1.90, 0.70, 0),
-      new THREE.Vector3(1.90, 0.20, 0),
-      new THREE.Vector3(1.90, -0.20, 0),
-      new THREE.Vector3(1.90, -0.50, 0),
-      new THREE.Vector3(1.75, -0.30, 0),
-      new THREE.Vector3(1.62, 0.30, 0),
+      new THREE.Vector3(2.18, 0.78, 0), // Top inlet of Sedimentation Tank
+      new THREE.Vector3(1.90, 0.45, 0), // Settling through sand & gravel
+      new THREE.Vector3(1.64, 0.30, 0), // Sedimentation outlet
+      new THREE.Vector3(1.48, 0.30, 0), // Inline YF-S201 Flow Sensor
+      new THREE.Vector3(1.35, 0.30, 0), // Elbow above booster pump
+      new THREE.Vector3(1.35, 0.10, 0), // Booster Pump impeller core
     ], false, 'catmullrom', 0.05);
 
-    // Stage 3: Transfer to Inline Flow Sensor & Quality Chamber Inflow
+    // Stage 3: High-Pressure Pump through 4-Stage Smart Filtration Train (SediShield -> ChemoBlock -> RO Maxx -> Active Copper)
     const stage3 = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(1.62, 0.30, 0),
-      new THREE.Vector3(1.45, 0.30, 0),
-      new THREE.Vector3(1.20, 0.30, 0),
-      new THREE.Vector3(1.00, 0.30, 0),
-      new THREE.Vector3(0.85, 0.30, 0),
-    ], false, 'catmullrom', 0.05);
-
-    // Stage 4: Secondary Chamber Testing Probes & Pump Intake
-    const stage4 = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(0.85, 0.30, 0),
-      new THREE.Vector3(0.60, 0.25, 0),
-      new THREE.Vector3(0.45, 0.20, 0),
-      new THREE.Vector3(0.20, 0.12, 0),
-      new THREE.Vector3(0.05, 0.08, 0),
-    ], false, 'catmullrom', 0.05);
-
-    // Stage 5: High-Pressure Pump through 4-Stage Smart Filtration Train -> Clean Outlet
-    const stage5 = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(0.05, 0.08, 0),        // Pump outlet
-      new THREE.Vector3(0.05, 0.45, 0),        // Riser
-      new THREE.Vector3(0.05, 0.79, 0),        // Overhead elbow
-      new THREE.Vector3(0.05, 0.79, -0.62),    // Turn to back rack
-      new THREE.Vector3(-0.65, 0.79, -0.62),   // Rack conduit
+      new THREE.Vector3(1.35, 0.12, 0),        // Booster Pump outlet
+      new THREE.Vector3(1.35, 0.45, 0),        // Riser
+      new THREE.Vector3(1.35, 0.79, 0),        // Overhead elbow
+      new THREE.Vector3(1.35, 0.79, -0.62),    // Turn to back rack
+      new THREE.Vector3(0.00, 0.79, -0.62),    // Top rack conduit
       new THREE.Vector3(-1.36, 0.79, -0.62),   // Stage 1 SediShield top inlet
       new THREE.Vector3(-1.36, 0.45, -0.62),   // Stage 1 SediShield core (silt/rust trapped)
-      new THREE.Vector3(-1.14, 0.79, -0.62),   // Thin glowing jumper to Stage 2
+      new THREE.Vector3(-1.14, 0.79, -0.62),   // Jumper to Stage 2
       new THREE.Vector3(-0.92, 0.79, -0.62),   // Stage 2 ChemoBlock top inlet
       new THREE.Vector3(-0.92, 0.45, -0.62),   // Stage 2 ChemoBlock core (chemicals stripped)
-      new THREE.Vector3(-0.70, 0.79, -0.62),   // Thin glowing jumper to Stage 3
+      new THREE.Vector3(-0.70, 0.79, -0.62),   // Jumper to Stage 3
       new THREE.Vector3(-0.48, 0.79, -0.62),   // Stage 3 RO Maxx top inlet
       new THREE.Vector3(-0.48, 0.45, -0.62),   // Stage 3 RO Maxx membrane core (TDS dropped)
-      new THREE.Vector3(-0.26, 0.79, -0.62),   // Thin glowing jumper to Stage 4
-      new THREE.Vector3(-0.04, 0.79, -0.62),   // Stage 4 FinalGuard UV top inlet
-      new THREE.Vector3(-0.04, 0.45, -0.62),   // Stage 4 UV core (germicidal sterilization)
+      new THREE.Vector3(-0.26, 0.79, -0.62),   // Jumper to Stage 4
+      new THREE.Vector3(-0.04, 0.79, -0.62),   // Stage 4 Active Copper top inlet
+      new THREE.Vector3(-0.04, 0.45, -0.62),   // Stage 4 Active Copper core (copper ion infusion & antimicrobial polish)
+    ], false, 'catmullrom', 0.05);
+
+    // Stage 4: Discharge from Stage 4 Active Copper into Quality Verification Tank (Chamber 2) & Multi-Sensor Testing
+    const stage4 = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(-0.04, 0.45, -0.62),   // Stage 4 Active Copper core
       new THREE.Vector3(-0.04, 0.79, -0.62),   // Stage 4 top discharge
-      new THREE.Vector3(-0.04, 0.79, 0),       // Return forward to front plane
-      new THREE.Vector3(0.20, 0.79, 0),        // Feed to secondary compartment
-      new THREE.Vector3(0.44, 0.65, 0),        // Secondary tank clean inflow
+      new THREE.Vector3(-0.04, 0.79, 0),       // Return forward
+      new THREE.Vector3(-0.945, 0.79, 0),      // Overhead conduit to Verification Tank
+      new THREE.Vector3(-1.85, 0.79, 0),       // Over Verification Tank
+      new THREE.Vector3(-1.85, 0.50, 0),       // Inlet drop
+      new THREE.Vector3(-1.85, 0.15, 0),       // Center of Verification Chamber (sensor probing)
     ], false, 'catmullrom', 0.05);
 
-    // Stage 6 Setup 1 Direct: Secondary Tank -> Primary 250L Potable Reservoir
-    const stage6Direct = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(0.44, 0.65, 0),
-      new THREE.Vector3(0.20, 0.55, 0),
-      new THREE.Vector3(-0.10, 0.35, 0),
-      new THREE.Vector3(-0.45, 0.0, 0),
-      new THREE.Vector3(-0.70, -0.35, 0),
-      new THREE.Vector3(-1.10, -0.65, 0),
-      new THREE.Vector3(-2.48, -1.45, 0),
+    // Stage 5 Path A: Clean Approved -> Transfer to Primary Clean Storage
+    const stage5Clean = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(-1.85, 0.15, 0),       // Verification Tank
+      new THREE.Vector3(-1.85, -0.16, 0),      // Bottom outlet
+      new THREE.Vector3(-1.85, -0.22, 0),      // 3-way valve
+      new THREE.Vector3(-1.50, -0.22, 0),      // Horizontal to clean reservoir inlet
+      new THREE.Vector3(-1.50, -0.45, 0),      // Drop into clean tank
+      new THREE.Vector3(-0.90, -0.80, 0),      // Cascading into potable reservoir
+    ], false, 'catmullrom', 0.05);
+
+    // Stage 5 Path B: Sub-Standard Impure -> Recirculation Loop back to Stage 1 SediShield
+    const stage5Recirc = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(-1.85, 0.15, 0),       // Verification Tank (impure)
+      new THREE.Vector3(-1.85, -0.16, 0),      // Bottom drain port
+      new THREE.Vector3(-1.85, -0.22, 0),      // 3-way diverter valve
+      new THREE.Vector3(-1.85, -0.22, -0.62),  // Depth pipe to back rack
+      new THREE.Vector3(-1.85, 0.28, -0.62),   // Return riser
+      new THREE.Vector3(-1.85, 0.79, -0.62),   // Top rack elbow
+      new THREE.Vector3(-1.36, 0.79, -0.62),   // Return to Stage 1 SediShield top inlet!
+      new THREE.Vector3(-1.36, 0.45, -0.62),   // Re-entering filtration train
+    ], false, 'catmullrom', 0.05);
+
+    // Stage 6: Primary Clean Storage & Dispense Tap
+    const stage6 = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(-1.20, -0.70, 0),
+      new THREE.Vector3(-0.70, -0.80, 0),
+      new THREE.Vector3(-1.50, -1.10, 0),
+      new THREE.Vector3(-2.40, -1.45, 0),
       new THREE.Vector3(-2.85, -1.72, 0),
-    ], false, 'catmullrom', 0.05);
-
-    // Stage 6 Setup 2 Path A (Potable Pass): Tank 2 -> Clean 250L Reservoir + UV-C
-    const stage6Pass = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(-1.85, 0.15, 0),
-      new THREE.Vector3(-2.19, 0.03, 0),
-      new THREE.Vector3(-2.27, -0.20, 0),
-      new THREE.Vector3(-1.60, -0.45, 0),
-      new THREE.Vector3(-0.70, -0.55, 0),
-      new THREE.Vector3(-0.40, -0.60, 0),
-    ], false, 'catmullrom', 0.05);
-
-    // Stage 6 Setup 2 Path B (Sub-Standard Fail): Tank 2 -> Recirculation Return -> Riser -> RO Filter Inlet -> Filter Media -> Tank 2
-    const stage6Recirc = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(-1.85, 0.15, 0),
-      new THREE.Vector3(-1.70, -0.11, 0),
-      new THREE.Vector3(-1.70, -0.22, 0),
-      new THREE.Vector3(-1.25, -0.22, 0),
-      new THREE.Vector3(-0.88, -0.22, 0),
-      new THREE.Vector3(-0.88, 0.10, 0),
-      new THREE.Vector3(-0.88, 0.38, 0),
-      new THREE.Vector3(-1.15, 0.38, 0),
-      new THREE.Vector3(-1.40, 0.38, 0),
-      new THREE.Vector3(-1.85, 0.38, 0),
-      new THREE.Vector3(-1.85, 0.15, 0),
     ], false, 'catmullrom', 0.05);
 
     return { 
@@ -218,10 +196,10 @@ export const WaterDropletTracker = () => {
       2: stage2, 
       3: stage3, 
       4: stage4, 
-      5: stage5, 
-      6: stage6Pass, 
-      '6_direct': stage6Direct,
-      '6_recirc': stage6Recirc 
+      5: stage5Clean,
+      '5_clean': stage5Clean,
+      '5_recirc': stage5Recirc,
+      6: stage6,
     };
   }, [hydroGeneratorMode]);
 
@@ -235,14 +213,8 @@ export const WaterDropletTracker = () => {
     const progress = (time * 0.28) % 1.0;
 
     let activeCurve: THREE.CatmullRomCurve3;
-    if (waterTrackStage === 6) {
-      if (!dualVerificationMode) {
-        activeCurve = stageCurves['6_direct'];
-      } else if (isRecirculating) {
-        activeCurve = stageCurves['6_recirc'];
-      } else {
-        activeCurve = stageCurves[6];
-      }
+    if (waterTrackStage === 5) {
+      activeCurve = isRecirculating ? stageCurves['5_recirc'] : stageCurves['5_clean'];
     } else {
       activeCurve = (stageCurves[waterTrackStage as keyof typeof stageCurves] as THREE.CatmullRomCurve3) || stageCurves[1];
     }

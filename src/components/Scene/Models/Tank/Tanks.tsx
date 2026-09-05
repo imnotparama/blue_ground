@@ -58,8 +58,8 @@ export const Tanks = () => {
   } = useSystemState();
 
   const mainTankRef = useRef<THREE.Group>(null);
-  const sedTankRef = useRef<THREE.Group>(null);
   const tank2Ref = useRef<THREE.Group>(null);
+  const sedTankRef = useRef<THREE.Group>(null);
 
   const tankMatRef = useRef<THREE.MeshPhysicalMaterial>(null);
   const sedMatRef = useRef<THREE.MeshPhysicalMaterial>(null);
@@ -84,10 +84,11 @@ export const Tanks = () => {
     }
 
     if (tank2Ref.current) {
-      const targetScale = dualVerificationMode ? 1.0 : 0.001;
+      const targetY = exploded ? 0.25 : 0.15;
       const damp = 1.0 - Math.exp(-8 * delta);
-      tank2Ref.current.scale.setScalar(THREE.MathUtils.lerp(tank2Ref.current.scale.x, targetScale, damp));
-      tank2Ref.current.visible = tank2Ref.current.scale.x > 0.05;
+      tank2Ref.current.position.y = THREE.MathUtils.lerp(tank2Ref.current.position.y, targetY, damp);
+      tank2Ref.current.scale.setScalar(1.0);
+      tank2Ref.current.visible = true;
     }
 
     if (sedTankRef.current) {
@@ -106,7 +107,7 @@ export const Tanks = () => {
       ? 0.04
       : isXray 
       ? 0.08 
-      : (activeHotspot !== null && activeHotspot !== 'primary_tank' && activeHotspot !== 'secondary_tank') 
+      : (activeHotspot !== null && activeHotspot !== 'primary_tank' && activeHotspot !== 'secondary_tank' && activeHotspot !== 'tank2_verification') 
       ? 0.15 
       : 0.45;
     
@@ -191,90 +192,6 @@ export const Tanks = () => {
           </group>
         ))}
 
-        {/* HORIZONTAL COMPARTMENT DIVIDER (Secondary Top ↔ Primary Bottom on Right Side) */}
-        {/* Secondary compartment spans world x from -0.10 to +1.00 -> local x from +0.60 to +1.70 (center = +1.15, width = 1.10) */}
-        <mesh position={[1.15, 0.55, 0]} receiveShadow castShadow>
-          <boxGeometry args={[1.10, 0.025, TD - 0.04]} />
-          <meshPhysicalMaterial
-            color="#e0f2fe"
-            transparent
-            opacity={0.4}
-            roughness={0.06}
-            clearcoat={1.0}
-            depthWrite={false}
-          />
-        </mesh>
-
-        {/* Divider Cyan Glowing Front Edge */}
-        <mesh position={[1.15, 0.55, TD / 2 - 0.001]}>
-          <boxGeometry args={[1.10, 0.02, 0.004]} />
-          <meshStandardMaterial color="#06b6d4" emissive="#06b6d4" emissiveIntensity={0.8} />
-        </mesh>
-
-        {/* Vertical Partition Wall for Secondary Compartment Left Edge (world x = -0.10 -> local x = +0.60) */}
-        <mesh position={[0.60, 0.85, 0]} receiveShadow castShadow>
-          <boxGeometry args={[0.025, 0.60, TD - 0.04]} />
-          <meshPhysicalMaterial
-            color="#e0f2fe"
-            transparent
-            opacity={0.4}
-            roughness={0.06}
-            clearcoat={1.0}
-            depthWrite={false}
-          />
-        </mesh>
-
-        {/* Vertical Divider Cyan Glowing Front Edge */}
-        <mesh position={[0.60, 0.85, TD / 2 - 0.001]}>
-          <boxGeometry args={[0.02, 0.60, 0.004]} />
-          <meshStandardMaterial color="#06b6d4" emissive="#06b6d4" emissiveIntensity={0.8} />
-        </mesh>
-
-        {/* ─── SECONDARY TANK INTERNAL VERTICAL FLOAT SWITCH PROBE ─── */}
-        <group position={[1.15, 0.85, 0]}>
-          {/* Vertical Stainless Probe Rod */}
-          <mesh castShadow>
-            <cylinderGeometry args={[0.006, 0.006, 0.48, 12]} />
-            <meshStandardMaterial color="#cbd5e1" roughness={0.2} metalness={0.95} />
-          </mesh>
-          {/* Top Cable Gland Mounting Collar */}
-          <mesh position={[0, 0.25, 0]} castShadow>
-            <cylinderGeometry args={[0.016, 0.016, 0.03, 12]} />
-            <meshStandardMaterial color="#1e293b" roughness={0.4} metalness={0.7} />
-          </mesh>
-          {/* Toroidal Magnetic Float Ring with Purity Indicator */}
-          <mesh position={[0, 0.05, 0]} castShadow>
-            <torusGeometry args={[0.022, 0.008, 12, 24]} />
-            <meshStandardMaterial color="#0284c7" roughness={0.3} metalness={0.6} />
-          </mesh>
-          {/* Laser-Etched Level Marker Rings along Probe */}
-          {[-0.15, -0.05, 0.05, 0.15].map((ly, lIdx) => (
-            <mesh key={lIdx} position={[0, ly, 0]}>
-              <cylinderGeometry args={[0.008, 0.008, 0.003, 12]} />
-              <meshStandardMaterial color="#38bdf8" emissive="#38bdf8" emissiveIntensity={0.6} />
-            </mesh>
-          ))}
-        </group>
-
-        {/* ─── SECONDARY TANK CLEAN WATER OUTLET SOLENOID VALVE ─── */}
-        <group position={[TW / 2 + 0.08, 0.65, 0]}>
-          {/* Heavy Brass Forged Valve Body */}
-          <mesh castShadow>
-            <boxGeometry args={[0.065, 0.065, 0.065]} />
-            <meshStandardMaterial color="#ca8a04" roughness={0.25} metalness={0.9} />
-          </mesh>
-          {/* IP65 Weatherproof Solenoid Coil Housing */}
-          <mesh position={[0, 0.055, 0]} castShadow>
-            <cylinderGeometry args={[0.024, 0.024, 0.065, 16]} />
-            <meshStandardMaterial color="#090d16" roughness={0.4} />
-          </mesh>
-          {/* Valve Energized LED Indicator (Emerald Green when Clean Outlet is open) */}
-          <mesh position={[0, 0.09, 0]}>
-            <sphereGeometry args={[0.006, 8, 8]} />
-            <meshStandardMaterial color="#10b981" emissive="#10b981" emissiveIntensity={2.5} />
-          </mesh>
-        </group>
-
         {/* ─── PHOTOREALISTIC HARDWARE & SCALE ETCHINGS ─── */}
         {/* 1. Laser-etched Metric Volume Graduation Marks on Front Acrylic Face */}
         <group position={[-TW / 2 + 0.35, 0, TD / 2 + 0.002]}>
@@ -312,13 +229,7 @@ export const Tanks = () => {
           </group>
         ))}
 
-        {/* 3. Translucent Silicone Gasket Seal Line along Secondary Divider Shelf */}
-        <mesh position={[1.15, 0.545, 0]}>
-          <boxGeometry args={[1.10, 0.008, TD - 0.02]} />
-          <meshPhysicalMaterial color="#f0fdf4" transparent opacity={0.65} roughness={0.8} />
-        </mesh>
-
-        {/* 4. Heavy-Duty Rubber Vibration Dampener Feet with Leveling Studs */}
+        {/* 3. Heavy-Duty Rubber Vibration Dampener Feet with Leveling Studs */}
         {[-TW / 2 + 0.15, TW / 2 - 0.15].map((fx) =>
           [-TD / 2 + 0.15, TD / 2 - 0.15].map((fz) => (
             <group key={`foot-${fx}-${fz}`} position={[fx, -TH / 2 - 0.05, fz]}>
@@ -336,12 +247,101 @@ export const Tanks = () => {
           ))
         )}
 
+        {/* ─── SECONDARY COMPARTMENT (RAW WATER SETTLING & SENSOR CHAMBER) ─── */}
+        {/* Horizontal Compartment Divider (Secondary Top Floor ↔ Primary Clean Bottom) */}
+        <mesh position={[1.15, 0.55, 0]} receiveShadow castShadow>
+          <boxGeometry args={[1.10, 0.025, TD - 0.04]} />
+          <meshPhysicalMaterial
+            color="#bae6fd"
+            transparent
+            opacity={0.55}
+            roughness={0.06}
+            metalness={0.1}
+            clearcoat={1.0}
+            depthWrite={false}
+          />
+        </mesh>
+
+        {/* Divider Frame Structural Extrusion & Cyan Glowing Front Edge */}
+        <mesh position={[1.15, 0.54, TD / 2]}>
+          <boxGeometry args={[1.10, 0.028, 0.028]} />
+          <meshStandardMaterial color="#334155" roughness={0.3} metalness={0.9} />
+        </mesh>
+        <mesh position={[1.15, 0.555, TD / 2 + 0.001]}>
+          <boxGeometry args={[1.10, 0.012, 0.004]} />
+          <meshStandardMaterial color="#06b6d4" emissive="#06b6d4" emissiveIntensity={1.2} />
+        </mesh>
+
+        {/* Vertical Partition Wall for Secondary Compartment Left Edge */}
+        <mesh position={[0.60, 0.85, 0]} receiveShadow castShadow>
+          <boxGeometry args={[0.025, 0.60, TD - 0.04]} />
+          <meshPhysicalMaterial
+            color="#bae6fd"
+            transparent
+            opacity={0.55}
+            roughness={0.06}
+            metalness={0.1}
+            clearcoat={1.0}
+            depthWrite={false}
+          />
+        </mesh>
+
+        {/* Vertical Divider Frame Bar & Cyan Glowing Front Edge */}
+        <mesh position={[0.60, 0.85, TD / 2]}>
+          <boxGeometry args={[0.028, 0.60, 0.028]} />
+          <meshStandardMaterial color="#334155" roughness={0.3} metalness={0.9} />
+        </mesh>
+        <mesh position={[0.60, 0.85, TD / 2 + 0.001]}>
+          <boxGeometry args={[0.012, 0.60, 0.004]} />
+          <meshStandardMaterial color="#06b6d4" emissive="#06b6d4" emissiveIntensity={1.2} />
+        </mesh>
+
+        {/* Secondary Tank Laser-Etched Volume Graduation Marks */}
+        <group position={[1.62, 0.85, TD / 2 + 0.002]}>
+          {[-0.20, -0.10, 0.0, 0.10, 0.20].map((yTick, idx) => (
+            <mesh key={`sec-tick-${idx}`} position={[0, yTick, 0]}>
+              <boxGeometry args={[0.05, 0.003, 0.001]} />
+              <meshStandardMaterial color="#38bdf8" roughness={0.2} />
+            </mesh>
+          ))}
+        </group>
+
+        {/* Secondary Tank Metallic Nameplate / Inspection Badge */}
+        <group position={[1.15, 0.62, TD / 2 + 0.002]}>
+          <mesh castShadow>
+            <boxGeometry args={[0.74, 0.06, 0.004]} />
+            <meshStandardMaterial color="#0f172a" roughness={0.5} metalness={0.8} />
+          </mesh>
+          <mesh position={[0, 0.024, 0.001]}>
+            <boxGeometry args={[0.70, 0.004, 0.001]} />
+            <meshStandardMaterial color="#06b6d4" emissive="#06b6d4" emissiveIntensity={0.8} />
+          </mesh>
+        </group>
+
+        {/* Stainless Sensor Mounting Bridge across top of Secondary Tank */}
+        <group position={[1.15, 1.13, 0.20]}>
+          <mesh castShadow>
+            <boxGeometry args={[1.05, 0.024, 0.05]} />
+            <meshStandardMaterial color="#64748b" roughness={0.25} metalness={0.92} />
+          </mesh>
+          {/* 4 Precision Machined Sensor Mounting Collar Ports */}
+          {[-0.22, -0.03, 0.17, 0.35].map((cx, idx) => (
+            <mesh key={`gland-collar-${idx}`} position={[cx, 0.015, 0]} castShadow>
+              <cylinderGeometry args={[0.022, 0.026, 0.025, 16]} />
+              <meshStandardMaterial color="#94a3b8" roughness={0.2} metalness={0.95} />
+            </mesh>
+          ))}
+        </group>
+
         {/* INLETS & OUTLETS */}
-        {/* A. Secondary Compartment Inlet (from Sedimentation / Flow sensor) */}
+        {/* Secondary Tank Inlet Nozzle (from Sedimentation Tank & Flow Sensor at world x = 1.0, y = 0.30) */}
         <PipeNozzle pos={[TW / 2, 0.85, 0]} rot={[0, 0, Math.PI / 2]} />
 
-        {/* B. Primary Tank Clean Return Inlet (from RO Filtration Tank on left at world x = -1.95) */}
-        <PipeNozzle pos={[-1.25, TH / 2, 0]} rot={[0, 0, 0]} />
+        {/* Secondary Tank Suction Outlet Nozzle (to Booster Pump Inlet at world x = 1.0, y = 0.05) */}
+        <PipeNozzle pos={[TW / 2, 0.60, 0]} rot={[0, 0, Math.PI / 2]} />
+
+        {/* Primary Tank Clean Return Inlet (from Verification Chamber at world x = -1.50) */}
+        <PipeNozzle pos={[-0.80, TH / 2, 0]} rot={[0, 0, 0]} />
 
         {/* C. Primary Tank Clean Water Outlet Tap (Bottom-Left) */}
         <PipeNozzle pos={[-TW / 2, -0.90, 0]} rot={[0, 0, -Math.PI / 2]} />
@@ -378,7 +378,7 @@ export const Tanks = () => {
           setCameraPreset('SEDIMENTATION_TANK');
         }}
       >
-        {/* Transparent RO Housing Cylinder */}
+        {/* Transparent Sedimentation Cylinder */}
         <mesh castShadow receiveShadow>
           <cylinderGeometry args={[0.26, 0.20, 1.45, 24, 1, false]} />
           <meshPhysicalMaterial
@@ -438,10 +438,10 @@ export const Tanks = () => {
       </group>
 
       {/* ════════════════════════════════════════════════════════════════════
-          3. POST-FILTRATION QUALITY VERIFICATION TANK 2 (Chamber 2)
+          2. POST-FILTRATION QUALITY VERIFICATION TANK (Chamber 2)
              Center: [-1.85, 0.15, 0]
              Houses Sensor Suite #2 (TDS #2, pH #2, Turbidity #2)
-             Dual-Verification Closed-Loop Return System
+             Closed-Loop Dual Verification & Recirculation Return
           ════════════════════════════════════════════════════════════════════ */}
       <group
         ref={tank2Ref}
@@ -484,14 +484,28 @@ export const Tanks = () => {
           <meshStandardMaterial color="#1e293b" roughness={0.4} metalness={0.8} />
         </mesh>
 
-        {/* Inlet Port from RO Purifier (Right Wall, x = 0.34, y = 0.16) */}
-        <PipeNozzle pos={[0.34, 0.16, 0]} rot={[0, 0, -Math.PI / 2]} />
+        {/* Top Inlet Port from Stage 4 Filter Train */}
+        <PipeNozzle pos={[0, 0.26, 0]} rot={[0, 0, 0]} />
 
-        {/* Clean Outlet Port to Primary Tank (Left Wall, x = -0.34, y = -0.12) */}
-        <PipeNozzle pos={[-0.34, -0.12, 0]} rot={[0, 0, Math.PI / 2]} />
+        {/* 3 Dedicated Lid Gland Ports for Water Analytical Sensors */}
+        {/* pH Sensor Gland */}
+        <mesh position={[-0.12, 0.275, 0.10]} castShadow>
+          <cylinderGeometry args={[0.022, 0.022, 0.025, 16]} />
+          <meshStandardMaterial color="#0284c7" roughness={0.3} metalness={0.8} />
+        </mesh>
+        {/* Turbidity Sensor Gland */}
+        <mesh position={[0.12, 0.275, 0.10]} castShadow>
+          <cylinderGeometry args={[0.022, 0.022, 0.025, 16]} />
+          <meshStandardMaterial color="#06b6d4" roughness={0.3} metalness={0.8} />
+        </mesh>
+        {/* TDS / EC Sensor Gland */}
+        <mesh position={[0, 0.275, 0.15]} castShadow>
+          <cylinderGeometry args={[0.022, 0.022, 0.025, 16]} />
+          <meshStandardMaterial color="#38bdf8" roughness={0.3} metalness={0.8} />
+        </mesh>
 
-        {/* Recirculation Return Port (Bottom Outlet, y = -0.26, x = 0.15) */}
-        <PipeNozzle pos={[0.15, -0.26, 0]} rot={[Math.PI, 0, 0]} />
+        {/* Clean Outlet / Recirculation Multi-Port at Bottom */}
+        <PipeNozzle pos={[0, -0.26, 0]} rot={[Math.PI, 0, 0]} />
 
         {/* Diagnostic Chamber Micro-Label Plaque */}
         <mesh position={[0, 0.18, 0.295]} castShadow>

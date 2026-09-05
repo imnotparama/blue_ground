@@ -77,7 +77,7 @@ export interface SystemMetrics {
   stage1Health: number; // Sediment %
   stage2Health: number; // Chemo Block %
   stage3Health: number; // RO Maxx %
-  stage4Health: number; // Final Guard / UV %
+  stage4Health: number; // Active Copper Filter %
   // Power Distribution Rails
   pumpRailVoltage: number; // 24.0 V
   logicRailVoltage: number; // 5.0 V
@@ -162,7 +162,7 @@ interface SystemStateContextType {
   // 4-Stage Filter Focus View
   filterView: boolean;
   setFilterView: (val: boolean) => void;
-  filterStageFocus: number; // 0 = all 4, 1 = SediShield, 2 = ChemoBlock, 3 = RO Maxx, 4 = FinalGuard UV
+  filterStageFocus: number; // 0 = all 4, 1 = SediShield, 2 = ChemoBlock, 3 = RO Maxx, 4 = Active Copper Filter
   setFilterStageFocus: (stage: number) => void;
 }
 
@@ -229,25 +229,31 @@ const presentationSteps: PresentationStep[] = [
   {
     target: 'SEDIMENTATION_TANK',
     title: 'Phase 2: Gravitational Sedimentation Trap',
-    description: 'Raw water enters the primary sedimentation vessel. Multi-density settling layers of coarse aggregate, gravel, and activated carbon trap heavy suspended solids and mining grit.',
-    duration: 6000,
+    description: 'Raw water from the borewell enters the 45L sedimentation vessel. Multi-density settling layers of coarse gravel, quartz sand, and activated carbon trap heavy suspended solids, clay silt, and mining grit before pumping.',
+    duration: 5500,
   },
   {
     target: 'FLOW_SENSOR',
-    title: 'Phase 3: Real-Time Flow Telemetry',
-    description: 'As settled water leaves the sedimentation tank, an inline Hall-effect flow sensor measures volumetric inflow rate (L/min), providing live throughput telemetry to the ESP32.',
-    duration: 5000,
-  },
-  {
-    target: 'SECONDARY_TANK',
-    title: 'Phase 4: Sensor Quality & Dual Routing',
-    description: 'Water fills the secondary quality analysis chamber where immersed TDS, pH, and optical Turbidity probes evaluate purity in real time. Good water drops directly to storage; bad water is routed to RO filtration.',
-    duration: 6500,
+    title: 'Phase 2B: High-Pressure Booster & Flow Telemetry',
+    description: 'Settled water passes through the inline YF-S201 Hall-effect flow sensor for instantaneous volumetric rate telemetry (L/min) before entering the 24V booster pump to pressurize the filtration train.',
+    duration: 5500,
   },
   {
     target: 'FILTER_HOUSING',
-    title: 'Phase 5: 4-Stage Smart Filtration Train',
-    description: 'Four-stage defense against borewell and mining water: Stage 1 SediShield blocks sand, silt and rust; Stage 2 ChemoBlock cuts chlorine, odor and chemicals; Stage 3 RO Maxx strips heavy metals and drops TDS by 96%; Stage 4 FinalGuard UV kills microbes before dispense into clean storage.',
+    title: 'Phase 3: 4-Stage Smart Filtration Train',
+    description: 'Four-stage sequential defense: Stage 1 SediShield traps sand, rust and silt; Stage 2 ChemoBlock cuts chlorine, odor and organic load; Stage 3 RO Maxx strips heavy metals and reduces TDS by 96%; Stage 4 Active Copper Filter infuses copper ions (Cu²⁺) for antimicrobial defense and mineral balance.',
+    duration: 6500,
+  },
+  {
+    target: 'TANK2_VERIFICATION',
+    title: 'Phase 4: Post-Filtration Quality Verification',
+    description: 'Discharge flows directly into the Quality Verification Chamber (Tank 2). Integrated multi-sensor arrays (TDS #2, pH #2, Turbidity #2) perform real-time optical and electrical inspection before release.',
+    duration: 6000,
+  },
+  {
+    target: 'RECIRCULATION_LOOP',
+    title: 'Phase 5: Closed-Loop Recirculation Decision Gate',
+    description: 'If verified pure, water flows straight into clean storage. If water fails safety thresholds (TDS > 100 ppm), the bottom 3-way solenoid valve diverts water into the recirculation loop, pumping it back to Stage 1 (SediShield) to be re-filtered!',
     duration: 6500,
   },
   {

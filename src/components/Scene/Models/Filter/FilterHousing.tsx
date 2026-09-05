@@ -107,20 +107,20 @@ export const FilterHousing = () => {
       id: 'stage4',
       num: 4,
       x: 0.66,
-      name: 'Stage 4 – FinalGuard UV',
-      boldName: 'FinalGuard UV',
-      roleTag: 'Kills microbes before dispense',
-      fullTag: 'FinalGuard UV – Kills microbes before dispense',
-      subtitle: 'Microbial Disinfection (254nm Germicidal UV-C)',
-      color: '#94a3b8', // Sleek polished stainless/chrome
-      accentColor: '#818cf8', // Ultraviolet indigo glow
-      stripColor: '#a855f7',
+      name: 'Stage 4 – Active Copper Filter',
+      boldName: 'Active Copper',
+      roleTag: 'Infuses copper ions & antimicrobial polish',
+      fullTag: 'Active Copper – Infuses copper ions & antimicrobial polish',
+      subtitle: 'Active Copper Infusion & Mineral Polishing',
+      color: '#b87333', // Burnished metallic copper
+      accentColor: '#f97316', // Warm copper glow
+      stripColor: '#ea580c',
       health: metrics.stage4Health || 95,
-      healthColor: 'text-violet-400',
-      barColor: 'bg-violet-400',
-      iconType: 'uv',
-      badgeText: 'Final Safety Layer',
-      desc: 'Neutralizes bacteria, viruses, and microorganisms just before water enters secondary tank and outlet.',
+      healthColor: 'text-amber-400',
+      barColor: 'bg-amber-400',
+      iconType: 'copper',
+      badgeText: 'Cu²⁺ Ion Infusion',
+      desc: 'Enriches purified water with bio-available copper ions (Cu²⁺) for natural antimicrobial protection, alkalinity balance, and crisp taste.',
     },
   ];
 
@@ -172,7 +172,7 @@ export const FilterHousing = () => {
       {stages.map((st, i) => {
         const isHovered = hovered === i;
         const healthFrac = st.health / 100;
-        const isUvStage = st.num === 4;
+        const isCopperStage = st.num === 4;
         const isRoStage = st.num === 3;
         const isChemoStage = st.num === 2;
         const isSediStage = st.num === 1;
@@ -210,7 +210,7 @@ export const FilterHousing = () => {
             {/* Top Reinforced Manifold Cap with Inlet/Outlet Ports */}
             <mesh position={[0, 0.34, 0]} castShadow>
               <cylinderGeometry args={[0.078, 0.082, 0.09, 24]} />
-              <meshStandardMaterial color={isChemoStage ? "#064e3b" : isRoStage ? "#075985" : "#0f172a"} roughness={0.35} metalness={0.8} />
+              <meshStandardMaterial color={isChemoStage ? "#064e3b" : isRoStage ? "#075985" : isCopperStage ? "#7c2d12" : "#0f172a"} roughness={0.35} metalness={0.8} />
             </mesh>
 
             {/* Pressure Relief Vent Valve / Gauge Port on Cap */}
@@ -307,45 +307,53 @@ export const FilterHousing = () => {
               </group>
             )}
 
-            {isUvStage && (
-              /* Stage 4: FinalGuard UV — Sleek Polished Stainless Steel & 254nm Quartz Tube */
+            {isCopperStage && (
+              /* Stage 4: Active Copper Filter — Burnished Metallic Copper Vessel & Copper Mineral Granules Core */
               <group>
-                {/* Sleek Mirror-Polished Stainless Steel Cylinder */}
+                {/* Burnished Metallic Copper Cartridge Body */}
                 <mesh position={[0, 0, 0]} castShadow receiveShadow>
-                  <cylinderGeometry args={[0.070, 0.068, 0.60, 32]} />
+                  <cylinderGeometry args={[0.072, 0.068, 0.60, 32]} />
                   <meshStandardMaterial 
-                    color="#e2e8f0" 
-                    roughness={0.08} 
-                    metalness={0.96}
+                    color="#b87333" 
+                    roughness={0.22} 
+                    metalness={0.88}
                     transparent={transparent || cutaway}
                     opacity={(transparent || cutaway) ? 0.25 : 1.0}
                   />
                 </mesh>
-                {/* Internal Luminous UV-C Quartz Tube */}
+                {/* Genuine Copper Reinforcing Bands */}
+                {[-0.18, 0.0, 0.18].map((cy, idx) => (
+                  <mesh key={idx} position={[0, cy, 0]} castShadow>
+                    <cylinderGeometry args={[0.075, 0.075, 0.024, 28]} />
+                    <meshStandardMaterial color="#d97706" roughness={0.15} metalness={0.95} />
+                  </mesh>
+                ))}
+                {/* Internal Active Copper (Cu2+) Mineral Media Chamber */}
                 <group position={[0, -0.02, 0]}>
+                  {/* Copper Media Core */}
                   <mesh>
-                    <cylinderGeometry args={[0.028, 0.028, 0.46, 20]} />
+                    <cylinderGeometry args={[0.038, 0.038, 0.44, 20]} />
                     <meshStandardMaterial 
-                      color="#818cf8" 
-                      emissive={metrics.uvStatus === 'ON' ? '#6366f1' : '#1e1b4b'}
-                      emissiveIntensity={metrics.uvStatus === 'ON' ? 3.0 : 0.2}
-                      roughness={0.1} 
+                      color="#ea580c" 
+                      emissive="#c2410c"
+                      emissiveIntensity={0.6}
+                      roughness={0.4}
+                      metalness={0.7} 
                     />
                   </mesh>
-                  {/* Outer Quartz Sleeve Window */}
+                  {/* Inspection Window showing Active Copper Granules */}
                   <mesh position={[0, 0, 0.070]}>
                     <boxGeometry args={[0.035, 0.38, 0.005]} />
                     <meshPhysicalMaterial 
-                      color="#a855f7" 
+                      color="#fed7aa" 
                       transparent 
-                      opacity={0.85} 
+                      opacity={0.80} 
                       roughness={0.05} 
                       clearcoat={1.0}
                     />
                   </mesh>
-                  {metrics.uvStatus === 'ON' && (
-                    <pointLight color="#818cf8" intensity={1.8} distance={0.8} />
-                  )}
+                  {/* Warm Copper Ion Halo Light */}
+                  <pointLight color="#f97316" intensity={1.2} distance={0.6} />
                 </group>
               </group>
             )}
@@ -503,12 +511,15 @@ export const FilterHousing = () => {
                             <span className="text-[8px] font-black text-cyan-300 font-mono">TDS</span>
                           </div>
                         )}
-                        {st.iconType === 'uv' && (
-                          /* UV Ray / Shield Icon for FinalGuard UV */
-                          <svg className="w-3.5 h-3.5 text-violet-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                            <path d="m9 12 2 2 4-4" />
-                          </svg>
+                        {st.iconType === 'copper' && (
+                          /* Active Copper Molecule / Ion Icon */
+                          <div className="flex items-center gap-0.5">
+                            <svg className="w-3.5 h-3.5 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <circle cx="12" cy="12" r="8" />
+                              <path d="M12 2v2M12 20v2M2 12h2M20 12h2" />
+                            </svg>
+                            <span className="text-[7.5px] font-black text-amber-300 font-mono">Cu²⁺</span>
+                          </div>
                         )}
                       </span>
                       <span className="text-[9px] font-mono font-bold text-zinc-400 uppercase tracking-wide">
@@ -551,9 +562,9 @@ export const FilterHousing = () => {
                       Inflow: 680 → 28 ppm
                     </div>
                   )}
-                  {isUvStage && (
-                    <div className="text-[8px] font-mono text-violet-300 bg-violet-950/40 px-1.5 py-0.5 rounded border border-violet-800/40 text-center font-bold">
-                      Final Safety Layer ➔ Dispense
+                  {isCopperStage && (
+                    <div className="text-[8px] font-mono text-amber-300 bg-amber-950/40 px-1.5 py-0.5 rounded border border-amber-800/40 text-center font-bold">
+                      Active Cu²⁺ Ion Infusion
                     </div>
                   )}
                   {isSediStage && (

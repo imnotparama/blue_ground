@@ -331,37 +331,33 @@ export const Pipes = () => {
               <meshStandardMaterial color="#0f172a" roughness={0.7} />
             </mesh>
 
-            {/* Top Elbow and Horizontal Feed into Sedimentation Tank */}
+            {/* Overhead horizontal pipe from Hydro-Power motor to Sedimentation Tank top */}
             <PipeElbow pos={[2.52, 0.78, 0]} r={0.034} mat="gray" />
             <TeflonRing pos={[2.52, 0.74, 0]} />
-            <PipeSeg pos={[2.21, 0.78, 0]} len={0.62} r={0.030} rot={[0, 0, Math.PI / 2]} mat="gray" />
-            <TeflonRing pos={[2.0, 0.78, 0]} rot={[0, 0, Math.PI / 2]} />
+            <PipeSeg pos={[2.35, 0.78, 0]} len={0.34} r={0.030} rot={[0, 0, Math.PI / 2]} mat="gray" />
+            <PipeElbow pos={[2.18, 0.78, 0]} r={0.034} mat="gray" />
           </group>
         ) : (
-          /* Standard Borewell Riser Pipe Setup */
+          /* Standard Borewell Riser Pipe Setup feeding into Sedimentation Tank top */
           <group>
-            <PipeSeg pos={[2.8, -0.50, 0]} len={2.55} r={0.030} mat="gray" />
-            <PipeClamp pos={[2.8, 0.20, 0]} rot={[0, 0, 0]} />
+            <PipeSeg pos={[2.8, -0.5, 0]} len={2.55} r={0.030} mat="gray" />
+            <PipeClamp pos={[2.8, 0.2, 0]} rot={[0, 0, 0]} />
             <PipeElbow pos={[2.8, 0.78, 0]} r={0.034} mat="gray" />
             <TeflonRing pos={[2.8, 0.74, 0]} />
-            <PipeSeg pos={[2.35, 0.78, 0]} len={0.90} r={0.030} rot={[0, 0, Math.PI / 2]} mat="gray" />
-            <TeflonRing pos={[2.0, 0.78, 0]} rot={[0, 0, Math.PI / 2]} />
+            <PipeSeg pos={[2.49, 0.78, 0]} len={0.62} r={0.030} rot={[0, 0, Math.PI / 2]} mat="gray" />
+            <PipeElbow pos={[2.18, 0.78, 0]} r={0.034} mat="gray" />
           </group>
         )}
-
-        {/* Common Drop into Sedimentation Tank Top Cap */}
-        <PipeElbow pos={[1.90, 0.78, 0]} r={0.034} mat="gray" />
-        <PipeSeg pos={[1.90, 0.76, 0]} len={0.04} r={0.030} mat="gray" />
       </group>
 
       {/* ══════════════════════════════════════════════════════════════════════
-          2. PROCESS: SEDIMENTATION OUTLET [1.62, 0.30] → FLOW SENSOR [1.45] → SECONDARY COMPARTMENT [1.0, 0.30]
+          2. TRANSFER: SEDIMENTATION OUTLET [1.64, 0.30, 0] → FLOW SENSOR [1.35, 0.30, 0] → SECONDARY TANK INLET [1.00, 0.30, 0]
           ══════════════════════════════════════════════════════════════════════ */}
       <group
         onClick={(e) => {
           e.stopPropagation();
-          setActiveHotspot('return_pipe');
-          setCameraPreset('RETURN_PIPE');
+          setActiveHotspot('flow_sensor');
+          setCameraPreset('FLOW_SENSOR');
         }}
         onPointerOver={(e) => {
           e.stopPropagation();
@@ -371,54 +367,75 @@ export const Pipes = () => {
           document.body.style.cursor = 'default';
         }}
       >
-        {/* Pipe between Sedimentation Tank and Flow Sensor */}
-        <PipeSeg pos={[1.56, 0.30, 0]} len={0.18} rot={[0, 0, Math.PI / 2]} />
-        <TeflonRing pos={[1.60, 0.30, 0]} rot={[0, 0, Math.PI / 2]} />
+        {/* Horizontal pipe from Sedimentation outlet to Flow Sensor */}
+        <PipeSeg pos={[1.50, 0.30, 0]} len={0.28} rot={[0, 0, Math.PI / 2]} />
+        <TeflonRing pos={[1.63, 0.30, 0]} rot={[0, 0, Math.PI / 2]} />
 
-        {/* Pipe between Flow Sensor and Secondary Tank Inlet */}
-        <PipeSeg pos={[1.20, 0.30, 0]} len={0.36} rot={[0, 0, Math.PI / 2]} />
-        <TeflonRing pos={[1.05, 0.30, 0]} rot={[0, 0, Math.PI / 2]} />
+        {/* Inline YF-S201 Flow Sensor Housing */}
+        <group position={[1.35, 0.30, 0]}>
+          <mesh castShadow>
+            <cylinderGeometry args={[0.042, 0.042, 0.08, 16]} />
+            <meshStandardMaterial color="#0f172a" roughness={0.3} metalness={0.7} />
+          </mesh>
+          <mesh position={[0, 0.042, 0]} castShadow>
+            <boxGeometry args={[0.038, 0.024, 0.038]} />
+            <meshStandardMaterial color="#38bdf8" roughness={0.4} />
+          </mesh>
+        </group>
+
+        {/* Pipe continuing from Flow Sensor directly into Secondary Tank Inlet */}
+        <TeflonRing pos={[1.30, 0.30, 0]} rot={[0, 0, Math.PI / 2]} />
+        <PipeSeg pos={[1.15, 0.30, 0]} len={0.30} rot={[0, 0, Math.PI / 2]} />
+        <TeflonRing pos={[1.02, 0.30, 0]} rot={[0, 0, Math.PI / 2]} />
+        <PipeClamp pos={[1.15, 0.30, 0]} rot={[0, 0, Math.PI / 2]} />
       </group>
 
       {/* ══════════════════════════════════════════════════════════════════════
-          3. DIRECT PASSAGE VALVE (Secondary Floor → Primary Tank for Good Water)
-             Position: [0.70, 0.0, 0]
+          2B. SECONDARY TANK SUCTION LINE → BOOSTER PUMP INLET
+             Secondary Tank Outlet [1.00, 0.05, 0] → Isolation Valve → Booster Pump [1.35, 0.05, 0]
           ══════════════════════════════════════════════════════════════════════ */}
       <group>
-        <SolenoidValve pos={[0.70, 0.0, 0]} rot={[Math.PI / 2, 0, 0]} open={isDirectValveOpen} />
-        <TeflonRing pos={[0.70, -0.04, 0]} />
-        <PipeSeg pos={[0.70, -0.15, 0]} len={0.24} />
+        <PipeSeg pos={[1.08, 0.05, 0]} len={0.16} rot={[0, 0, Math.PI / 2]} />
+        {/* Manual Ball Valve for Secondary Tank suction isolation */}
+        <SolenoidValve pos={[1.18, 0.05, 0]} rot={[0, 0, Math.PI / 2]} open={true} />
+        <PipeSeg pos={[1.27, 0.05, 0]} len={0.10} rot={[0, 0, Math.PI / 2]} />
+        <TeflonRing pos={[1.32, 0.05, 0]} rot={[0, 0, Math.PI / 2]} />
       </group>
 
       {/* ══════════════════════════════════════════════════════════════════════
-          4. FOUR-STAGE SMART FILTRATION TRAIN HYDRAULIC PIPING & RECIRCULATION
-             Pump [0.05, 0.08, 0] → Riser [0.05, 0.79, 0] → Back Conduit [0.05, 0.79, -0.62] 
+          3. FOUR-STAGE SMART FILTRATION TRAIN HYDRAULIC PIPING & RECIRCULATION
+             Pump [1.35, 0.05, 0] → Riser [1.35, 0.79, 0] → Back Conduit [1.35, 0.79, -0.62] 
              → Stage 1 SediShield [-1.36, 0.79, -0.62] → Stage 2 ChemoBlock [-0.92] 
-             → Stage 3 RO Maxx [-0.48] → Stage 4 FinalGuard UV [-0.04]
-             → Clean Delivery Line → Secondary Tank & Clean Potable Reservoir
+             → Stage 3 RO Maxx [-0.48] → Stage 4 Active Copper Filter [-0.04]
+             → Verification Tank [-1.85, 0.15, 0] 
+             → Clean Delivery Line (Path A) OR Recirculation Return Loop (Path B)
           ══════════════════════════════════════════════════════════════════════ */}
       <group>
-        {/* Vertical riser pipe from Pump Discharge rising up to overhead rack height */}
-        <PipeSeg pos={[0.05, 0.44, 0]} len={0.58} />
-        <TeflonRing pos={[0.05, 0.16, 0]} />
-        <PipeClamp pos={[0.05, 0.50, 0]} rot={[0, 0, 0]} />
-        <PipeElbow pos={[0.05, 0.79, 0]} />
-        <TeflonRing pos={[0.05, 0.76, 0]} />
+        {/* Vertical riser pipe from Booster Pump Discharge rising up to overhead rack height */}
+        <PipeSeg pos={[1.35, 0.45, 0]} len={0.68} />
+        {/* Rigid structural pipe clamps anchored to the unistrut pump leg */}
+        <PipeClamp pos={[1.35, 0.30, 0]} rot={[0, 0, 0]} />
+        <PipeClamp pos={[1.35, 0.60, 0]} rot={[0, 0, 0]} />
+        <PipeElbow pos={[1.35, 0.79, 0]} />
+        <TeflonRing pos={[1.35, 0.76, 0]} />
 
         {/* Depth pipe running backwards from Z=0 to Z=-0.62 (connecting to back-mounted filtration rack) */}
-        <PipeSeg pos={[0.05, 0.79, -0.31]} len={0.62} rot={[Math.PI / 2, 0, 0]} mat="gray" />
-        <PipeElbow pos={[0.05, 0.79, -0.62]} mat="gray" />
+        <PipeSeg pos={[1.35, 0.79, -0.31]} len={0.62} rot={[Math.PI / 2, 0, 0]} mat="gray" />
+        <PipeClamp pos={[1.35, 0.79, -0.31]} rot={[Math.PI / 2, 0, 0]} />
+        <PipeElbow pos={[1.35, 0.79, -0.62]} mat="gray" />
 
         {/* Overhead manifold pipe running left across back rack to Stage 1 (SediShield) Inlet */}
-        <PipeSeg pos={[-0.655, 0.79, -0.62]} len={1.41} rot={[0, 0, Math.PI / 2]} mat="gray" />
+        <PipeSeg pos={[-0.005, 0.79, -0.62]} len={2.71} rot={[0, 0, Math.PI / 2]} mat="gray" />
+        <PipeClamp pos={[0.60, 0.79, -0.62]} rot={[0, 0, Math.PI / 2]} />
+        <PipeClamp pos={[-0.70, 0.79, -0.62]} rot={[0, 0, Math.PI / 2]} />
         <TeflonRing pos={[-1.30, 0.79, -0.62]} rot={[0, 0, Math.PI / 2]} />
         
         {/* Drop elbow into Stage 1 SediShield Top Manifold Cap */}
         <PipeElbow pos={[-1.36, 0.79, -0.62]} />
         <PipeSeg pos={[-1.36, 0.76, -0.62]} len={0.06} />
 
-        {/* ─── STAGE 4 (FINALGUARD UV) DISCHARGE LINE ─── */}
-        {/* Vertical riser out of Stage 4 FinalGuard UV */}
+        {/* ─── STAGE 4 (ACTIVE COPPER FILTER) DISCHARGE LINE ─── */}
+        {/* Vertical riser out of Stage 4 Active Copper Filter */}
         <PipeSeg pos={[-0.04, 0.76, -0.62]} len={0.06} />
         <PipeElbow pos={[-0.04, 0.79, -0.62]} />
 
@@ -427,79 +444,61 @@ export const Pipes = () => {
         <PipeElbow pos={[-0.04, 0.79, 0]} />
         <TeflonRing pos={[-0.04, 0.79, -0.05]} rot={[Math.PI / 2, 0, 0]} />
 
-        {/* ─── SETUP 1: Direct Pure Water Feed into Secondary Top Tank & Potable Reservoir ─── */}
-        {!dualVerificationMode ? (
-          <group>
-            {/* Horizontal feed into Secondary Top Compartment */}
-            <PipeSeg pos={[0.20, 0.79, 0]} len={0.48} rot={[0, 0, Math.PI / 2]} />
-            <SolenoidValve pos={[0.25, 0.79, 0]} rot={[0, 0, Math.PI / 2]} open={true} />
-            <PipeElbow pos={[0.44, 0.79, 0]} />
-            <PipeSeg pos={[0.44, 0.65, 0]} len={0.28} />
+        {/* ─── DISCHARGE DIRECTLY INTO QUALITY VERIFICATION TANK (CHAMBER 2) ─── */}
+        <group>
+          {/* Feed line running left from Stage 4 into Verification Tank Inlet */}
+          <PipeSeg pos={[-0.945, 0.79, 0]} len={1.81} rot={[0, 0, Math.PI / 2]} />
+          <PipeClamp pos={[-0.50, 0.79, 0]} rot={[0, 0, Math.PI / 2]} />
+          <PipeClamp pos={[-1.40, 0.79, 0]} rot={[0, 0, Math.PI / 2]} />
+          <TeflonRing pos={[-1.85, 0.79, 0]} rot={[0, 0, Math.PI / 2]} />
+          <PipeElbow pos={[-1.85, 0.79, 0]} />
+          <PipeSeg pos={[-1.85, 0.60, 0]} len={0.38} />
+          <TeflonRing pos={[-1.85, 0.42, 0]} />
 
-            {/* Clean storage drop pipe cascading into Primary 250L Potable Reservoir */}
-            {!filterView && (
-              <>
-                <PipeSeg pos={[-0.60, 0.79, 0]} len={0.50} rot={[0, 0, Math.PI / 2]} />
-                <PipeElbow pos={[-0.85, 0.79, 0]} />
-                <PipeSeg pos={[-0.85, 0.35, 0]} len={0.88} />
-              </>
-            )}
+          {/* Verification Tank Multi-Directional Valve & Lines at Bottom */}
+          {/* Bottom Drop Pipe out of Verification Tank */}
+          <PipeSeg pos={[-1.85, -0.16, 0]} len={0.10} />
+          <TeflonRing pos={[-1.85, -0.12, 0]} />
+          
+          {/* Automated 3-Way Diverter Solenoid Valve */}
+          <SolenoidValve pos={[-1.85, -0.22, 0]} rot={[0, 0, Math.PI / 2]} open={true} />
+
+          {/* Path A: Confirmed Potable Pure -> Discharges into Primary Clean Reservoir */}
+          <group>
+            <PipeSeg pos={[-1.675, -0.22, 0]} len={0.35} rot={[0, 0, Math.PI / 2]} />
+            <PipeElbow pos={[-1.50, -0.22, 0]} />
+            <PipeSeg pos={[-1.50, -0.38, 0]} len={0.32} />
           </group>
-        ) : (
-          /* ─── SETUP 2: Dual-Stage Tank 2 & Closed-Loop Recirculation ─── */
-          <group>
-            {/* Feed line running left from Stage 4 into Tank 2 Inlet */}
-            <PipeSeg pos={[-0.945, 0.79, 0]} len={1.81} rot={[0, 0, Math.PI / 2]} />
-            <TeflonRing pos={[-1.85, 0.79, 0]} rot={[0, 0, Math.PI / 2]} />
-            <PipeElbow pos={[-1.85, 0.79, 0]} />
-            <PipeSeg pos={[-1.85, 0.48, 0]} len={0.62} />
 
-            {/* Tank 2 Clean Delivery Line (Path A: Confirmed Potable Pure -> Primary Clean Tank) */}
-            <PipeSeg pos={[-2.19, 0.03, 0]} len={0.16} rot={[0, 0, Math.PI / 2]} />
-            <PipeElbow pos={[-2.27, 0.03, 0]} />
-            <PipeSeg pos={[-2.27, -0.25, 0]} len={0.56} />
+          {/* Path B: Sub-Standard Quality -> Closed-Loop Recirculation Return to Stage 1 SediShield */}
+          <group
+            onClick={(e) => {
+              e.stopPropagation();
+              setActiveHotspot('recirculation_loop');
+              setCameraPreset('RECIRCULATION_LOOP');
+            }}
+          >
+            {/* Depth pipe running backwards to back rack (Z=-0.62) */}
+            <PipeSeg pos={[-1.85, -0.22, -0.31]} len={0.62} rot={[Math.PI / 2, 0, 0]} mat="gray" />
+            <PipeElbow pos={[-1.85, -0.22, -0.62]} mat="gray" />
 
-            {/* Tank 2 Closed-Loop Recirculation System (Path B: Sub-Standard -> Return to Stage 1 SediShield Inlet) */}
-            <group
-              onClick={(e) => {
-                e.stopPropagation();
-                setActiveHotspot('recirculation_loop');
-                setCameraPreset('RECIRCULATION_LOOP');
-              }}
-            >
-              {/* Recirculation Bottom Drop Pipe from Tank 2 */}
-              <PipeSeg pos={[-1.70, -0.16, 0]} len={0.12} />
-              <PipeElbow pos={[-1.70, -0.22, 0]} />
-              
-              {/* Solenoid Diverter Valve */}
-              <SolenoidValve pos={[-1.52, -0.22, 0]} open={true} />
-              
-              {/* Mini Inline Recirculation Booster Pump */}
-              <group position={[-1.28, -0.22, 0]}>
-                <mesh castShadow>
-                  <cylinderGeometry args={[0.032, 0.032, 0.07, 12]} />
-                  <meshStandardMaterial color="#0284c7" roughness={0.3} metalness={0.8} />
-                </mesh>
-                <mesh position={[0, 0.03, 0]} castShadow>
-                  <boxGeometry args={[0.045, 0.035, 0.045]} />
-                  <meshStandardMaterial color="#0f172a" roughness={0.5} />
-                </mesh>
-              </group>
-
-              {/* Horizontal Recirculation Return Line Spanning Right to Filter Riser */}
-              <PipeSeg pos={[-1.29, -0.22, 0]} len={0.82} rot={[0, 0, Math.PI / 2]} mat="gray" />
-              
-              {/* Elbow turning upward into the filtration train inlet */}
-              <PipeElbow pos={[-0.88, -0.22, 0]} mat="gray" />
-              
-              {/* Vertical Recirculation Return Riser Pipe feeding DIRECTLY into filtration train */}
-              <PipeSeg pos={[-0.88, 0.28, 0]} len={1.00} mat="gray" />
-              <TeflonRing pos={[-0.88, 0.76, 0]} />
-              <PipeElbow pos={[-0.88, 0.79, 0]} mat="gray" />
-              <PipeSeg pos={[-0.88, 0.79, -0.31]} len={0.62} rot={[Math.PI / 2, 0, 0]} mat="gray" />
+            {/* In-line Recirculation Booster Pump */}
+            <group position={[-1.85, -0.22, -0.62]}>
+              <mesh castShadow>
+                <cylinderGeometry args={[0.034, 0.034, 0.08, 12]} />
+                <meshStandardMaterial color="#0284c7" roughness={0.3} metalness={0.8} />
+              </mesh>
             </group>
+
+            {/* Vertical Recirculation Return Riser Pipe to top rack manifold */}
+            <PipeSeg pos={[-1.85, 0.28, -0.62]} len={1.00} mat="gray" />
+            <TeflonRing pos={[-1.85, 0.76, -0.62]} />
+            <PipeElbow pos={[-1.85, 0.79, -0.62]} mat="gray" />
+
+            {/* Return pipe into Stage 1 SediShield top manifold */}
+            <PipeSeg pos={[-1.605, 0.79, -0.62]} len={0.49} rot={[0, 0, Math.PI / 2]} mat="gray" />
           </group>
-        )}
+        </group>
       </group>
 
       {/* ══════════════════════════════════════════════════════════════════════

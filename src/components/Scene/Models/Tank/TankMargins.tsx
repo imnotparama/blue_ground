@@ -86,7 +86,6 @@ const TankMarginBox: React.FC<TankMarginBoxProps> = ({
       <Html
         position={[0, hh + 0.18, 0]}
         center
-        distanceFactor={6.5}
         className="pointer-events-none select-none"
       >
         <div
@@ -143,55 +142,41 @@ export const TankMargins = () => {
         badgeBg="rgba(6, 182, 212, 0.20)"
       />
 
-      {/* 2. SECONDARY COMPARTMENT (Sensor Quality Testing Chamber) */}
+      {/* 2. SEDIMENTATION TANK (Gravitational Settling & Pre-Filtration Trap) */}
+      <TankMarginBox
+        center={[1.90, 0.05, 0]}
+        size={[0.62, 1.55, 0.62]}
+        title="Sedimentation Tank"
+        capacity="45 Liters"
+        role="Grit & Silt Gravitational Trap"
+        dimensions="Ø 0.52m × 1.45m"
+        color="#eab308"
+        badgeBg="rgba(234, 179, 8, 0.20)"
+      />
+
+      {/* 3. POST-FILTRATION QUALITY VERIFICATION CHAMBER (Sensor Suite #2 & Recirculation Diverter) */}
+      <TankMarginBox
+        center={[-1.85, 0.15, 0]}
+        size={[0.72, 0.56, 0.62]}
+        title="Quality Verification Chamber"
+        capacity="25 Liters"
+        role="Post-Filtration Sensor Verification"
+        dimensions="0.68m × 0.52m × 0.58m"
+        color="#a855f7"
+        badgeBg="rgba(168, 85, 247, 0.20)"
+      />
+
+      {/* 4. SECONDARY TANK (Raw Settling & Sensor Testing Deck) */}
       <TankMarginBox
         center={[0.45, 0.28, 0]}
         size={[1.16, 0.66, 1.26]}
-        title="Secondary Compartment"
+        title="Secondary Tank"
         capacity="35 Liters"
-        role="Quality Analysis Chamber"
-        dimensions="1.10m × 0.60m × 1.20m"
+        role="Raw Water Settling & Sensor Deck"
+        dimensions="1.10m × 0.60m × 1.25m"
         color="#10b981"
         badgeBg="rgba(16, 185, 129, 0.20)"
       />
-
-      {/* 3. SEDIMENTATION TANK (Primary Grit & Sand Settling Trap) */}
-      <TankMarginBox
-        center={[1.90, 0.05, 0]}
-        size={[0.66, 1.56, 0.66]}
-        title="Sedimentation Tank"
-        capacity="45 Liters"
-        role="Primary Settling Trap"
-        dimensions="Ø 0.60m × 1.50m"
-        color="#38bdf8"
-        badgeBg="rgba(56, 189, 248, 0.20)"
-      />
-
-      {/* 4. RO FILTRATION TANK (4-Stage Drinking Water Purifier) */}
-      <TankMarginBox
-        center={[-1.40, 0.38, 0]}
-        size={[0.96, 0.34, 0.34]}
-        title="RO Filtration Tank"
-        capacity="15 Liters"
-        role="4-Stage Pure Purifier"
-        dimensions="0.90m × Ø 0.28m"
-        color="#f59e0b"
-        badgeBg="rgba(245, 158, 11, 0.20)"
-      />
-
-      {/* 5. POST-FILTRATION TANK 2 (Sensor Suite #2 & Recirculation Diverter) */}
-      {dualVerificationMode && (
-        <TankMarginBox
-          center={[-1.85, 0.15, 0]}
-          size={[0.72, 0.56, 0.62]}
-          title="Tank 2 (Verification Chamber)"
-          capacity="20 Liters"
-          role="Post-RO Quality Verification"
-          dimensions="0.68m × 0.52m × 0.58m"
-          color="#a855f7"
-          badgeBg="rgba(168, 85, 247, 0.20)"
-        />
-      )}
     </group>
   );
 };

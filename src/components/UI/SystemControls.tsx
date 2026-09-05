@@ -159,17 +159,20 @@ export const SystemControls = () => {
   };
 
   // ─── WATER CLEANLINESS SIMULATIONS ───
-  // Simulation 1: Clean/Moderate Borewell Inflow -> Treated via Setup 1 (Direct Single-Pass)
+  // Simulation 1: Standard Borewell Inflow -> Treated via 4-Stage Filter & Verified Pure -> Primary Reservoir
   const triggerSimulation1 = () => {
-    setDualVerificationMode(false);
+    setDualVerificationMode(true);
     setRecirculationTriggered(false);
     setMode('NORMAL');
     setCameraPreset('OVERVIEW');
+    setTank2Tds(28);
     setMetrics(prev => ({
       ...prev,
-      turbidity: 2.8, // Clear blue/cyan sedimentation & raw chamber
+      turbidity: 2.8,
       tds: 190,
-      ph: 7.22,
+      tds2: 28,
+      turbidity2: 0.2,
+      ph: 7.35,
       temperature: 24.0,
       waterQuality: 'EXCELLENT',
       flowRate: 4.8,
@@ -179,17 +182,18 @@ export const SystemControls = () => {
     }));
   };
 
-  // Simulation 2: Bad Mining Slurry Water -> Treated via Setup 2 (Tank 2 TDS Check & Recirculation Loop)
+  // Simulation 2: Bad Mining Slurry Water -> 4-Stage Filter -> Verification Fails -> Recirculates to Stage 1 SediShield
   const triggerSimulation2 = () => {
     setDualVerificationMode(true);
     setRecirculationTriggered(true);
     setMode('TURBIDITY');
     setCameraPreset('TANK2_VERIFICATION');
+    setTank2Tds(185);
     setMetrics(prev => ({
       ...prev,
-      turbidity: 44.0, // Dark turbid muddy brown in sedimentation & Chamber 1
+      turbidity: 44.0,
       tds: 680,
-      tds2: 185, // Sub-standard post-RO permeate (amber water in Tank 2)
+      tds2: 185, // Sub-standard permeate in Verification Tank
       turbidity2: 4.5,
       ph: 6.25,
       temperature: 25.4,
@@ -259,68 +263,52 @@ export const SystemControls = () => {
               X-Ray Mode
             </button>
 
-            {/* Pipeline Architecture Mode Switcher: Setup 1 vs Setup 2 */}
-            <div className="col-span-2 flex flex-col gap-1 p-2 rounded-xl bg-purple-950/20 border border-purple-500/30">
+            {/* Verification Gate Architecture: Pure vs Impure Recirculation */}
+            <div className="col-span-2 flex flex-col gap-1.5 p-2 rounded-xl bg-purple-950/20 border border-purple-500/30">
               <div className="flex items-center justify-between text-[8px] font-mono text-purple-300 font-bold">
                 <span className="flex items-center gap-1">
                   <Repeat className="w-3 h-3 text-purple-400" />
-                  PIPELINE ARCHITECTURE
+                  VERIFICATION GATE (TANK 2)
                 </span>
                 <span className="text-[7px] px-1 py-0.2 rounded bg-purple-950 text-purple-300 border border-purple-500/40">HOTKEY: V</span>
               </div>
+              <div className="text-[7.5px] font-mono text-zinc-400">
+                4-Stage Discharge ➔ Verification Gate
+              </div>
               <div className="grid grid-cols-2 gap-1 font-mono text-[8px]">
                 <button
-                  onClick={() => setDualVerificationMode(false)}
+                  onClick={() => {
+                    setDualVerificationMode(true);
+                    setTank2Tds(28);
+                    setRecirculationTriggered(false);
+                    setMetrics(prev => ({ ...prev, tds2: 28, recirculationActive: false }));
+                  }}
                   className={`py-1 px-1.5 rounded-md border text-center transition-all cursor-pointer ${
-                    !dualVerificationMode
-                      ? 'bg-cyan-500/25 border-cyan-400 text-cyan-300 font-bold shadow-[0_0_8px_rgba(6,182,212,0.3)]'
+                    metrics.tds2 <= 100
+                      ? 'bg-emerald-500/30 border-emerald-400 text-emerald-300 font-bold shadow-[0_0_8px_rgba(16,185,129,0.3)]'
                       : 'bg-black/40 border-white/5 text-zinc-500 hover:text-white'
                   }`}
-                  title="Setup 1: Direct RO -> Primary 250L Tank"
+                  title="Verified Pure: Pass directly to Clean 250L Potable Reservoir"
                 >
-                  Setup 1: Direct
+                  ✓ Pure (28 ppm)
                 </button>
                 <button
-                  onClick={() => setDualVerificationMode(true)}
+                  onClick={() => {
+                    setDualVerificationMode(true);
+                    setTank2Tds(185);
+                    setRecirculationTriggered(true);
+                    setMetrics(prev => ({ ...prev, tds2: 185, recirculationActive: true }));
+                  }}
                   className={`py-1 px-1.5 rounded-md border text-center transition-all cursor-pointer ${
-                    dualVerificationMode
-                      ? 'bg-purple-500/25 border-purple-400 text-purple-300 font-bold shadow-[0_0_8px_rgba(168,85,247,0.3)]'
+                    metrics.tds2 > 100
+                      ? 'bg-amber-500/30 border-amber-400 text-amber-300 font-bold animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.3)]'
                       : 'bg-black/40 border-white/5 text-zinc-500 hover:text-white'
                   }`}
-                  title="Setup 2: RO -> Tank 2 TDS Verification -> Recirculate/Store"
+                  title="Impure Detected: Divert via Solenoid back into Stage 1 SediShield"
                 >
-                  Setup 2: Tank 2 Verif
+                  ↻ Impure (185 ppm)
                 </button>
               </div>
-
-              {/* In Setup 2: Live TDS Sensing Test Simulator */}
-              {dualVerificationMode && (
-                <div className="flex items-center justify-between gap-1 pt-1.5 border-t border-purple-500/20 mt-0.5">
-                  <span className="text-[8px] text-zinc-400 font-mono">TDS #2:</span>
-                  <button
-                    onClick={() => setTank2Tds(28)}
-                    className={`flex-1 py-0.5 rounded text-[8px] font-mono border transition-all cursor-pointer ${
-                      metrics.tds2 <= 100
-                        ? 'bg-emerald-500/30 border-emerald-400 text-emerald-300 font-bold shadow-[0_0_8px_rgba(16,185,129,0.25)]'
-                        : 'bg-zinc-900 border-white/5 text-zinc-500 hover:text-zinc-300'
-                    }`}
-                    title="Simulate Potable Pure Permeate (Pass to 250L Storage Tank)"
-                  >
-                    28 ppm (Pass)
-                  </button>
-                  <button
-                    onClick={() => setTank2Tds(185)}
-                    className={`flex-1 py-0.5 rounded text-[8px] font-mono border transition-all cursor-pointer ${
-                      metrics.tds2 > 100
-                        ? 'bg-amber-500/30 border-amber-400 text-amber-300 font-bold animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.25)]'
-                        : 'bg-zinc-900 border-white/5 text-zinc-500 hover:text-zinc-300'
-                    }`}
-                    title="Simulate High TDS Permeate (Fail -> Recirculate to RO Pump)"
-                  >
-                    185 ppm (Re-Filter)
-                  </button>
-                </div>
-              )}
             </div>
 
             {/* Hydro-Power Motor Energy Harvesting Toggle */}
@@ -420,36 +408,36 @@ export const SystemControls = () => {
             <Settings className="w-3 h-3 text-zinc-500" /> Preset Scenarios
           </span>
           <div className="flex flex-col gap-1.5 font-mono text-[9px]">
-            {/* Simulation 1: Clean Borewell -> Setup 1 */}
+            {/* Simulation 1: Clean Borewell -> Verified Pure */}
             <button
               onClick={triggerSimulation1}
               className={`w-full text-left p-2 rounded-xl border flex flex-col gap-0.5 transition-all cursor-pointer ${
-                !dualVerificationMode && metrics.turbidity < 5
+                metrics.tds2 <= 100 && metrics.turbidity < 5
                   ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300 shadow-[0_0_12px_rgba(6,182,212,0.25)]'
                   : 'bg-white/2 border-white/5 text-zinc-400 hover:bg-white/5 hover:text-white'
               }`}
             >
               <div className="flex items-center justify-between font-bold text-[9px]">
-                <span>🌟 Sim 1: Clean Borewell Water</span>
-                <span className="text-[8px] px-1.5 py-0.2 rounded bg-cyan-950 text-cyan-300 border border-cyan-500/30">SETUP 1 DIRECT</span>
+                <span>🌟 Sim 1: Standard Borewell</span>
+                <span className="text-[8px] px-1.5 py-0.2 rounded bg-cyan-950 text-cyan-300 border border-cyan-500/30">VERIFIED PURE</span>
               </div>
-              <span className="text-[8px] text-zinc-400">Clear Inflow ➔ Direct RO ➔ 250L Potable</span>
+              <span className="text-[8px] text-zinc-400">4-Stage Filter ➔ Verification Chamber ➔ Clean Storage</span>
             </button>
 
-            {/* Simulation 2: Mining Slurry Runoff -> Setup 2 Loop */}
+            {/* Simulation 2: Mining Slurry Runoff -> Stage 1 Re-Filter Loop */}
             <button
               onClick={triggerSimulation2}
               className={`w-full text-left p-2 rounded-xl border flex flex-col gap-0.5 transition-all cursor-pointer ${
-                dualVerificationMode && metrics.turbidity > 20
+                metrics.tds2 > 100 && metrics.turbidity > 20
                   ? 'bg-amber-500/20 border-amber-400 text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.25)]'
                   : 'bg-white/2 border-white/5 text-zinc-400 hover:bg-white/5 hover:text-white'
               }`}
             >
               <div className="flex items-center justify-between font-bold text-[9px]">
                 <span>⚡ Sim 2: Mining Slurry Runoff</span>
-                <span className="text-[8px] px-1.5 py-0.2 rounded bg-amber-950 text-amber-300 border border-amber-500/30">SETUP 2 LOOP</span>
+                <span className="text-[8px] px-1.5 py-0.2 rounded bg-amber-950 text-amber-300 border border-amber-500/30">STAGE 1 RE-FILTER</span>
               </div>
-              <span className="text-[8px] text-zinc-400">Muddy Inflow ➔ Tank 2 Check ➔ Re-Filter Loop</span>
+              <span className="text-[8px] text-zinc-400">Turbid Inflow ➔ Verification Fails ➔ Closed-Loop to Stage 1</span>
             </button>
 
             {/* Other System Presets */}
