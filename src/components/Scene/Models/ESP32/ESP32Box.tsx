@@ -84,6 +84,7 @@ export const ESP32Box = () => {
   }, [displayContext]);
 
   const materialsRef = useRef<THREE.MeshStandardMaterial[]>([]);
+  const faceplateRef = useRef<THREE.Group>(null);
 
   useEffect(() => {
     if (!groupRef.current) return;
@@ -98,13 +99,25 @@ export const ESP32Box = () => {
 
   useFrame((state, delta) => {
     const time = state.clock.getElapsedTime();
-    const targetY = exploded ? 0.35 : 0;
     const damp = 1.0 - Math.exp(-6 * delta);
 
     if (groupRef.current) {
-      groupRef.current.position.y = THREE.MathUtils.lerp(groupRef.current.position.y, targetY, damp);
+      const targetX = exploded ? 0.30 : 0;
+      const targetY = exploded ? 0.70 : 0;
+      const targetZ = exploded ? 1.05 : 0;
+
+      groupRef.current.position.x = THREE.MathUtils.lerp(groupRef.current.position.x, -0.70 + targetX, damp);
+      groupRef.current.position.y = THREE.MathUtils.lerp(groupRef.current.position.y, 0.40 + targetY, damp);
+      groupRef.current.position.z = THREE.MathUtils.lerp(groupRef.current.position.z, 0.42 + targetZ, damp);
+
       const targetScale = hoveredBox || hoveredScreen ? 1.03 : 1.0;
       groupRef.current.scale.setScalar(THREE.MathUtils.lerp(groupRef.current.scale.x, targetScale, damp * 1.5));
+    }
+
+    // Exploded front faceplate pops forward
+    if (faceplateRef.current) {
+      const targetFaceZ = exploded ? 0.16 : 0;
+      faceplateRef.current.position.z = THREE.MathUtils.lerp(faceplateRef.current.position.z, targetFaceZ, damp);
     }
 
     if (statusLedRef.current) {
@@ -161,58 +174,90 @@ export const ESP32Box = () => {
         <meshBasicMaterial color="#06b6d4" wireframe transparent opacity={0.45} />
       </mesh>
 
-      {/* ─── 1.8-INCH TFT DISPLAY ─── */}
-      <group position={[-0.10, 0.02, 0.112]}>
-        {/* Bezel Ring */}
-        <mesh castShadow>
-          <boxGeometry args={[0.20, 0.20, 0.012]} />
-          <meshStandardMaterial color="#1e293b" roughness={0.4} metalness={0.6} />
+      {/* Internal Microcontroller PCB Board (Revealed during exploded disassembly) */}
+      <group position={[0, 0, 0]}>
+        {/* Green Dual-Layer Industrial FR4 PCB */}
+        <mesh position={[0, 0, 0]} castShadow>
+          <boxGeometry args={[0.48, 0.22, 0.008]} />
+          <meshStandardMaterial color="#15803d" roughness={0.35} metalness={0.25} />
         </mesh>
-        {/* Dynamic TFT Screen with Live Canvas Texture */}
-        {displayContext.texture && (
-          <mesh position={[0, 0, 0.007]}>
-            <planeGeometry args={[0.17, 0.17]} />
-            <meshBasicMaterial map={displayContext.texture} />
+        {/* ESP32-WROOM-32E Dual-Core SoC RF Shield Can */}
+        <mesh position={[0.06, 0.02, 0.006]} castShadow>
+          <boxGeometry args={[0.16, 0.11, 0.006]} />
+          <meshStandardMaterial color="#e2e8f0" roughness={0.15} metalness={0.92} />
+        </mesh>
+        {/* Gold PCB Meandered Inverted-F Wi-Fi Antenna Trace */}
+        <mesh position={[0.16, 0.02, 0.006]}>
+          <boxGeometry args={[0.03, 0.09, 0.002]} />
+          <meshStandardMaterial color="#ca8a04" roughness={0.2} metalness={0.95} />
+        </mesh>
+        {/* Quartz Crystal Oscillator Clock */}
+        <mesh position={[-0.08, 0.05, 0.006]}>
+          <boxGeometry args={[0.03, 0.02, 0.004]} />
+          <meshStandardMaterial color="#cbd5e1" roughness={0.2} metalness={0.9} />
+        </mesh>
+        {/* Type-C USB Flashing & Serial Terminal Port */}
+        <mesh position={[0, -0.105, 0.006]}>
+          <boxGeometry args={[0.06, 0.015, 0.01]} />
+          <meshStandardMaterial color="#94a3b8" roughness={0.2} metalness={0.85} />
+        </mesh>
+      </group>
+
+      {/* ─── REMOVABLE FRONT FACEPLATE (Pops forward in CAD Exploded View) ─── */}
+      <group ref={faceplateRef} position={[0, 0, 0]}>
+        {/* ─── 1.8-INCH TFT DISPLAY ─── */}
+        <group position={[-0.10, 0.02, 0.112]}>
+          {/* Bezel Ring */}
+          <mesh castShadow>
+            <boxGeometry args={[0.20, 0.20, 0.012]} />
+            <meshStandardMaterial color="#1e293b" roughness={0.4} metalness={0.6} />
           </mesh>
-        )}
-      </group>
-
-      {/* ─── 16-CHANNEL CAPACITIVE TOUCH SENSOR STRIP ─── */}
-      <group position={[0.12, 0.02, 0.112]}>
-        {/* Strip PCB Backplate */}
-        <mesh castShadow>
-          <boxGeometry args={[0.18, 0.19, 0.008]} />
-          <meshStandardMaterial color="#1e293b" roughness={0.3} metalness={0.7} />
-        </mesh>
-        {/* 16 Gold-plated Touch Pads (4x4 Grid) */}
-        {[-0.06, -0.02, 0.02, 0.06].map((tx, row) =>
-          [-0.06, -0.02, 0.02, 0.06].map((ty, col) => (
-            <mesh key={`pad-${row}-${col}`} position={[tx, ty, 0.005]}>
-              <boxGeometry args={[0.026, 0.026, 0.002]} />
-              <meshStandardMaterial color="#ca8a04" roughness={0.2} metalness={0.9} />
+          {/* Dynamic TFT Screen with Live Canvas Texture */}
+          {displayContext.texture && (
+            <mesh position={[0, 0, 0.007]}>
+              <planeGeometry args={[0.17, 0.17]} />
+              <meshBasicMaterial map={displayContext.texture} />
             </mesh>
-          ))
-        )}
+          )}
+        </group>
+
+        {/* ─── 16-CHANNEL CAPACITIVE TOUCH SENSOR STRIP ─── */}
+        <group position={[0.12, 0.02, 0.112]}>
+          {/* Strip PCB Backplate */}
+          <mesh castShadow>
+            <boxGeometry args={[0.18, 0.19, 0.008]} />
+            <meshStandardMaterial color="#1e293b" roughness={0.3} metalness={0.7} />
+          </mesh>
+          {/* 16 Gold-plated Touch Pads (4x4 Grid) */}
+          {[-0.06, -0.02, 0.02, 0.06].map((tx, row) =>
+            [-0.06, -0.02, 0.02, 0.06].map((ty, col) => (
+              <mesh key={`pad-${row}-${col}`} position={[tx, ty, 0.005]}>
+                <boxGeometry args={[0.026, 0.026, 0.002]} />
+                <meshStandardMaterial color="#ca8a04" roughness={0.2} metalness={0.9} />
+              </mesh>
+            ))
+          )}
+        </group>
+
+        {/* Microcontroller Identification Plaque */}
+        <mesh position={[0, -0.10, 0.112]}>
+          <boxGeometry args={[0.42, 0.03, 0.002]} />
+          <meshStandardMaterial color="#334155" roughness={0.4} metalness={0.6} />
+        </mesh>
+
+        {/* Status LEDs on Top Edge */}
+        {/* Power LED (Solid Emerald) */}
+        <mesh ref={powerLedRef} position={[-0.20, 0.10, 0.112]}>
+          <sphereGeometry args={[0.008, 12, 12]} />
+          <meshStandardMaterial color="#10b981" emissive="#10b981" emissiveIntensity={2.5} />
+        </mesh>
+
+        {/* Wi-Fi / ESP-NOW Pulse LED (Pulsing Cyan) */}
+        <mesh ref={statusLedRef} position={[-0.16, 0.10, 0.112]}>
+          <sphereGeometry args={[0.008, 12, 12]} />
+          <meshStandardMaterial color="#06b6d4" emissive="#06b6d4" emissiveIntensity={2.0} />
+        </mesh>
       </group>
-
-      {/* Microcontroller Identification Plaque */}
-      <mesh position={[0, -0.10, 0.112]}>
-        <boxGeometry args={[0.42, 0.03, 0.002]} />
-        <meshStandardMaterial color="#334155" roughness={0.4} metalness={0.6} />
-      </mesh>
-
-      {/* Status LEDs on Top Edge */}
-      {/* Power LED (Solid Emerald) */}
-      <mesh ref={powerLedRef} position={[-0.20, 0.10, 0.112]}>
-        <sphereGeometry args={[0.008, 12, 12]} />
-        <meshStandardMaterial color="#10b981" emissive="#10b981" emissiveIntensity={2.5} />
-      </mesh>
-
-      {/* Wi-Fi / ESP-NOW Pulse LED (Pulsing Cyan) */}
-      <mesh ref={statusLedRef} position={[-0.16, 0.10, 0.112]}>
-        <sphereGeometry args={[0.008, 12, 12]} />
-        <meshStandardMaterial color="#06b6d4" emissive="#06b6d4" emissiveIntensity={2.0} />
-      </mesh>
 
       {/* External Wi-Fi / ESP-NOW High-Gain Whip Antenna */}
       <group position={[0.24, 0.13, 0]} rotation={[0, 0, -0.2]}>

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useSystemState } from '@/hooks/useSystemState';
 import * as THREE from 'three';
@@ -233,8 +233,25 @@ export const Pipes = () => {
     dualVerificationMode,
     hydroGeneratorMode,
     filterView,
+    exploded,
   } = useSystemState();
   const groupRef = useRef<THREE.Group>(null);
+  const materialsRef = useRef<THREE.MeshStandardMaterial[]>([]);
+
+  useEffect(() => {
+    if (!groupRef.current) return;
+    const mats: THREE.MeshStandardMaterial[] = [];
+    groupRef.current.traverse((child) => {
+      if (child instanceof THREE.Mesh && child.material) {
+        if (Array.isArray(child.material)) {
+          mats.push(...(child.material as THREE.MeshStandardMaterial[]));
+        } else {
+          mats.push(child.material as THREE.MeshStandardMaterial);
+        }
+      }
+    });
+    materialsRef.current = mats;
+  }, []);
 
   const isDirectValveOpen = mode !== 'TURBIDITY' && mode !== 'CLEANING' && mode !== 'PUMP_FAILURE';
   const isDrainValveOpen = mode === 'CLEANING';
@@ -246,6 +263,18 @@ export const Pipes = () => {
     const damp = 1.0 - Math.exp(-8 * delta);
     groupRef.current.scale.setScalar(THREE.MathUtils.lerp(groupRef.current.scale.x, targetScale, damp));
     groupRef.current.visible = groupRef.current.scale.x > 0.05;
+
+    // In CAD Exploded Mode, transition physical pipes to subtle phantom ghost guides
+    const targetOpacity = exploded ? 0.12 : 1.0;
+    const isTrans = exploded || tanksOnly;
+    for (let i = 0; i < materialsRef.current.length; i++) {
+      const mat = materialsRef.current[i];
+      if (mat.transparent !== isTrans) {
+        mat.transparent = isTrans;
+        mat.needsUpdate = true;
+      }
+      mat.opacity = THREE.MathUtils.lerp(mat.opacity, targetOpacity, damp);
+    }
   });
 
   return (
@@ -367,9 +396,9 @@ export const Pipes = () => {
           document.body.style.cursor = 'default';
         }}
       >
-        {/* Horizontal pipe from Sedimentation outlet to Flow Sensor */}
-        <PipeSeg pos={[1.50, 0.30, 0]} len={0.28} rot={[0, 0, Math.PI / 2]} />
-        <TeflonRing pos={[1.63, 0.30, 0]} rot={[0, 0, Math.PI / 2]} />
+        {/* Horizontal pipe from Sedimentation outlet to Flow Sensor (perfect flush alignment with nozzle at x=1.62, y=0.30) */}
+        <PipeSeg pos={[1.485, 0.30, 0]} len={0.27} rot={[0, 0, Math.PI / 2]} />
+        <TeflonRing pos={[1.61, 0.30, 0]} rot={[0, 0, Math.PI / 2]} />
 
         {/* Inline YF-S201 Flow Sensor Housing */}
         <group position={[1.35, 0.30, 0]}>
@@ -444,15 +473,90 @@ export const Pipes = () => {
         <PipeElbow pos={[-0.04, 0.79, 0]} />
         <TeflonRing pos={[-0.04, 0.79, -0.05]} rot={[Math.PI / 2, 0, 0]} />
 
-        {/* ─── DISCHARGE DIRECTLY INTO QUALITY VERIFICATION TANK (CHAMBER 2) ─── */}
+        {/* ─── PIPELINE ARCHITECTURE DIVERTER: SETUP 1 (DIRECT) vs SETUP 2 (TANK 2) ─── */}
+        {/* Overhead manifold pipe from Stage 4 [x=-0.04] to Diverter Junction [x=-0.95] */}
+        <PipeSeg pos={[-0.495, 0.79, 0]} len={0.91} rot={[0, 0, Math.PI / 2]} />
+        <PipeClamp pos={[-0.50, 0.79, 0]} rot={[0, 0, Math.PI / 2]} />
+
+        {/* 3-Way Diverter Tee Body at [-0.95, 0.79, 0] */}
+        <group position={[-0.95, 0.79, 0]}>
+          <mesh castShadow>
+            <cylinderGeometry args={[0.038, 0.038, 0.08, 16]} />
+            <meshStandardMaterial color="#1e293b" roughness={0.3} metalness={0.8} />
+          </mesh>
+          <mesh rotation={[0, 0, Math.PI / 2]} castShadow>
+            <cylinderGeometry args={[0.038, 0.038, 0.08, 16]} />
+            <meshStandardMaterial color="#1e293b" roughness={0.3} metalness={0.8} />
+          </mesh>
+          <TeflonRing pos={[0, 0, 0]} />
+        </group>
+
+        {/* ═══ ROUTE A: SETUP 1 DIRECT FILTRATION (Single-Pass Direct Cascade to 250L Reservoir) ═══ */}
+        <group
+          onClick={(e) => {
+            e.stopPropagation();
+            setActiveHotspot('setup1_direct');
+            setCameraPreset('SETUP1_DIRECT');
+          }}
+          onPointerOver={(e) => {
+            e.stopPropagation();
+            document.body.style.cursor = 'pointer';
+          }}
+          onPointerOut={() => {
+            document.body.style.cursor = 'default';
+          }}
+        >
+          {/* Direct Vertical Drop Pipe from Diverter to Primary Reservoir Lid */}
+          <PipeSeg pos={[-0.95, 0.72, 0]} len={0.10} />
+          {/* Automated Setup 1 Direct Solenoid Diverter Valve */}
+          <SolenoidValve pos={[-0.95, 0.65, 0]} rot={[0, 0, 0]} open={!dualVerificationMode} />
+          
+          {/* Setup 1 Live Indicator Light on Valve (Green when open) */}
+          <mesh position={[-0.95, 0.65, 0.045]}>
+            <sphereGeometry args={[0.009, 12, 12]} />
+            <meshStandardMaterial 
+              color={!dualVerificationMode ? '#10b981' : '#64748b'} 
+              emissive={!dualVerificationMode ? '#10b981' : '#000000'}
+              emissiveIntensity={!dualVerificationMode ? 2.0 : 0.0}
+            />
+          </mesh>
+
+          {/* Lower Pipe Segment entering Primary Tank Nozzle at y=0.60 */}
+          <PipeSeg pos={[-0.95, 0.58, 0]} len={0.08} />
+          <TeflonRing pos={[-0.95, 0.55, 0]} />
+          
+          {/* Internal Downcomer Cascade Tube inside Primary Tank */}
+          <PipeSeg pos={[-0.95, 0.25, 0]} len={0.50} mat="gray" />
+          <group position={[-0.95, -0.02, 0]}>
+            <mesh castShadow>
+              <cylinderGeometry args={[0.028, 0.022, 0.04, 12]} />
+              <meshStandardMaterial color="#334155" roughness={0.2} metalness={0.95} />
+            </mesh>
+          </group>
+        </group>
+
+        {/* ═══ ROUTE B: SETUP 2 DUAL-VERIFICATION & RECIRCULATION (Tank 2 Chamber) ═══ */}
         <group>
-          {/* Feed line running left from Stage 4 into Verification Tank Inlet */}
-          <PipeSeg pos={[-0.945, 0.79, 0]} len={1.81} rot={[0, 0, Math.PI / 2]} />
-          <PipeClamp pos={[-0.50, 0.79, 0]} rot={[0, 0, Math.PI / 2]} />
+          {/* Pipe continuing left from Diverter [-0.95, 0.79, 0] to Tank 2 Inlet [-1.85, 0.79, 0] */}
+          <PipeSeg pos={[-1.40, 0.79, 0]} len={0.82} rot={[0, 0, Math.PI / 2]} />
           <PipeClamp pos={[-1.40, 0.79, 0]} rot={[0, 0, Math.PI / 2]} />
+          {/* Setup 2 Solenoid Isolation Valve */}
+          <SolenoidValve pos={[-1.62, 0.79, 0]} rot={[0, 0, Math.PI / 2]} open={dualVerificationMode} />
+          
+          {/* Setup 2 Live Indicator Light */}
+          <mesh position={[-1.62, 0.835, 0]}>
+            <sphereGeometry args={[0.009, 12, 12]} />
+            <meshStandardMaterial 
+              color={dualVerificationMode ? '#06b6d4' : '#64748b'} 
+              emissive={dualVerificationMode ? '#06b6d4' : '#000000'}
+              emissiveIntensity={dualVerificationMode ? 2.0 : 0.0}
+            />
+          </mesh>
+
           <TeflonRing pos={[-1.85, 0.79, 0]} rot={[0, 0, Math.PI / 2]} />
           <PipeElbow pos={[-1.85, 0.79, 0]} />
-          <PipeSeg pos={[-1.85, 0.60, 0]} len={0.38} />
+          {/* Drop pipe into Tank 2 lid at y=0.41 */}
+          <PipeSeg pos={[-1.85, 0.60, 0]} len={0.34} />
           <TeflonRing pos={[-1.85, 0.42, 0]} />
 
           {/* Verification Tank Multi-Directional Valve & Lines at Bottom */}
@@ -461,7 +565,7 @@ export const Pipes = () => {
           <TeflonRing pos={[-1.85, -0.12, 0]} />
           
           {/* Automated 3-Way Diverter Solenoid Valve */}
-          <SolenoidValve pos={[-1.85, -0.22, 0]} rot={[0, 0, Math.PI / 2]} open={true} />
+          <SolenoidValve pos={[-1.85, -0.22, 0]} rot={[0, 0, Math.PI / 2]} open={dualVerificationMode} />
 
           {/* Path A: Confirmed Potable Pure -> Discharges into Primary Clean Reservoir */}
           <group>

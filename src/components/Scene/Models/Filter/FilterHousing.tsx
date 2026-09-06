@@ -25,21 +25,49 @@ export const FilterHousing = () => {
   
   const mainGroupRef = useRef<THREE.Group>(null);
   const glowPipeMatRef = useRef<THREE.MeshStandardMaterial>(null);
+  const stageRefs = useRef<(THREE.Group | null)[]>([]);
+  const capRefs = useRef<(THREE.Mesh | null)[]>([]);
+  const sumpRefs = useRef<(THREE.Group | null)[]>([]);
   const [hovered, setHovered] = useState<number | null>(null);
 
   useFrame((state, delta) => {
     const time = state.clock.getElapsedTime();
+    const damp = 1.0 - Math.exp(-6 * delta);
+
     if (mainGroupRef.current) {
-      const targetY = exploded ? 0.25 : 0;
-      const targetZ = exploded ? -0.20 : 0;
-      const damp = 1.0 - Math.exp(-6 * delta);
+      const targetY = exploded ? 0.85 : 0;
+      const targetZ = exploded ? -0.85 : 0;
       mainGroupRef.current.position.y = THREE.MathUtils.lerp(mainGroupRef.current.position.y, 0.45 + targetY, damp);
       mainGroupRef.current.position.z = THREE.MathUtils.lerp(mainGroupRef.current.position.z, -0.62 + targetZ, damp);
     }
 
+    // Explode individual filter stages horizontally and separate caps & sumps
+    const basePositions = [-0.66, -0.22, 0.22, 0.66];
+    const spreadMult = exploded ? 1.85 : 1.0;
+    stageRefs.current.forEach((ref, idx) => {
+      if (ref) {
+        const targetX = basePositions[idx] * spreadMult;
+        ref.position.x = THREE.MathUtils.lerp(ref.position.x, targetX, damp);
+      }
+    });
+
+    capRefs.current.forEach((cRef) => {
+      if (cRef) {
+        const targetCapY = exploded ? 0.52 : 0.34;
+        cRef.position.y = THREE.MathUtils.lerp(cRef.position.y, targetCapY, damp);
+      }
+    });
+
+    sumpRefs.current.forEach((sRef) => {
+      if (sRef) {
+        const targetSumpY = exploded ? -0.25 : 0.0;
+        sRef.position.y = THREE.MathUtils.lerp(sRef.position.y, targetSumpY, damp);
+      }
+    });
+
     if (glowPipeMatRef.current) {
-      // Dynamic pulsing glow along the thin inter-cartridge pipes
-      const pulse = 1.8 + Math.sin(time * 5.0) * 0.8;
+      // Dynamic pulsing glow along the thin inter-cartridge pipes (faded in exploded view)
+      const pulse = exploded ? 0.2 : (1.8 + Math.sin(time * 5.0) * 0.8);
       glowPipeMatRef.current.emissiveIntensity = pulse;
     }
   });
@@ -182,6 +210,7 @@ export const FilterHousing = () => {
         return (
           <group 
             key={st.id} 
+            ref={(el) => { stageRefs.current[i] = el; }}
             position={[st.x, 0, 0]}
             onPointerOver={(e) => {
               e.stopPropagation();
@@ -208,7 +237,7 @@ export const FilterHousing = () => {
             }}
           >
             {/* Top Reinforced Manifold Cap with Inlet/Outlet Ports */}
-            <mesh position={[0, 0.34, 0]} castShadow>
+            <mesh ref={(el) => { capRefs.current[i] = el; }} position={[0, 0.34, 0]} castShadow>
               <cylinderGeometry args={[0.078, 0.082, 0.09, 24]} />
               <meshStandardMaterial color={isChemoStage ? "#064e3b" : isRoStage ? "#075985" : isCopperStage ? "#7c2d12" : "#0f172a"} roughness={0.35} metalness={0.8} />
             </mesh>
@@ -219,6 +248,8 @@ export const FilterHousing = () => {
               <meshStandardMaterial color={isRoStage ? "#0284c7" : "#ef4444"} roughness={0.3} metalness={0.6} />
             </mesh>
 
+            {/* Lower Cartridge Sump Assembly (Drops down in CAD Exploded View) */}
+            <group ref={(el) => { sumpRefs.current[i] = el; }}>
             {/* ─── STAGE-SPECIFIC DISTINCT CARTRIDGE CASING ─── */}
             {isSediStage && (
               /* Stage 1: SediShield — Rugged ribbed sediment pre-filter */
@@ -394,6 +425,7 @@ export const FilterHousing = () => {
                 />
               </mesh>
             )}
+            </group>
 
             {/* ════════════════════════════════════════════════════════════════
                 THIN GLOWING PIPES CONNECTING THE 4 CARTRIDGES IN SERIES

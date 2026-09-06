@@ -114,14 +114,14 @@ export const QuickControls = () => {
                 onClick={() => setExploded(!exploded)}
                 className={`w-full py-2 px-3 rounded-xl text-xs font-medium transition-all flex items-center justify-between border ${
                   exploded 
-                    ? 'bg-cyan-500/15 border-cyan-500/35 text-white font-semibold shadow-[0_0_10px_rgba(6,182,212,0.1)]' 
+                    ? 'bg-amber-500/20 border-amber-500/40 text-amber-200 font-semibold shadow-[0_0_12px_rgba(245,158,11,0.2)]' 
                     : 'border-white/5 bg-white/2 text-zinc-400 hover:bg-white/5'
                 }`}
               >
                 <span className="flex items-center gap-2">
-                  <Maximize2 className="w-3.5 h-3.5" /> Exploded hardware view
+                  <Maximize2 className="w-3.5 h-3.5 text-amber-400" /> CAD Exploded Mode (E)
                 </span>
-                <span className={`w-1.5 h-1.5 rounded-full ${exploded ? 'bg-cyan-400 animate-pulse' : 'bg-zinc-600'}`} />
+                <span className={`w-2 h-2 rounded-full ${exploded ? 'bg-amber-400 animate-pulse' : 'bg-zinc-600'}`} />
               </button>
 
               {/* Transparent Tank */}

@@ -27,15 +27,23 @@ const hotspotsList: HotspotConfig[] = [
   {
     id: 'battery',
     preset: 'BATTERY',
-    position: [-0.65, 0.92, 0],
+    position: [-1.38, 0.88, 0.20],
     label: 'Battery Source',
     getStatus: (m) => m.batteryPercent < 15 ? { label: 'CRITICAL', color: 'text-rose-400 animate-pulse' } : { label: 'NOMINAL', color: 'text-emerald-400' },
     getSub: (m) => `Capacity: ${Math.round(m.batteryPercent)}%`,
   },
   {
+    id: 'setup1_direct',
+    preset: 'SETUP1_DIRECT',
+    position: [-0.95, 0.78, 0.15],
+    label: 'Setup 1: Direct Bypass Valve',
+    getStatus: (m, mode) => ({ label: 'SINGLE-PASS PURIFICATION', color: 'text-emerald-400' }),
+    getSub: () => 'RO Permeate ➔ Direct to 250L Potable Storage',
+  },
+  {
     id: 'esp32',
     preset: 'ESP32',
-    position: [0.40, 0.92, 0],
+    position: [-0.70, 0.55, 0.45],
     label: 'Unit & Control',
     getStatus: (m) => m.esp32Online ? { label: 'ONLINE', color: 'text-emerald-400' } : { label: 'OFFLINE', color: 'text-rose-400' },
     getSub: (m) => 'WiFi Connected',
@@ -207,10 +215,10 @@ const hotspotsList: HotspotConfig[] = [
 ];
 
 export const Hotspots = () => {
-  const { landingVisited, demoRunning, activeHotspot, setActiveHotspot, setCameraPreset, metrics, mode, showHotspots, filterView } = useSystemState();
+  const { landingVisited, demoRunning, activeHotspot, setActiveHotspot, setCameraPreset, metrics, mode, showHotspots, filterView, exploded } = useSystemState();
   const [hoveredId, setHoveredId] = useState<string | null>(null);
 
-  if (!landingVisited || demoRunning || !showHotspots || filterView) return null;
+  if (!landingVisited || demoRunning || !showHotspots || filterView || exploded) return null;
 
   return (
     <group>

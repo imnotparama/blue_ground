@@ -124,9 +124,9 @@ const TankMarginBox: React.FC<TankMarginBoxProps> = ({
 
 // ─── Main TankMargins Manager Component ───────────────────────────────────────
 export const TankMargins = () => {
-  const { tanksOnly, dualVerificationMode } = useSystemState();
+  const { tanksOnly, dualVerificationMode, exploded } = useSystemState();
 
-  if (!tanksOnly) return null;
+  if (!tanksOnly || exploded) return null;
 
   return (
     <group>

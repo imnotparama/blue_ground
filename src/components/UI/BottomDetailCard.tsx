@@ -80,14 +80,14 @@ const componentCatalog: Record<string, ComponentDetail> = {
     getLiveReadout: (m) => `Level: ${m.waterLevel}% (${Math.round(m.waterLevel * 2.5)}L Reserve)`,
   },
   pump: {
-    name: 'High-Efficiency DC Submersible Sump Pump',
-    purpose: 'Drives raw intake water through the multi-layer filtration cylinder.',
-    principle: 'Brushless DC motor spins an impeller at high angular velocity, creating centrifugal force that pushes fluid outward.',
-    specifications: ['Max flow: 12 L/min', 'Max lift: 4.5 meters', 'Brushless motor with dry-run protection'],
-    power: 'Draw: 12.0W (Load variable)',
-    maintenance: '94% - Inspect impeller blades in 45 days',
-    processRole: 'The circulatory heart. Provides the necessary pressure head to overcome resistance in the dense filtration media.',
-    getLiveReadout: (m) => `Operating speed: ${m.pumpRpm} RPM | Flow: ${m.flowRate.toFixed(1)} L/min`,
+    name: '24V High-Pressure Booster Pump',
+    purpose: 'Pressurizes settled water from the secondary tank through the 4-stage smart filtration train.',
+    principle: 'Positive displacement diaphragm pump driven by a high-torque 24V DC motor, generating up to 4.5 Bar (65 PSI) pressure head to overcome dense filter media and RO membrane resistance.',
+    specifications: ['Working Pressure: 4.5 Bar (65 PSI)', 'Max Flow: 4.8 L/min', 'Mounting: Grounded Unistrut Stand with Vibration Dampeners'],
+    power: 'Draw: 24.0W (12–24V DC)',
+    maintenance: '94% - Inspect diaphragm seals every 6 months',
+    processRole: 'The circulatory heart. Delivers necessary operating pressure for RO Maxx desalinization and sequential cartridge purification.',
+    getLiveReadout: (m) => `Operating speed: ${m.pumpRpm} RPM | Flow: ${m.flowRate.toFixed(1)} L/min | Pressure: 4.5 Bar`,
   },
   uv: {
     name: 'UV-C LED Sterilization Module',
@@ -139,6 +139,16 @@ const componentCatalog: Record<string, ComponentDetail> = {
     processRole: 'Calibration compensation. Adjusts voltage offset calculations of chemical sensors as water temperature changes.',
     getLiveReadout: (m) => `Temperature: ${m.temperature.toFixed(1)} °C`,
   },
+  temp_sensor: {
+    name: 'DS18B20 Digital Temperature Sensor',
+    purpose: 'Measures water temperature, calibrating temperature-sensitive pH and TDS probes on the secondary tank bridge.',
+    principle: 'Silicon bandgap sensor translates temperature changes to digital pulse counts using the 1-Wire protocol.',
+    specifications: ['Range: -55°C to +125°C', 'Accuracy: ±0.5°C', 'Resolution: 12-bit programmable'],
+    power: 'Signal load: <0.01W',
+    maintenance: '100% - Calibrated',
+    processRole: 'Calibration compensation. Adjusts voltage offset calculations of chemical sensors as water temperature changes.',
+    getLiveReadout: (m) => `Temperature: ${m.temperature.toFixed(1)} °C`,
+  },
   flow: {
     name: 'Inline Impeller Flow Sensor',
     purpose: 'Measures volumetric fluid speed to calculate total throughput and detect pipeline leaks.',
@@ -160,6 +170,16 @@ const componentCatalog: Record<string, ComponentDetail> = {
     getLiveReadout: (m) => m.tds > 100 
       ? `VERIFICATION: IMPURE (${m.tds} ppm) ➔ Closed-Loop Recirculating to Stage 1 SediShield` 
       : `VERIFICATION: PURE (${m.tds || 28} ppm) ➔ Direct Dispense to Clean Potable Storage`,
+  },
+  setup1_direct: {
+    name: 'Setup 1: Direct Single-Pass Bypass Line & Solenoid',
+    purpose: 'Directly cascades purified water from the 4-stage filter outlet into the Primary 250L Potable Reservoir, bypassing the secondary verification chamber.',
+    principle: 'Direct single-pass filtration architecture: when enabled, an automated 3-way motorized solenoid valve opens the vertical cascade drop tube directly into clean drinking storage, ensuring rapid delivery with zero recirculation latency.',
+    specifications: ['Valve: 12V DC Fast-Acting Solenoid Diverter', 'Drop tube: Sanitary food-grade downcomer', 'Throughput: Up to 5.5 L/min', 'Bypass: Completely isolates Tank 2'],
+    power: 'Actuation power: 3.2W (during state change)',
+    maintenance: '99% - Automated seal integrity test',
+    processRole: 'Standard single-pass purification routing for clean or moderately mineralized borewell water sources.',
+    getLiveReadout: (m) => `Status: SETUP 1 DIRECT CASCADE ACTIVE | Delivery Rate: ${m.flowRate.toFixed(1)} L/min`,
   },
   recirculation_loop: {
     name: 'Closed-Loop Recirculation Loop',
@@ -232,14 +252,14 @@ const componentCatalog: Record<string, ComponentDetail> = {
     getLiveReadout: (m) => `Volume Reserve: ${m.waterLevel}% (${Math.round(m.waterLevel * 2.5)} Liters)`,
   },
   secondary_tank: {
-    name: 'Secondary Monitoring Tank Frame',
-    purpose: 'Houses sensor probes and the submerged pump, managing raw water inlet flow.',
-    principle: 'Acts as a buffer reservoir that maintains constant immersion height for probes, preventing drying out.',
-    specifications: ['Volume: 10.0 Liters', 'Immersion depth: 220mm', 'Material: Impact clear acrylic'],
-    power: 'Passive buffer',
-    maintenance: '97% - Flush scale buildup monthly',
-    processRole: 'Sensor well. Keeps the pH and TDS probes constantly submerged in fresh flowing water for stable readings.',
-    getLiveReadout: (m) => `Probe Well: Submerged | Water Quality: ${m.waterQuality}`,
+    name: 'Secondary Settling Tank & Sensor Bridge',
+    purpose: 'Receives gravity-settled water from the sedimentation tank and provides a calm testing deck for the primary water quality sensor suite.',
+    principle: '35L clear acrylic settling vessel equipped with an overhead stainless steel sensor bridge. Submerges pH, Turbidity, TDS, and DS18B20 temperature probes to profile water before pumping.',
+    specifications: ['Capacity: 35 Liters', 'Bridge: 4 Precision Collar Mounts', 'Inlet: 1/2" Transfer from Sedimentation Tank', 'Suction: Bottom outlet to Booster Pump'],
+    power: 'Passive settling buffer',
+    maintenance: '96% - Clean probe wells quarterly',
+    processRole: 'Pre-filtration analytical station. Performs baseline water quality profiling prior to high-pressure filtration.',
+    getLiveReadout: (m) => `Quality: ${m.waterQuality} | Turbidity: ${m.turbidity.toFixed(1)} NTU | TDS: ${m.tds} ppm | pH: ${m.ph.toFixed(2)}`,
   },
   intake_pipe: {
     name: 'Industrial Raw Water Intake Pipe',
@@ -292,6 +312,13 @@ const componentCatalog: Record<string, ComponentDetail> = {
     getLiveReadout: (m) => `Intake Throughput: ${m.flowRate.toFixed(1)} L/min | Mechanism Status: OPERATIONAL`,
   },
 };
+
+// Aliases for unified telemetry lookup across all modules
+componentCatalog['filters'] = componentCatalog['filter_housing'];
+componentCatalog['tank2'] = componentCatalog['tank2_verification'];
+componentCatalog['tds2'] = componentCatalog['tank2_verification'];
+componentCatalog['ph2'] = componentCatalog['tank2_verification'];
+componentCatalog['turbidity2'] = componentCatalog['tank2_verification'];
 
 export const BottomDetailCard = () => {
   const { activeHotspot, setActiveHotspot, setCameraPreset, metrics } = useSystemState();

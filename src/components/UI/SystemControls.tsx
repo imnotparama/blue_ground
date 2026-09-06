@@ -50,8 +50,6 @@ export const SystemControls = () => {
     setCameraPreset,
     hydroGeneratorMode,
     setHydroGeneratorMode,
-    antigravityMode,
-    setAntigravityMode,
     filterView,
     setFilterView,
   } = useSystemState();
@@ -158,22 +156,17 @@ export const SystemControls = () => {
     }));
   };
 
-  // ─── WATER CLEANLINESS SIMULATIONS ───
-  // Simulation 1: Standard Borewell Inflow -> Treated via 4-Stage Filter & Verified Pure -> Primary Reservoir
+  // Simulation 1: Standard Borewell Inflow -> Treated via 4-Stage Filter & Setup 1 Direct Single-Pass -> Primary Reservoir
   const triggerSimulation1 = () => {
-    setDualVerificationMode(true);
+    setDualVerificationMode(false);
     setRecirculationTriggered(false);
     setMode('NORMAL');
-    setCameraPreset('OVERVIEW');
-    setTank2Tds(28);
+    setCameraPreset('SETUP1_DIRECT');
     setMetrics(prev => ({
       ...prev,
       turbidity: 2.8,
       tds: 190,
-      tds2: 28,
-      turbidity2: 0.2,
-      ph: 7.35,
-      temperature: 24.0,
+      ph: 7.22,
       waterQuality: 'EXCELLENT',
       flowRate: 4.8,
       pumpRpm: 1800,
@@ -221,30 +214,20 @@ export const SystemControls = () => {
             <Eye className="w-3 h-3 text-zinc-500" /> CAD Layer Views
           </span>
           <div className="grid grid-cols-2 gap-2">
-            {/* Antigravity Floating Mode Toggle */}
-            <button
-              onClick={() => setAntigravityMode(!antigravityMode)}
-              className={`col-span-2 flex items-center justify-center gap-2 py-2 px-3 rounded-xl border text-[9px] font-mono font-bold tracking-wider transition-all cursor-pointer ${
-                antigravityMode
-                  ? 'bg-gradient-to-r from-cyan-500/30 to-violet-500/30 text-cyan-200 border-cyan-400 shadow-[0_0_16px_rgba(6,182,212,0.4)] animate-pulse'
-                  : 'bg-white/5 border-white/10 text-zinc-300 hover:bg-white/10 hover:text-white'
-              }`}
-            >
-              <Sparkles className={`w-3.5 h-3.5 ${antigravityMode ? 'text-cyan-300 animate-spin-slow' : 'text-zinc-400'}`} />
-              <span>{antigravityMode ? 'Antigravity View: FLOATING (A)' : 'Toggle Antigravity View (A)'}</span>
-            </button>
-
-            {/* Exploded View Toggle */}
+            {/* CAD Exploded View Disassembly Toggle */}
             <button
               onClick={() => setExploded(!exploded)}
-              className={`flex items-center justify-center gap-1 py-1.5 rounded-lg border text-[9px] font-mono font-bold tracking-wider transition-all cursor-pointer ${
-                exploded 
-                  ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40 shadow-[0_0_8px_rgba(6,182,212,0.15)]' 
-                  : 'bg-white/2 border-white/5 text-zinc-400 hover:bg-white/5 hover:text-white'
+              className={`col-span-2 flex items-center justify-between py-2 px-3 rounded-xl border text-[9px] font-mono font-bold tracking-wider transition-all cursor-pointer ${
+                exploded
+                  ? 'bg-gradient-to-r from-amber-500/25 to-purple-500/25 text-amber-200 border-amber-400 shadow-[0_0_16px_rgba(245,158,11,0.35)] ring-1 ring-amber-400/50'
+                  : 'bg-white/5 border-white/10 text-zinc-300 hover:bg-white/10 hover:text-white hover:border-amber-500/30'
               }`}
             >
-              <Wrench className="w-3 h-3" />
-              Exploded
+              <div className="flex items-center gap-2">
+                <Wrench className={`w-3.5 h-3.5 ${exploded ? 'text-amber-300 animate-spin-slow' : 'text-zinc-400'}`} />
+                <span>{exploded ? 'CAD Exploded View: ACTIVE' : 'CAD Exploded View (Disassembly)'}</span>
+              </div>
+              <span className={`text-[9px] px-1.5 py-0.5 rounded font-mono font-bold ${exploded ? 'bg-amber-950 text-amber-300 border border-amber-500/40' : 'bg-zinc-800 border border-zinc-700 text-zinc-400'}`}>E</span>
             </button>
 
             {/* X-Ray / Transparency View Toggle */}
@@ -263,52 +246,105 @@ export const SystemControls = () => {
               X-Ray Mode
             </button>
 
-            {/* Verification Gate Architecture: Pure vs Impure Recirculation */}
-            <div className="col-span-2 flex flex-col gap-1.5 p-2 rounded-xl bg-purple-950/20 border border-purple-500/30">
+            {/* Pipeline Architecture Selector: Setup 1 (Direct) vs Setup 2 (Dual-Verification) */}
+            <div className="col-span-2 flex flex-col gap-2 p-2.5 rounded-xl bg-gradient-to-b from-purple-950/30 to-zinc-950/40 border border-purple-500/30">
               <div className="flex items-center justify-between text-[8px] font-mono text-purple-300 font-bold">
                 <span className="flex items-center gap-1">
                   <Repeat className="w-3 h-3 text-purple-400" />
-                  VERIFICATION GATE (TANK 2)
+                  PIPELINE ARCHITECTURE
                 </span>
                 <span className="text-[7px] px-1 py-0.2 rounded bg-purple-950 text-purple-300 border border-purple-500/40">HOTKEY: V</span>
               </div>
-              <div className="text-[7.5px] font-mono text-zinc-400">
-                4-Stage Discharge ➔ Verification Gate
-              </div>
+
+              {/* Toggle Switch between Setup 1 and Setup 2 */}
               <div className="grid grid-cols-2 gap-1 font-mono text-[8px]">
                 <button
                   onClick={() => {
-                    setDualVerificationMode(true);
-                    setTank2Tds(28);
+                    setDualVerificationMode(false);
                     setRecirculationTriggered(false);
-                    setMetrics(prev => ({ ...prev, tds2: 28, recirculationActive: false }));
+                    setCameraPreset('SETUP1_DIRECT');
+                    setMetrics(prev => ({ ...prev, recirculationActive: false }));
                   }}
-                  className={`py-1 px-1.5 rounded-md border text-center transition-all cursor-pointer ${
-                    metrics.tds2 <= 100
-                      ? 'bg-emerald-500/30 border-emerald-400 text-emerald-300 font-bold shadow-[0_0_8px_rgba(16,185,129,0.3)]'
+                  className={`py-1.5 px-2 rounded-lg border text-center transition-all cursor-pointer flex flex-col items-center gap-0.5 ${
+                    !dualVerificationMode
+                      ? 'bg-emerald-500/30 border-emerald-400 text-emerald-300 font-bold shadow-[0_0_10px_rgba(16,185,129,0.35)]'
                       : 'bg-black/40 border-white/5 text-zinc-500 hover:text-white'
                   }`}
-                  title="Verified Pure: Pass directly to Clean 250L Potable Reservoir"
+                  title="Setup 1: Direct single-pass from 4-stage filter outlet directly into 250L Potable Reservoir"
                 >
-                  ✓ Pure (28 ppm)
+                  <span className="text-[9px]">⚡ Setup 1</span>
+                  <span className="text-[7px] opacity-80">Direct Cascade</span>
                 </button>
+
                 <button
                   onClick={() => {
                     setDualVerificationMode(true);
-                    setTank2Tds(185);
-                    setRecirculationTriggered(true);
-                    setMetrics(prev => ({ ...prev, tds2: 185, recirculationActive: true }));
+                    setCameraPreset('TANK2_VERIFICATION');
                   }}
-                  className={`py-1 px-1.5 rounded-md border text-center transition-all cursor-pointer ${
-                    metrics.tds2 > 100
-                      ? 'bg-amber-500/30 border-amber-400 text-amber-300 font-bold animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.3)]'
+                  className={`py-1.5 px-2 rounded-lg border text-center transition-all cursor-pointer flex flex-col items-center gap-0.5 ${
+                    dualVerificationMode
+                      ? 'bg-purple-500/30 border-purple-400 text-purple-200 font-bold shadow-[0_0_10px_rgba(168,85,247,0.35)]'
                       : 'bg-black/40 border-white/5 text-zinc-500 hover:text-white'
                   }`}
-                  title="Impure Detected: Divert via Solenoid back into Stage 1 SediShield"
+                  title="Setup 2: Dual-Verification through Tank 2 sensor suite with automated recirculation"
                 >
-                  ↻ Impure (185 ppm)
+                  <span className="text-[9px]">🛡️ Setup 2</span>
+                  <span className="text-[7px] opacity-80">Tank 2 Verif</span>
                 </button>
               </div>
+
+              {/* Sub-status & sub-controls depending on active mode */}
+              {!dualVerificationMode ? (
+                <div className="p-1.5 rounded-lg bg-emerald-950/20 border border-emerald-500/20 flex flex-col gap-1">
+                  <div className="text-[7.5px] font-mono text-emerald-300 font-semibold flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    Setup 1: Direct Single-Pass ACTIVE
+                  </div>
+                  <div className="text-[7px] font-mono text-zinc-400 leading-tight">
+                    Direct drop valve open ➔ 250L clean reservoir. Tank 2 bypassed.
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-1.5">
+                  <div className="text-[7px] font-mono text-zinc-400">
+                    Tank 2 Quality Gate Thresholds:
+                  </div>
+                  <div className="grid grid-cols-2 gap-1 font-mono text-[8px]">
+                    <button
+                      onClick={() => {
+                        setDualVerificationMode(true);
+                        setTank2Tds(28);
+                        setRecirculationTriggered(false);
+                        setMetrics(prev => ({ ...prev, tds2: 28, recirculationActive: false }));
+                      }}
+                      className={`py-1 px-1.5 rounded-md border text-center transition-all cursor-pointer ${
+                        metrics.tds2 <= 100
+                          ? 'bg-emerald-500/30 border-emerald-400 text-emerald-300 font-bold shadow-[0_0_8px_rgba(16,185,129,0.3)]'
+                          : 'bg-black/40 border-white/5 text-zinc-500 hover:text-white'
+                      }`}
+                      title="Verified Pure: Pass directly to Clean 250L Potable Reservoir"
+                    >
+                      ✓ Pure (28 ppm)
+                    </button>
+                    <button
+                      onClick={() => {
+                        setDualVerificationMode(true);
+                        setTank2Tds(185);
+                        setRecirculationTriggered(true);
+                        setMetrics(prev => ({ ...prev, tds2: 185, recirculationActive: true }));
+                      }}
+                      className={`py-1 px-1.5 rounded-md border text-center transition-all cursor-pointer ${
+                        metrics.tds2 > 100
+                          ? 'bg-amber-500/30 border-amber-400 text-amber-300 font-bold animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.3)]'
+                          : 'bg-black/40 border-white/5 text-zinc-500 hover:text-white'
+                      }`}
+                      title="Impure Detected: Divert via Solenoid back into Stage 1 SediShield"
+                    >
+                      ↻ Impure (185 ppm)
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Hydro-Power Motor Energy Harvesting Toggle */}

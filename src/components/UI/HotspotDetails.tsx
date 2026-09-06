@@ -100,6 +100,8 @@ const sensorDetailsCatalog: Record<string, SensorDetail> = {
   },
 };
 
+sensorDetailsCatalog['temp_sensor'] = sensorDetailsCatalog['temp'];
+
 export const HotspotDetails = () => {
   const { activeHotspot, setActiveHotspot, setCameraPreset, metrics } = useSystemState();
 

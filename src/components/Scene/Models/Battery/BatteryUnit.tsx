@@ -11,6 +11,11 @@ export const BatteryUnit = () => {
   const [hovered, setHovered] = useState(false);
   const ledRefs = useRef<(THREE.MeshStandardMaterial | null)[]>([]);
   const materialsRef = useRef<THREE.MeshStandardMaterial[]>([]);
+  const coverRef = useRef<THREE.Mesh>(null);
+  const cellRefs = useRef<(THREE.Group | null)[]>([]);
+  const boostRef = useRef<THREE.Group>(null);
+  const buckRef = useRef<THREE.Group>(null);
+  const bmsRef = useRef<THREE.Mesh>(null);
 
   useEffect(() => {
     if (!groupRef.current) return;
@@ -25,13 +30,52 @@ export const BatteryUnit = () => {
 
   useFrame((state, delta) => {
     const time = state.clock.getElapsedTime();
-    const targetY = exploded ? 0.35 : 0;
     const damp = 1.0 - Math.exp(-6 * delta);
 
     if (groupRef.current) {
+      const targetX = exploded ? -0.85 : 0;
+      const targetY = exploded ? 0.95 : 0;
+      const targetZ = exploded ? 0.55 : 0;
+
+      groupRef.current.position.x = THREE.MathUtils.lerp(groupRef.current.position.x, targetX, damp);
       groupRef.current.position.y = THREE.MathUtils.lerp(groupRef.current.position.y, targetY, damp);
+      groupRef.current.position.z = THREE.MathUtils.lerp(groupRef.current.position.z, targetZ, damp);
+
       const targetScale = hovered ? 1.03 : 1.0;
       groupRef.current.scale.setScalar(THREE.MathUtils.lerp(groupRef.current.scale.x, targetScale, damp * 1.5));
+    }
+
+    // Exploded sub-component disassembly
+    if (coverRef.current) {
+      const targetCoverY = exploded ? 0.28 : 0;
+      coverRef.current.position.y = THREE.MathUtils.lerp(coverRef.current.position.y, targetCoverY, damp);
+    }
+
+    const baseCells = [-0.14, -0.07, 0, 0.07, 0.14];
+    const cellSpread = exploded ? 1.85 : 1.0;
+    cellRefs.current.forEach((cRef, idx) => {
+      if (cRef) {
+        cRef.position.x = THREE.MathUtils.lerp(cRef.position.x, baseCells[idx] * cellSpread, damp);
+      }
+    });
+
+    if (boostRef.current) {
+      const targetZ = exploded ? 0.28 : 0.09;
+      const targetY = exploded ? 0.14 : 0.05;
+      boostRef.current.position.z = THREE.MathUtils.lerp(boostRef.current.position.z, targetZ, damp);
+      boostRef.current.position.y = THREE.MathUtils.lerp(boostRef.current.position.y, targetY, damp);
+    }
+
+    if (buckRef.current) {
+      const targetZ = exploded ? -0.28 : -0.09;
+      const targetY = exploded ? 0.14 : 0.05;
+      buckRef.current.position.z = THREE.MathUtils.lerp(buckRef.current.position.z, targetZ, damp);
+      buckRef.current.position.y = THREE.MathUtils.lerp(buckRef.current.position.y, targetY, damp);
+    }
+
+    if (bmsRef.current) {
+      const targetY = exploded ? 0.14 : 0.02;
+      bmsRef.current.position.y = THREE.MathUtils.lerp(bmsRef.current.position.y, targetY, damp);
     }
 
     const activeLedsCount = Math.ceil((metrics.batteryPercent / 100) * 5);
@@ -92,21 +136,38 @@ export const BatteryUnit = () => {
       onClick={handleClick}
     >
       {/* ════════════════════════════════════════════════════════════════════
-          POWER SUBSYSTEM VISUALIZATION SLICE (Side Platform at x = -1.65, y = 0.55)
+          POWER SUBSYSTEM VISUALIZATION SLICE (Dry Elevated Platform at x = -1.38, y = 0.72)
           Solar Input + Battery Bank (1S5P) + DC-DC Boost & Buck Rails
+          Mounted firmly on top aluminum extrusion frame at y = 0.62, safely above all water
           ════════════════════════════════════════════════════════════════════ */}
-      <group position={[-1.65, 0.55, 0]}>
+      <group position={[-1.38, 0.72, 0]}>
         
-        {/* Transparent Polycarbonate Electronics Shelf */}
-        <mesh position={[0, -0.16, 0]} receiveShadow>
-          <boxGeometry args={[0.85, 0.02, 0.46]} />
+        {/* Transparent Polycarbonate Dry Electronics Shelf (Resting on unistrut frame at y = 0.62) */}
+        <mesh position={[0, -0.10, 0]} receiveShadow>
+          <boxGeometry args={[0.74, 0.02, 0.42]} />
           <meshStandardMaterial color="#0f172a" roughness={0.3} metalness={0.7} />
         </mesh>
+
+        {/* Heavy-Duty Structural Frame Mounting Legs & Vibration Dampening Pads down to Tank Extrusions at y=0.60 */}
+        {[-0.28, 0.28].map((mx) =>
+          [-0.14, 0.14].map((mz) => (
+            <group key={`mount-${mx}-${mz}`} position={[mx, -0.11, mz]}>
+              <mesh castShadow>
+                <cylinderGeometry args={[0.016, 0.018, 0.02, 12]} />
+                <meshStandardMaterial color="#1e293b" roughness={0.3} metalness={0.9} />
+              </mesh>
+              <mesh position={[0, -0.012, 0]}>
+                <cylinderGeometry args={[0.022, 0.022, 0.008, 12]} />
+                <meshStandardMaterial color="#090d16" roughness={0.8} />
+              </mesh>
+            </group>
+          ))
+        )}
 
         {/* ─── 1. BATTERY BANK (1S5P Li-ion Pack) ─── */}
         <group position={[-0.14, 0, 0]}>
           {/* Transparent Acrylic Protective Battery Enclosure */}
-          <mesh position={[0, 0, 0]} castShadow>
+          <mesh ref={coverRef} position={[0, 0, 0]} castShadow>
             <boxGeometry args={[0.42, 0.22, 0.32]} />
             <meshPhysicalMaterial 
               color="#0f172a" 
@@ -119,7 +180,11 @@ export const BatteryUnit = () => {
 
           {/* 5 x Li-ion 18650/21700 Cylindrical Cells in Parallel (1S5P) */}
           {[-0.14, -0.07, 0, 0.07, 0.14].map((cx, idx) => (
-            <group key={idx} position={[cx, -0.02, 0]}>
+            <group 
+              key={idx} 
+              ref={(el) => { cellRefs.current[idx] = el; }} 
+              position={[cx, -0.02, 0]}
+            >
               <mesh castShadow>
                 <cylinderGeometry args={[0.024, 0.024, 0.14, 20]} />
                 <meshStandardMaterial color="#0284c7" roughness={0.3} metalness={0.7} />
@@ -139,7 +204,7 @@ export const BatteryUnit = () => {
           </mesh>
 
           {/* 1S BMS Protection Board on End */}
-          <mesh position={[0, 0.02, 0.14]}>
+          <mesh ref={bmsRef} position={[0, 0.02, 0.14]}>
             <boxGeometry args={[0.32, 0.05, 0.008]} />
             <meshStandardMaterial color="#15803d" roughness={0.4} metalness={0.3} />
           </mesh>
@@ -166,7 +231,7 @@ export const BatteryUnit = () => {
         </group>
 
         {/* ─── 2. DC-DC STEP-UP BOOST CONVERTER (XL6009 / XL6019: Boost to 24V Pump Rail) ─── */}
-        <group position={[0.24, 0.05, 0.09]}>
+        <group ref={boostRef} position={[0.24, 0.05, 0.09]}>
           {/* Blue PCB */}
           <mesh castShadow>
             <boxGeometry args={[0.20, 0.025, 0.12]} />
@@ -190,7 +255,7 @@ export const BatteryUnit = () => {
         </group>
 
         {/* ─── 3. DC-DC STEP-DOWN BUCK CONVERTER (LM2596 / XL4015: Buck to 5V Logic Rail) ─── */}
-        <group position={[0.24, 0.05, -0.09]}>
+        <group ref={buckRef} position={[0.24, 0.05, -0.09]}>
           {/* Blue/Red PCB */}
           <mesh castShadow>
             <boxGeometry args={[0.20, 0.025, 0.12]} />

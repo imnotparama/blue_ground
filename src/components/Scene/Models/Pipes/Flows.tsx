@@ -43,7 +43,8 @@ export const Flows = () => {
     envMode, 
     dualVerificationMode, 
     recirculationTriggered, 
-    hydroGeneratorMode 
+    hydroGeneratorMode,
+    exploded,
   } = useSystemState();
 
   const intakeParticlesRef = useRef<THREE.Points>(null);
@@ -90,8 +91,9 @@ export const Flows = () => {
           new THREE.Vector3(0.45, 0.28, 0), // Inside Secondary Tank settling chamber
         ], false, 'catmullrom', 0.02);
 
-    // B. Four-Stage Smart Filtration Train: Secondary Tank Suction -> Booster Pump -> SediShield -> ChemoBlock -> RO Maxx -> Active Copper -> Verification Tank
-    const pumpCurve = new THREE.CatmullRomCurve3([
+    // B. Four-Stage Smart Filtration Train:
+    // Core points through Booster Pump and 4 Filter Stages (SediShield -> ChemoBlock -> RO Maxx -> Active Copper)
+    const filterCorePoints = [
       new THREE.Vector3(0.45, 0.15, 0),        // Inside Secondary Tank
       new THREE.Vector3(1.00, 0.05, 0),        // Secondary Tank suction outlet
       new THREE.Vector3(1.18, 0.05, 0),        // Isolation valve
@@ -111,14 +113,30 @@ export const Flows = () => {
       new THREE.Vector3(-0.48, 0.45, -0.62),   // Stage 3 RO Maxx membrane core (TDS dropped)
       new THREE.Vector3(-0.26, 0.79, -0.62),   // Thin glowing jumper to Stage 4
       new THREE.Vector3(-0.04, 0.79, -0.62),   // Stage 4 Active Copper top inlet
-      new THREE.Vector3(-0.04, 0.45, -0.62),   // Stage 4 Active Copper core (copper ion infusion & antimicrobial polish)
+      new THREE.Vector3(-0.04, 0.45, -0.62),   // Stage 4 Active Copper core (copper ion polish)
       new THREE.Vector3(-0.04, 0.79, -0.62),   // Stage 4 top discharge
       new THREE.Vector3(-0.04, 0.79, 0),       // Forward return to front plane
-      new THREE.Vector3(-0.945, 0.79, 0),      // Overhead conduit across to Verification Tank
-      new THREE.Vector3(-1.85, 0.79, 0),       // Verification Tank inlet elbow
-      new THREE.Vector3(-1.85, 0.50, 0),       // Drop pipe into Verification Chamber
-      new THREE.Vector3(-1.85, 0.20, 0),       // Inside Verification Chamber (undergoing quality test)
-    ], false, 'catmullrom', 0.02);
+      new THREE.Vector3(-0.495, 0.79, 0),      // Overhead conduit to Diverter Junction
+      new THREE.Vector3(-0.95, 0.79, 0),       // 3-Way Architecture Diverter
+    ];
+
+    // Dynamic routing: Setup 1 Direct (straight down into Primary Reservoir) vs Setup 2 (to Tank 2)
+    const pumpCurve = !dualVerificationMode
+      ? new THREE.CatmullRomCurve3([
+          ...filterCorePoints,
+          new THREE.Vector3(-0.95, 0.65, 0),   // Setup 1 Direct Solenoid Valve
+          new THREE.Vector3(-0.95, 0.40, 0),   // Direct downcomer tube entering Primary Tank
+          new THREE.Vector3(-0.95, 0.05, 0),   // Submerged in 250L Potable Storage
+          new THREE.Vector3(-0.95, -0.65, 0),  // Direct cascade into Clean Reservoir bottom!
+        ], false, 'catmullrom', 0.02)
+      : new THREE.CatmullRomCurve3([
+          ...filterCorePoints,
+          new THREE.Vector3(-1.40, 0.79, 0),   // Overhead conduit across to Tank 2
+          new THREE.Vector3(-1.62, 0.79, 0),   // Setup 2 Isolation Valve
+          new THREE.Vector3(-1.85, 0.79, 0),   // Verification Tank inlet elbow
+          new THREE.Vector3(-1.85, 0.50, 0),   // Drop pipe into Verification Chamber
+          new THREE.Vector3(-1.85, 0.20, 0),   // Inside Verification Chamber (undergoing quality test)
+        ], false, 'catmullrom', 0.02);
 
     // C. Verification Tank Clean Delivery Line (When verified pure: Discharge into Primary Clean Reservoir)
     const tank2DeliveryCurve = new THREE.CatmullRomCurve3([
@@ -143,7 +161,7 @@ export const Flows = () => {
     ], false, 'catmullrom', 0.02);
 
     return { intakeCurve, pumpCurve, tank2DeliveryCurve, recirculationCurve };
-  }, [hydroGeneratorMode]);
+  }, [hydroGeneratorMode, dualVerificationMode]);
 
   // Pre-sample points along curves to avoid expensive CatmullRom spline evaluations in render loop
   const sampledCurves = useMemo(() => {
@@ -177,33 +195,37 @@ export const Flows = () => {
 
   // 3. ELECTRICAL POWER & SIGNAL WIRING (Routed orthogonally along structural frame extrusions)
   const wires = useMemo(() => {
-    const solarToBatt = new THREE.LineCurve3(
-      new THREE.Vector3(-1.65, 0.75, 0),
-      new THREE.Vector3(-0.65, 0.75, 0)
-    );
-    const battToEsp = new THREE.LineCurve3(
-      new THREE.Vector3(-0.65, 0.75, 0),
-      new THREE.Vector3(0.40, 0.75, 0)
-    );
+    const solarToBatt = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(-1.65, 0.88, 0),
+      new THREE.Vector3(-1.65, 0.72, 0),
+      new THREE.Vector3(-1.38, 0.72, 0),
+    ], false, 'catmullrom', 0.01);
+
+    const battToEsp = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(-1.38, 0.72, 0),
+      new THREE.Vector3(-1.00, 0.60, 0.42),
+      new THREE.Vector3(-0.70, 0.40, 0.42),
+    ], false, 'catmullrom', 0.01);
+
     // ESP32 to Flow Sensor: runs right along top rail to x=1.0, down vertical beam to y=0.30, then to flow sensor
     const espToFlow = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(0.40, 0.75, 0.02),
-      new THREE.Vector3(1.00, 0.75, 0.02),
-      new THREE.Vector3(1.00, 0.30, 0.02),
+      new THREE.Vector3(-0.70, 0.40, 0.42),
+      new THREE.Vector3(0.40, 0.40, 0.42),
+      new THREE.Vector3(1.00, 0.40, 0.20),
       new THREE.Vector3(1.35, 0.30, 0.02),
     ], false, 'catmullrom', 0.01);
 
     // ESP32 to Active Copper (Stage 4): runs along top rail then back along rack
     const espToUv = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(0.40, 0.75, 0.02),
-      new THREE.Vector3(-0.04, 0.75, 0.02),
+      new THREE.Vector3(-0.70, 0.40, 0.42),
+      new THREE.Vector3(-0.04, 0.40, 0.20),
       new THREE.Vector3(-0.04, 0.75, -0.62),
     ], false, 'catmullrom', 0.01);
 
     // ESP32 to Float Sensor: runs left along top rail to x=-1.10, then down to float switch at y=0.60
     const espToFloat = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(0.40, 0.75, 0.02),
-      new THREE.Vector3(-1.10, 0.75, 0.02),
+      new THREE.Vector3(-0.70, 0.40, 0.42),
+      new THREE.Vector3(-1.10, 0.40, 0.20),
       new THREE.Vector3(-1.10, 0.60, 0.02),
     ], false, 'catmullrom', 0.01);
 
@@ -211,7 +233,7 @@ export const Flows = () => {
       new THREE.Vector3(2.52, -0.22, 0.09),
       new THREE.Vector3(2.52, 0.78, 0.05),
       new THREE.Vector3(1.00, 0.78, 0.05),
-      new THREE.Vector3(-0.65, 0.75, 0.02),
+      new THREE.Vector3(-1.38, 0.72, 0.02),
     ], false, 'catmullrom', 0.01);
 
     return { solarToBatt, battToEsp, espToFlow, espToUv, espToFloat, hydroToBatt };
@@ -229,25 +251,27 @@ export const Flows = () => {
   }, [wires]);
 
   useFrame((state, delta) => {
+    if (exploded) return;
     const time = state.clock.getElapsedTime();
 
     const isFlowActive = metrics.flowRate > 0.1 ? 1.0 : 0.0;
     const speedScale = 1.0 + (metrics.flowRate / 5.0) * 1.5;
 
-    if (intakeTubeMatRef.current) {
-      intakeTubeMatRef.current.uniforms.uTime.value = time;
-      intakeTubeMatRef.current.uniforms.uSpeed.value = speedScale;
-      intakeTubeMatRef.current.uniforms.uFlowActive.value = isFlowActive;
-    }
-    if (roTubeMatRef.current) {
-      roTubeMatRef.current.uniforms.uTime.value = time;
-      roTubeMatRef.current.uniforms.uSpeed.value = speedScale;
-      roTubeMatRef.current.uniforms.uFlowActive.value = isFlowActive;
-    }
+    // Direct uniform updates ensuring rock-solid WebGL animation
+    intakeShaderMat.uniforms.uTime.value = time;
+    intakeShaderMat.uniforms.uSpeed.value = speedScale;
+    intakeShaderMat.uniforms.uFlowActive.value = isFlowActive;
+
+    roShaderMat.uniforms.uTime.value = time;
+    roShaderMat.uniforms.uSpeed.value = speedScale;
+    roShaderMat.uniforms.uFlowActive.value = isFlowActive;
 
     const updateParticles = (ref: React.RefObject<THREE.Points | null>, pts: THREE.Vector3[], progress: Float32Array) => {
       if (!ref.current) return;
+      if (!ref.current.geometry || !ref.current.geometry.attributes || !ref.current.geometry.attributes.position) return;
+      if (!pts || pts.length === 0) return;
       const positions = ref.current.geometry.attributes.position.array as Float32Array;
+      if (!positions) return;
       const step = (metrics.flowRate / 5.0) * 0.22 * delta;
       const len = pts.length - 1;
 
@@ -258,9 +282,11 @@ export const Flows = () => {
         }
         const idx = Math.min(len, Math.max(0, Math.floor(progress[i] * len)));
         const pt = pts[idx];
-        positions[i * 3] = pt.x;
-        positions[i * 3 + 1] = pt.y;
-        positions[i * 3 + 2] = pt.z;
+        if (pt) {
+          positions[i * 3] = pt.x;
+          positions[i * 3 + 1] = pt.y;
+          positions[i * 3 + 2] = pt.z;
+        }
       }
       ref.current.geometry.attributes.position.needsUpdate = true;
     };
@@ -268,15 +294,16 @@ export const Flows = () => {
     updateParticles(intakeParticlesRef, sampledCurves.intake, particleConfig.intake.progress);
     updateParticles(pumpParticlesRef, sampledCurves.pump, particleConfig.pump.progress);
 
-    // Closed-Loop Verification Decision:
+    // Closed-Loop Verification Decision (Setup 2 Only):
     // If water is NOT pure: Recirculation Return Loop back to 4-stage filter
-    // If water IS pure: Clean delivery line to Primary Tank
-    const isRecirculating = (metrics.tds2 || 0) > 100 || (metrics.turbidity2 || 0) > 1.0 || recirculationTriggered;
-
-    if (isRecirculating) {
-      updateParticles(recircParticlesRef, sampledCurves.recirculation, particleConfig.recirc.progress);
-    } else {
-      updateParticles(directParticlesRef, sampledCurves.tank2Delivery, particleConfig.direct.progress);
+    // If water IS pure: Clean delivery line from Tank 2 to Primary Tank
+    if (dualVerificationMode) {
+      const isRecirculating = (metrics.tds2 || 0) > 100 || (metrics.turbidity2 || 0) > 1.0 || recirculationTriggered;
+      if (isRecirculating) {
+        updateParticles(recircParticlesRef, sampledCurves.recirculation, particleConfig.recirc.progress);
+      } else {
+        updateParticles(directParticlesRef, sampledCurves.tank2Delivery, particleConfig.direct.progress);
+      }
     }
 
     // Power wiring animations
@@ -284,29 +311,41 @@ export const Flows = () => {
     const isBatteryDischarging = metrics.currentDraw > 1 && mode !== 'LOW_BATTERY';
 
     if (solarPowerRef.current && solarPowerRef.current.material) {
-      solarPowerRef.current.material.dashOffset = isSolarCharging ? -time * 0.8 : 0;
-      solarPowerRef.current.material.opacity = isSolarCharging ? 0.9 : 0.05;
+      try {
+        solarPowerRef.current.material.dashOffset = isSolarCharging ? -time * 0.8 : 0;
+        solarPowerRef.current.material.opacity = isSolarCharging ? 0.9 : 0.05;
+      } catch (_) {}
     }
 
     if (battPowerRef.current && battPowerRef.current.material) {
-      battPowerRef.current.material.dashOffset = isBatteryDischarging ? -time * 0.6 : 0;
-      battPowerRef.current.material.opacity = isBatteryDischarging ? 0.9 : 0.05;
+      try {
+        battPowerRef.current.material.dashOffset = isBatteryDischarging ? -time * 0.6 : 0;
+        battPowerRef.current.material.opacity = isBatteryDischarging ? 0.9 : 0.05;
+      } catch (_) {}
     }
 
     if (hydroPowerRef.current && hydroPowerRef.current.material) {
-      const isHydroCharging = hydroGeneratorMode && metrics.flowRate > 0.2;
-      hydroPowerRef.current.material.dashOffset = isHydroCharging ? -time * 1.6 : 0;
-      hydroPowerRef.current.material.opacity = isHydroCharging ? 0.95 : 0.02;
+      try {
+        const isHydroCharging = hydroGeneratorMode && metrics.flowRate > 0.2;
+        hydroPowerRef.current.material.dashOffset = isHydroCharging ? -time * 1.6 : 0;
+        hydroPowerRef.current.material.opacity = isHydroCharging ? 0.95 : 0.02;
+      } catch (_) {}
     }
 
     if (espToFlowRef.current && espToFlowRef.current.material) {
-      espToFlowRef.current.material.dashOffset = -time * 0.4;
+      try {
+        espToFlowRef.current.material.dashOffset = -time * 0.4;
+      } catch (_) {}
     }
     if (espToUvRef.current && espToUvRef.current.material) {
-      espToUvRef.current.material.dashOffset = metrics.uvStatus === 'ON' ? -time * 0.6 : 0;
+      try {
+        espToUvRef.current.material.dashOffset = metrics.uvStatus === 'ON' ? -time * 0.6 : 0;
+      } catch (_) {}
     }
     if (espToFloatRef.current && espToFloatRef.current.material) {
-      espToFloatRef.current.material.dashOffset = -time * 0.3;
+      try {
+        espToFloatRef.current.material.dashOffset = -time * 0.3;
+      } catch (_) {}
     }
   });
 
@@ -346,16 +385,18 @@ export const Flows = () => {
     return mat;
   }, []);
 
+  if (exploded) return null;
+
   return (
     <group>
       {/* Fluid Tube Meshes */}
       <mesh>
-        <tubeGeometry args={[curves.intakeCurve, 30, 0.016, 8, false]} />
+        <tubeGeometry key={hydroGeneratorMode ? 'intake-hydro' : 'intake-std'} args={[curves.intakeCurve, 30, 0.016, 8, false]} />
         <primitive object={intakeShaderMat} ref={intakeTubeMatRef} attach="material" />
       </mesh>
 
       <mesh>
-        <tubeGeometry args={[curves.pumpCurve, 64, 0.016, 8, false]} />
+        <tubeGeometry key={dualVerificationMode ? 'pump-tank2' : 'pump-direct'} args={[curves.pumpCurve, 64, 0.016, 8, false]} />
         <primitive object={roShaderMat} ref={roTubeMatRef} attach="material" />
       </mesh>
 
@@ -381,8 +422,8 @@ export const Flows = () => {
         <pointsMaterial color="#38bdf8" size={0.035} transparent opacity={0.85} depthWrite={false} />
       </points>
 
-      {/* Dynamic Path: Closed-Loop Recirculation (Impure) OR Clean Storage Delivery (Pure) */}
-      {isRecirculating ? (
+      {/* Dynamic Path: Setup 2 Dual-Verification Only (Closed-Loop Recirculation vs Clean Delivery) */}
+      {dualVerificationMode && (isRecirculating ? (
         <points ref={recircParticlesRef}>
           <bufferGeometry>
             <bufferAttribute
@@ -402,7 +443,7 @@ export const Flows = () => {
           </bufferGeometry>
           <pointsMaterial color="#10b981" size={0.035} transparent opacity={0.85} depthWrite={false} />
         </points>
-      )}
+      ))}
 
       {/* Electrical Power & Signal Wiring */}
       <Line

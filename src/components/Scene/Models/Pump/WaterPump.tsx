@@ -10,6 +10,7 @@ export const WaterPump = () => {
   
   const groupRef = useRef<THREE.Group>(null);
   const impellerRef = useRef<THREE.Group>(null);
+  const pumpHeadRef = useRef<THREE.Group>(null);
   const [hovered, setHovered] = useState(false);
 
   const materialsRef = useRef<THREE.MeshStandardMaterial[]>([]);
@@ -29,26 +30,39 @@ export const WaterPump = () => {
     const time = state.clock.getElapsedTime();
     const damp = 1.0 - Math.exp(-6 * delta);
 
-    const targetY = exploded ? 0.25 : 0;
-    
     // High-frequency vibration when pump is running
     const vibrationAmp = metrics.pumpRpm > 0 ? 0.0015 : 0;
     const vibX = Math.sin(time * 90) * vibrationAmp;
     const vibZ = Math.sin(time * 100) * vibrationAmp;
 
     if (groupRef.current) {
-      groupRef.current.position.y = THREE.MathUtils.lerp(groupRef.current.position.y, 0.05 + targetY, damp);
-      groupRef.current.position.x = 1.35 + vibX;
-      groupRef.current.position.z = vibZ;
+      const targetX = (exploded ? 1.70 : 1.35) + vibX;
+      const targetY = exploded ? 0.65 : 0.05;
+      const targetZ = (exploded ? 0.85 : 0.0) + vibZ;
+
+      groupRef.current.position.x = THREE.MathUtils.lerp(groupRef.current.position.x, targetX, damp);
+      groupRef.current.position.y = THREE.MathUtils.lerp(groupRef.current.position.y, targetY, damp);
+      groupRef.current.position.z = THREE.MathUtils.lerp(groupRef.current.position.z, targetZ, damp);
 
       const targetScale = hovered ? 1.03 : 1.0;
       groupRef.current.scale.setScalar(THREE.MathUtils.lerp(groupRef.current.scale.x, targetScale, damp * 1.5));
     }
 
-    // Impeller rotation
-    if (impellerRef.current && metrics.pumpRpm > 0) {
-      const radPerSec = (metrics.pumpRpm / 60) * 2 * Math.PI;
-      impellerRef.current.rotation.y += radPerSec * delta;
+    // Exploded pump head & impeller separation
+    if (pumpHeadRef.current) {
+      const targetHeadX = exploded ? 0.20 : 0.05;
+      pumpHeadRef.current.position.x = THREE.MathUtils.lerp(pumpHeadRef.current.position.x, targetHeadX, damp);
+    }
+
+    if (impellerRef.current) {
+      const targetImpX = exploded ? 0.11 : 0.05;
+      impellerRef.current.position.x = THREE.MathUtils.lerp(impellerRef.current.position.x, targetImpX, damp);
+
+      // Impeller rotation
+      if (metrics.pumpRpm > 0) {
+        const radPerSec = (metrics.pumpRpm / 60) * 2 * Math.PI;
+        impellerRef.current.rotation.y += radPerSec * delta;
+      }
     }
 
     const isDimmed = tanksOnly || filterView || (activeHotspot !== null && activeHotspot !== 'pump' && activeHotspot !== 'water_pump');
@@ -166,19 +180,28 @@ export const WaterPump = () => {
         <meshStandardMaterial color="#ef4444" roughness={0.35} metalness={0.5} />
       </mesh>
 
-      {/* Transparent impeller chamber */}
-      <mesh position={[0.05, 0.0, 0]} rotation={[0, 0, Math.PI / 2]}>
-        <cylinderGeometry args={[0.055, 0.055, 0.04, 16, 1, true]} />
-        <meshPhysicalMaterial 
-          transparent 
-          opacity={0.35} 
-          roughness={0.05} 
-          clearcoat={1.0}
-          side={THREE.DoubleSide} 
-        />
-      </mesh>
+      {/* Exploded Pump Head Chamber & Inlet Collar */}
+      <group ref={pumpHeadRef} position={[0, 0, 0]}>
+        {/* Transparent impeller chamber */}
+        <mesh position={[0, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
+          <cylinderGeometry args={[0.055, 0.055, 0.04, 16, 1, true]} />
+          <meshPhysicalMaterial 
+            transparent 
+            opacity={0.35} 
+            roughness={0.05} 
+            clearcoat={1.0}
+            side={THREE.DoubleSide} 
+          />
+        </mesh>
 
-      {/* Rotating Impeller Fan */}
+        {/* Inlet Suction Collar from Secondary Chamber */}
+        <mesh position={[0.03, 0, 0]} rotation={[0, 0, Math.PI / 2]} castShadow>
+          <cylinderGeometry args={[0.022, 0.022, 0.04, 12]} />
+          <meshStandardMaterial color="#334155" roughness={0.2} metalness={0.8} />
+        </mesh>
+      </group>
+
+      {/* Rotating Impeller Fan (Visible in between motor and head in Exploded View) */}
       <group ref={impellerRef} position={[0.05, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
         <mesh castShadow>
           <cylinderGeometry args={[0.012, 0.012, 0.03, 8]} />
@@ -196,12 +219,6 @@ export const WaterPump = () => {
           </mesh>
         ))}
       </group>
-
-      {/* Inlet Suction Collar from Secondary Chamber */}
-      <mesh position={[0.08, 0, 0]} rotation={[0, 0, Math.PI / 2]} castShadow>
-        <cylinderGeometry args={[0.022, 0.022, 0.04, 12]} />
-        <meshStandardMaterial color="#334155" roughness={0.2} metalness={0.8} />
-      </mesh>
     </group>
   );
 };

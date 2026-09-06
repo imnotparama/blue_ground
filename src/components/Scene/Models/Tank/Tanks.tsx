@@ -60,6 +60,10 @@ export const Tanks = () => {
   const mainTankRef = useRef<THREE.Group>(null);
   const tank2Ref = useRef<THREE.Group>(null);
   const sedTankRef = useRef<THREE.Group>(null);
+  const sedLidRef = useRef<THREE.Group>(null);
+  const tank2LidRef = useRef<THREE.Group>(null);
+  const bridgeRef = useRef<THREE.Group>(null);
+  const sedLayerRefs = useRef<(THREE.Mesh | null)[]>([]);
 
   const tankMatRef = useRef<THREE.MeshPhysicalMaterial>(null);
   const sedMatRef = useRef<THREE.MeshPhysicalMaterial>(null);
@@ -68,13 +72,15 @@ export const Tanks = () => {
   const [hoveredSed, setHoveredSed] = useState(false);
 
   useFrame((_, delta) => {
-    // Exploded View offset
+    const damp = 1.0 - Math.exp(-6 * delta);
+
+    // 1. Primary 250L Tank Base Datum
     if (mainTankRef.current) {
-      const targetY = exploded ? 0.15 : 0;
+      const targetY = exploded ? -0.65 : -0.55;
       mainTankRef.current.position.y = THREE.MathUtils.lerp(
         mainTankRef.current.position.y,
-        -0.55 + targetY,
-        0.08
+        targetY,
+        damp
       );
 
       const targetScale = hoveredMain ? 1.01 : 1.0;
@@ -83,23 +89,58 @@ export const Tanks = () => {
       );
     }
 
+    if (bridgeRef.current) {
+      const targetBridgeY = exploded ? 1.55 : 1.13;
+      bridgeRef.current.position.y = THREE.MathUtils.lerp(bridgeRef.current.position.y, targetBridgeY, damp);
+    }
+
+    // 2. Tank 2 (50L Verification Chamber) Radial Separation
     if (tank2Ref.current) {
-      const targetY = exploded ? 0.25 : 0.15;
-      const damp = 1.0 - Math.exp(-8 * delta);
+      const targetX = exploded ? -1.95 : -1.85;
+      const targetY = exploded ? 0.45 : 0.15;
+      const targetZ = exploded ? 0.85 : 0.0;
+
+      tank2Ref.current.position.x = THREE.MathUtils.lerp(tank2Ref.current.position.x, targetX, damp);
       tank2Ref.current.position.y = THREE.MathUtils.lerp(tank2Ref.current.position.y, targetY, damp);
+      tank2Ref.current.position.z = THREE.MathUtils.lerp(tank2Ref.current.position.z, targetZ, damp);
       tank2Ref.current.scale.setScalar(1.0);
       tank2Ref.current.visible = true;
     }
 
+    if (tank2LidRef.current) {
+      const targetLidY = exploded ? 0.55 : 0.26;
+      tank2LidRef.current.position.y = THREE.MathUtils.lerp(tank2LidRef.current.position.y, targetLidY, damp);
+    }
+
+    // 3. Sedimentation Tank (Setup 2 Pre-Treatment) Radial Separation
     if (sedTankRef.current) {
-      const targetX = exploded ? 2.1 : 1.9;
-      sedTankRef.current.position.x = THREE.MathUtils.lerp(sedTankRef.current.position.x, targetX, 0.08);
+      const targetX = exploded ? 2.85 : 1.9;
+      const targetY = exploded ? 0.35 : 0.05;
+      const targetZ = exploded ? -0.25 : 0.0;
+
+      sedTankRef.current.position.x = THREE.MathUtils.lerp(sedTankRef.current.position.x, targetX, damp);
+      sedTankRef.current.position.y = THREE.MathUtils.lerp(sedTankRef.current.position.y, targetY, damp);
+      sedTankRef.current.position.z = THREE.MathUtils.lerp(sedTankRef.current.position.z, targetZ, damp);
 
       const targetScale = hoveredSed ? 1.025 : 1.0;
       sedTankRef.current.scale.setScalar(
         THREE.MathUtils.lerp(sedTankRef.current.scale.x, targetScale, 0.12)
       );
     }
+
+    if (sedLidRef.current) {
+      const targetSedLidY = exploded ? 1.15 : 0.73;
+      sedLidRef.current.position.y = THREE.MathUtils.lerp(sedLidRef.current.position.y, targetSedLidY, damp);
+    }
+
+    // Explode internal media layers
+    const layerBaseY = [-0.25, 0.0, 0.28];
+    sedLayerRefs.current.forEach((lRef, idx) => {
+      if (lRef) {
+        const targetY = layerBaseY[idx] * (exploded ? 1.7 : 1.0);
+        lRef.position.y = THREE.MathUtils.lerp(lRef.position.y, targetY, damp);
+      }
+    });
 
     // Material transparency
     const isXray = transparent || cutaway;
@@ -319,7 +360,7 @@ export const Tanks = () => {
         </group>
 
         {/* Stainless Sensor Mounting Bridge across top of Secondary Tank */}
-        <group position={[1.15, 1.13, 0.20]}>
+        <group ref={bridgeRef} position={[1.15, 1.13, 0.20]}>
           <mesh castShadow>
             <boxGeometry args={[1.05, 0.024, 0.05]} />
             <meshStandardMaterial color="#64748b" roughness={0.25} metalness={0.92} />
@@ -342,6 +383,9 @@ export const Tanks = () => {
 
         {/* Primary Tank Clean Return Inlet (from Verification Chamber at world x = -1.50) */}
         <PipeNozzle pos={[-0.80, TH / 2, 0]} rot={[0, 0, 0]} />
+
+        {/* Setup 1: Direct Single-Pass Inlet Nozzle (world x = -0.95, y = 0.60, z = 0) */}
+        <PipeNozzle pos={[-0.25, TH / 2, 0]} rot={[0, 0, 0]} />
 
         {/* C. Primary Tank Clean Water Outlet Tap (Bottom-Left) */}
         <PipeNozzle pos={[-TW / 2, -0.90, 0]} rot={[0, 0, -Math.PI / 2]} />
@@ -398,7 +442,13 @@ export const Tanks = () => {
         {sedLayers.map((layer, idx) => {
           const isMesh = idx === 0;
           return (
-            <mesh key={idx} position={[0, layer.y, 0]} castShadow receiveShadow>
+            <mesh 
+              key={idx} 
+              ref={(el) => { sedLayerRefs.current[idx] = el; }}
+              position={[0, layer.y, 0]} 
+              castShadow 
+              receiveShadow
+            >
               <cylinderGeometry args={[0.23, 0.18, layer.height, 20]} />
               <meshStandardMaterial
                 color={layer.color}
@@ -413,7 +463,7 @@ export const Tanks = () => {
         })}
 
         {/* Top Housing Cap with Inlet from Borewell */}
-        <group position={[0, 0.73, 0]}>
+        <group ref={sedLidRef} position={[0, 0.73, 0]}>
           <mesh castShadow>
             <cylinderGeometry args={[0.29, 0.29, 0.12, 24]} />
             <meshStandardMaterial color="#0369a1" roughness={0.35} metalness={0.6} />
@@ -423,9 +473,9 @@ export const Tanks = () => {
             <cylinderGeometry args={[0.035, 0.035, 0.06, 12]} />
             <meshStandardMaterial color="#334155" roughness={0.2} metalness={0.8} />
           </mesh>
-          {/* Outlet to Flow sensor on left */}
-          <mesh position={[-0.28, -0.43, 0]} rotation={[0, 0, -Math.PI / 2]} castShadow>
-            <cylinderGeometry args={[0.035, 0.035, 0.06, 12]} />
+          {/* Outlet to Flow sensor on left: world y = 0.05 + 0.73 - 0.48 = 0.30, perfectly flush with transfer pipe */}
+          <mesh position={[-0.28, -0.48, 0]} rotation={[0, 0, -Math.PI / 2]} castShadow>
+            <cylinderGeometry args={[0.035, 0.035, 0.08, 12]} />
             <meshStandardMaterial color="#334155" roughness={0.2} metalness={0.8} />
           </mesh>
         </group>
@@ -473,45 +523,55 @@ export const Tanks = () => {
         <FrameCorner x={-0.34} y={0} z={0.29} h={0.52} />
         <FrameCorner x={0.34} y={0} z={0.29} h={0.52} />
 
-        {/* Top Rim & Lid Bezel */}
-        <mesh position={[0, 0.26, 0]} castShadow>
-          <boxGeometry args={[0.70, 0.03, 0.60]} />
-          <meshStandardMaterial color="#0e7490" roughness={0.3} metalness={0.7} />
-        </mesh>
+        {/* Top Rim & Lid Assembly (Lifts up in CAD Exploded View) */}
+        <group ref={tank2LidRef} position={[0, 0, 0]}>
+          <mesh position={[0, 0.26, 0]} castShadow>
+            <boxGeometry args={[0.70, 0.03, 0.60]} />
+            <meshStandardMaterial color="#0e7490" roughness={0.3} metalness={0.7} />
+          </mesh>
+
+          {/* Top Inlet Port from Stage 4 Filter Train */}
+          <PipeNozzle pos={[0, 0.26, 0]} rot={[0, 0, 0]} />
+
+          {/* 3 Dedicated Lid Gland Ports for Water Analytical Sensors */}
+          {/* pH Sensor Gland */}
+          <mesh position={[-0.12, 0.275, 0.10]} castShadow>
+            <cylinderGeometry args={[0.022, 0.022, 0.025, 16]} />
+            <meshStandardMaterial color="#0284c7" roughness={0.3} metalness={0.8} />
+          </mesh>
+          {/* Turbidity Sensor Gland */}
+          <mesh position={[0.12, 0.275, 0.10]} castShadow>
+            <cylinderGeometry args={[0.022, 0.022, 0.025, 16]} />
+            <meshStandardMaterial color="#06b6d4" roughness={0.3} metalness={0.8} />
+          </mesh>
+          {/* TDS / EC Sensor Gland */}
+          <mesh position={[0, 0.275, 0.15]} castShadow>
+            <cylinderGeometry args={[0.022, 0.022, 0.025, 16]} />
+            <meshStandardMaterial color="#38bdf8" roughness={0.3} metalness={0.8} />
+          </mesh>
+        </group>
+
         {/* Bottom Mounting Flange Base */}
         <mesh position={[0, -0.26, 0]} castShadow>
           <boxGeometry args={[0.72, 0.04, 0.62]} />
           <meshStandardMaterial color="#1e293b" roughness={0.4} metalness={0.8} />
         </mesh>
 
-        {/* Top Inlet Port from Stage 4 Filter Train */}
-        <PipeNozzle pos={[0, 0.26, 0]} rot={[0, 0, 0]} />
-
-        {/* 3 Dedicated Lid Gland Ports for Water Analytical Sensors */}
-        {/* pH Sensor Gland */}
-        <mesh position={[-0.12, 0.275, 0.10]} castShadow>
-          <cylinderGeometry args={[0.022, 0.022, 0.025, 16]} />
-          <meshStandardMaterial color="#0284c7" roughness={0.3} metalness={0.8} />
-        </mesh>
-        {/* Turbidity Sensor Gland */}
-        <mesh position={[0.12, 0.275, 0.10]} castShadow>
-          <cylinderGeometry args={[0.022, 0.022, 0.025, 16]} />
-          <meshStandardMaterial color="#06b6d4" roughness={0.3} metalness={0.8} />
-        </mesh>
-        {/* TDS / EC Sensor Gland */}
-        <mesh position={[0, 0.275, 0.15]} castShadow>
-          <cylinderGeometry args={[0.022, 0.022, 0.025, 16]} />
-          <meshStandardMaterial color="#38bdf8" roughness={0.3} metalness={0.8} />
-        </mesh>
-
         {/* Clean Outlet / Recirculation Multi-Port at Bottom */}
         <PipeNozzle pos={[0, -0.26, 0]} rot={[Math.PI, 0, 0]} />
 
-        {/* Diagnostic Chamber Micro-Label Plaque */}
-        <mesh position={[0, 0.18, 0.295]} castShadow>
-          <boxGeometry args={[0.42, 0.08, 0.01]} />
-          <meshStandardMaterial color="#0891b2" roughness={0.3} metalness={0.7} />
-        </mesh>
+        {/* Diagnostic Chamber Micro-Label Plaque & Status Indicator */}
+        <group position={[0, 0.18, 0.295]}>
+          <mesh castShadow>
+            <boxGeometry args={[0.48, 0.08, 0.01]} />
+            <meshStandardMaterial color={dualVerificationMode ? '#083344' : '#1e293b'} roughness={0.3} metalness={0.7} />
+          </mesh>
+          {/* Live Status LED: Cyan for Active Verification, Amber for Standby (Setup 1 Direct) */}
+          <mesh position={[-0.20, 0, 0.008]}>
+            <circleGeometry args={[0.014, 16]} />
+            <meshBasicMaterial color={dualVerificationMode ? '#06b6d4' : '#64748b'} />
+          </mesh>
+        </group>
       </group>
     </group>
   );

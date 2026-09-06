@@ -22,12 +22,12 @@ export const CAMERA_PRESETS: Record<CameraPreset, { position: [number, number, n
     target: [-1.65, 0.75, 0],
   },
   BATTERY: {
-    position: [-0.65, 1.3, 1.3],
-    target: [-0.65, 0.74, 0],
+    position: [-1.38, 1.05, 1.3],
+    target: [-1.38, 0.72, 0],
   },
   ESP32: {
-    position: [0.40, 1.3, 1.3],
-    target: [0.40, 0.74, 0],
+    position: [-0.70, 0.65, 1.2],
+    target: [-0.70, 0.40, 0.42],
   },
   DISPLAY: {
     position: [0.22, 0.85, 0.7],
@@ -101,6 +101,10 @@ export const CAMERA_PRESETS: Record<CameraPreset, { position: [number, number, n
     position: [-1.85, 0.45, 1.6],
     target: [-1.85, 0.15, 0],
   },
+  SETUP1_DIRECT: {
+    position: [-0.95, 0.85, 1.4],
+    target: [-0.95, 0.60, 0],
+  },
   RECIRCULATION_LOOP: {
     position: [-1.85, 0.15, 1.6],
     target: [-1.85, -0.22, 0],
@@ -114,8 +118,8 @@ export const CAMERA_PRESETS: Record<CameraPreset, { position: [number, number, n
     target: [2.8, -0.4, 0],
   },
   WATER_STAGE_2: {
-    position: [1.90, 0.30, 1.8],
-    target: [1.90, 0.15, 0],
+    position: [1.20, 0.45, 2.2],
+    target: [1.20, 0.25, 0],
   },
   WATER_STAGE_3: {
     position: [-0.70, 0.60, 1.25],
@@ -174,17 +178,28 @@ export const CameraController = () => {
         tds: 'TDS_SENSOR',
         turbidity: 'TURBIDITY_SENSOR',
         temp: 'TEMP_SENSOR',
+        temp_sensor: 'TEMP_SENSOR',
         flow: 'FLOW_SENSOR',
         sedimentation_tank: 'SEDIMENTATION_TANK',
+        sedimentation: 'SEDIMENTATION_TANK',
         tank2_verification: 'TANK2_VERIFICATION',
+        tank2: 'TANK2_VERIFICATION',
+        setup1_direct: 'SETUP1_DIRECT',
         recirculation_loop: 'RECIRCULATION_LOOP',
         filter_housing: 'FILTER_HOUSING',
+        filters: 'FILTER_VIEW',
+        filter: 'FILTER_HOUSING',
         filtration_tank: 'FILTER_HOUSING',
         primary_tank: 'PRIMARY_TANK',
         secondary_tank: 'SECONDARY_TANK',
         intake_pipe: 'INTAKE_PIPE',
         return_pipe: 'RETURN_PIPE',
         drain_valve: 'DRAIN_VALVE',
+        tds2: 'TANK2_VERIFICATION',
+        ph2: 'TANK2_VERIFICATION',
+        turbidity2: 'TANK2_VERIFICATION',
+        hydro_generator: 'HYDRO_GENERATOR',
+        hand_pump: 'INTAKE_PIPE',
       };
 
       if (presetMap[activeHotspot] && presetMap[activeHotspot] !== cameraPreset) {

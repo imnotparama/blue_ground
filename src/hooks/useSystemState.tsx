@@ -40,6 +40,7 @@ export type CameraPreset =
   | 'RETURN_PIPE'
   | 'DRAIN_VALVE'
   | 'TANK2_VERIFICATION'
+  | 'SETUP1_DIRECT'
   | 'RECIRCULATION_LOOP'
   | 'HYDRO_GENERATOR'
   | 'WATER_STAGE_1'
@@ -130,6 +131,7 @@ interface SystemStateContextType {
   nextStep: () => void;
   prevStep: () => void;
   currentStepData: PresentationStep | null;
+  totalDemoSteps: number;
   // Hotspot interaction
   activeHotspot: string | null;
   setActiveHotspot: (id: string | null) => void;
@@ -234,8 +236,20 @@ const presentationSteps: PresentationStep[] = [
   },
   {
     target: 'FLOW_SENSOR',
-    title: 'Phase 2B: High-Pressure Booster & Flow Telemetry',
-    description: 'Settled water passes through the inline YF-S201 Hall-effect flow sensor for instantaneous volumetric rate telemetry (L/min) before entering the 24V booster pump to pressurize the filtration train.',
+    title: 'Phase 2B: Inline Flow Rate Telemetry',
+    description: 'Settled water passes through the inline YF-S201 Hall-effect flow sensor for instantaneous volumetric rate telemetry (L/min) into the secondary settling chamber.',
+    duration: 5000,
+  },
+  {
+    target: 'SECONDARY_TANK',
+    title: 'Phase 2C: Secondary Settling Tank & Sensor Bridge',
+    description: 'Pre-filtered water enters the secondary settling tank. An overhead stainless bridge suspends an array of industrial sensors (pH probe, Turbidity optical sensor, TDS dual-pin electrodes, and DS18B20 temperature probe) to profile raw water quality before booster intake.',
+    duration: 6000,
+  },
+  {
+    target: 'PUMP',
+    title: 'Phase 2D: High-Pressure 24V Booster Pump',
+    description: 'The high-efficiency booster pump draws settled water from the secondary tank base and pressurizes the stream up to 4.5 Bar, driving it into the overhead 4-stage smart filtration train.',
     duration: 5500,
   },
   {
@@ -639,14 +653,14 @@ export const SystemStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
     return () => clearInterval(interval);
   }, [waterTrackMode, autoPlayWater]);
 
-  // Global Hotkeys: 'H' for Hotspots, 'T' for Tanks Only, 'S' for Sensors & Tools, 'W' for Water Flow Focus, 'V' for Dual Verification, 'G' for Hydro Generator, 'A' for Antigravity Mode
+  // Global Hotkeys: 'E' for CAD Exploded View, 'H' for Hotspots, 'T' for Tanks Only, 'S' for Sensors & Tools, 'W' for Water Flow Focus, 'V' for Dual Verification, 'G' for Hydro Generator
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Ignore key events when user is typing in an input
       if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
 
-      if (e.key === 'a' || e.key === 'A') {
-        setAntigravityMode(prev => !prev);
+      if (e.key === 'e' || e.key === 'E') {
+        setExploded(prev => !prev);
       }
       if (e.key === 'h' || e.key === 'H') {
         setShowHotspots(prev => !prev);
@@ -693,9 +707,18 @@ export const SystemStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
         });
       }
       if (e.key === 'Escape') {
+        setActiveHotspot(null);
         setFilterViewState(prev => {
           if (prev) {
             setFilterStageFocusState(0);
+            setCameraPreset('OVERVIEW');
+            return false;
+          }
+          return prev;
+        });
+        setWaterTrackModeState(prev => {
+          if (prev) {
+            setAutoPlayWater(false);
             setCameraPreset('OVERVIEW');
             return false;
           }
@@ -748,6 +771,7 @@ export const SystemStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
         nextStep,
         prevStep,
         currentStepData,
+        totalDemoSteps: presentationSteps.length,
         activeHotspot,
         setActiveHotspot,
         showHotspots,

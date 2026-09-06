@@ -42,7 +42,7 @@ export const TOOLS_CATALOG: ToolItem[] = [
     category: 'SENSORS',
     model: 'DFRobot SEN0244 / Platinum Dual-Pin',
     spec: '0–1000 ppm • ±5% F.S. • Platinum Electrodes',
-    location: 'Secondary Testing Chamber (Top-Right)',
+    location: 'Secondary Tank Sensor Bridge (Collar 3)',
     getLiveValue: (m) => `${m.tds} ppm`,
     getStatus: (m) => m.tds > 300 ? { label: 'HIGH TDS', color: 'text-rose-400 bg-rose-950/60 border-rose-500/40' } : { label: 'OPTIMAL', color: 'text-emerald-400 bg-emerald-950/60 border-emerald-500/40' },
   },
@@ -53,7 +53,7 @@ export const TOOLS_CATALOG: ToolItem[] = [
     category: 'SENSORS',
     model: 'E-201-C Industrial Glass Combination',
     spec: '0–14.0 pH • Ag/AgCl Reference Wire • Ceramic Junction',
-    location: 'Secondary Testing Chamber (Top-Right)',
+    location: 'Secondary Tank Sensor Bridge (Collar 1)',
     getLiveValue: (m) => `${m.ph.toFixed(2)} pH`,
     getStatus: (m) => m.ph < 6.5 || m.ph > 8.5 ? { label: 'ACIDIC/BASIC', color: 'text-amber-400 bg-amber-950/60 border-amber-500/40' } : { label: 'BALANCED', color: 'text-emerald-400 bg-emerald-950/60 border-emerald-500/40' },
   },
@@ -64,9 +64,20 @@ export const TOOLS_CATALOG: ToolItem[] = [
     category: 'SENSORS',
     model: 'TS-300B Nephelometric Module',
     spec: '0–100 NTU • 850nm IR Emitter / 90° Receiver',
-    location: 'Secondary Testing Chamber (Top-Right)',
+    location: 'Secondary Tank Sensor Bridge (Collar 2)',
     getLiveValue: (m) => `${m.turbidity.toFixed(1)} NTU`,
     getStatus: (m) => m.turbidity > 5.0 ? { label: 'TURBID MINE WATER', color: 'text-rose-400 bg-rose-950/60 border-rose-500/40' } : { label: 'CLEAR', color: 'text-emerald-400 bg-emerald-950/60 border-emerald-500/40' },
+  },
+  {
+    id: 'temp_sensor',
+    preset: 'TEMP_SENSOR',
+    name: 'DS18B20 Temperature Sensor',
+    category: 'SENSORS',
+    model: 'Dallas 1-Wire Digital Thermometer',
+    spec: '-55°C to +125°C • ±0.5°C Accuracy • Stainless Probe',
+    location: 'Secondary Tank Sensor Bridge (Collar 4)',
+    getLiveValue: (m) => `${m.temperature.toFixed(1)}°C`,
+    getStatus: () => ({ label: 'NOMINAL', color: 'text-emerald-400 bg-emerald-950/60 border-emerald-500/40' }),
   },
   {
     id: 'flow',
@@ -185,13 +196,13 @@ export const TOOLS_CATALOG: ToolItem[] = [
   {
     id: 'pump',
     preset: 'PUMP',
-    name: 'DC Submersible Filtration Pump',
+    name: '24V High-Pressure Booster Pump',
     category: 'HYDRAULICS',
-    model: '12V Brushless DC Submersible Pump',
-    spec: '2400 Max RPM • 3.5m Head • PWM Controlled',
-    location: 'Secondary Chamber Floor (x = 0.05)',
-    getLiveValue: (m) => `${m.pumpRpm} RPM`,
-    getStatus: (m) => m.pumpRpm > 0 ? { label: 'PUMPING TO RO', color: 'text-emerald-400 bg-emerald-950/60 border-emerald-500/40' } : { label: 'STANDBY', color: 'text-zinc-400 bg-zinc-900 border-zinc-700' },
+    model: '24V DC Industrial Diaphragm Booster Pump',
+    spec: '4.5 Bar (65 PSI) • 4.8 L/min • Grounded Unistrut Stand',
+    location: 'Industrial Pump Stand (x = 1.35, y = 0.05)',
+    getLiveValue: (m) => `${m.pumpRpm} RPM (4.5 Bar)`,
+    getStatus: (m) => m.pumpRpm > 0 ? { label: 'PRESSURIZING RO', color: 'text-emerald-400 bg-emerald-950/60 border-emerald-500/40' } : { label: 'STANDBY', color: 'text-zinc-400 bg-zinc-900 border-zinc-700' },
   },
   {
     id: 'uv',
@@ -225,6 +236,17 @@ export const TOOLS_CATALOG: ToolItem[] = [
     location: 'Intake Ground Pedestal (x = 2.80, y = -1.95)',
     getLiveValue: (m) => `Pumping Flow: ${m.flowRate.toFixed(1)} L/min`,
     getStatus: (m) => m.flowRate > 0 ? { label: 'STROKE ACTIVE', color: 'text-emerald-400 bg-emerald-950/60 border-emerald-500/40' } : { label: 'READY', color: 'text-zinc-400 bg-zinc-900 border-zinc-700' },
+  },
+  {
+    id: 'setup1_direct',
+    preset: 'SETUP1_DIRECT',
+    name: 'Setup 1: Direct Cascade Bypass Valve',
+    category: 'HYDRAULICS',
+    model: '12V DC Fast-Acting 3-Way Motorized Diverter Solenoid',
+    spec: 'Rapid Cascade directly to 250L Potable Storage • Isolates Tank 2',
+    location: 'Filtration Overhead Diverter Junction (x = -0.95, y = 0.78)',
+    getLiveValue: (m) => `Direct Delivery: ${m.flowRate.toFixed(1)} L/min`,
+    getStatus: (m, mode) => ({ label: 'DIRECT SINGLE-PASS ACTIVE', color: 'text-emerald-400 bg-emerald-950/60 border-emerald-500/40' }),
   },
 
   // ─── VESSELS & FILTERS ───
@@ -306,11 +328,11 @@ export const SensorsAndTools = () => {
   const [searchQuery, setSearchQuery] = useState('');
 
   const categories: { key: ToolCategory; label: string; icon: React.ReactNode }[] = [
-    { key: 'ALL', label: 'All Tools (16)', icon: <Layers className="w-3 h-3" /> },
-    { key: 'SENSORS', label: 'Sensors (6)', icon: <Activity className="w-3 h-3 text-cyan-400" /> },
-    { key: 'ELECTRONICS', label: 'Electronics (4)', icon: <Cpu className="w-3 h-3 text-amber-400" /> },
-    { key: 'HYDRAULICS', label: 'Hydraulics (2)', icon: <Droplet className="w-3 h-3 text-blue-400" /> },
-    { key: 'VESSELS', label: 'Vessels & RO (4)', icon: <Gauge className="w-3 h-3 text-emerald-400" /> },
+    { key: 'ALL', label: `All Tools (${TOOLS_CATALOG.length})`, icon: <Layers className="w-3 h-3" /> },
+    { key: 'SENSORS', label: `Sensors (${TOOLS_CATALOG.filter(t => t.category === 'SENSORS').length})`, icon: <Activity className="w-3 h-3 text-cyan-400" /> },
+    { key: 'ELECTRONICS', label: `Electronics (${TOOLS_CATALOG.filter(t => t.category === 'ELECTRONICS').length})`, icon: <Cpu className="w-3 h-3 text-amber-400" /> },
+    { key: 'HYDRAULICS', label: `Hydraulics (${TOOLS_CATALOG.filter(t => t.category === 'HYDRAULICS').length})`, icon: <Droplet className="w-3 h-3 text-blue-400" /> },
+    { key: 'VESSELS', label: `Vessels & RO (${TOOLS_CATALOG.filter(t => t.category === 'VESSELS').length})`, icon: <Gauge className="w-3 h-3 text-emerald-400" /> },
   ];
 
   const filteredTools = TOOLS_CATALOG.filter((tool) => {

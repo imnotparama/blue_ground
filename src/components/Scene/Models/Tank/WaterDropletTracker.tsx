@@ -26,9 +26,9 @@ const STAGE_THEMES = {
     ringColor: '#fde047',
     trailColor: '#eab308',
     particleSize: 0.038,
-    title: 'Sedimentation Tank & Flow Telemetry',
-    metric: 'Gravitational Grit Trap • 4.80 L/min Hall Sensor',
-    badge: 'STAGE 2/6: SEDIMENTATION & TELEMETRY',
+    title: 'Sedimentation & Secondary Settling',
+    metric: 'Grit Trap ➔ Secondary Settling Chamber & Sensor Bridge',
+    badge: 'STAGE 2/6: DUAL SETTLING & SENSORS',
     lightIntensity: 2.4,
   },
   3: {
@@ -84,6 +84,7 @@ export const WaterDropletTracker = () => {
     metrics, 
     recirculationTriggered,
     hydroGeneratorMode,
+    exploded,
   } = useSystemState();
 
   const dropletMeshRef = useRef<THREE.Group>(null);
@@ -119,14 +120,18 @@ export const WaterDropletTracker = () => {
           new THREE.Vector3(2.18, 0.78, 0),
         ], false, 'catmullrom', 0.05);
 
-    // Stage 2: Sedimentation Tank Settling Beds -> Flow Sensor -> Booster Pump Inlet
+    // Stage 2: Sedimentation Tank Settling Beds -> Flow Sensor -> Secondary Tank -> Booster Pump Inlet
     const stage2 = new THREE.CatmullRomCurve3([
       new THREE.Vector3(2.18, 0.78, 0), // Top inlet of Sedimentation Tank
       new THREE.Vector3(1.90, 0.45, 0), // Settling through sand & gravel
       new THREE.Vector3(1.64, 0.30, 0), // Sedimentation outlet
-      new THREE.Vector3(1.48, 0.30, 0), // Inline YF-S201 Flow Sensor
-      new THREE.Vector3(1.35, 0.30, 0), // Elbow above booster pump
-      new THREE.Vector3(1.35, 0.10, 0), // Booster Pump impeller core
+      new THREE.Vector3(1.35, 0.30, 0), // Inline YF-S201 Flow Sensor
+      new THREE.Vector3(1.00, 0.30, 0), // Secondary Tank inlet nozzle
+      new THREE.Vector3(0.55, 0.28, 0), // Secondary Tank settling chamber & sensor bridge
+      new THREE.Vector3(1.00, 0.05, 0), // Secondary Tank bottom suction outlet
+      new THREE.Vector3(1.18, 0.05, 0), // Isolation ball valve
+      new THREE.Vector3(1.35, 0.05, 0), // Booster Pump inlet
+      new THREE.Vector3(1.35, 0.12, 0), // Booster Pump impeller core
     ], false, 'catmullrom', 0.05);
 
     // Stage 3: High-Pressure Pump through 4-Stage Smart Filtration Train (SediShield -> ChemoBlock -> RO Maxx -> Active Copper)
@@ -207,7 +212,7 @@ export const WaterDropletTracker = () => {
   const trailPositions = useMemo(() => new Float32Array(25 * 3), []);
 
   useFrame((state) => {
-    if (!waterTrackMode) return;
+    if (!waterTrackMode || exploded) return;
 
     const time = state.clock.getElapsedTime();
     const progress = (time * 0.28) % 1.0;
@@ -258,21 +263,21 @@ export const WaterDropletTracker = () => {
   });
 
   const baseTheme = STAGE_THEMES[waterTrackStage as 1 | 2 | 3 | 4 | 5 | 6] || STAGE_THEMES[1];
-  const currentTheme = isRecirculating
+  const currentTheme = (isRecirculating && waterTrackStage === 5)
     ? {
         color: '#f59e0b',
         emissive: '#d97706',
         ringColor: '#ef4444',
         trailColor: '#f59e0b',
         particleSize: 0.038,
-        title: 'Recirculation Return Loop',
-        metric: 'Sub-Standard ➔ Re-Filtering via RO',
-        badge: 'STAGE 6: RE-FILTER',
+        title: 'Closed-Loop Recirculation Loop',
+        metric: 'Sub-Standard (TDS > 100 ppm) ➔ Re-Filtering via SediShield',
+        badge: 'STAGE 5/6: RECIRCULATING',
         lightIntensity: 2.8,
       }
     : baseTheme;
 
-  if (!waterTrackMode) return null;
+  if (!waterTrackMode || exploded) return null;
 
   return (
     <group>

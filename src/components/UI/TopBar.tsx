@@ -51,8 +51,8 @@ export const TopBar = () => {
     setCameraPreset,
     hydroGeneratorMode,
     setHydroGeneratorMode,
-    antigravityMode,
-    setAntigravityMode,
+    exploded,
+    setExploded,
     filterView,
     setFilterView,
   } = useSystemState();
@@ -123,19 +123,19 @@ export const TopBar = () => {
 
       {/* Center demo action & clean view toggle (pointers enabled) */}
       <div className="flex items-center gap-2.5 pointer-events-auto">
-        {/* Toggle Antigravity View Button */}
+        {/* Toggle CAD Exploded View Button */}
         <button
-          onClick={() => setAntigravityMode(!antigravityMode)}
+          onClick={() => setExploded(!exploded)}
           className={`flex items-center gap-1.5 px-3 py-2 rounded-full border transition-all text-xs font-mono tracking-wide cursor-pointer ${
-            antigravityMode
-              ? 'bg-gradient-to-r from-cyan-500/30 to-violet-500/30 border-cyan-400 text-cyan-200 shadow-[0_0_15px_rgba(6,182,212,0.4)]'
-              : 'bg-zinc-900/80 border-zinc-700 text-zinc-400 hover:text-white hover:border-cyan-500/40'
+            exploded
+              ? 'bg-gradient-to-r from-amber-500/30 to-purple-500/30 border-amber-400 text-amber-200 shadow-[0_0_16px_rgba(245,158,11,0.45)] ring-1 ring-amber-400/60'
+              : 'bg-zinc-900/80 border-zinc-700 text-zinc-400 hover:text-white hover:border-amber-500/40'
           }`}
-          title="Toggle Antigravity Cinematic View (Hotkey: A)"
+          title="Toggle Full CAD Exploded View (Hotkey: E)"
         >
-          <Sparkles className={`w-3.5 h-3.5 ${antigravityMode ? 'text-cyan-300 animate-spin-slow' : 'text-zinc-400'}`} />
-          <span className="hidden md:inline font-semibold">{antigravityMode ? 'Antigravity: ON' : 'Antigravity'}</span>
-          <span className={`text-[10px] px-1 py-0.2 rounded font-bold ${antigravityMode ? 'bg-cyan-950 text-cyan-300 border border-cyan-500/40' : 'bg-zinc-800 border border-zinc-700 text-zinc-400'}`}>A</span>
+          <Layers className={`w-3.5 h-3.5 ${exploded ? 'text-amber-300 animate-pulse' : 'text-zinc-400'}`} />
+          <span className="hidden md:inline font-semibold">{exploded ? 'Exploded: ON' : 'Exploded View'}</span>
+          <span className={`text-[10px] px-1 py-0.2 rounded font-bold ${exploded ? 'bg-amber-950 text-amber-300 border border-amber-500/40' : 'bg-zinc-800 border border-zinc-700 text-zinc-400'}`}>E</span>
         </button>
 
         {/* Toggle 4-Stage Filter View Button */}

@@ -6,11 +6,16 @@ import { useSystemState } from '@/hooks/useSystemState';
 import * as THREE from 'three';
 
 export const Water = () => {
-  const { metrics, mode, dualVerificationMode } = useSystemState();
+  const { metrics, mode, dualVerificationMode, exploded } = useSystemState();
 
   const primaryWaterRef = useRef<THREE.Mesh>(null);
   const secondaryWaterRef = useRef<THREE.Mesh>(null);
   const sedWaterRef = useRef<THREE.Mesh>(null);
+
+  const primaryWaterGroupRef = useRef<THREE.Group>(null);
+  const secondaryWaterGroupRef = useRef<THREE.Group>(null);
+  const sedWaterGroupRef = useRef<THREE.Group>(null);
+  const tank2WaterGroupRef = useRef<THREE.Group>(null);
 
   const primaryMatRef = useRef<THREE.MeshPhysicalMaterial>(null);
   const secondaryMatRef = useRef<THREE.MeshPhysicalMaterial>(null);
@@ -82,11 +87,42 @@ export const Water = () => {
       );
     }
 
-    // 3. Tank 2 Water Color (Amber for High TDS / Recirculate vs Azure Blue for Potable Pass)
+    // 3. Tank 2 Water Color & Opacity (Active in Setup 2 Dual-Verification; Standby/bypassed in Setup 1 Direct)
+    const isRecirculating = (metrics.tds2 || 0) > 100;
     if (tank2MatRef.current) {
-      const isTank2HighTds = (metrics.tds2 || 0) > 100;
-      const targetTank2Color = isTank2HighTds ? new THREE.Color('#f59e0b') : new THREE.Color('#38bdf8');
-      tank2MatRef.current.color.lerp(targetTank2Color, dampFactor);
+      // If Tank 2 is in verification mode, show cyan pure water; if recirculating, amber; if bypassed in Setup 1 Direct, faded
+      const targetOpacity = (!dualVerificationMode && !isRecirculating) ? 0.18 : 0.65;
+      tank2MatRef.current.opacity = THREE.MathUtils.lerp(tank2MatRef.current.opacity, targetOpacity, dampFactor);
+      tank2MatRef.current.color.lerp(
+        isRecirculating ? new THREE.Color('#f59e0b') : new THREE.Color('#38bdf8'),
+        dampFactor
+      );
+    }
+
+    // Exploded View Water Volume Alignment with Separated Tanks
+    if (primaryWaterGroupRef.current) {
+      const targetY = exploded ? -0.10 : 0.0;
+      primaryWaterGroupRef.current.position.y = THREE.MathUtils.lerp(primaryWaterGroupRef.current.position.y, targetY, dampFactor);
+    }
+    if (secondaryWaterGroupRef.current) {
+      const targetY = exploded ? -0.10 : 0.0;
+      secondaryWaterGroupRef.current.position.y = THREE.MathUtils.lerp(secondaryWaterGroupRef.current.position.y, targetY, dampFactor);
+    }
+    if (sedWaterGroupRef.current) {
+      const targetX = exploded ? 2.85 : 1.90;
+      const targetY = exploded ? 0.35 : 0.05;
+      const targetZ = exploded ? -0.25 : 0.0;
+      sedWaterGroupRef.current.position.x = THREE.MathUtils.lerp(sedWaterGroupRef.current.position.x, targetX, dampFactor);
+      sedWaterGroupRef.current.position.y = THREE.MathUtils.lerp(sedWaterGroupRef.current.position.y, targetY, dampFactor);
+      sedWaterGroupRef.current.position.z = THREE.MathUtils.lerp(sedWaterGroupRef.current.position.z, targetZ, dampFactor);
+    }
+    if (tank2WaterGroupRef.current) {
+      const targetX = exploded ? -1.95 : -1.85;
+      const targetY = exploded ? 0.45 : 0.15;
+      const targetZ = exploded ? 0.85 : 0.0;
+      tank2WaterGroupRef.current.position.x = THREE.MathUtils.lerp(tank2WaterGroupRef.current.position.x, targetX, dampFactor);
+      tank2WaterGroupRef.current.position.y = THREE.MathUtils.lerp(tank2WaterGroupRef.current.position.y, targetY, dampFactor);
+      tank2WaterGroupRef.current.position.z = THREE.MathUtils.lerp(tank2WaterGroupRef.current.position.z, targetZ, dampFactor);
     }
 
     // 4. Animate Primary Bubbles
@@ -126,9 +162,8 @@ export const Water = () => {
     <group>
       {/* ════════════════════════════════════════════════════════════════════
           A. PRIMARY TANK PURE WATER (Clean Potable Storage Compartment)
-             Bounds: x from -2.35 to 0.95 (center = -0.7), z from -0.6 to 0.6
           ════════════════════════════════════════════════════════════════════ */}
-      <group position={[-0.7, 0, 0]}>
+      <group ref={primaryWaterGroupRef} position={[-0.7, 0, 0]}>
         {/* Pure Water Volume */}
         <mesh ref={primaryWaterRef} position={[0, -0.85, 0]} castShadow receiveShadow>
           <boxGeometry args={[3.30, 1.0, 1.22]} />
@@ -165,9 +200,8 @@ export const Water = () => {
 
       {/* ════════════════════════════════════════════════════════════════════
           B. SECONDARY COMPARTMENT RAW WATER (Raw Settling & Sensor Chamber)
-             Center: [0.45, 0.28, 0], Size: [1.06, 0.48, 1.20]
           ════════════════════════════════════════════════════════════════════ */}
-      <group position={[0.45, 0, 0]}>
+      <group ref={secondaryWaterGroupRef} position={[0.45, 0, 0]}>
         <mesh ref={secondaryWaterRef} position={[0, 0.28, 0]} castShadow receiveShadow>
           <boxGeometry args={[1.06, 0.48, 1.20]} />
           <meshPhysicalMaterial
@@ -203,9 +237,8 @@ export const Water = () => {
 
       {/* ════════════════════════════════════════════════════════════════════
           C. SEDIMENTATION TANK RAW WATER (Grit & Sediment Settling Cylinder)
-             Center: [1.90, 0.05, 0]
           ════════════════════════════════════════════════════════════════════ */}
-      <group position={[1.90, 0.05, 0]}>
+      <group ref={sedWaterGroupRef} position={[1.90, 0.05, 0]}>
         <mesh ref={sedWaterRef} castShadow receiveShadow>
           <cylinderGeometry args={[0.26, 0.26, 1.25, 24]} />
           <meshPhysicalMaterial
@@ -225,9 +258,8 @@ export const Water = () => {
 
       {/* ════════════════════════════════════════════════════════════════════
           D. POST-FILTRATION QUALITY VERIFICATION TANK WATER (Chamber 2 at x = -1.85)
-             Contains water undergoing secondary sensor suite verification
           ════════════════════════════════════════════════════════════════════ */}
-      <group position={[-1.85, 0.15, 0]}>
+      <group ref={tank2WaterGroupRef} position={[-1.85, 0.15, 0]}>
         <mesh position={[0, -0.02, 0]} castShadow receiveShadow>
           <boxGeometry args={[0.62, 0.42, 0.52]} />
           <meshPhysicalMaterial

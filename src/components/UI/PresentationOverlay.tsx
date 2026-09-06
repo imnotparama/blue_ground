@@ -12,7 +12,8 @@ export const PresentationOverlay = () => {
     nextStep, 
     prevStep, 
     stopDemo, 
-    currentStepData 
+    currentStepData,
+    totalDemoSteps,
   } = useSystemState();
 
   const [progressWidth, setProgressWidth] = useState(0);
@@ -36,8 +37,9 @@ export const PresentationOverlay = () => {
 
   if (!demoRunning || !currentStepData) return null;
 
+  const totalSteps = totalDemoSteps || 14;
   const stepIndexFormatted = String(demoStep + 1).padStart(2, '0');
-  const totalStepsFormatted = '11'; // Fixed total presentation steps
+  const totalStepsFormatted = String(totalSteps).padStart(2, '0');
 
   return (
     <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 w-full max-w-xl px-4 pointer-events-none">
@@ -111,7 +113,7 @@ export const PresentationOverlay = () => {
 
             {/* Step circles indicator */}
             <div className="flex items-center gap-1.5">
-              {Array.from({ length: 11 }).map((_, idx) => (
+              {Array.from({ length: totalSteps }).map((_, idx) => (
                 <div 
                   key={idx} 
                   className={`h-1.5 rounded-full transition-all duration-300 ${
@@ -128,7 +130,7 @@ export const PresentationOverlay = () => {
               onClick={nextStep}
               className="flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/20 text-cyan-300 text-[10px] tracking-wider uppercase font-semibold transition-all hover:scale-105"
             >
-              {demoStep === 10 ? 'Finish' : 'Next'}
+              {demoStep === totalSteps - 1 ? 'Finish' : 'Next'}
               <ArrowRight className="w-3 h-3" />
             </button>
           </div>

@@ -26,11 +26,11 @@ import { Hotspots } from './Environment/Hotspots';
 import { SupportRack } from './Environment/SupportRack';
 import { ScenicEnvironment } from './Environment/ScenicEnvironment';
 
-// Antigravity Levitation Rig
-import { AntigravityRig } from './Models/Antigravity/AntigravityRig';
+// Exploded 3D Subassembly Callout Labels
+import { ExplodedLabels } from './Models/Exploded/ExplodedLabels';
 
 export const Scene = () => {
-  const { exploded, transparent, cutaway, mode, antigravityMode } = useSystemState();
+  const { exploded, transparent, cutaway, mode } = useSystemState();
 
   return (
     <div
@@ -118,33 +118,34 @@ export const Scene = () => {
         <AmbientLife />
         <ScenicEnvironment />
 
-        {/* Hardware Components Group with Antigravity Levitation Capability */}
+        {/* Hardware Components Group seated firmly on datum foundation */}
         <group position={[0, -0.2, 0]}>
-          <AntigravityRig>
-            {/* Render the physical hardware system components */}
-            <Tanks />
-            <SolarPanel />
-            <BatteryUnit />
-            <ESP32Box />
-            <WaterPump />
-            <Sensors />
-            <FilterHousing />
-            <Pipes />
-            <SupportRack />
+          {/* Render the physical hardware system components */}
+          <Tanks />
+          <SolarPanel />
+          <BatteryUnit />
+          <ESP32Box />
+          <WaterPump />
+          <Sensors />
+          <FilterHousing />
+          <Pipes />
+          <SupportRack />
 
-            {/* Render dynamic fluids and current animations */}
-            <Water />
-            <TankMargins />
-            <WaterDropletTracker />
-            <Flows />
+          {/* Render dynamic fluids and current animations */}
+          <Water />
+          <TankMargins />
+          <WaterDropletTracker />
+          <Flows />
 
-            {/* Vision Pro style hotspots */}
-            <Hotspots />
-          </AntigravityRig>
+          {/* Vision Pro style hotspots */}
+          <Hotspots />
+
+          {/* Exploded View 3D Subassembly Callout Tags */}
+          <ExplodedLabels />
 
           {/* Subtle grid overlay on platform */}
           <gridHelper args={[10, 20, '#94a3b8', '#e2e8f0']} position={[-0.5, -2.18, 0]}>
-            <lineBasicMaterial attach="material" transparent opacity={antigravityMode ? 0.02 : 0.08} />
+            <lineBasicMaterial attach="material" transparent opacity={0.08} />
           </gridHelper>
         </group>
 
