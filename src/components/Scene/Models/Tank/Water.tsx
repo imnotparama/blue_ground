@@ -6,7 +6,7 @@ import { useSystemState } from '@/hooks/useSystemState';
 import * as THREE from 'three';
 
 export const Water = () => {
-  const { metrics, mode, dualVerificationMode, exploded } = useSystemState();
+  const { metrics, mode, dualVerificationMode, exploded, simState } = useSystemState();
 
   const primaryWaterRef = useRef<THREE.Mesh>(null);
   const secondaryWaterRef = useRef<THREE.Mesh>(null);
@@ -54,22 +54,39 @@ export const Water = () => {
   }, []);
 
   useFrame((state, delta) => {
-    // 1. Primary Tank Water Level (Clean Water Storage)
-    const fillFraction = Math.max(metrics.waterLevel / 100, 0.08);
-    const currentHeight = fillFraction * 1.55;
     const dampFactor = 1.0 - Math.exp(-4.0 * delta);
+
+    // 1. Primary Tank Water Level (Clean Water Storage Volume)
+    const cleanFraction = simState
+      ? Math.max(simState.purifiedWaterLevel / simState.purifiedTankCapacity, 0.06)
+      : Math.max(metrics.waterLevel / 100, 0.08);
+    const currentCleanHeight = cleanFraction * 1.55;
 
     if (primaryWaterRef.current) {
       primaryWaterRef.current.scale.y = THREE.MathUtils.lerp(
         primaryWaterRef.current.scale.y,
-        currentHeight,
+        currentCleanHeight,
         dampFactor
       );
       primaryWaterRef.current.position.y = -1.65 + primaryWaterRef.current.scale.y / 2;
     }
 
-    // 2. Turbidity color transition for Sedimentation Tank & Secondary Raw Compartment
-    const isTurbid = metrics.turbidity > 10 || mode === 'TURBIDITY';
+    // 2. Secondary Compartment / Raw Water Chamber Level (Depletes as water is processed)
+    const rawFraction = simState
+      ? Math.max(simState.rawWaterLevel / simState.rawTankCapacity, 0.04)
+      : 0.85;
+
+    if (secondaryWaterRef.current) {
+      secondaryWaterRef.current.scale.y = THREE.MathUtils.lerp(
+        secondaryWaterRef.current.scale.y,
+        rawFraction,
+        dampFactor
+      );
+      secondaryWaterRef.current.position.y = (0.28 - 0.24) + (rawFraction * 0.48) / 2;
+    }
+
+    // 3. Turbidity color transition for Sedimentation Tank & Secondary Raw Compartment
+    const isTurbid = (simState && simState.inputTurbidity > 10) || metrics.turbidity > 10 || mode === 'TURBIDITY';
     const targetSedColor = isTurbid ? new THREE.Color('#92400e') : new THREE.Color('#0284c7');
     const targetRawColor = isTurbid ? new THREE.Color('#b45309') : new THREE.Color('#0d9488');
 
@@ -128,7 +145,7 @@ export const Water = () => {
     // 4. Animate Primary Bubbles
     if (primaryBubblesRef.current && primaryWaterRef.current) {
       const positions = primaryBubblesRef.current.geometry.attributes.position.array as Float32Array;
-      const topY = -1.65 + currentHeight;
+      const topY = -1.65 + currentCleanHeight;
 
       for (let i = 0; i < primaryBubblesData.positions.length / 3; i++) {
         positions[i * 3 + 1] += primaryBubblesData.speeds[i] * delta;

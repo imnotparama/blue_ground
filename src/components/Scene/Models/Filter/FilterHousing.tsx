@@ -21,6 +21,7 @@ export const FilterHousing = () => {
     setFilterView,
     filterStageFocus,
     setFilterStageFocus,
+    simState,
   } = useSystemState();
   
   const mainGroupRef = useRef<THREE.Group>(null);
@@ -73,6 +74,11 @@ export const FilterHousing = () => {
   });
 
   // 4-Stage Smart Filtration Train specifications
+  const h1 = simState?.filterHealth.sediment ?? (metrics.stage1Health || 92);
+  const h2 = simState?.filterHealth.carbon ?? (metrics.stage2Health || 85);
+  const h3 = simState?.filterHealth.ro ?? (metrics.stage3Health || 88);
+  const h4 = simState?.filterHealth.uf ?? (metrics.stage4Health || 95);
+
   const stages = [
     {
       id: 'stage1',
@@ -83,14 +89,14 @@ export const FilterHousing = () => {
       roleTag: 'Blocks dirt, silt and rust',
       fullTag: 'SediShield – Blocks dirt, silt and rust',
       subtitle: 'Sediment Pre-Filter (5µm Melt-Blown PP)',
-      color: '#cbd5e1', // Rugged stone-cream base
-      accentColor: '#f97316', // Rugged amber-rust accent
-      stripColor: '#ea580c',
-      health: metrics.stage1Health || 92,
-      healthColor: 'text-amber-400',
-      barColor: 'bg-amber-400',
+      color: h1 < 30 ? '#78350f' : h1 < 60 ? '#d97706' : '#cbd5e1',
+      accentColor: h1 < 30 ? '#ef4444' : '#f97316',
+      stripColor: h1 < 30 ? '#dc2626' : '#ea580c',
+      health: h1,
+      healthColor: h1 < 30 ? 'text-rose-400' : h1 < 60 ? 'text-amber-400' : 'text-emerald-400',
+      barColor: h1 < 30 ? 'bg-rose-500' : h1 < 60 ? 'bg-amber-500' : 'bg-emerald-500',
       iconType: 'dust',
-      badgeText: 'Rugged First-Line Defense',
+      badgeText: h1 < 30 ? 'CRITICAL CLOGGED' : 'Rugged First-Line Defense',
       desc: 'Traps sand, rust, silt, and heavy suspended mining particles before they reach pumps.',
     },
     {
@@ -102,12 +108,12 @@ export const FilterHousing = () => {
       roleTag: 'Cuts chlorine, odour and chemical load',
       fullTag: 'ChemoBlock – Cuts chlorine, odour and chemical load',
       subtitle: 'Activated Carbon & Chemical Guard (CTO Block)',
-      color: '#1e293b', // Deep charcoal body
-      accentColor: '#059669', // Deep emerald green
+      color: '#1e293b',
+      accentColor: h2 < 30 ? '#ef4444' : '#059669',
       stripColor: '#10b981',
-      health: metrics.stage2Health || 85,
-      healthColor: 'text-emerald-400',
-      barColor: 'bg-emerald-400',
+      health: h2,
+      healthColor: h2 < 30 ? 'text-rose-400' : h2 < 60 ? 'text-amber-400' : 'text-emerald-400',
+      barColor: h2 < 30 ? 'bg-rose-500' : h2 < 60 ? 'bg-amber-500' : 'bg-emerald-500',
       iconType: 'chemical',
       badgeText: 'Chemical & Odour Guard',
       desc: 'Uses high-adsorption activated carbon to strip chlorine, colours, odour, and organic contaminants.',
@@ -121,14 +127,14 @@ export const FilterHousing = () => {
       roleTag: 'Drops TDS and heavy metals',
       fullTag: 'RO Maxx – Drops TDS and heavy metals',
       subtitle: 'High-Pressure RO Membrane (0.0001µm TFC)',
-      color: '#0369a1', // High-pressure ocean blue
-      accentColor: '#06b6d4', // Cyan high-pressure accent
-      stripColor: '#38bdf8',
-      health: metrics.stage3Health || 88,
-      healthColor: 'text-cyan-400',
-      barColor: 'bg-cyan-400',
+      color: h3 < 30 ? '#7f1d1d' : '#0369a1',
+      accentColor: h3 < 30 ? '#ef4444' : '#06b6d4',
+      stripColor: h3 < 30 ? '#dc2626' : '#38bdf8',
+      health: h3,
+      healthColor: h3 < 30 ? 'text-rose-400' : h3 < 60 ? 'text-amber-400' : 'text-cyan-400',
+      barColor: h3 < 30 ? 'bg-rose-500' : h3 < 60 ? 'bg-amber-500' : 'bg-cyan-400',
       iconType: 'tds',
-      badgeText: 'TDS: 680 → 28 ppm (-96%)',
+      badgeText: h3 < 30 ? 'MEMBRANE DEGRADED' : `TDS Rejection: ${simState ? (simState.roRejectionRate * 100).toFixed(0) : 95}%`,
       desc: 'Core high-pressure reverse-osmosis stage stripping dissolved salts, hardness, and heavy metals.',
     },
     {
@@ -140,12 +146,12 @@ export const FilterHousing = () => {
       roleTag: 'Infuses copper ions & antimicrobial polish',
       fullTag: 'Active Copper – Infuses copper ions & antimicrobial polish',
       subtitle: 'Active Copper Infusion & Mineral Polishing',
-      color: '#b87333', // Burnished metallic copper
-      accentColor: '#f97316', // Warm copper glow
+      color: '#b87333',
+      accentColor: '#f97316',
       stripColor: '#ea580c',
-      health: metrics.stage4Health || 95,
-      healthColor: 'text-amber-400',
-      barColor: 'bg-amber-400',
+      health: h4,
+      healthColor: h4 < 30 ? 'text-rose-400' : h4 < 60 ? 'text-amber-400' : 'text-amber-400',
+      barColor: h4 < 30 ? 'bg-rose-500' : h4 < 60 ? 'bg-amber-500' : 'bg-amber-400',
       iconType: 'copper',
       badgeText: 'Cu²⁺ Ion Infusion',
       desc: 'Enriches purified water with bio-available copper ions (Cu²⁺) for natural antimicrobial protection, alkalinity balance, and crisp taste.',

@@ -9,6 +9,7 @@ import {
   Settings, 
   Sparkles, 
   Play, 
+  Pause,
   Compass, 
   Database, 
   Cpu, 
@@ -52,108 +53,58 @@ export const SystemControls = () => {
     setHydroGeneratorMode,
     filterView,
     setFilterView,
+    simState,
+    simulationRunning,
+    startSimulation,
+    pauseSimulation,
+    resetSimulation,
+    activeScenario,
+    setScenario,
   } = useSystemState();
 
   if (!landingVisited || demoRunning) return null; // Hide controls during landing or guided tour
 
-  // Preset trigger handlers to simulate scenarios dynamically
-  const triggerSensorFault = () => {
-    setMetrics(prev => ({
-      ...prev,
-      tds: 999,
-      turbidity: 88.5,
-      ph: 12.8,
-      waterQuality: 'CRITICAL',
-      cloudSync: 'ERROR',
-    }));
+  // Preset trigger handlers to simulate scenarios dynamically via SimulationEngine
+  const triggerNormal = () => {
+    setScenario('NORMAL');
+    startSimulation();
   };
 
-  const triggerNormal = () => {
-    setMode('NORMAL');
-    setMetrics(prev => ({
-      ...prev,
-      batteryPercent: 88,
-      solarWatts: 48.5,
-      currentDraw: 12.0,
-      waterLevel: 65,
-      flowRate: 4.8,
-      ph: 7.20,
-      tds: 145,
-      turbidity: 1.2,
-      temperature: 24.5,
-      pumpRpm: 1800,
-      filterHealth: 98,
-      uvStatus: 'ON',
-      esp32Online: true,
-      waterQuality: 'EXCELLENT'
-    }));
+  const triggerHighTds = () => {
+    setScenario('HIGH_TDS');
+    startSimulation();
   };
 
   const triggerTurbidity = () => {
-    setMode('TURBIDITY');
-    setMetrics(prev => ({
-      ...prev,
-      batteryPercent: 86,
-      solarWatts: 45.0,
-      currentDraw: 12.4,
-      waterLevel: 62,
-      flowRate: 4.2,
-      ph: 7.65,
-      tds: 260,
-      turbidity: 14.8, // high turbidity
-      temperature: 24.8,
-      pumpRpm: 1950,
-      filterHealth: 95,
-      uvStatus: 'ON',
-      esp32Online: true,
-      waterQuality: 'POOR'
-    }));
+    setScenario('HIGH_TURBIDITY');
+    startSimulation();
+  };
+
+  const triggerLowWater = () => {
+    setScenario('LOW_WATER');
+    startSimulation();
+  };
+
+  const triggerSedimentClog = () => {
+    setScenario('SEDIMENT_CLOGGING');
+    startSimulation();
+  };
+
+  const triggerRoDegradation = () => {
+    setScenario('RO_DEGRADATION');
+    startSimulation();
   };
 
   const triggerPumpFailure = () => {
-    setMode('PUMP_FAILURE');
-    setMetrics(prev => ({
-      ...prev,
-      batteryPercent: 82,
-      solarWatts: 40.0,
-      currentDraw: 1.2, // low draw (pump stopped)
-      flowRate: 0.0,
-      pumpRpm: 0,
-      ph: 7.20,
-      tds: 145,
-      turbidity: 1.2,
-      uvStatus: 'OFF',
-      waterQuality: 'GOOD'
-    }));
+    setScenario('PUMP_FAILURE');
   };
 
-  const triggerCleaning = () => {
-    setMode('CLEANING');
-    setMetrics(prev => ({
-      ...prev,
-      batteryPercent: 78,
-      solarWatts: 42.0,
-      currentDraw: 18.0, // solenoid active
-      waterLevel: 22, // draining
-      flowRate: 0.0,
-      pumpRpm: 0,
-      uvStatus: 'OFF',
-      waterQuality: 'GOOD'
-    }));
+  const triggerSensorFault = () => {
+    setScenario('SENSOR_FAILURE');
   };
 
-  const triggerLowBattery = () => {
-    setMode('LOW_BATTERY');
-    setMetrics(prev => ({
-      ...prev,
-      batteryPercent: 8.5, // low
-      solarWatts: 2.0, // overcast
-      currentDraw: 3.5, // power-save mode
-      flowRate: 1.2,
-      pumpRpm: 800, // running slow
-      uvStatus: 'OFF',
-      waterQuality: 'GOOD'
-    }));
+  const triggerUvFailure = () => {
+    setScenario('UV_FAILURE');
   };
 
   // Simulation 1: Standard Borewell Inflow -> Treated via 4-Stage Filter & Setup 1 Direct Single-Pass -> Primary Reservoir
@@ -438,111 +389,152 @@ export const SystemControls = () => {
           </div>
         </div>
 
-        {/* 2. Simulation preset scenarios */}
+        {/* 2. Real-Time Engineering Simulation & Scenarios */}
         <div className="flex flex-col gap-2">
-          <span className="text-[8px] font-mono text-zinc-500 uppercase tracking-widest flex items-center gap-1">
-            <Settings className="w-3 h-3 text-zinc-500" /> Preset Scenarios
+          <div className="flex items-center justify-between border-b border-white/5 pb-1">
+            <span className="text-[8px] font-mono text-zinc-400 uppercase tracking-widest flex items-center gap-1">
+              <Settings className="w-3 h-3 text-cyan-400" /> SIMULATION ENGINE
+            </span>
+            <span className={`text-[7.5px] font-mono px-1.5 py-0.2 rounded font-bold ${
+              simulationRunning ? 'bg-emerald-950 text-emerald-300 border border-emerald-500/30' : 'text-zinc-500'
+            }`}>
+              {simulationRunning ? 'RUNNING' : 'PAUSED'}
+            </span>
+          </div>
+
+          {/* Master Start / Pause Simulation Button */}
+          <button
+            onClick={() => simulationRunning ? pauseSimulation() : startSimulation()}
+            className={`w-full py-2 px-3 rounded-xl border text-[10px] font-mono font-bold tracking-wider transition-all cursor-pointer flex items-center justify-center gap-2 ${
+              simulationRunning
+                ? 'bg-amber-500/25 border-amber-400 text-amber-200 shadow-[0_0_12px_rgba(245,158,11,0.3)]'
+                : 'bg-emerald-500/25 border-emerald-400 text-emerald-200 shadow-[0_0_12px_rgba(16,185,129,0.3)]'
+            }`}
+          >
+            {simulationRunning ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 fill-current" />}
+            <span>{simulationRunning ? 'PAUSE SIMULATION' : 'START SIMULATION'}</span>
+          </button>
+
+          <span className="text-[7.5px] font-mono text-zinc-500 uppercase tracking-wider">
+            9 Failure & Operational Scenarios:
           </span>
-          <div className="flex flex-col gap-1.5 font-mono text-[9px]">
-            {/* Simulation 1: Clean Borewell -> Verified Pure */}
-            <button
-              onClick={triggerSimulation1}
-              className={`w-full text-left p-2 rounded-xl border flex flex-col gap-0.5 transition-all cursor-pointer ${
-                metrics.tds2 <= 100 && metrics.turbidity < 5
-                  ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300 shadow-[0_0_12px_rgba(6,182,212,0.25)]'
-                  : 'bg-white/2 border-white/5 text-zinc-400 hover:bg-white/5 hover:text-white'
-              }`}
-            >
-              <div className="flex items-center justify-between font-bold text-[9px]">
-                <span>🌟 Sim 1: Standard Borewell</span>
-                <span className="text-[8px] px-1.5 py-0.2 rounded bg-cyan-950 text-cyan-300 border border-cyan-500/30">VERIFIED PURE</span>
-              </div>
-              <span className="text-[8px] text-zinc-400">4-Stage Filter ➔ Verification Chamber ➔ Clean Storage</span>
-            </button>
 
-            {/* Simulation 2: Mining Slurry Runoff -> Stage 1 Re-Filter Loop */}
-            <button
-              onClick={triggerSimulation2}
-              className={`w-full text-left p-2 rounded-xl border flex flex-col gap-0.5 transition-all cursor-pointer ${
-                metrics.tds2 > 100 && metrics.turbidity > 20
-                  ? 'bg-amber-500/20 border-amber-400 text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.25)]'
-                  : 'bg-white/2 border-white/5 text-zinc-400 hover:bg-white/5 hover:text-white'
-              }`}
-            >
-              <div className="flex items-center justify-between font-bold text-[9px]">
-                <span>⚡ Sim 2: Mining Slurry Runoff</span>
-                <span className="text-[8px] px-1.5 py-0.2 rounded bg-amber-950 text-amber-300 border border-amber-500/30">STAGE 1 RE-FILTER</span>
-              </div>
-              <span className="text-[8px] text-zinc-400">Turbid Inflow ➔ Verification Fails ➔ Closed-Loop to Stage 1</span>
-            </button>
-
-            {/* Other System Presets */}
+          <div className="flex flex-col gap-1 font-mono text-[8.5px]">
+            {/* 1. Normal Operation */}
             <button
               onClick={triggerNormal}
               className={`w-full text-left px-2.5 py-1.5 rounded-lg border flex items-center justify-between transition-all cursor-pointer ${
-                mode === 'NORMAL' && !dualVerificationMode && metrics.turbidity >= 5
-                  ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 font-bold' 
+                activeScenario === 'NORMAL'
+                  ? 'bg-emerald-500/20 border-emerald-400 text-emerald-300 font-bold'
                   : 'bg-white/2 border-white/5 text-zinc-400 hover:bg-white/5 hover:text-white'
               }`}
             >
-              <span>🟢 Normal Operations</span>
-              <span>NOMINAL</span>
+              <span>🟢 1. Normal Operation</span>
+              <span className="text-[7.5px] opacity-75">NOMINAL</span>
             </button>
 
+            {/* 2. High TDS Borewell Water */}
+            <button
+              onClick={triggerHighTds}
+              className={`w-full text-left px-2.5 py-1.5 rounded-lg border flex items-center justify-between transition-all cursor-pointer ${
+                activeScenario === 'HIGH_TDS'
+                  ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300 font-bold'
+                  : 'bg-white/2 border-white/5 text-zinc-400 hover:bg-white/5 hover:text-white'
+              }`}
+            >
+              <span>💧 2. High TDS Borewell</span>
+              <span className="text-[7.5px] opacity-75">1180 ppm</span>
+            </button>
+
+            {/* 3. High Turbidity Slurry */}
             <button
               onClick={triggerTurbidity}
               className={`w-full text-left px-2.5 py-1.5 rounded-lg border flex items-center justify-between transition-all cursor-pointer ${
-                mode === 'TURBIDITY' 
-                  ? 'bg-amber-500/10 border-amber-500/30 text-amber-400 font-bold' 
+                activeScenario === 'HIGH_TURBIDITY'
+                  ? 'bg-amber-500/20 border-amber-400 text-amber-300 font-bold'
                   : 'bg-white/2 border-white/5 text-zinc-400 hover:bg-white/5 hover:text-white'
               }`}
             >
-              <span>🟡 High Turbidity</span>
-              <span>POOR INFLOW</span>
+              <span>🟡 3. High Turbidity Water</span>
+              <span className="text-[7.5px] opacity-75">52 NTU</span>
             </button>
 
+            {/* 4. Low Water Level */}
+            <button
+              onClick={triggerLowWater}
+              className={`w-full text-left px-2.5 py-1.5 rounded-lg border flex items-center justify-between transition-all cursor-pointer ${
+                activeScenario === 'LOW_WATER'
+                  ? 'bg-rose-500/20 border-rose-400 text-rose-300 font-bold'
+                  : 'bg-white/2 border-white/5 text-zinc-400 hover:bg-white/5 hover:text-white'
+              }`}
+            >
+              <span>⚠️ 4. Low Water Level</span>
+              <span className="text-[7.5px] opacity-75">DRY-RUN</span>
+            </button>
+
+            {/* 5. Sediment Filter Clogging */}
+            <button
+              onClick={triggerSedimentClog}
+              className={`w-full text-left px-2.5 py-1.5 rounded-lg border flex items-center justify-between transition-all cursor-pointer ${
+                activeScenario === 'SEDIMENT_CLOGGING'
+                  ? 'bg-amber-500/20 border-amber-400 text-amber-300 font-bold'
+                  : 'bg-white/2 border-white/5 text-zinc-400 hover:bg-white/5 hover:text-white'
+              }`}
+            >
+              <span>🧱 5. Sediment Clogging</span>
+              <span className="text-[7.5px] opacity-75">14% HEALTH</span>
+            </button>
+
+            {/* 6. RO Membrane Degradation */}
+            <button
+              onClick={triggerRoDegradation}
+              className={`w-full text-left px-2.5 py-1.5 rounded-lg border flex items-center justify-between transition-all cursor-pointer ${
+                activeScenario === 'RO_DEGRADATION'
+                  ? 'bg-purple-500/20 border-purple-400 text-purple-300 font-bold'
+                  : 'bg-white/2 border-white/5 text-zinc-400 hover:bg-white/5 hover:text-white'
+              }`}
+            >
+              <span>🔬 6. RO Membrane Degraded</span>
+              <span className="text-[7.5px] opacity-75">SALT PASS</span>
+            </button>
+
+            {/* 7. Pump Failure */}
             <button
               onClick={triggerPumpFailure}
               className={`w-full text-left px-2.5 py-1.5 rounded-lg border flex items-center justify-between transition-all cursor-pointer ${
-                mode === 'PUMP_FAILURE' 
-                  ? 'bg-red-500/10 border-red-500/30 text-red-400 font-bold animate-pulse' 
+                activeScenario === 'PUMP_FAILURE'
+                  ? 'bg-rose-500/20 border-rose-400 text-rose-300 font-bold animate-pulse'
                   : 'bg-white/2 border-white/5 text-zinc-400 hover:bg-white/5 hover:text-white'
               }`}
             >
-              <span>🔴 Pump Failure</span>
-              <span>ERROR</span>
+              <span>🔴 7. Booster Pump Failure</span>
+              <span className="text-[7.5px] opacity-75">0 RPM</span>
             </button>
 
-            <button
-              onClick={triggerCleaning}
-              className={`w-full text-left px-2.5 py-1.5 rounded-lg border flex items-center justify-between transition-all cursor-pointer ${
-                mode === 'CLEANING' 
-                  ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-300 font-bold' 
-                  : 'bg-white/2 border-white/5 text-zinc-400 hover:bg-white/5 hover:text-white'
-              }`}
-            >
-              <span>🟣 Self Cleaning</span>
-              <span>FLUSHING</span>
-            </button>
-
-            <button
-              onClick={triggerLowBattery}
-              className={`w-full text-left px-2.5 py-1.5 rounded-lg border flex items-center justify-between transition-all cursor-pointer ${
-                mode === 'LOW_BATTERY' 
-                  ? 'bg-rose-500/10 border-rose-500/30 text-rose-400 font-bold' 
-                  : 'bg-white/2 border-white/5 text-zinc-400 hover:bg-white/5 hover:text-white'
-              }`}
-            >
-              <span>🟤 Low Battery</span>
-              <span>LOW POWER</span>
-            </button>
-
+            {/* 8. Sensor Failure */}
             <button
               onClick={triggerSensorFault}
-              className="w-full text-left px-2.5 py-1.5 rounded-lg border border-white/5 bg-white/2 text-zinc-400 hover:bg-white/5 hover:text-amber-400 flex items-center justify-between transition-all cursor-pointer"
+              className={`w-full text-left px-2.5 py-1.5 rounded-lg border flex items-center justify-between transition-all cursor-pointer ${
+                activeScenario === 'SENSOR_FAILURE'
+                  ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300 font-bold'
+                  : 'bg-white/2 border-white/5 text-zinc-400 hover:bg-white/5 hover:text-white'
+              }`}
             >
-              <span>⚠️ Sensor Fault</span>
-              <span>CALIBRATE</span>
+              <span>⚡ 8. Sensor Instrument Fault</span>
+              <span className="text-[7.5px] opacity-75">999 PPM</span>
+            </button>
+
+            {/* 9. UV Failure */}
+            <button
+              onClick={triggerUvFailure}
+              className={`w-full text-left px-2.5 py-1.5 rounded-lg border flex items-center justify-between transition-all cursor-pointer ${
+                activeScenario === 'UV_FAILURE'
+                  ? 'bg-violet-500/20 border-violet-400 text-violet-300 font-bold'
+                  : 'bg-white/2 border-white/5 text-zinc-400 hover:bg-white/5 hover:text-white'
+              }`}
+            >
+              <span>🟣 9. UV Sterilizer Failure</span>
+              <span className="text-[7.5px] opacity-75">0 mW/cm²</span>
             </button>
           </div>
         </div>

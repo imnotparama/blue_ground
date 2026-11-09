@@ -45,15 +45,18 @@ export const Flows = () => {
     recirculationTriggered, 
     hydroGeneratorMode,
     exploded,
+    simState,
   } = useSystemState();
 
   const intakeParticlesRef = useRef<THREE.Points>(null);
   const directParticlesRef = useRef<THREE.Points>(null);
   const pumpParticlesRef = useRef<THREE.Points>(null);
   const recircParticlesRef = useRef<THREE.Points>(null);
+  const rejectParticlesRef = useRef<THREE.Points>(null);
 
   const intakeTubeMatRef = useRef<THREE.ShaderMaterial>(null);
   const roTubeMatRef = useRef<THREE.ShaderMaterial>(null);
+  const rejectTubeMatRef = useRef<THREE.ShaderMaterial>(null);
 
   const isRecirculating = (metrics.tds2 || 0) > 100 || (metrics.turbidity2 || 0) > 1.0 || recirculationTriggered;
 
@@ -160,7 +163,18 @@ export const Flows = () => {
       new THREE.Vector3(-1.36, 0.45, -0.62),   // Re-entering filtration train
     ], false, 'catmullrom', 0.02);
 
-    return { intakeCurve, pumpCurve, tank2DeliveryCurve, recirculationCurve };
+    // E. RO Membrane Stage 3 Reject / Brine Stream Split -> Waste Line
+    const roRejectCurve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(-0.48, 0.42, -0.62), // RO membrane bottom reject port
+      new THREE.Vector3(-0.48, 0.20, -0.62), // Downward drain pipe
+      new THREE.Vector3(-0.48, 0.10, -0.42), // Turn forward
+      new THREE.Vector3(-0.48, 0.10, -0.15),
+      new THREE.Vector3(-0.10, 0.10, -0.15), // Horizontal manifold
+      new THREE.Vector3(0.20, -0.05, -0.15), // Flow restrictor / reject drop
+      new THREE.Vector3(0.40, -0.45, -0.15), // Waste stream discharge
+    ], false, 'catmullrom', 0.02);
+
+    return { intakeCurve, pumpCurve, tank2DeliveryCurve, recirculationCurve, roRejectCurve };
   }, [hydroGeneratorMode, dualVerificationMode]);
 
   // Pre-sample points along curves to avoid expensive CatmullRom spline evaluations in render loop
@@ -170,6 +184,7 @@ export const Flows = () => {
       pump: curves.pumpCurve.getPoints(160),
       tank2Delivery: curves.tank2DeliveryCurve.getPoints(120),
       recirculation: curves.recirculationCurve.getPoints(160),
+      roReject: curves.roRejectCurve.getPoints(100),
     };
   }, [curves]);
 
@@ -190,6 +205,7 @@ export const Flows = () => {
       direct: init(30),
       pump: init(45),
       recirc: init(35),
+      reject: init(30),
     };
   }, []);
 
@@ -254,29 +270,47 @@ export const Flows = () => {
     if (exploded) return;
     const time = state.clock.getElapsedTime();
 
-    const isFlowActive = metrics.flowRate > 0.1 ? 1.0 : 0.0;
-    const speedScale = 1.0 + (metrics.flowRate / 5.0) * 1.5;
+    const inFlow = simState ? simState.inputFlowRate : metrics.flowRate;
+    const outFlow = simState ? simState.outputFlowRate : (metrics.flowRate * 0.7);
+    const wasteFlow = simState ? simState.wasteFlowRate : (metrics.flowRate * 0.3);
+
+    const isFlowActive = inFlow > 0.05 ? 1.0 : 0.0;
+    const isOutFlowActive = outFlow > 0.05 ? 1.0 : 0.0;
+    const isWasteFlowActive = wasteFlow > 0.05 ? 1.0 : 0.0;
+
+    const intakeSpeed = Math.max(0.4, (inFlow / 5.0) * 2.2);
+    const outputSpeed = Math.max(0.4, (outFlow / 3.5) * 2.0);
+    const wasteSpeed = Math.max(0.4, (wasteFlow / 1.5) * 1.8);
 
     // Direct uniform updates ensuring rock-solid WebGL animation
     intakeShaderMat.uniforms.uTime.value = time;
-    intakeShaderMat.uniforms.uSpeed.value = speedScale;
+    intakeShaderMat.uniforms.uSpeed.value = intakeSpeed;
     intakeShaderMat.uniforms.uFlowActive.value = isFlowActive;
+    if (simState && simState.inputTurbidity > 15) {
+      intakeShaderMat.uniforms.uColor.value.set('#b45309');
+    } else {
+      intakeShaderMat.uniforms.uColor.value.set('#0284c7');
+    }
 
     roShaderMat.uniforms.uTime.value = time;
-    roShaderMat.uniforms.uSpeed.value = speedScale;
-    roShaderMat.uniforms.uFlowActive.value = isFlowActive;
+    roShaderMat.uniforms.uSpeed.value = outputSpeed;
+    roShaderMat.uniforms.uFlowActive.value = isOutFlowActive;
 
-    const updateParticles = (ref: React.RefObject<THREE.Points | null>, pts: THREE.Vector3[], progress: Float32Array) => {
+    rejectShaderMat.uniforms.uTime.value = time;
+    rejectShaderMat.uniforms.uSpeed.value = wasteSpeed;
+    rejectShaderMat.uniforms.uFlowActive.value = isWasteFlowActive;
+
+    const updateParticles = (ref: React.RefObject<THREE.Points | null>, pts: THREE.Vector3[], progress: Float32Array, activeFlowRate: number) => {
       if (!ref.current) return;
       if (!ref.current.geometry || !ref.current.geometry.attributes || !ref.current.geometry.attributes.position) return;
       if (!pts || pts.length === 0) return;
       const positions = ref.current.geometry.attributes.position.array as Float32Array;
       if (!positions) return;
-      const step = (metrics.flowRate / 5.0) * 0.22 * delta;
+      const step = (activeFlowRate / 5.0) * 0.22 * delta;
       const len = pts.length - 1;
 
       for (let i = 0; i < progress.length; i++) {
-        if (metrics.flowRate > 0) {
+        if (activeFlowRate > 0.05) {
           progress[i] += step;
           if (progress[i] > 1.0) progress[i] = 0;
         }
@@ -291,8 +325,9 @@ export const Flows = () => {
       ref.current.geometry.attributes.position.needsUpdate = true;
     };
 
-    updateParticles(intakeParticlesRef, sampledCurves.intake, particleConfig.intake.progress);
-    updateParticles(pumpParticlesRef, sampledCurves.pump, particleConfig.pump.progress);
+    updateParticles(intakeParticlesRef, sampledCurves.intake, particleConfig.intake.progress, inFlow);
+    updateParticles(pumpParticlesRef, sampledCurves.pump, particleConfig.pump.progress, outFlow);
+    updateParticles(rejectParticlesRef, sampledCurves.roReject, particleConfig.reject.progress, wasteFlow);
 
     // Closed-Loop Verification Decision (Setup 2 Only):
     // If water is NOT pure: Recirculation Return Loop back to 4-stage filter
@@ -300,9 +335,9 @@ export const Flows = () => {
     if (dualVerificationMode) {
       const isRecirculating = (metrics.tds2 || 0) > 100 || (metrics.turbidity2 || 0) > 1.0 || recirculationTriggered;
       if (isRecirculating) {
-        updateParticles(recircParticlesRef, sampledCurves.recirculation, particleConfig.recirc.progress);
+        updateParticles(recircParticlesRef, sampledCurves.recirculation, particleConfig.recirc.progress, outFlow);
       } else {
-        updateParticles(directParticlesRef, sampledCurves.tank2Delivery, particleConfig.direct.progress);
+        updateParticles(directParticlesRef, sampledCurves.tank2Delivery, particleConfig.direct.progress, outFlow);
       }
     }
 
@@ -385,6 +420,18 @@ export const Flows = () => {
     return mat;
   }, []);
 
+  const rejectShaderMat = useMemo(() => {
+    const mat = new THREE.ShaderMaterial({
+      uniforms: THREE.UniformsUtils.clone(TubeFlowShader.uniforms),
+      vertexShader: TubeFlowShader.vertexShader,
+      fragmentShader: TubeFlowShader.fragmentShader,
+      transparent: true,
+      depthWrite: false,
+    });
+    mat.uniforms.uColor.value.set('#d97706');
+    return mat;
+  }, []);
+
   if (exploded) return null;
 
   return (
@@ -400,6 +447,12 @@ export const Flows = () => {
         <primitive object={roShaderMat} ref={roTubeMatRef} attach="material" />
       </mesh>
 
+      {/* RO Reject Concentrate / Brine Fluid Tube */}
+      <mesh>
+        <tubeGeometry key="ro-reject-tube" args={[curves.roRejectCurve, 32, 0.012, 8, false]} />
+        <primitive object={rejectShaderMat} ref={rejectTubeMatRef} attach="material" />
+      </mesh>
+
       {/* Flowing Water Particles */}
       <points ref={intakeParticlesRef}>
         <bufferGeometry>
@@ -411,7 +464,7 @@ export const Flows = () => {
         <pointsMaterial color="#38bdf8" size={0.035} transparent opacity={0.85} depthWrite={false} />
       </points>
 
-      {/* Four-Stage Smart Filtration Train & Verification Tank Flow */}
+      {/* Four-Stage Smart Filtration Train Permeate Flow */}
       <points ref={pumpParticlesRef}>
         <bufferGeometry>
           <bufferAttribute
@@ -420,6 +473,17 @@ export const Flows = () => {
           />
         </bufferGeometry>
         <pointsMaterial color="#38bdf8" size={0.035} transparent opacity={0.85} depthWrite={false} />
+      </points>
+
+      {/* RO Reject Brine Particles (Concentrate Stream to Waste) */}
+      <points ref={rejectParticlesRef}>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            args={[particleConfig.reject.positions, 3]}
+          />
+        </bufferGeometry>
+        <pointsMaterial color="#f59e0b" size={0.032} transparent opacity={0.85} depthWrite={false} />
       </points>
 
       {/* Dynamic Path: Setup 2 Dual-Verification Only (Closed-Loop Recirculation vs Clean Delivery) */}

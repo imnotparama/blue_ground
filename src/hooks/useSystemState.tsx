@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import confetti from 'canvas-confetti';
+import { SimulationEngine, SimulationState, SimulationScenarioId } from '@/simulation';
 
 // Define the operational modes
 export type SystemMode =
@@ -166,6 +167,17 @@ interface SystemStateContextType {
   setFilterView: (val: boolean) => void;
   filterStageFocus: number; // 0 = all 4, 1 = SediShield, 2 = ChemoBlock, 3 = RO Maxx, 4 = Active Copper Filter
   setFilterStageFocus: (stage: number) => void;
+  // Deterministic Real-Time Engineering Simulation Engine
+  simState: SimulationState;
+  simulationRunning: boolean;
+  startSimulation: () => void;
+  pauseSimulation: () => void;
+  resetSimulation: () => void;
+  stepSimulation: () => void;
+  activeScenario: SimulationScenarioId;
+  setScenario: (scenarioId: SimulationScenarioId) => void;
+  speedMultiplier: number;
+  setSpeedMultiplier: (mult: number) => void;
 }
 
 const SystemStateContext = createContext<SystemStateContextType | undefined>(undefined);
@@ -412,64 +424,53 @@ export const SystemStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
     }
   };
 
-  // Keep metrics animating dynamically (ambient fluctuation)
+  // ─── Real-Time Deterministic Engineering Simulation Engine ────────────────────
+  const engineRef = useRef<SimulationEngine | null>(null);
+  if (!engineRef.current) {
+    engineRef.current = new SimulationEngine();
+  }
+
+  const [simState, setSimState] = useState<SimulationState>(() => engineRef.current!.getState());
+
   useEffect(() => {
-    const interval = setInterval(() => {
-      if (demoRunning) return; // Presentation overrides fluctuations
+    const unsubscribe = engineRef.current!.subscribe((newSimState) => {
+      setSimState(newSimState);
+      setMetrics(prev => ({
+        ...prev,
+        waterLevel: Math.round((newSimState.purifiedWaterLevel / newSimState.purifiedTankCapacity) * 100),
+        flowRate: newSimState.inputFlowRate,
+        pumpRpm: newSimState.pumpRpm,
+        tds: newSimState.inputTds,
+        tds2: newSimState.outputTds,
+        ph: newSimState.inputPh,
+        ph2: newSimState.outputPh,
+        turbidity: newSimState.inputTurbidity,
+        turbidity2: newSimState.outputTurbidity,
+        temperature: newSimState.temperature,
+        filterHealth: newSimState.filterHealth.overall,
+        stage1Health: newSimState.filterHealth.sediment,
+        stage2Health: newSimState.filterHealth.carbon,
+        stage3Health: newSimState.filterHealth.ro,
+        stage4Health: newSimState.filterHealth.uf,
+        uvStatus: newSimState.uvStatus === 'ON' ? 'ON' : 'OFF',
+        waterQuality: newSimState.waterQuality,
+        tankCapacity: newSimState.purifiedTankCapacity,
+      }));
+    });
+    return () => unsubscribe();
+  }, []);
 
-      setMetrics(prev => {
-        // Simple helper to add tiny noise
-        const noise = (min: number, max: number) => Math.random() * (max - min) + min;
-
-        // Fluctuations based on system mode
-        if (mode === 'PUMP_FAILURE') {
-          return {
-            ...prev,
-            batteryPercent: Math.max(1, prev.batteryPercent - 0.01),
-            solarWatts: envMode === 'SUNNY' ? 48 + noise(-2, 2) : envMode === 'NIGHT' ? 0 : 15 + noise(-1, 1),
-            temperature: 24.0 + noise(-0.1, 0.1),
-            wifiSignal: -55 + Math.round(noise(-2, 2)),
-          };
-        }
-
-        if (mode === 'LOW_BATTERY') {
-          return {
-            ...prev,
-            batteryPercent: Math.max(1, prev.batteryPercent - 0.005),
-            temperature: 22.0 + noise(-0.05, 0.05),
-          };
-        }
-
-        // Standard fluctuations
-        const isSolarActive = envMode !== 'NIGHT';
-        const batteryDelta = isSolarActive
-          ? (prev.solarWatts - prev.currentDraw > 0 ? 0.05 : -0.01)
-          : -0.05;
-
-        return {
-          ...prev,
-          batteryPercent: Math.max(0, Math.min(100, prev.batteryPercent + batteryDelta)),
-          solarWatts: isSolarActive
-            ? envMode === 'SUNNY'
-              ? 55 + noise(-2, 2)
-              : envMode === 'CLOUDY'
-              ? 18 + noise(-1, 1)
-              : envMode === 'RAIN'
-              ? 8 + noise(-0.5, 0.5)
-              : 35 + noise(-1.5, 1.5) // morning
-            : 0,
-          currentDraw: prev.pumpRpm > 0 ? 12 + noise(-0.5, 0.5) + (prev.uvStatus === 'ON' ? 3 : 0) : 4 + noise(-0.1, 0.1),
-          ph: prev.ph + noise(-0.02, 0.02),
-          tds: prev.tds + Math.round(noise(-1, 1)),
-          temperature: 24.5 + noise(-0.1, 0.1),
-          turbidity: Math.max(0.1, prev.turbidity + noise(-0.05, 0.05)),
-          wifiSignal: Math.min(-30, Math.max(-90, prev.wifiSignal + Math.round(noise(-1, 1)))),
-        };
-      });
-    }, 2000);
-
-    return () => clearInterval(interval);
-  }, [mode, envMode, demoRunning]);
+  const startSimulation = () => engineRef.current?.start();
+  const pauseSimulation = () => engineRef.current?.pause();
+  const resetSimulation = () => engineRef.current?.reset();
+  const stepSimulation = () => engineRef.current?.step();
+  const setScenario = (scenarioId: SimulationScenarioId) => {
+    engineRef.current?.setScenario(scenarioId);
+    if (scenarioId === 'PUMP_FAILURE') setModeState('PUMP_FAILURE');
+    else if (scenarioId === 'HIGH_TURBIDITY') setModeState('TURBIDITY');
+    else if (scenarioId === 'NORMAL') setModeState('NORMAL');
+  };
+  const setSpeedMultiplier = (mult: number) => engineRef.current?.setSpeedMultiplier(mult);
 
   // Adjust environmental mode impact on metrics
   useEffect(() => {
@@ -799,6 +800,16 @@ export const SystemStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
         setFilterView,
         filterStageFocus,
         setFilterStageFocus,
+        simState,
+        simulationRunning: simState.simulationRunning,
+        startSimulation,
+        pauseSimulation,
+        resetSimulation,
+        stepSimulation,
+        activeScenario: simState.activeScenario,
+        setScenario,
+        speedMultiplier: simState.speedMultiplier,
+        setSpeedMultiplier,
       }}
     >
       {children}

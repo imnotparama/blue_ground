@@ -6,7 +6,7 @@ import { useSystemState } from '@/hooks/useSystemState';
 import * as THREE from 'three';
 
 export const WaterPump = () => {
-  const { exploded, metrics, activeHotspot, setActiveHotspot, setCameraPreset, tanksOnly, filterView } = useSystemState();
+  const { exploded, metrics, activeHotspot, setActiveHotspot, setCameraPreset, tanksOnly, filterView, simState } = useSystemState();
   
   const groupRef = useRef<THREE.Group>(null);
   const impellerRef = useRef<THREE.Group>(null);
@@ -166,6 +166,28 @@ export const WaterPump = () => {
       <mesh castShadow receiveShadow>
         <cylinderGeometry args={[0.07, 0.07, 0.15, 16]} />
         <meshStandardMaterial color="#1e293b" roughness={0.3} metalness={0.85} />
+      </mesh>
+
+      {/* Live Operational Status LED on Booster Motor Body */}
+      <mesh position={[0, 0.05, 0.072]}>
+        <sphereGeometry args={[0.008, 12, 12]} />
+        <meshStandardMaterial
+          color={
+            simState?.pumpStatus === 'FAULT'
+              ? '#ef4444'
+              : simState?.pumpStatus === 'RUNNING'
+              ? '#10b981'
+              : '#64748b'
+          }
+          emissive={
+            simState?.pumpStatus === 'FAULT'
+              ? '#ef4444'
+              : simState?.pumpStatus === 'RUNNING'
+              ? '#10b981'
+              : '#000000'
+          }
+          emissiveIntensity={simState?.pumpStatus === 'IDLE' ? 0 : 2.5}
+        />
       </mesh>
 
       {/* Base mounting brackets */}

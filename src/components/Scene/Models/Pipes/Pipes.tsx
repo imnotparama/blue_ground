@@ -234,6 +234,7 @@ export const Pipes = () => {
     hydroGeneratorMode,
     filterView,
     exploded,
+    simState,
   } = useSystemState();
   const groupRef = useRef<THREE.Group>(null);
   const materialsRef = useRef<THREE.MeshStandardMaterial[]>([]);
@@ -253,9 +254,11 @@ export const Pipes = () => {
     materialsRef.current = mats;
   }, []);
 
-  const isDirectValveOpen = mode !== 'TURBIDITY' && mode !== 'CLEANING' && mode !== 'PUMP_FAILURE';
+  const isDirectValveOpen = simState
+    ? (simState.solenoidValveStatus === 'OPEN' && !dualVerificationMode)
+    : (mode !== 'TURBIDITY' && mode !== 'CLEANING' && mode !== 'PUMP_FAILURE');
   const isDrainValveOpen = mode === 'CLEANING';
-  const isTapOpen = mode !== 'PUMP_FAILURE';
+  const isTapOpen = simState ? (simState.outputFlowRate > 0) : (mode !== 'PUMP_FAILURE');
 
   useFrame((_, delta) => {
     if (!groupRef.current) return;
@@ -462,6 +465,31 @@ export const Pipes = () => {
         {/* Drop elbow into Stage 1 SediShield Top Manifold Cap */}
         <PipeElbow pos={[-1.36, 0.79, -0.62]} />
         <PipeSeg pos={[-1.36, 0.76, -0.62]} len={0.06} />
+
+        {/* ─── STAGE 3 (RO MAXX) CONCENTRATE REJECT & BRINE FLUSH LINE ─── */}
+        <group position={[-0.48, 0.35, -0.62]}>
+          {/* Quick-connect reject port fitting */}
+          <mesh castShadow>
+            <cylinderGeometry args={[0.022, 0.022, 0.04, 12]} />
+            <meshStandardMaterial color="#f59e0b" roughness={0.3} metalness={0.7} />
+          </mesh>
+          {/* Reject drain pipe down */}
+          <PipeSeg pos={[0, -0.15, 0]} len={0.25} r={0.012} mat="gray" />
+          {/* 90-deg turn elbow forward */}
+          <PipeElbow pos={[0, -0.25, 0]} mat="gray" />
+          <PipeSeg pos={[0, -0.25, 0.22]} len={0.42} rot={[Math.PI / 2, 0, 0]} r={0.012} mat="gray" />
+          {/* Inline RO Flow Restrictor (FR-450) & Brine Flush Solenoid */}
+          <group position={[0, -0.25, 0.45]}>
+            <mesh castShadow>
+              <cylinderGeometry args={[0.018, 0.018, 0.06, 12]} />
+              <meshStandardMaterial color="#b45309" roughness={0.25} metalness={0.8} />
+            </mesh>
+            <mesh position={[0, 0.03, 0]}>
+              <boxGeometry args={[0.025, 0.015, 0.025]} />
+              <meshStandardMaterial color="#0f172a" roughness={0.4} />
+            </mesh>
+          </group>
+        </group>
 
         {/* ─── STAGE 4 (ACTIVE COPPER FILTER) DISCHARGE LINE ─── */}
         {/* Vertical riser out of Stage 4 Active Copper Filter */}

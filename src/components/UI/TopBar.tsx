@@ -55,44 +55,26 @@ export const TopBar = () => {
     setExploded,
     filterView,
     setFilterView,
+    simulationRunning,
+    startSimulation,
+    pauseSimulation,
+    setScenario,
   } = useSystemState();
 
   const runSim1 = () => {
     setDualVerificationMode(false);
     setRecirculationTriggered(false);
-    setMode('NORMAL');
     setCameraPreset('OVERVIEW');
-    setMetrics(prev => ({
-      ...prev,
-      turbidity: 2.8,
-      tds: 190,
-      ph: 7.22,
-      waterQuality: 'EXCELLENT',
-      flowRate: 4.8,
-      pumpRpm: 1800,
-      uvStatus: 'ON',
-      recirculationActive: false,
-    }));
+    setScenario('NORMAL');
+    startSimulation();
   };
 
   const runSim2 = () => {
     setDualVerificationMode(true);
     setRecirculationTriggered(true);
-    setMode('TURBIDITY');
     setCameraPreset('TANK2_VERIFICATION');
-    setMetrics(prev => ({
-      ...prev,
-      turbidity: 44.0,
-      tds: 680,
-      tds2: 185,
-      turbidity2: 4.5,
-      ph: 6.25,
-      waterQuality: 'POOR',
-      flowRate: 3.8,
-      pumpRpm: 2200,
-      uvStatus: 'ON',
-      recirculationActive: true,
-    }));
+    setScenario('HIGH_TURBIDITY');
+    startSimulation();
   };
 
   const envs: { mode: EnvironmentalMode; icon: React.ReactNode; label: string }[] = [
@@ -123,6 +105,20 @@ export const TopBar = () => {
 
       {/* Center demo action & clean view toggle (pointers enabled) */}
       <div className="flex items-center gap-2.5 pointer-events-auto">
+        {/* Master Engineering Simulation Start / Pause Button */}
+        <button
+          onClick={() => simulationRunning ? pauseSimulation() : startSimulation()}
+          className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all text-xs font-mono tracking-wide cursor-pointer shadow-md ${
+            simulationRunning
+              ? 'bg-amber-500/30 border-amber-400 text-amber-200 shadow-[0_0_16px_rgba(245,158,11,0.4)] ring-1 ring-amber-400/50'
+              : 'bg-emerald-500/30 border-emerald-400 text-emerald-200 shadow-[0_0_16px_rgba(16,185,129,0.4)] ring-1 ring-emerald-400/50 hover:bg-emerald-500/40'
+          }`}
+          title={simulationRunning ? 'Pause Real-Time Simulation Engine' : 'Start Real-Time Engineering Simulation Loop'}
+        >
+          {simulationRunning ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 fill-current" />}
+          <span className="font-bold">{simulationRunning ? 'Sim: ACTIVE' : 'Start Simulation'}</span>
+        </button>
+
         {/* Toggle CAD Exploded View Button */}
         <button
           onClick={() => setExploded(!exploded)}

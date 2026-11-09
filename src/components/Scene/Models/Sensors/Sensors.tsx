@@ -2,6 +2,7 @@
 
 import React, { useRef, useState, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
+import { Html } from '@react-three/drei';
 import { useSystemState, CameraPreset } from '@/hooks/useSystemState';
 import * as THREE from 'three';
 
@@ -12,11 +13,12 @@ interface InteractiveSensorProps {
   position: [number, number, number];
   rotation?: [number, number, number];
   label: string;
+  liveValue?: string;
   children: React.ReactNode;
 }
 
 const InteractiveSensor: React.FC<InteractiveSensorProps> = ({
-  id, preset, position, rotation = [0, 0, 0], label, children,
+  id, preset, position, rotation = [0, 0, 0], label, liveValue, children,
 }) => {
   const { setActiveHotspot, setCameraPreset, activeHotspot, tanksOnly, filterView } = useSystemState();
   const [hovered, setHovered] = useState(false);
@@ -50,6 +52,24 @@ const InteractiveSensor: React.FC<InteractiveSensorProps> = ({
         </mesh>
       )}
       {children}
+
+      {/* Floating In-Situ Telemetry Label */}
+      {liveValue && (
+        <Html position={[0, 0.16, 0]} center distanceFactor={9} style={{ pointerEvents: 'none' }}>
+          <div className="flex flex-col items-center select-none whitespace-nowrap pointer-events-none">
+            <div className={`px-2 py-0.5 rounded-md border text-[9px] font-mono font-bold backdrop-blur-md shadow-lg flex items-center gap-1.5 transition-all ${
+              isActive 
+                ? 'bg-cyan-950/90 text-cyan-200 border-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.4)] ring-1 ring-cyan-400/50'
+                : 'bg-zinc-950/85 text-zinc-200 border-white/20'
+            }`}>
+              <span className="text-[7.5px] text-zinc-400 uppercase tracking-wider">{label}</span>
+              <span className="text-cyan-300 font-extrabold">{liveValue}</span>
+            </div>
+            <div className="w-0.5 h-1.5 bg-cyan-400/70" />
+          </div>
+        </Html>
+      )}
+
       {/* Label Base Plate */}
       <mesh position={[0, -0.06, 0.035]} castShadow>
         <boxGeometry args={[0.07, 0.016, 0.004]} />
@@ -60,7 +80,7 @@ const InteractiveSensor: React.FC<InteractiveSensorProps> = ({
 };
 
 export const Sensors = () => {
-  const { exploded, metrics } = useSystemState();
+  const { exploded, metrics, simState } = useSystemState();
   const flowRotorRef = useRef<THREE.Mesh>(null);
   const floatRingRef = useRef<THREE.Mesh>(null);
 
@@ -129,7 +149,13 @@ export const Sensors = () => {
           ══════════════════════════════════════════════════════════════════════ */}
       <group ref={groupARef}>
         {/* 1. pH SENSOR PROBE (Secondary Tank Bridge, Collar 1) */}
-        <InteractiveSensor id="ph_sensor" preset="PH_SENSOR" position={[0.23, 0.58, 0.20]} label="pH Probe">
+        <InteractiveSensor 
+          id="ph_sensor" 
+          preset="PH_SENSOR" 
+          position={[0.23, 0.58, 0.20]} 
+          label="Raw pH"
+          liveValue={`${(simState ? simState.inputPh : metrics.ph).toFixed(2)} pH`}
+        >
           {/* Stainless Threaded Cable Gland Collar */}
           <mesh position={[0, 0.02, 0]} castShadow>
             <cylinderGeometry args={[0.018, 0.020, 0.04, 16]} />
@@ -153,7 +179,13 @@ export const Sensors = () => {
         </InteractiveSensor>
 
         {/* 2. TURBIDITY SENSOR (Secondary Tank Bridge, Collar 2) */}
-        <InteractiveSensor id="turbidity_sensor" preset="TURBIDITY_SENSOR" position={[0.42, 0.58, 0.20]} label="Turbidity">
+        <InteractiveSensor 
+          id="turbidity_sensor" 
+          preset="TURBIDITY_SENSOR" 
+          position={[0.42, 0.58, 0.20]} 
+          label="Turbidity"
+          liveValue={`${(simState ? simState.inputTurbidity : metrics.turbidity).toFixed(1)} NTU`}
+        >
           {/* Top Flanged Electronic Header Box */}
           <mesh position={[0, 0.028, 0]} castShadow>
             <boxGeometry args={[0.034, 0.042, 0.034]} />
@@ -172,7 +204,13 @@ export const Sensors = () => {
         </InteractiveSensor>
 
         {/* 3. TDS / EC SENSOR (Secondary Tank Bridge, Collar 3) */}
-        <InteractiveSensor id="tds_sensor" preset="TDS_SENSOR" position={[0.62, 0.58, 0.20]} label="TDS/EC">
+        <InteractiveSensor 
+          id="tds_sensor" 
+          preset="TDS_SENSOR" 
+          position={[0.62, 0.58, 0.20]} 
+          label="Raw TDS"
+          liveValue={`${simState ? simState.inputTds : metrics.tds} ppm`}
+        >
           {/* Industrial Waterproof Hex Collar */}
           <mesh position={[0, 0.02, 0]} castShadow>
             <cylinderGeometry args={[0.016, 0.016, 0.04, 6]} />
@@ -193,7 +231,13 @@ export const Sensors = () => {
         </InteractiveSensor>
 
         {/* 4. DS18B20 TEMPERATURE SENSOR (Secondary Tank Bridge, Collar 4) */}
-        <InteractiveSensor id="temp_sensor" preset="TEMP_SENSOR" position={[0.80, 0.58, 0.20]} label="DS18B20">
+        <InteractiveSensor 
+          id="temp_sensor" 
+          preset="TEMP_SENSOR" 
+          position={[0.80, 0.58, 0.20]} 
+          label="Temp"
+          liveValue={`${(simState ? simState.temperature : metrics.temperature).toFixed(1)} °C`}
+        >
           {/* Frame Cable Gland */}
           <mesh position={[0, 0.02, 0]} castShadow>
             <cylinderGeometry args={[0.014, 0.014, 0.035, 12]} />
@@ -218,7 +262,13 @@ export const Sensors = () => {
 
       {/* 5. WATER LEVEL FLOAT SWITCH (Clamped to Clean Reservoir Top Rim) */}
       <group ref={ultraRef}>
-        <InteractiveSensor id="float_sensor" preset="FLOAT_SENSOR" position={[-1.10, 0.60, 0]} label="Float Switch">
+        <InteractiveSensor 
+          id="float_sensor" 
+          preset="FLOAT_SENSOR" 
+          position={[-1.10, 0.60, 0]} 
+          label="Clean Vol"
+          liveValue={`${simState ? simState.purifiedWaterLevel.toFixed(1) : metrics.waterLevel} L`}
+        >
           {/* Frame Mounting Bracket Clamp */}
           <mesh position={[0, 0.02, 0]} castShadow>
             <boxGeometry args={[0.045, 0.03, 0.045]} />
@@ -243,7 +293,13 @@ export const Sensors = () => {
       </group>
 
       {/* 6. INLINE YF-S201 FLOW SENSOR (Plumbed directly on intake transfer pipe) */}
-      <InteractiveSensor id="flow_sensor" preset="FLOW_SENSOR" position={[1.35, 0.30, 0]} label="YF-S201">
+      <InteractiveSensor 
+        id="flow_sensor" 
+        preset="FLOW_SENSOR" 
+        position={[1.35, 0.30, 0]} 
+        label="Feed Flow"
+        liveValue={`${(simState ? simState.inputFlowRate : metrics.flowRate).toFixed(2)} L/m`}
+      >
         {/* Brass Threaded Coupling Unions */}
         {[-0.045, 0.045].map((ux, uIdx) => (
           <mesh key={uIdx} position={[ux, 0, 0]} rotation={[0, 0, Math.PI / 2]} castShadow>
@@ -274,7 +330,13 @@ export const Sensors = () => {
           ══════════════════════════════════════════════════════════════════════ */}
       <group ref={tank2SensorsRef}>
         {/* TDS #2 Verifier on Tank 2 Lid */}
-        <InteractiveSensor id="tds2_sensor" preset="TANK2_VERIFICATION" position={[-1.85, 0.41, 0.15]} label="TDS #2">
+        <InteractiveSensor 
+          id="tds2_sensor" 
+          preset="TANK2_VERIFICATION" 
+          position={[-1.85, 0.41, 0.15]} 
+          label="Permeate TDS"
+          liveValue={`${simState ? simState.outputTds : metrics.tds2} ppm`}
+        >
           <mesh position={[0, 0.02, 0]} castShadow>
             <cylinderGeometry args={[0.015, 0.015, 0.035, 6]} />
             <meshStandardMaterial color="#0f172a" roughness={0.4} metalness={0.8} />
@@ -292,7 +354,13 @@ export const Sensors = () => {
         </InteractiveSensor>
 
         {/* pH #2 Verifier on Tank 2 Lid */}
-        <InteractiveSensor id="ph2_sensor" preset="TANK2_VERIFICATION" position={[-1.73, 0.41, 0.10]} label="pH #2">
+        <InteractiveSensor 
+          id="ph2_sensor" 
+          preset="TANK2_VERIFICATION" 
+          position={[-1.73, 0.41, 0.10]} 
+          label="Output pH"
+          liveValue={`${(simState ? simState.outputPh : metrics.ph2).toFixed(2)} pH`}
+        >
           <mesh position={[0, 0.02, 0]} castShadow>
             <cylinderGeometry args={[0.015, 0.015, 0.035, 16]} />
             <meshStandardMaterial color="#0284c7" roughness={0.3} metalness={0.8} />
@@ -315,7 +383,13 @@ export const Sensors = () => {
 
       {/* 7. BH1750 AMBIENT LIGHT SENSOR (Clamped directly to Solar Panel Support Strut at x=-1.20, y=0.92, z=0.25) */}
       <group ref={bhRef}>
-        <InteractiveSensor id="solar" preset="SOLAR" position={[-1.20, 0.92, 0.25]} label="BH1750">
+        <InteractiveSensor 
+          id="solar" 
+          preset="SOLAR" 
+          position={[-1.20, 0.92, 0.25]} 
+          label="Solar"
+          liveValue={`${(metrics.solarWatts || 56.8).toFixed(1)} W`}
+        >
           {/* CNC Aluminum Strut Collar Clamp */}
           <mesh position={[0, -0.02, 0]} castShadow>
             <cylinderGeometry args={[0.016, 0.016, 0.03, 16]} />
