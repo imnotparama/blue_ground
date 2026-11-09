@@ -18,6 +18,7 @@ import {
   Repeat,
   Zap,
   Filter,
+  Activity,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -60,6 +61,8 @@ export const SystemControls = () => {
     resetSimulation,
     activeScenario,
     setScenario,
+    simulationViewOpen,
+    setSimulationViewOpen,
   } = useSystemState();
 
   if (!landingVisited || demoRunning) return null; // Hide controls during landing or guided tour
@@ -413,6 +416,15 @@ export const SystemControls = () => {
           >
             {simulationRunning ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 fill-current" />}
             <span>{simulationRunning ? 'PAUSE SIMULATION' : 'START SIMULATION'}</span>
+          </button>
+
+          {/* Complete Simulation Workbench Modal Toggle */}
+          <button
+            onClick={() => setSimulationViewOpen(true)}
+            className="w-full py-2 px-3 rounded-xl border border-cyan-500/40 bg-cyan-950/50 text-cyan-200 text-[10px] font-mono font-bold tracking-wider hover:bg-cyan-900/70 hover:border-cyan-400 transition-all cursor-pointer flex items-center justify-center gap-2 shadow-[0_0_14px_rgba(6,182,212,0.25)]"
+          >
+            <Activity className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
+            <span>FULL SIMULATION VIEW (DATA)</span>
           </button>
 
           <span className="text-[7.5px] font-mono text-zinc-500 uppercase tracking-wider">

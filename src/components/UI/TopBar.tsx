@@ -23,6 +23,7 @@ import {
   Sparkles,
   Zap,
   Filter,
+  Activity,
 } from 'lucide-react';
 
 export const TopBar = () => {
@@ -59,6 +60,8 @@ export const TopBar = () => {
     startSimulation,
     pauseSimulation,
     setScenario,
+    simulationViewOpen,
+    setSimulationViewOpen,
   } = useSystemState();
 
   const runSim1 = () => {
@@ -117,6 +120,24 @@ export const TopBar = () => {
         >
           {simulationRunning ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 fill-current" />}
           <span className="font-bold">{simulationRunning ? 'Sim: ACTIVE' : 'Start Simulation'}</span>
+        </button>
+
+        {/* Toggle Complete Real-Time Simulation Workbench */}
+        <button
+          onClick={() => setSimulationViewOpen(!simulationViewOpen)}
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-full border transition-all text-xs font-mono tracking-wide cursor-pointer shadow-md ${
+            simulationViewOpen
+              ? 'bg-gradient-to-r from-cyan-500/30 to-blue-500/30 border-cyan-400 text-cyan-200 shadow-[0_0_20px_rgba(6,182,212,0.5)] ring-1 ring-cyan-400'
+              : 'bg-zinc-900/90 border-cyan-500/40 text-cyan-300 hover:text-white hover:bg-cyan-950/60 hover:border-cyan-400'
+          }`}
+          title="Open Full Real-Time Water Simulation Workbench & Sensor Matrix (Shift + S)"
+        >
+          <Activity className={`w-3.5 h-3.5 ${simulationViewOpen ? 'text-cyan-300 animate-spin-slow' : 'text-cyan-400 animate-pulse'}`} />
+          <span className="font-bold hidden md:inline">SIMULATION VIEW</span>
+          <span className="font-bold md:hidden">DATA</span>
+          <span className="text-[9px] px-1 py-0.2 rounded font-bold bg-cyan-950 text-cyan-300 border border-cyan-500/40">
+            P&ID
+          </span>
         </button>
 
         {/* Toggle CAD Exploded View Button */}

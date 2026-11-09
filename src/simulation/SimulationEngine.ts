@@ -15,6 +15,7 @@ export class SimulationEngine implements WaterPurifierTelemetrySource {
 
   constructor() {
     this.state = this.createInitialState('NORMAL');
+    this.start();
   }
 
   public createInitialState(scenarioId: SimulationScenarioId = 'NORMAL'): SimulationState {
@@ -29,9 +30,9 @@ export class SimulationEngine implements WaterPurifierTelemetrySource {
       wasteWaterLevel: 6,
       wasteTankCapacity: 50,
 
-      inputFlowRate: 0,
-      outputFlowRate: 0,
-      wasteFlowRate: 0,
+      inputFlowRate: scenario.componentWearFactors?.pumpFault ? 0 : 5.0,
+      outputFlowRate: scenario.componentWearFactors?.pumpFault ? 0 : 3.5,
+      wasteFlowRate: scenario.componentWearFactors?.pumpFault ? 0 : 1.5,
 
       inputTds: scenario.feedWater.tds,
       outputTds: 24,
@@ -74,15 +75,15 @@ export class SimulationEngine implements WaterPurifierTelemetrySource {
         uf: 96,
       },
 
-      pumpStatus: scenario.componentWearFactors?.pumpFault ? 'FAULT' : 'IDLE',
-      pumpRpm: 0,
-      uvStatus: scenario.componentWearFactors?.uvFault ? 'FAULT' : 'OFF',
+      pumpStatus: scenario.componentWearFactors?.pumpFault ? 'FAULT' : 'RUNNING',
+      pumpRpm: scenario.componentWearFactors?.pumpFault ? 0 : 1800,
+      uvStatus: scenario.componentWearFactors?.uvFault ? 'FAULT' : 'ON',
       uvIntensity: scenario.componentWearFactors?.uvFault ? 0 : 16.5,
       roStatus: scenario.componentWearFactors?.roDegraded ? 'FOULING' : 'ACTIVE',
       roRecoveryRate: 0.70,
       roRejectionRate: 0.95,
-      solenoidValveStatus: 'CLOSED',
-      valveAngleDeg: 0,
+      solenoidValveStatus: scenario.componentWearFactors?.pumpFault ? 'CLOSED' : 'OPEN',
+      valveAngleDeg: scenario.componentWearFactors?.pumpFault ? 0 : 90,
 
       totalWaterPurified: 0,
       totalWasteWater: 0,
@@ -102,7 +103,7 @@ export class SimulationEngine implements WaterPurifierTelemetrySource {
       },
 
       timestamp: Date.now(),
-      simulationRunning: false,
+      simulationRunning: true,
       speedMultiplier: 1,
       activeScenario: scenarioId,
     };

@@ -89,6 +89,8 @@ export const Dashboard = () => {
     setScenario,
     speedMultiplier,
     setSpeedMultiplier,
+    simulationViewOpen,
+    setSimulationViewOpen,
   } = useSystemState();
 
   const [collapsed, setCollapsed] = React.useState(false);
@@ -299,6 +301,15 @@ export const Dashboard = () => {
                   {SCENARIO_DEFINITIONS[activeScenario]?.description}
                 </p>
               </div>
+
+              {/* Complete Simulation Workbench Launcher Button */}
+              <button
+                onClick={() => setSimulationViewOpen(true)}
+                className="w-full py-2 px-3 rounded-xl border border-cyan-500/40 bg-cyan-950/60 text-cyan-200 text-[10px] font-mono font-bold tracking-wider hover:bg-cyan-900/80 hover:border-cyan-400 transition-all cursor-pointer flex items-center justify-center gap-2 shadow-[0_0_12px_rgba(6,182,212,0.2)]"
+              >
+                <Activity className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
+                <span>EXPAND COMPLETE SIMULATION VIEW</span>
+              </button>
             </div>
 
             {/* ======================================================== */}

@@ -178,6 +178,8 @@ interface SystemStateContextType {
   setScenario: (scenarioId: SimulationScenarioId) => void;
   speedMultiplier: number;
   setSpeedMultiplier: (mult: number) => void;
+  simulationViewOpen: boolean;
+  setSimulationViewOpen: (val: boolean) => void;
 }
 
 const SystemStateContext = createContext<SystemStateContextType | undefined>(undefined);
@@ -432,6 +434,8 @@ export const SystemStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
   const [simState, setSimState] = useState<SimulationState>(() => engineRef.current!.getState());
 
+  const [simulationViewOpen, setSimulationViewOpen] = useState(false);
+
   useEffect(() => {
     const unsubscribe = engineRef.current!.subscribe((newSimState) => {
       setSimState(newSimState);
@@ -457,6 +461,8 @@ export const SystemStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
         tankCapacity: newSimState.purifiedTankCapacity,
       }));
     });
+    // Auto-start simulation loop immediately on mount
+    engineRef.current?.start();
     return () => unsubscribe();
   }, []);
 
@@ -810,6 +816,8 @@ export const SystemStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
         setScenario,
         speedMultiplier: simState.speedMultiplier,
         setSpeedMultiplier,
+        simulationViewOpen,
+        setSimulationViewOpen,
       }}
     >
       {children}

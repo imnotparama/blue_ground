@@ -11,6 +11,7 @@ import { SystemControls } from '@/components/UI/SystemControls';
 import { LandingHero } from '@/components/UI/LandingHero';
 import { WaterTrackerHUD } from '@/components/UI/WaterTrackerHUD';
 import { FilterViewHUD } from '@/components/UI/FilterViewHUD';
+import { SimulationWorkbench } from '@/components/UI/SimulationWorkbench';
 
 // Dynamically import the 3D Scene with SSR disabled to prevent WebGL hydration mismatches in Next.js
 const Scene = dynamic(
@@ -65,6 +66,9 @@ const HomePageContent = () => {
 
       {/* 4-Stage Smart Filtration Rack Focus HUD (Filter View Mode) */}
       <FilterViewHUD />
+
+      {/* Comprehensive Real-Time Engineering Simulation Workbench */}
+      <SimulationWorkbench />
 
       {/* Fullscreen cinematic landing intro cover */}
       <LandingHero />

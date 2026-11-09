@@ -2,20 +2,27 @@
 
 import React from 'react';
 import { useSystemState } from '@/hooks/useSystemState';
-import { Play, Navigation, Compass, Layers, Zap, Droplet } from 'lucide-react';
+import { Play, Navigation, Compass, Layers, Zap, Droplet, Activity } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export const LandingHero = () => {
-  const { landingVisited, setLandingVisited, startDemo, setCameraPreset } = useSystemState();
+  const { landingVisited, setLandingVisited, startDemo, setCameraPreset, setSimulationViewOpen, startSimulation } = useSystemState();
 
   const handleEnterManual = () => {
     setLandingVisited(true);
     setCameraPreset('OVERVIEW');
+    startSimulation();
   };
 
   const handleEnterDemo = () => {
     setLandingVisited(true);
     startDemo();
+  };
+
+  const handleEnterSimulation = () => {
+    setLandingVisited(true);
+    setSimulationViewOpen(true);
+    startSimulation();
   };
 
   return (
@@ -91,19 +98,28 @@ export const LandingHero = () => {
               {/* Guided Keynote Presentation */}
               <button
                 onClick={handleEnterDemo}
-                className="flex items-center justify-center gap-2.5 px-8 py-4 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-medium text-xs tracking-wider uppercase transition-all shadow-[0_0_25px_rgba(6,182,212,0.3)] hover:scale-105 cursor-pointer border border-cyan-400/20"
+                className="flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-medium text-xs tracking-wider uppercase transition-all shadow-[0_0_25px_rgba(6,182,212,0.3)] hover:scale-105 cursor-pointer border border-cyan-400/20"
               >
                 <Play className="w-4 h-4 fill-white" />
                 Guided Presentation
               </button>
 
+              {/* Complete Simulation View */}
+              <button
+                onClick={handleEnterSimulation}
+                className="flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-cyan-950/80 border border-cyan-400/60 text-cyan-200 hover:text-white hover:bg-cyan-900 font-semibold text-xs tracking-wider uppercase transition-all shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:scale-105 cursor-pointer"
+              >
+                <Activity className="w-4 h-4 text-cyan-400 animate-pulse" />
+                Live Simulation View
+              </button>
+
               {/* Manual Control */}
               <button
                 onClick={handleEnterManual}
-                className="flex items-center justify-center gap-2.5 px-8 py-4 rounded-full border border-white/10 hover:border-white/20 hover:bg-white/2 text-zinc-300 hover:text-white font-medium text-xs tracking-wider uppercase transition-all cursor-pointer"
+                className="flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-full border border-white/10 hover:border-white/20 hover:bg-white/5 text-zinc-300 hover:text-white font-medium text-xs tracking-wider uppercase transition-all cursor-pointer"
               >
                 <Navigation className="w-4 h-4" />
-                Manual Diagnostics
+                Manual 3D Twin
               </button>
             </motion.div>
           </div>
