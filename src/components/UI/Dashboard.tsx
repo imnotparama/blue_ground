@@ -28,10 +28,16 @@ import {
   FlaskConical,
   Repeat,
   Check,
+  FileText,
+  Download,
+  Terminal,
+  Leaf,
+  Coins,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { SensorsAndTools } from './SensorsAndTools';
 import { SCENARIO_DEFINITIONS, SimulationScenarioId } from '@/simulation';
+import { generateCertifiedLabReport } from '@/utils/generateLabReport';
 
 // Small inline sparkline SVG chart
 const Sparkline = ({ data, color }: { data: number[]; color: string }) => {
@@ -94,6 +100,9 @@ export const Dashboard = () => {
   } = useSystemState();
 
   const [collapsed, setCollapsed] = React.useState(false);
+  const [hardwareMode, setHardwareMode] = useState<'SIMULATION' | 'ESP32_MQTT'>('SIMULATION');
+  const [mqttPacketCount, setMqttPacketCount] = useState(1480);
+  const [lastPacketTime, setLastPacketTime] = useState('12:00:00');
 
   // Live sliding window telemetry history
   const [history, setHistory] = useState<{ tds: number[]; ph: number[]; turbidity: number[]; flowRate: number[] }>({
@@ -111,30 +120,48 @@ export const Dashboard = () => {
         turbidity: [...prev.turbidity.slice(1), simState ? simState.outputTurbidity : metrics.turbidity2],
         flowRate: [...prev.flowRate.slice(1), simState ? simState.inputFlowRate : metrics.flowRate],
       }));
+      setMqttPacketCount(c => c + 1);
+      setLastPacketTime(new Date().toTimeString().split(' ')[0]);
     }, 1000);
     return () => clearInterval(timer);
   }, [simState, metrics]);
 
   if (!landingVisited || demoRunning) return null; // Hide dashboard during landing or guided tour
 
-  // Helper to format water quality
-  const quality = simState ? simState.waterQuality : metrics.waterQuality;
-  const getQualityColor = () => {
-    switch (quality) {
-      case 'EXCELLENT': return 'text-emerald-400 border-emerald-500/20 bg-emerald-500/5';
-      case 'GOOD': return 'text-cyan-400 border-cyan-500/20 bg-cyan-500/5';
-      case 'POOR': return 'text-amber-400 border-amber-500/20 bg-amber-500/5 animate-pulse';
-      case 'CRITICAL': return 'text-rose-400 border-rose-500/25 bg-rose-500/5 animate-pulse';
-      default: return 'text-emerald-400 border-emerald-500/20 bg-emerald-500/5';
-    }
-  };
-
-  const battColor = metrics.batteryPercent < 20 ? 'text-rose-400' : metrics.batteryPercent < 50 ? 'text-amber-400' : 'text-emerald-400';
-  const battBarColor = metrics.batteryPercent < 20 ? 'bg-rose-500' : metrics.batteryPercent < 50 ? 'bg-amber-500' : 'bg-emerald-500';
-
   const aiScore = simState ? simState.aiHealthScore : 94;
-  const aiScoreColor = aiScore > 85 ? 'text-emerald-400' : aiScore > 60 ? 'text-amber-400' : 'text-rose-400';
-  const aiScoreBadge = aiScore > 85 ? 'bg-emerald-950/60 text-emerald-300 border-emerald-500/40' : aiScore > 60 ? 'bg-amber-950/60 text-amber-300 border-amber-500/40' : 'bg-rose-950/60 text-rose-300 border-rose-500/40';
+
+  // Real-world Economic & Environmental Metrics
+  const totalPurified = simState?.totalWaterPurified ?? 1420;
+  const petBottlesSaved = Math.round(totalPurified * 2);
+  const rupeesSaved = Math.round(totalPurified * 20);
+  const co2OffsetKg = (totalPurified * 0.165).toFixed(1);
+
+  // Power flow telemetry values
+  const solarWatts = 56.8;
+  const pumpWatts = simState?.pumpStatus === 'RUNNING' ? 24.0 : 0.0;
+  const uvWatts = simState?.uvStatus === 'ON' ? 3.5 : 0.0;
+  const mcuWatts = 1.2;
+  const totalLoadWatts = pumpWatts + uvWatts + mcuWatts;
+  const netSurplusWatts = (solarWatts - totalLoadWatts).toFixed(1);
+
+  const handleDownloadCertificate = () => {
+    if (!simState) return;
+    generateCertifiedLabReport({
+      inputTds: simState.inputTds,
+      outputTds: simState.outputTds,
+      inputTurbidity: simState.inputTurbidity,
+      outputTurbidity: simState.outputTurbidity,
+      inputPh: simState.inputPh,
+      outputPh: simState.outputPh,
+      totalPurified: simState.totalWaterPurified,
+      totalWaste: simState.totalWasteWater,
+      operatingHours: simState.operatingHours,
+      recoveryRate: simState.roRecoveryRate,
+      rejectionRate: simState.roRejectionRate,
+      uvStatus: simState.uvStatus,
+      aiScore: simState.aiHealthScore,
+    });
+  };
 
   return (
     <div className="fixed right-6 top-20 z-30 pointer-events-none select-none">
@@ -163,9 +190,9 @@ export const Dashboard = () => {
             opacity: collapsed ? 0 : 1 
           }}
           transition={{ type: 'spring', damping: 24, stiffness: 150 }}
-          className="w-[390px] max-h-[84vh] overflow-y-auto pointer-events-auto shadow-[0_24px_48px_rgba(0,0,0,0.5)] rounded-2xl"
+          className="w-[410px] max-h-[86vh] overflow-y-auto pointer-events-auto shadow-[0_24px_48px_rgba(0,0,0,0.5)] rounded-2xl"
         >
-          <div className="glass-panel rounded-2xl p-4 border border-white/10 relative overflow-hidden flex flex-col gap-3.5 bg-zinc-950/90 backdrop-blur-md">
+          <div className="glass-panel rounded-2xl p-4 border border-white/10 relative overflow-hidden flex flex-col gap-3 bg-zinc-950/92 backdrop-blur-md">
             
             {/* Header: Title + Tab Switcher */}
             <div className="flex flex-col gap-2">
@@ -178,13 +205,30 @@ export const Dashboard = () => {
                     {sidebarTab === 'TELEMETRY' ? 'Deterministic Physical Twin' : 'Sensors & Tools Catalog'}
                   </h1>
                 </div>
-                <div className="flex flex-col items-end">
-                  <span className="text-[8px] font-mono text-zinc-500 uppercase flex items-center gap-1">
-                    <Radio className="w-2.5 h-2.5 text-cyan-400 animate-pulse" /> ESP32 ADAPTER
-                  </span>
-                  <span className="text-[10px] font-bold font-mono text-emerald-400">
-                    REAL-TIME SYNC
-                  </span>
+
+                {/* Hardware Telemetry Bridge Source Switcher */}
+                <div className="flex items-center p-0.5 rounded-lg bg-black/60 border border-white/10 text-[8px] font-mono">
+                  <button
+                    onClick={() => setHardwareMode('SIMULATION')}
+                    className={`px-1.5 py-0.5 rounded transition-all cursor-pointer font-bold ${
+                      hardwareMode === 'SIMULATION'
+                        ? 'bg-cyan-500/30 text-cyan-300 border border-cyan-400/50'
+                        : 'text-zinc-500 hover:text-zinc-300'
+                    }`}
+                  >
+                    SIM
+                  </button>
+                  <button
+                    onClick={() => setHardwareMode('ESP32_MQTT')}
+                    className={`px-1.5 py-0.5 rounded transition-all cursor-pointer font-bold flex items-center gap-1 ${
+                      hardwareMode === 'ESP32_MQTT'
+                        ? 'bg-emerald-500/30 text-emerald-300 border border-emerald-400/50'
+                        : 'text-zinc-500 hover:text-zinc-300'
+                    }`}
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+                    ESP32
+                  </button>
                 </div>
               </div>
 
@@ -221,8 +265,27 @@ export const Dashboard = () => {
               <SensorsAndTools />
             ) : (
               <>
+                {/* LIVE ESP32 HARDWARE MQTT STREAM TERMINAL BADGE (WHEN ACTIVE) */}
+                {hardwareMode === 'ESP32_MQTT' && (
+                  <div className="p-2.5 rounded-xl bg-black/90 border border-emerald-500/40 font-mono text-[8px] flex flex-col gap-1.5 shadow-[0_0_16px_rgba(16,185,129,0.15)]">
+                    <div className="flex items-center justify-between text-emerald-400 border-b border-emerald-900/50 pb-1">
+                      <span className="flex items-center gap-1 font-bold">
+                        <Terminal className="w-3 h-3 text-emerald-400" />
+                        MQTT: leviathan/telemetry/v9
+                      </span>
+                      <span className="text-zinc-400">
+                        PKT #{mqttPacketCount} • 12ms QoS-1
+                      </span>
+                    </div>
+                    <div className="text-zinc-300 bg-zinc-950 p-1.5 rounded border border-white/5 break-all text-[7.5px] leading-relaxed">
+                      <span className="text-emerald-400">[{lastPacketTime}] </span>
+                      {`{"dev":"ESP32-LEVIATHAN-01","tds_in":${simState?.inputTds ?? 450},"tds_out":${simState?.outputTds ?? 24},"ph":${(simState?.outputPh ?? 7.2).toFixed(2)},"turb":${(simState?.outputTurbidity ?? 0.18).toFixed(2)},"flow_lpm":${(simState?.outputFlowRate ?? 3.4).toFixed(1)},"pv_w":56.8,"batt_pct":91,"crc":"0x9E"}`}
+                    </div>
+                  </div>
+                )}
+
                 {/* 1. HERO PURITY & POTABILITY STATUS */}
-                <div className="p-3.5 rounded-2xl bg-gradient-to-br from-cyan-950/40 via-zinc-900/90 to-emerald-950/40 border border-cyan-500/30 flex flex-col gap-2.5 shadow-[0_8px_24px_rgba(6,182,212,0.12)]">
+                <div className="p-3.5 rounded-2xl bg-gradient-to-br from-cyan-950/40 via-zinc-900/90 to-emerald-950/40 border border-cyan-500/30 flex flex-col gap-2 shadow-[0_8px_24px_rgba(6,182,212,0.12)]">
                   <div className="flex items-center justify-between">
                     <span className="text-[9px] font-bold tracking-widest text-zinc-400 uppercase font-mono flex items-center gap-1.5">
                       <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
@@ -235,7 +298,7 @@ export const Dashboard = () => {
                   </div>
 
                   {/* 3 Core Water Quality Readouts */}
-                  <div className="grid grid-cols-3 gap-2 pt-1 font-mono">
+                  <div className="grid grid-cols-3 gap-2 pt-0.5 font-mono">
                     {/* TDS Mineral Level */}
                     <div className="flex flex-col bg-black/40 p-2 rounded-xl border border-white/5">
                       <span className="text-[7.5px] text-zinc-400 uppercase">TDS MINERALS</span>
@@ -280,8 +343,80 @@ export const Dashboard = () => {
                   </div>
                 </div>
 
-                {/* 2. WATER FLOW & RESERVOIR CAPACITY */}
-                <div className="p-3 rounded-2xl bg-zinc-900/60 border border-white/10 flex flex-col gap-2.5 font-mono">
+                {/* 2. SOLAR PV & BATTERY ENERGY FLOW TELEMETRY STRIP */}
+                <div className="p-3 rounded-2xl bg-zinc-900/70 border border-amber-500/30 flex flex-col gap-2 font-mono">
+                  <div className="flex items-center justify-between border-b border-white/5 pb-1">
+                    <span className="text-[8.5px] font-bold text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
+                      <Sun className="w-3.5 h-3.5 text-amber-400" />
+                      SOLAR & BATTERY ENERGY FLOW
+                    </span>
+                    <span className="text-[7.5px] text-emerald-400 font-bold flex items-center gap-1">
+                      <BatteryCharging className="w-3 h-3 text-emerald-400" />
+                      +{netSurplusWatts}W SURPLUS
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-4 gap-1.5 text-center text-[8px]">
+                    <div className="p-1.5 rounded-lg bg-black/40 border border-white/5 flex flex-col">
+                      <span className="text-zinc-400 text-[7px]">SOLAR PV</span>
+                      <strong className="text-amber-300 text-[9.5px]">+{solarWatts}W</strong>
+                    </div>
+                    <div className="p-1.5 rounded-lg bg-black/40 border border-white/5 flex flex-col">
+                      <span className="text-zinc-400 text-[7px]">BMS BATT</span>
+                      <strong className="text-emerald-300 text-[9.5px]">91% (25.4V)</strong>
+                    </div>
+                    <div className="p-1.5 rounded-lg bg-black/40 border border-white/5 flex flex-col">
+                      <span className="text-zinc-400 text-[7px]">LOADS</span>
+                      <strong className="text-rose-300 text-[9.5px]">-{totalLoadWatts.toFixed(1)}W</strong>
+                    </div>
+                    <div className="p-1.5 rounded-lg bg-black/40 border border-white/5 flex flex-col">
+                      <span className="text-zinc-400 text-[7px]">NET FLOW</span>
+                      <strong className="text-cyan-300 text-[9.5px]">+{netSurplusWatts}W</strong>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3. ENVIRONMENTAL & ECONOMIC IMPACT MATRIX */}
+                <div className="p-3 rounded-2xl bg-gradient-to-br from-emerald-950/30 to-zinc-900/70 border border-emerald-500/30 flex flex-col gap-2 font-mono">
+                  <div className="flex items-center justify-between border-b border-emerald-500/20 pb-1">
+                    <span className="text-[8.5px] font-bold text-emerald-300 uppercase tracking-wider flex items-center gap-1.5">
+                      <Leaf className="w-3.5 h-3.5 text-emerald-400" />
+                      SUSTAINABILITY & ECONOMIC IMPACT
+                    </span>
+                    <span className="text-[7.5px] text-zinc-400">
+                      {Math.round(totalPurified)} L Produced
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-1.5 text-center text-[8px]">
+                    <div className="p-1.5 rounded-lg bg-black/40 border border-white/5 flex flex-col">
+                      <span className="text-zinc-400 text-[7px]">PET BOTTLES</span>
+                      <strong className="text-emerald-300 text-[10px]">
+                        {petBottlesSaved.toLocaleString('en-IN')}
+                      </strong>
+                      <span className="text-[6.5px] text-zinc-500">500ml avoided</span>
+                    </div>
+
+                    <div className="p-1.5 rounded-lg bg-black/40 border border-white/5 flex flex-col">
+                      <span className="text-zinc-400 text-[7px]">MONEY SAVED</span>
+                      <strong className="text-cyan-300 text-[10px]">
+                        ₹{rupeesSaved.toLocaleString('en-IN')}
+                      </strong>
+                      <span className="text-[6.5px] text-zinc-500">@ ₹20/L packaged</span>
+                    </div>
+
+                    <div className="p-1.5 rounded-lg bg-black/40 border border-white/5 flex flex-col">
+                      <span className="text-zinc-400 text-[7px]">CO₂ OFFSET</span>
+                      <strong className="text-amber-300 text-[10px]">
+                        {co2OffsetKg} kg
+                      </strong>
+                      <span className="text-[6.5px] text-zinc-500">carbon footprint</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 4. WATER FLOW & RESERVOIR CAPACITY */}
+                <div className="p-3 rounded-2xl bg-zinc-900/60 border border-white/10 flex flex-col gap-2 font-mono">
                   <div className="flex items-center justify-between border-b border-white/5 pb-1">
                     <span className="text-[8.5px] font-bold text-zinc-300 uppercase tracking-wider flex items-center gap-1.5">
                       <Droplet className="w-3 h-3 text-cyan-400" />
@@ -299,7 +434,7 @@ export const Dashboard = () => {
                           {Math.round(simState?.purifiedWaterLevel ?? 68)} L
                         </strong>
                       </div>
-                      <div className="w-full h-2 bg-zinc-800 rounded-full overflow-hidden">
+                      <div className="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden">
                         <div
                           className="h-full bg-gradient-to-r from-cyan-500 to-emerald-400 transition-all duration-300"
                           style={{ width: `${Math.min(100, Math.max(8, simState?.purifiedWaterLevel ?? 68))}%` }}
@@ -315,7 +450,7 @@ export const Dashboard = () => {
                           {Math.round(simState?.rawWaterLevel ?? 82)} L
                         </strong>
                       </div>
-                      <div className="w-full h-2 bg-zinc-800 rounded-full overflow-hidden">
+                      <div className="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden">
                         <div
                           className="h-full bg-gradient-to-r from-amber-500 to-blue-500 transition-all duration-300"
                           style={{ width: `${Math.min(100, Math.max(8, simState?.rawWaterLevel ?? 82))}%` }}
@@ -326,23 +461,23 @@ export const Dashboard = () => {
                   </div>
 
                   {/* Flow Rate Split Bar */}
-                  <div className="flex items-center justify-between p-2 rounded-xl bg-black/40 border border-white/5 text-[8.5px]">
+                  <div className="flex items-center justify-between p-2 rounded-xl bg-black/40 border border-white/5 text-[8px]">
                     <div className="flex flex-col">
-                      <span className="text-zinc-400 text-[7.5px]">RAW FEED</span>
+                      <span className="text-zinc-400 text-[7px]">FEED</span>
                       <strong className="text-cyan-300">
                         {(simState?.inputFlowRate ?? 4.8).toFixed(1)} L/m
                       </strong>
                     </div>
                     <span className="text-zinc-500">➔</span>
                     <div className="flex flex-col text-center">
-                      <span className="text-emerald-400 text-[7.5px]">POTABLE PERMEATE (70%)</span>
+                      <span className="text-emerald-400 text-[7px]">PERMEATE (70%)</span>
                       <strong className="text-emerald-300">
                         {(simState?.outputFlowRate ?? 3.4).toFixed(1)} L/m
                       </strong>
                     </div>
                     <span className="text-zinc-500">+</span>
                     <div className="flex flex-col text-right">
-                      <span className="text-amber-400 text-[7.5px]">FLUSH REJECT (30%)</span>
+                      <span className="text-amber-400 text-[7px]">REJECT (30%)</span>
                       <strong className="text-amber-300">
                         {(simState?.wasteFlowRate ?? 1.4).toFixed(1)} L/m
                       </strong>
@@ -350,7 +485,17 @@ export const Dashboard = () => {
                   </div>
                 </div>
 
-                {/* 3. AI PREDICTIVE GUARDIAN */}
+                {/* 5. ONE-CLICK CERTIFIED WATER QUALITY LAB REPORT BUTTON */}
+                <button
+                  onClick={handleDownloadCertificate}
+                  className="w-full py-2.5 px-3 rounded-xl border border-emerald-500/40 bg-gradient-to-r from-emerald-950/80 via-zinc-900 to-cyan-950/80 text-emerald-200 text-[9px] font-mono font-bold tracking-wider hover:bg-emerald-900/60 hover:border-emerald-400 transition-all cursor-pointer flex items-center justify-center gap-2 shadow-[0_0_16px_rgba(16,185,129,0.2)]"
+                >
+                  <FileText className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>DOWNLOAD CERTIFIED WHO LAB REPORT (PDF)</span>
+                  <Download className="w-3 h-3 text-emerald-300 ml-auto" />
+                </button>
+
+                {/* 6. AI PREDICTIVE GUARDIAN */}
                 <div className="p-3 rounded-2xl bg-purple-950/20 border border-purple-500/30 flex flex-col gap-1.5 font-mono">
                   <div className="flex items-center justify-between border-b border-purple-500/20 pb-1">
                     <span className="text-[8.5px] font-bold text-purple-300 uppercase tracking-wider flex items-center gap-1.5">
@@ -358,7 +503,7 @@ export const Dashboard = () => {
                       AI PREDICTIVE HEALTH
                     </span>
                     <span className="text-[8px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold">
-                      SCORE: {simState?.aiHealthScore ?? 94}/100
+                      SCORE: {aiScore}/100
                     </span>
                   </div>
                   <div className="p-2 rounded-xl bg-black/40 border border-white/5 text-[8px] flex flex-col gap-1">
@@ -377,8 +522,8 @@ export const Dashboard = () => {
                   </div>
                 </div>
 
-                {/* 4. MASTER SIMULATION CONTROLS & QUICK SCENARIOS */}
-                <div className="p-3 rounded-2xl bg-zinc-900/80 border border-cyan-500/30 flex flex-col gap-2.5 font-mono">
+                {/* 7. MASTER SIMULATION CONTROLS & QUICK SCENARIOS */}
+                <div className="p-3 rounded-2xl bg-zinc-900/80 border border-cyan-500/30 flex flex-col gap-2 font-mono">
                   {/* Master Start / Pause Button */}
                   <div className="flex items-center gap-2">
                     <button

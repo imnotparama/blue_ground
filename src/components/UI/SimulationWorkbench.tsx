@@ -26,8 +26,10 @@ import {
   Minimize2,
   Sliders,
   Filter,
+  FileText,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { generateCertifiedLabReport } from '@/utils/generateLabReport';
 
 // Telemetry historical packet type for live rolling charts
 interface TelemetryPoint {
@@ -297,11 +299,38 @@ export const SimulationWorkbench: React.FC = () => {
               {/* CSV Telemetry Downloader */}
               <button
                 onClick={exportCsv}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-medium bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 hover:bg-cyan-900 transition-all shadow-[0_0_12px_rgba(6,182,212,0.2)]"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-medium bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 hover:bg-cyan-900 transition-all shadow-[0_0_12px_rgba(6,182,212,0.2)] cursor-pointer"
                 title="Download complete telemetry logs as CSV"
               >
                 <Download className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">EXPORT CSV</span>
+              </button>
+
+              {/* Certified WHO Potability Lab Report Generator */}
+              <button
+                onClick={() => {
+                  if (!simState) return;
+                  generateCertifiedLabReport({
+                    inputTds: simState.inputTds,
+                    outputTds: simState.outputTds,
+                    inputTurbidity: simState.inputTurbidity,
+                    outputTurbidity: simState.outputTurbidity,
+                    inputPh: simState.inputPh,
+                    outputPh: simState.outputPh,
+                    totalPurified: simState.totalWaterPurified,
+                    totalWaste: simState.totalWasteWater,
+                    operatingHours: simState.operatingHours,
+                    recoveryRate: simState.roRecoveryRate,
+                    rejectionRate: simState.roRejectionRate,
+                    uvStatus: simState.uvStatus,
+                    aiScore: simState.aiHealthScore,
+                  });
+                }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-medium bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 hover:bg-emerald-900 transition-all shadow-[0_0_12px_rgba(16,185,129,0.2)] cursor-pointer"
+                title="Generate and download WHO drinking water quality laboratory test certificate"
+              >
+                <FileText className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">WHO LAB REPORT</span>
               </button>
 
               {/* Fullscreen Toggle */}

@@ -75,7 +75,7 @@ function useLiveTFTTexture(simState: any, isRunning: boolean) {
     const outTurb = (simState?.outputTurbidity ?? 0.18).toFixed(2);
     const outpH = (simState?.outputpH ?? 7.2).toFixed(1);
     const outFlow = (simState?.outputFlowRate ?? 3.4).toFixed(1);
-    const pumpRpm = isRunning && simState?.pumpStatus === 'ON' ? '1800 RPM' : 'IDLE';
+    const pumpRpm = isRunning && simState?.pumpStatus === 'RUNNING' ? '1800 RPM' : 'IDLE';
 
     ctx.fillStyle = '#052e16';
     ctx.fillRect(16, 62, w - 32, 42);
