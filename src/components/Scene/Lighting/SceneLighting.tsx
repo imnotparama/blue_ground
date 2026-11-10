@@ -187,6 +187,15 @@ export const SceneLighting = () => {
         color="#f8fafc"
       />
 
+      {/* Studio Key Accent Light: Highlights White Sediment Filter, Brass Valve & Tank Basement */}
+      <pointLight
+        intensity={1.4}
+        position={[1.2, -0.5, 1.8]}
+        color="#e0f2fe"
+        distance={4.5}
+        decay={1.8}
+      />
+
       {/* 3D Visual Sun Sphere with Corona Glow — top-right of scene */}
       <group ref={sunSphereRef} position={[10, 15, -5]}>
         {/* Bright core */}

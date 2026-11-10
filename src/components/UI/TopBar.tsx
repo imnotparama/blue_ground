@@ -109,59 +109,26 @@ export const TopBar = () => {
         </div>
       </div>
 
-      {/* Center demo action & clean view toggle (pointers enabled) */}
-      <div className="flex items-center gap-2.5 pointer-events-auto">
+      {/* Center Action Controls: Essential CAD & Simulation Navigation */}
+      <div className="flex items-center gap-2 pointer-events-auto">
         {/* Master Engineering Simulation Start / Pause Button */}
         <button
-          onClick={() => simulationRunning ? pauseSimulation() : startSimulation()}
+          onClick={() => (simulationRunning ? pauseSimulation() : startSimulation())}
           className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all text-xs font-mono tracking-wide cursor-pointer shadow-md ${
             simulationRunning
-              ? 'bg-amber-500/30 border-amber-400 text-amber-200 shadow-[0_0_16px_rgba(245,158,11,0.4)] ring-1 ring-amber-400/50'
-              : 'bg-emerald-500/30 border-emerald-400 text-emerald-200 shadow-[0_0_16px_rgba(16,185,129,0.4)] ring-1 ring-emerald-400/50 hover:bg-emerald-500/40'
+              ? 'bg-amber-500/25 border-amber-400 text-amber-200 shadow-[0_0_16px_rgba(245,158,11,0.35)] ring-1 ring-amber-400/50'
+              : 'bg-emerald-500/25 border-emerald-400 text-emerald-200 shadow-[0_0_16px_rgba(16,185,129,0.35)] ring-1 ring-emerald-400/50 hover:bg-emerald-500/35'
           }`}
           title={simulationRunning ? 'Pause Real-Time Simulation Engine' : 'Start Real-Time Engineering Simulation Loop'}
         >
           {simulationRunning ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 fill-current" />}
-          <span className="font-bold">{simulationRunning ? 'Sim: ACTIVE' : 'Start Simulation'}</span>
+          <span className="font-bold">{simulationRunning ? 'Sim: RUNNING' : 'Start Simulation'}</span>
         </button>
 
-        {/* Toggle Complete Real-Time Simulation Workbench */}
-        <button
-          onClick={() => setSimulationViewOpen(!simulationViewOpen)}
-          className={`flex items-center gap-2 px-3.5 py-2 rounded-full border transition-all text-xs font-mono tracking-wide cursor-pointer shadow-md ${
-            simulationViewOpen
-              ? 'bg-gradient-to-r from-cyan-500/30 to-blue-500/30 border-cyan-400 text-cyan-200 shadow-[0_0_20px_rgba(6,182,212,0.5)] ring-1 ring-cyan-400'
-              : 'bg-zinc-900/90 border-cyan-500/40 text-cyan-300 hover:text-white hover:bg-cyan-950/60 hover:border-cyan-400'
-          }`}
-          title="Open Full Real-Time Water Simulation Workbench & Sensor Matrix (Shift + S)"
-        >
-          <Activity className={`w-3.5 h-3.5 ${simulationViewOpen ? 'text-cyan-300 animate-spin-slow' : 'text-cyan-400 animate-pulse'}`} />
-          <span className="font-bold hidden md:inline">SIMULATION VIEW</span>
-          <span className="font-bold md:hidden">DATA</span>
-          <span className="text-[9px] px-1 py-0.2 rounded font-bold bg-cyan-950 text-cyan-300 border border-cyan-500/40">
-            P&ID
-          </span>
-        </button>
-
-        {/* Toggle Official SolidCraft v9 CAD Digital Twin */}
-        <button
-          onClick={() => setCadModelMode(!cadModelMode)}
-          className={`flex items-center gap-1.5 px-3 py-2 rounded-full border transition-all text-xs font-mono tracking-wide cursor-pointer ${
-            cadModelMode
-              ? 'bg-gradient-to-r from-blue-600/30 to-cyan-500/30 border-cyan-400 text-cyan-200 shadow-[0_0_16px_rgba(6,182,212,0.4)] ring-1 ring-cyan-400/60'
-              : 'bg-zinc-900/80 border-zinc-700 text-zinc-400 hover:text-white hover:border-cyan-500/40'
-          }`}
-          title="Toggle Authentic SolidCraft v9 CAD Assembly (250 Features)"
-        >
-          <Box className={`w-3.5 h-3.5 ${cadModelMode ? 'text-cyan-400 animate-pulse' : 'text-zinc-400'}`} />
-          <span className="hidden md:inline font-semibold">{cadModelMode ? 'CAD v9 Twin: ON' : 'Procedural'}</span>
-          <span className={`text-[9px] px-1 py-0.2 rounded font-bold ${cadModelMode ? 'bg-cyan-950 text-cyan-300 border border-cyan-500/40' : 'bg-zinc-800 border border-zinc-700 text-zinc-400'}`}>v9</span>
-        </button>
-
-        {/* Toggle CAD Exploded View Button */}
+        {/* CAD Exploded View Button */}
         <button
           onClick={() => setExploded(!exploded)}
-          className={`flex items-center gap-1.5 px-3 py-2 rounded-full border transition-all text-xs font-mono tracking-wide cursor-pointer ${
+          className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full border transition-all text-xs font-mono tracking-wide cursor-pointer ${
             exploded
               ? 'bg-gradient-to-r from-amber-500/30 to-purple-500/30 border-amber-400 text-amber-200 shadow-[0_0_16px_rgba(245,158,11,0.45)] ring-1 ring-amber-400/60'
               : 'bg-zinc-900/80 border-zinc-700 text-zinc-400 hover:text-white hover:border-amber-500/40'
@@ -173,10 +140,10 @@ export const TopBar = () => {
           <span className={`text-[10px] px-1 py-0.2 rounded font-bold ${exploded ? 'bg-amber-950 text-amber-300 border border-amber-500/40' : 'bg-zinc-800 border border-zinc-700 text-zinc-400'}`}>E</span>
         </button>
 
-        {/* Toggle 4-Stage Filter View Button */}
+        {/* 4-Stage Filter Rack Focus */}
         <button
           onClick={() => setFilterView(!filterView)}
-          className={`flex items-center gap-2 px-3.5 py-2 rounded-full border transition-all text-xs font-mono tracking-wide cursor-pointer ${
+          className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full border transition-all text-xs font-mono tracking-wide cursor-pointer ${
             filterView
               ? 'bg-gradient-to-r from-cyan-500/25 to-emerald-500/25 border-cyan-400 text-cyan-200 shadow-[0_0_18px_rgba(6,182,212,0.4)] ring-1 ring-cyan-400'
               : 'bg-zinc-900/80 border-zinc-700 text-zinc-400 hover:text-white hover:border-cyan-500/40'
@@ -184,139 +151,43 @@ export const TopBar = () => {
           title="Toggle 4-Stage Smart Filtration Rack View (Hotkey: F)"
         >
           <Filter className={`w-3.5 h-3.5 ${filterView ? 'text-cyan-400 animate-pulse' : 'text-zinc-400'}`} />
-          <span className="hidden sm:inline font-semibold">{filterView ? 'Filter View: ON' : 'Filter View'}</span>
+          <span className="hidden sm:inline font-semibold">{filterView ? 'Filter Rack: ON' : 'Filter Rack'}</span>
           <span className={`text-[10px] px-1 py-0.2 rounded font-bold ${filterView ? 'bg-cyan-950 text-cyan-300 border border-cyan-500/40' : 'bg-zinc-800 border border-zinc-700 text-zinc-400'}`}>F</span>
         </button>
 
-        {/* Toggle Water Flow Focus View Button */}
+        {/* Complete Simulation Workbench Modal Toggle */}
         <button
-          onClick={() => setWaterTrackMode(!waterTrackMode)}
-          className={`flex items-center gap-2 px-3.5 py-2 rounded-full border transition-all text-xs font-mono tracking-wide cursor-pointer ${
-            waterTrackMode
-              ? 'bg-cyan-500/25 border-cyan-400 text-cyan-300 shadow-[0_0_18px_rgba(6,182,212,0.35)]'
-              : 'bg-zinc-900/80 border-zinc-700 text-zinc-400 hover:text-white hover:border-cyan-500/40'
+          onClick={() => setSimulationViewOpen(!simulationViewOpen)}
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-full border transition-all text-xs font-mono tracking-wide cursor-pointer shadow-md ${
+            simulationViewOpen
+              ? 'bg-gradient-to-r from-cyan-500/30 to-blue-500/30 border-cyan-400 text-cyan-200 shadow-[0_0_20px_rgba(6,182,212,0.5)] ring-1 ring-cyan-400'
+              : 'bg-zinc-900/90 border-cyan-500/40 text-cyan-300 hover:text-white hover:bg-cyan-950/60 hover:border-cyan-400'
           }`}
-          title="Toggle Interactive Water Flow Focus Journey (Hotkey: W)"
+          title="Open Full Real-Time Water Simulation Workbench & Sensor Matrix (Shift + S)"
         >
-          <Droplets className={`w-3.5 h-3.5 ${waterTrackMode ? 'text-cyan-400 animate-bounce-subtle' : 'text-zinc-400'}`} />
-          <span className="hidden sm:inline font-semibold">{waterTrackMode ? 'Water Flow: ON' : 'Water Flow'}</span>
-          <span className={`text-[10px] px-1 py-0.2 rounded font-bold ${waterTrackMode ? 'bg-cyan-950 text-cyan-300 border border-cyan-500/40' : 'bg-zinc-800 border border-zinc-700 text-zinc-400'}`}>W</span>
-        </button>
-
-        {/* Toggle Sensors & Tools Inventory View Button */}
-        <button
-          onClick={() => setSidebarTab(sidebarTab === 'TOOLS' ? 'TELEMETRY' : 'TOOLS')}
-          className={`flex items-center gap-2 px-3.5 py-2 rounded-full border transition-all text-xs font-mono tracking-wide cursor-pointer ${
-            sidebarTab === 'TOOLS'
-              ? 'bg-amber-500/20 border-amber-400/50 text-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.25)]'
-              : 'bg-zinc-900/80 border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-500'
-          }`}
-          title="Toggle Sensors & Tools Hardware Inventory (Hotkey: S)"
-        >
-          <Wrench className={`w-3.5 h-3.5 ${sidebarTab === 'TOOLS' ? 'text-amber-400 animate-pulse' : 'text-zinc-400'}`} />
-          <span className="hidden sm:inline font-semibold">{sidebarTab === 'TOOLS' ? 'Tools View: ON' : 'Sensors & Tools'}</span>
-          <span className={`text-[10px] px-1 py-0.2 rounded font-bold ${sidebarTab === 'TOOLS' ? 'bg-amber-950 text-amber-300 border border-amber-500/40' : 'bg-zinc-800 border border-zinc-700 text-zinc-400'}`}>S</span>
-        </button>
-
-        {/* Toggle Setup 1 (Standard Direct) vs Setup 2 (Tank 2 Dual-Verif & Recirculation) */}
-        <button
-          onClick={() => setDualVerificationMode(!dualVerificationMode)}
-          className={`flex items-center gap-2 px-3.5 py-2 rounded-full border transition-all text-xs font-mono tracking-wide cursor-pointer ${
-            dualVerificationMode
-              ? 'bg-purple-500/25 border-purple-400 text-purple-300 shadow-[0_0_18px_rgba(168,85,247,0.35)]'
-              : 'bg-zinc-900/80 border-zinc-700 text-zinc-400 hover:text-white hover:border-purple-500/40'
-          }`}
-          title="Toggle Architecture: Setup 1 (Direct RO->Clean Tank) vs Setup 2 (Tank 2 TDS Verification & Recirculation) [Hotkey: V]"
-        >
-          <Repeat className={`w-3.5 h-3.5 ${dualVerificationMode ? 'text-purple-400 animate-spin-slow' : 'text-zinc-400'}`} style={{ animationDuration: '6s' }} />
-          <span className="hidden sm:inline font-semibold">
-            {dualVerificationMode ? 'Setup 2: Tank 2 Verif' : 'Setup 1: Direct'}
+          <Activity className={`w-3.5 h-3.5 ${simulationViewOpen ? 'text-cyan-300 animate-spin-slow' : 'text-cyan-400 animate-pulse'}`} />
+          <span className="font-bold hidden md:inline">DATA MATRIX</span>
+          <span className="text-[9px] px-1 py-0.2 rounded font-bold bg-cyan-950 text-cyan-300 border border-cyan-500/40">
+            P&ID
           </span>
-          <span className={`text-[10px] px-1 py-0.2 rounded font-bold ${dualVerificationMode ? 'bg-purple-950 text-purple-300 border border-purple-500/40' : 'bg-zinc-800 border border-zinc-700 text-zinc-400'}`}>V</span>
         </button>
 
-        {/* Quick Simulation 1: Clean Borewell -> Setup 1 */}
-        <button
-          onClick={runSim1}
-          className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-cyan-500/40 bg-cyan-950/60 hover:bg-cyan-900/80 text-cyan-300 text-xs font-mono font-bold transition-all shadow-[0_0_12px_rgba(6,182,212,0.2)] cursor-pointer"
-          title="Simulate Clean/Moderate Borewell Inflow (Setup 1 Direct Purification)"
-        >
-          <Sparkles className="w-3 h-3 text-cyan-400" />
-          <span>Sim 1: Borewell</span>
-        </button>
-
-        {/* Quick Simulation 2: Mining Slurry -> Setup 2 Loop */}
-        <button
-          onClick={runSim2}
-          className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-amber-500/40 bg-amber-950/60 hover:bg-amber-900/80 text-amber-300 text-xs font-mono font-bold transition-all shadow-[0_0_12px_rgba(245,158,11,0.2)] cursor-pointer"
-          title="Simulate Contaminated Mining Slurry Inflow (Setup 2 Tank 2 TDS Check & Recirculation Loop)"
-        >
-          <Repeat className="w-3 h-3 text-amber-400" />
-          <span>Sim 2: Mining Slurry</span>
-        </button>
-
-        {/* Toggle Hydro Power Motor Generator Mode Button */}
-        <button
-          onClick={() => setHydroGeneratorMode(!hydroGeneratorMode)}
-          className={`flex items-center gap-2 px-3.5 py-2 rounded-full border transition-all text-xs font-mono tracking-wide cursor-pointer ${
-            hydroGeneratorMode
-              ? 'bg-blue-500/25 border-blue-400 text-blue-300 shadow-[0_0_18px_rgba(59,130,246,0.35)]'
-              : 'bg-zinc-900/80 border-zinc-700 text-zinc-400 hover:text-white hover:border-blue-500/40'
-          }`}
-          title="Toggle Hydro-Power Motor Energy Harvesting Generator & Battery Charging (Hotkey: G)"
-        >
-          <Zap className={`w-3.5 h-3.5 ${hydroGeneratorMode ? 'text-cyan-400 animate-pulse' : 'text-zinc-400'}`} />
-          <span className="hidden sm:inline font-semibold">
-            {hydroGeneratorMode ? `Hydro Gen: +${(metrics.hydroWatts || 28.5).toFixed(1)}W` : 'Hydro Gen'}
-          </span>
-          <span className={`text-[10px] px-1 py-0.2 rounded font-bold ${hydroGeneratorMode ? 'bg-blue-950 text-blue-300 border border-blue-500/40' : 'bg-zinc-800 border border-zinc-700 text-zinc-400'}`}>G</span>
-        </button>
-
-        {/* Toggle Tanks Only / Margin View Button */}
-        <button
-          onClick={() => setTanksOnly(!tanksOnly)}
-          className={`flex items-center gap-2 px-3.5 py-2 rounded-full border transition-all text-xs font-mono tracking-wide cursor-pointer ${
-            tanksOnly
-              ? 'bg-emerald-500/20 border-emerald-400/50 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.25)]'
-              : 'bg-zinc-900/80 border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-500'
-          }`}
-          title="Toggle Tanks Only & Volume Margins Mode (Hotkey: T)"
-        >
-          <Layers className={`w-3.5 h-3.5 ${tanksOnly ? 'text-emerald-400 animate-pulse' : 'text-zinc-400'}`} />
-          <span className="hidden sm:inline font-semibold">{tanksOnly ? 'Tanks Margins: ON' : 'Tanks Only'}</span>
-          <span className={`text-[10px] px-1 py-0.2 rounded font-bold ${tanksOnly ? 'bg-emerald-950 text-emerald-300 border border-emerald-500/40' : 'bg-zinc-800 border border-zinc-700 text-zinc-400'}`}>T</span>
-        </button>
-
-        {/* Toggle Details / Clean View Button */}
-        <button
-          onClick={() => setShowHotspots(!showHotspots)}
-          className={`flex items-center gap-2 px-3.5 py-2 rounded-full border transition-all text-xs font-mono tracking-wide cursor-pointer ${
-            showHotspots
-              ? 'bg-cyan-500/15 border-cyan-400/40 text-cyan-300 shadow-[0_0_12px_rgba(6,182,212,0.2)]'
-              : 'bg-zinc-900/80 border-zinc-700 text-zinc-400 hover:text-white'
-          }`}
-          title="Toggle Inspection Dots & Labels (Hotkey: H)"
-        >
-          {showHotspots ? <Eye className="w-3.5 h-3.5 text-cyan-400" /> : <EyeOff className="w-3.5 h-3.5 text-zinc-400" />}
-          <span className="hidden sm:inline font-semibold">{showHotspots ? 'Details: ON' : 'Clean View'}</span>
-          <span className="text-[10px] px-1 py-0.2 rounded bg-zinc-800 border border-zinc-700 text-zinc-400">H</span>
-        </button>
-
+        {/* Guided Presentation Tour Button */}
         {!demoRunning ? (
           <button
             onClick={startDemo}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-cyan-500/80 to-blue-600/80 hover:from-cyan-500 hover:to-blue-600 border border-cyan-400/20 text-white font-medium text-xs tracking-wider uppercase transition-all shadow-[0_0_15px_rgba(6,182,212,0.25)] hover:scale-105 cursor-pointer"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-gradient-to-r from-cyan-500/80 to-blue-600/80 hover:from-cyan-500 hover:to-blue-600 border border-cyan-400/20 text-white font-medium text-xs tracking-wider uppercase transition-all shadow-[0_0_15px_rgba(6,182,212,0.25)] hover:scale-105 cursor-pointer"
           >
             <Play className="w-3.5 h-3.5 fill-white" />
-            Start Guided Demo
+            <span>Guided Tour</span>
           </button>
         ) : (
           <button
             onClick={stopDemo}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-red-950/75 border border-red-500/30 hover:bg-red-900/80 text-red-200 font-medium text-xs tracking-wider uppercase transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-red-950/75 border border-red-500/30 hover:bg-red-900/80 text-red-200 font-medium text-xs tracking-wider uppercase transition-all cursor-pointer"
           >
             <Pause className="w-3.5 h-3.5 fill-red-200" />
-            End Demo Tour
+            <span>Exit Tour</span>
           </button>
         )}
       </div>

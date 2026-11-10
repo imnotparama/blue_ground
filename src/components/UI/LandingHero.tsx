@@ -125,9 +125,9 @@ export const LandingHero = () => {
           </div>
 
           {/* Footer branding */}
-          <div className="flex flex-col items-center text-zinc-600 font-mono text-[9px] tracking-widest gap-1">
-            <span>© 2026 AURA SYSTEMS INC.</span>
-            <span>MODEL: SMART IOT SOLAR PURIFICATION LOOP</span>
+          <div className="flex flex-col items-center text-zinc-500 font-mono text-[9.5px] tracking-widest gap-1">
+            <span>© 2026 BLUEGROUND LEVIATHAN v2.0</span>
+            <span>AUTONOMOUS SOLAR IOT WATER PURIFICATION • ENGINEERED BY <strong className="text-cyan-400">PARAMESHWARAN S</strong></span>
           </div>
         </motion.div>
       )}
