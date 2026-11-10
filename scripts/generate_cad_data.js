@@ -31,14 +31,67 @@ data.features.forEach(f => {
     pbr: { metallic: 0.5, roughness: 0.3 }
   };
 
-  const colorHex = '#' + app.color.map(c => Math.max(0, Math.min(255, c)).toString(16).padStart(2, '0')).join('');
-  const metalness = app.pbr?.metallic !== undefined ? app.pbr.metallic : 0.5;
-  const roughness = app.pbr?.roughness !== undefined ? app.pbr.roughness : 0.35;
-  const opacity = app.opacity !== undefined ? app.opacity : 1.0;
-  const transparent = opacity < 0.99;
+  let colorHex = '#' + app.color.map(c => Math.max(0, Math.min(255, c)).toString(16).padStart(2, '0')).join('');
+  let metalness = app.pbr?.metallic !== undefined ? app.pbr.metallic : 0.5;
+  let roughness = app.pbr?.roughness !== undefined ? app.pbr.roughness : 0.35;
+  let opacity = app.opacity !== undefined ? app.opacity : 1.0;
+  let transparent = opacity < 0.99;
+
+  const n = f.name;
+
+  // 1. Transparent Clear Polycarbonate Tank Shells for Fluid Visibility
+  if (n === 'Tank_Primary_Clean_Shell') {
+    colorHex = '#38bdf8';
+    opacity = 0.32;
+    transparent = true;
+    roughness = 0.08;
+    metalness = 0.05;
+  } else if (n === 'Fluid_Primary_Clean_Water') {
+    colorHex = '#0284c7';
+    opacity = 0.82;
+    transparent = true;
+    roughness = 0.15;
+    metalness = 0.1;
+  } else if (n === 'Tank_Secondary_Sensor_Shell') {
+    colorHex = '#0d9488';
+    opacity = 0.35;
+    transparent = true;
+    roughness = 0.08;
+    metalness = 0.05;
+  } else if (n === 'Fluid_Secondary_Sensor_Water') {
+    colorHex = '#0ea5e9';
+    opacity = 0.80;
+    transparent = true;
+    roughness = 0.15;
+    metalness = 0.1;
+  } else if (n.startsWith('Post_') || n.startsWith('Base_') || n.startsWith('Tier') || n.startsWith('Top_')) {
+    // Brushed Structural Aluminium Rack
+    colorHex = '#94a3b8';
+    metalness = 0.85;
+    roughness = 0.22;
+  } else if (n.startsWith('Deck_')) {
+    // Rigid Dark Delrin Deck Shelves
+    colorHex = '#1e293b';
+    metalness = 0.2;
+    roughness = 0.5;
+  } else if (n.includes('Stainless') || n.includes('Reactor') || n.includes('Probe_Temp') || n.includes('Body_FrontChromeTap')) {
+    // Polished 316L Stainless Steel
+    colorHex = '#f1f5f9';
+    metalness = 0.95;
+    roughness = 0.12;
+  } else if (n.includes('Brass') || n.includes('NRV') || n.includes('Fitting') || n.includes('Nipple')) {
+    // Machined Brass Valves & Compression Fittings
+    colorHex = '#d97706';
+    metalness = 0.88;
+    roughness = 0.25;
+  } else if (n.includes('Filter_F') || n.includes('Housing_Sediment')) {
+    // Medical Pure White Filter Bodies
+    colorHex = '#f8fafc';
+    metalness = 0.05;
+    roughness = 0.20;
+  }
 
   let subassembly = 'FRAME';
-  const n = f.name;
   if (n.startsWith('Post_') || n.startsWith('Base_') || n.startsWith('Tier') || n.startsWith('Top_') || n.startsWith('Deck_')) subassembly = 'FRAME';
   else if (n.includes('Solar') || n.includes('Slant')) subassembly = 'SOLAR';
   else if (n.includes('Primary') || n.includes('Clean') || n.includes('PathA')) subassembly = 'CLEAN_TANK';
@@ -134,7 +187,7 @@ data.features.forEach(f => {
   }
 });
 
-// Add the solar canopy assemblies
+// Add the high-detail Solar Canopy assemblies with dark glass & monocrystalline cells
 bodies.push({
   id: 2001,
   name: 'Solar_Canopy_Frame',
@@ -143,9 +196,9 @@ bodies.push({
   pos: toThreePos(0, 2.5, 879.5),
   rot: [0.297, 0, 0],
   size: [500 * scale, 0.045, 415 * scale],
-  color: '#0f172a',
+  color: '#334155',
   metalness: 0.85,
-  roughness: 0.2,
+  roughness: 0.22,
   opacity: 1,
   transparent: false,
   explodedOffset: [0, 0.45, 0],
@@ -159,9 +212,9 @@ bodies.push({
   subassembly: 'SOLAR',
   pos: toThreePos(0, 2.5, 882.5),
   rot: [0.297, 0, 0],
-  size: [480 * scale, 0.012, 395 * scale],
+  size: [480 * scale, 0.010, 395 * scale],
   color: '#0284c7',
-  metalness: 0.2,
+  metalness: 0.25,
   roughness: 0.05,
   opacity: 0.85,
   transparent: true,
@@ -176,9 +229,9 @@ bodies.push({
   subassembly: 'SOLAR',
   pos: toThreePos(0, 2.5, 884.0),
   rot: [0.297, 0, 0],
-  size: [460 * scale, 0.004, 380 * scale],
-  color: '#091e42',
-  metalness: 0.6,
+  size: [460 * scale, 0.003, 380 * scale],
+  color: '#0f172a',
+  metalness: 0.65,
   roughness: 0.15,
   opacity: 1,
   transparent: false,
@@ -192,7 +245,7 @@ if (!fs.existsSync(outDir)) {
 }
 
 const tsContent = `// Auto-generated from blueground_leviathan_v9.solidcraft
-// Contains all 250 parametric features transformed to Three.js datum
+// Contains all 250 parametric features transformed to Three.js datum with high-PBR finishes
 
 export interface CADBodyData {
   id: number;
@@ -215,5 +268,4 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = ${JSON.stringify(bodies, null, 
 `;
 
 fs.writeFileSync(path.join(outDir, 'cadModelData.ts'), tsContent, 'utf8');
-console.log('Successfully wrote cadModelData.ts with', bodies.length, 'bodies!');
-
+console.log('Successfully re-compiled cadModelData.ts with', bodies.length, 'bodies!');

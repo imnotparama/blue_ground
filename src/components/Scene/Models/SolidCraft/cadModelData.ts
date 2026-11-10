@@ -1,5 +1,5 @@
 // Auto-generated from blueground_leviathan_v9.solidcraft
-// Contains all 250 parametric features transformed to Three.js datum
+// Contains all 250 parametric features transformed to Three.js datum with high-PBR finishes
 
 export interface CADBodyData {
   id: number;
@@ -39,9 +39,9 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       2.4,
       0.06
     ],
-    "color": "#c8d1dc",
+    "color": "#94a3b8",
     "metalness": 0.85,
-    "roughness": 0.25,
+    "roughness": 0.22,
     "opacity": 1,
     "transparent": false,
     "explodedOffset": [
@@ -71,9 +71,9 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       2.4,
       0.06
     ],
-    "color": "#c8d1dc",
+    "color": "#94a3b8",
     "metalness": 0.85,
-    "roughness": 0.25,
+    "roughness": 0.22,
     "opacity": 1,
     "transparent": false,
     "explodedOffset": [
@@ -103,9 +103,9 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       2.7,
       0.06
     ],
-    "color": "#c8d1dc",
+    "color": "#94a3b8",
     "metalness": 0.85,
-    "roughness": 0.25,
+    "roughness": 0.22,
     "opacity": 1,
     "transparent": false,
     "explodedOffset": [
@@ -135,9 +135,9 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.06,
       0.06
     ],
-    "color": "#c8d1dc",
+    "color": "#94a3b8",
     "metalness": 0.85,
-    "roughness": 0.25,
+    "roughness": 0.22,
     "opacity": 1,
     "transparent": false,
     "explodedOffset": [
@@ -167,9 +167,9 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       2.7,
       0.06
     ],
-    "color": "#c8d1dc",
+    "color": "#94a3b8",
     "metalness": 0.85,
-    "roughness": 0.25,
+    "roughness": 0.22,
     "opacity": 1,
     "transparent": false,
     "explodedOffset": [
@@ -199,9 +199,9 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.06,
       0.06
     ],
-    "color": "#c8d1dc",
+    "color": "#94a3b8",
     "metalness": 0.85,
-    "roughness": 0.25,
+    "roughness": 0.22,
     "opacity": 1,
     "transparent": false,
     "explodedOffset": [
@@ -231,9 +231,9 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.06,
       1.02
     ],
-    "color": "#c8d1dc",
+    "color": "#94a3b8",
     "metalness": 0.85,
-    "roughness": 0.25,
+    "roughness": 0.22,
     "opacity": 1,
     "transparent": false,
     "explodedOffset": [
@@ -263,9 +263,9 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.06,
       1.02
     ],
-    "color": "#c8d1dc",
+    "color": "#94a3b8",
     "metalness": 0.85,
-    "roughness": 0.25,
+    "roughness": 0.22,
     "opacity": 1,
     "transparent": false,
     "explodedOffset": [
@@ -295,9 +295,9 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.06,
       0.06
     ],
-    "color": "#c8d1dc",
+    "color": "#94a3b8",
     "metalness": 0.85,
-    "roughness": 0.25,
+    "roughness": 0.22,
     "opacity": 1,
     "transparent": false,
     "explodedOffset": [
@@ -327,9 +327,9 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.06,
       0.06
     ],
-    "color": "#c8d1dc",
+    "color": "#94a3b8",
     "metalness": 0.85,
-    "roughness": 0.25,
+    "roughness": 0.22,
     "opacity": 1,
     "transparent": false,
     "explodedOffset": [
@@ -359,9 +359,9 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.06,
       1.02
     ],
-    "color": "#c8d1dc",
+    "color": "#94a3b8",
     "metalness": 0.85,
-    "roughness": 0.25,
+    "roughness": 0.22,
     "opacity": 1,
     "transparent": false,
     "explodedOffset": [
@@ -391,9 +391,9 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.06,
       1.02
     ],
-    "color": "#c8d1dc",
+    "color": "#94a3b8",
     "metalness": 0.85,
-    "roughness": 0.25,
+    "roughness": 0.22,
     "opacity": 1,
     "transparent": false,
     "explodedOffset": [
@@ -423,9 +423,9 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.06,
       0.06
     ],
-    "color": "#c8d1dc",
+    "color": "#94a3b8",
     "metalness": 0.85,
-    "roughness": 0.25,
+    "roughness": 0.22,
     "opacity": 1,
     "transparent": false,
     "explodedOffset": [
@@ -455,9 +455,9 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.06,
       0.06
     ],
-    "color": "#c8d1dc",
+    "color": "#94a3b8",
     "metalness": 0.85,
-    "roughness": 0.25,
+    "roughness": 0.22,
     "opacity": 1,
     "transparent": false,
     "explodedOffset": [
@@ -487,9 +487,9 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.06,
       1.02
     ],
-    "color": "#c8d1dc",
+    "color": "#94a3b8",
     "metalness": 0.85,
-    "roughness": 0.25,
+    "roughness": 0.22,
     "opacity": 1,
     "transparent": false,
     "explodedOffset": [
@@ -519,9 +519,9 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.06,
       1.02
     ],
-    "color": "#c8d1dc",
+    "color": "#94a3b8",
     "metalness": 0.85,
-    "roughness": 0.25,
+    "roughness": 0.22,
     "opacity": 1,
     "transparent": false,
     "explodedOffset": [
@@ -551,9 +551,9 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.06,
       0.06
     ],
-    "color": "#c8d1dc",
+    "color": "#94a3b8",
     "metalness": 0.85,
-    "roughness": 0.25,
+    "roughness": 0.22,
     "opacity": 1,
     "transparent": false,
     "explodedOffset": [
@@ -583,9 +583,9 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.06,
       0.06
     ],
-    "color": "#c8d1dc",
+    "color": "#94a3b8",
     "metalness": 0.85,
-    "roughness": 0.25,
+    "roughness": 0.22,
     "opacity": 1,
     "transparent": false,
     "explodedOffset": [
@@ -616,8 +616,8 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       1.02
     ],
     "color": "#1e293b",
-    "metalness": 0,
-    "roughness": 0.4,
+    "metalness": 0.2,
+    "roughness": 0.5,
     "opacity": 1,
     "transparent": false,
     "explodedOffset": [
@@ -648,8 +648,8 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       1.02
     ],
     "color": "#1e293b",
-    "metalness": 0,
-    "roughness": 0.4,
+    "metalness": 0.2,
+    "roughness": 0.5,
     "opacity": 1,
     "transparent": false,
     "explodedOffset": [
@@ -680,8 +680,8 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       1.02
     ],
     "color": "#1e293b",
-    "metalness": 0,
-    "roughness": 0.4,
+    "metalness": 0.2,
+    "roughness": 0.5,
     "opacity": 1,
     "transparent": false,
     "explodedOffset": [
@@ -711,11 +711,11 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.75,
       0.84
     ],
-    "color": "#0f172a",
-    "metalness": 0.1,
-    "roughness": 0.4,
-    "opacity": 1,
-    "transparent": false,
+    "color": "#38bdf8",
+    "metalness": 0.05,
+    "roughness": 0.08,
+    "opacity": 0.32,
+    "transparent": true,
     "explodedOffset": [
       -0.6,
       0,
@@ -743,11 +743,11 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.6,
       0.81
     ],
-    "color": "#38bdf8",
-    "metalness": 0,
-    "roughness": 0.3,
-    "opacity": 1,
-    "transparent": false,
+    "color": "#0284c7",
+    "metalness": 0.1,
+    "roughness": 0.15,
+    "opacity": 0.82,
+    "transparent": true,
     "explodedOffset": [
       -0.6,
       0,
@@ -994,9 +994,9 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.0975,
       0.72
     ],
-    "color": "#0f172a",
-    "metalness": 0.1,
-    "roughness": 0.4,
+    "color": "#f8fafc",
+    "metalness": 0.05,
+    "roughness": 0.2,
     "opacity": 1,
     "transparent": false,
     "explodedOffset": [
@@ -1026,8 +1026,8 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.045
     ],
     "color": "#f8fafc",
-    "metalness": 0,
-    "roughness": 0.85,
+    "metalness": 0.05,
+    "roughness": 0.2,
     "opacity": 1,
     "transparent": false,
     "explodedOffset": [
@@ -1181,11 +1181,11 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.54,
       0.48
     ],
-    "color": "#1e293b",
-    "metalness": 0.1,
-    "roughness": 0.4,
-    "opacity": 1,
-    "transparent": false,
+    "color": "#0d9488",
+    "metalness": 0.05,
+    "roughness": 0.08,
+    "opacity": 0.35,
+    "transparent": true,
     "explodedOffset": [
       0.35,
       0.15,
@@ -1213,10 +1213,10 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.42,
       0.45
     ],
-    "color": "#ef4444",
-    "metalness": 0.5,
-    "roughness": 0.35,
-    "opacity": 0.75,
+    "color": "#0ea5e9",
+    "metalness": 0.1,
+    "roughness": 0.15,
+    "opacity": 0.8,
     "transparent": true,
     "explodedOffset": [
       0.35,
@@ -1618,9 +1618,9 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.009,
       0.48
     ],
-    "color": "#0f172a",
-    "metalness": 0.1,
-    "roughness": 0.4,
+    "color": "#f1f5f9",
+    "metalness": 0.95,
+    "roughness": 0.12,
     "opacity": 1,
     "transparent": false,
     "explodedOffset": [
@@ -2459,8 +2459,8 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.075,
       0.48
     ],
-    "color": "#cbd5e1",
-    "metalness": 0.8,
+    "color": "#f8fafc",
+    "metalness": 0.05,
     "roughness": 0.2,
     "opacity": 1,
     "transparent": false,
@@ -2614,9 +2614,9 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.0225,
       0.06
     ],
-    "color": "#e2b62d",
+    "color": "#d97706",
     "metalness": 0.88,
-    "roughness": 0.24,
+    "roughness": 0.25,
     "opacity": 1,
     "transparent": false,
     "explodedOffset": [
@@ -2645,9 +2645,9 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.0225,
       0.06
     ],
-    "color": "#e2b62d",
+    "color": "#d97706",
     "metalness": 0.88,
-    "roughness": 0.24,
+    "roughness": 0.25,
     "opacity": 1,
     "transparent": false,
     "explodedOffset": [
@@ -2676,9 +2676,9 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.0225,
       0.06
     ],
-    "color": "#e2b62d",
+    "color": "#d97706",
     "metalness": 0.88,
-    "roughness": 0.24,
+    "roughness": 0.25,
     "opacity": 1,
     "transparent": false,
     "explodedOffset": [
@@ -2707,9 +2707,9 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.0225,
       0.06
     ],
-    "color": "#e2b62d",
+    "color": "#d97706",
     "metalness": 0.88,
-    "roughness": 0.24,
+    "roughness": 0.25,
     "opacity": 1,
     "transparent": false,
     "explodedOffset": [
@@ -2769,8 +2769,8 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.0675,
       0.78
     ],
-    "color": "#e8eef5",
-    "metalness": 0.96,
+    "color": "#f1f5f9",
+    "metalness": 0.95,
     "roughness": 0.12,
     "opacity": 1,
     "transparent": false,
@@ -3049,9 +3049,9 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.024,
       0.036
     ],
-    "color": "#e2b62d",
+    "color": "#d97706",
     "metalness": 0.88,
-    "roughness": 0.24,
+    "roughness": 0.25,
     "opacity": 1,
     "transparent": false,
     "explodedOffset": [
@@ -3080,9 +3080,9 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.024,
       0.036
     ],
-    "color": "#e2b62d",
+    "color": "#d97706",
     "metalness": 0.88,
-    "roughness": 0.24,
+    "roughness": 0.25,
     "opacity": 1,
     "transparent": false,
     "explodedOffset": [
@@ -3423,9 +3423,9 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.09,
       0.105
     ],
-    "color": "#e2b62d",
+    "color": "#d97706",
     "metalness": 0.88,
-    "roughness": 0.24,
+    "roughness": 0.25,
     "opacity": 1,
     "transparent": false,
     "explodedOffset": [
@@ -3703,9 +3703,9 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.024,
       0.036
     ],
-    "color": "#e2b62d",
+    "color": "#d97706",
     "metalness": 0.88,
-    "roughness": 0.24,
+    "roughness": 0.25,
     "opacity": 1,
     "transparent": false,
     "explodedOffset": [
@@ -4234,9 +4234,9 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.03,
       0.096
     ],
-    "color": "#f5f7fa",
-    "metalness": 0.98,
-    "roughness": 0.05,
+    "color": "#f1f5f9",
+    "metalness": 0.95,
+    "roughness": 0.12,
     "opacity": 1,
     "transparent": false,
     "explodedOffset": [
@@ -5119,9 +5119,9 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.0225,
       0.039
     ],
-    "color": "#e2b62d",
+    "color": "#d97706",
     "metalness": 0.88,
-    "roughness": 0.24,
+    "roughness": 0.25,
     "opacity": 1,
     "transparent": false,
     "explodedOffset": [
@@ -5243,9 +5243,9 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.0225,
       0.039
     ],
-    "color": "#e2b62d",
+    "color": "#d97706",
     "metalness": 0.88,
-    "roughness": 0.24,
+    "roughness": 0.25,
     "opacity": 1,
     "transparent": false,
     "explodedOffset": [
@@ -5367,9 +5367,9 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.0225,
       0.039
     ],
-    "color": "#e2b62d",
+    "color": "#d97706",
     "metalness": 0.88,
-    "roughness": 0.24,
+    "roughness": 0.25,
     "opacity": 1,
     "transparent": false,
     "explodedOffset": [
@@ -5491,9 +5491,9 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.0225,
       0.039
     ],
-    "color": "#e2b62d",
+    "color": "#d97706",
     "metalness": 0.88,
-    "roughness": 0.24,
+    "roughness": 0.25,
     "opacity": 1,
     "transparent": false,
     "explodedOffset": [
@@ -5646,9 +5646,9 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.0285,
       0.018
     ],
-    "color": "#e2b62d",
+    "color": "#d97706",
     "metalness": 0.88,
-    "roughness": 0.24,
+    "roughness": 0.25,
     "opacity": 1,
     "transparent": false,
     "explodedOffset": [
@@ -5739,9 +5739,9 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.0285,
       0.018
     ],
-    "color": "#e2b62d",
+    "color": "#d97706",
     "metalness": 0.88,
-    "roughness": 0.24,
+    "roughness": 0.25,
     "opacity": 1,
     "transparent": false,
     "explodedOffset": [
@@ -5832,9 +5832,9 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.0285,
       0.018
     ],
-    "color": "#e2b62d",
+    "color": "#d97706",
     "metalness": 0.88,
-    "roughness": 0.24,
+    "roughness": 0.25,
     "opacity": 1,
     "transparent": false,
     "explodedOffset": [
@@ -5925,9 +5925,9 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.0285,
       0.018
     ],
-    "color": "#e2b62d",
+    "color": "#d97706",
     "metalness": 0.88,
-    "roughness": 0.24,
+    "roughness": 0.25,
     "opacity": 1,
     "transparent": false,
     "explodedOffset": [
@@ -6390,9 +6390,9 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.0195,
       0.039
     ],
-    "color": "#b4becd",
-    "metalness": 0.5,
-    "roughness": 0.3,
+    "color": "#d97706",
+    "metalness": 0.88,
+    "roughness": 0.25,
     "opacity": 1,
     "transparent": false,
     "explodedOffset": [
@@ -6639,9 +6639,9 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.0195,
       0.039
     ],
-    "color": "#b4becd",
-    "metalness": 0.5,
-    "roughness": 0.3,
+    "color": "#d97706",
+    "metalness": 0.88,
+    "roughness": 0.25,
     "opacity": 1,
     "transparent": false,
     "explodedOffset": [
@@ -6888,9 +6888,9 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.0195,
       0.039
     ],
-    "color": "#b4becd",
-    "metalness": 0.5,
-    "roughness": 0.3,
+    "color": "#d97706",
+    "metalness": 0.88,
+    "roughness": 0.25,
     "opacity": 1,
     "transparent": false,
     "explodedOffset": [
@@ -7137,9 +7137,9 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.0195,
       0.039
     ],
-    "color": "#b4becd",
-    "metalness": 0.5,
-    "roughness": 0.3,
+    "color": "#d97706",
+    "metalness": 0.88,
+    "roughness": 0.25,
     "opacity": 1,
     "transparent": false,
     "explodedOffset": [
@@ -7420,9 +7420,9 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.045,
       1.245
     ],
-    "color": "#0f172a",
+    "color": "#334155",
     "metalness": 0.85,
-    "roughness": 0.2,
+    "roughness": 0.22,
     "opacity": 1,
     "transparent": false,
     "explodedOffset": [
@@ -7449,11 +7449,11 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
     ],
     "size": [
       1.44,
-      0.012,
+      0.01,
       1.185
     ],
     "color": "#0284c7",
-    "metalness": 0.2,
+    "metalness": 0.25,
     "roughness": 0.05,
     "opacity": 0.85,
     "transparent": true,
@@ -7481,11 +7481,11 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
     ],
     "size": [
       1.3800000000000001,
-      0.004,
+      0.003,
       1.1400000000000001
     ],
-    "color": "#091e42",
-    "metalness": 0.6,
+    "color": "#0f172a",
+    "metalness": 0.65,
     "roughness": 0.15,
     "opacity": 1,
     "transparent": false,

@@ -79,42 +79,21 @@ export const Scene = () => {
         {/* Lighting setup */}
         <SceneLighting />
 
-        {/* Expansive Natural Ground */}
-        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2.24, 0]} receiveShadow>
-          <planeGeometry args={[300, 300]} />
-          <meshStandardMaterial
-            color="#94a3b8"
-            roughness={0.92}
-            metalness={0.05}
-          />
-        </mesh>
-
-        {/* Clean Architectural Platform with Subtle Shadow */}
-        <mesh position={[-0.5, -2.22, -0.1]} receiveShadow castShadow>
-          <boxGeometry args={[9.4, 0.08, 2.6]} />
-          <meshStandardMaterial color="#f8fafc" roughness={0.7} metalness={0.15} />
-        </mesh>
-        {/* Platform Accent Edge Trim */}
-        <mesh position={[-0.5, -2.20, 1.25]} castShadow>
-          <boxGeometry args={[9.4, 0.06, 0.06]} />
-          <meshStandardMaterial color="#0284c7" roughness={0.3} metalness={0.7} />
-        </mesh>
-
         {/* Camera state transitions controller */}
         <CameraController />
 
-        {/* Silky Smooth Orbit controls */}
+        {/* Silky Smooth Studio Orbit controls */}
         <OrbitControls
           makeDefault
           enableDamping
-          dampingFactor={0.075}
-          rotateSpeed={0.8}
-          zoomSpeed={0.9}
-          panSpeed={0.8}
-          target={[0.0, -0.5, 0]}
-          maxPolarAngle={Math.PI / 2 + 0.08}
-          minDistance={0.8}
-          maxDistance={20}
+          dampingFactor={0.06}
+          rotateSpeed={0.65}
+          zoomSpeed={0.75}
+          panSpeed={0.7}
+          target={[-0.1, -0.65, -0.05]}
+          maxPolarAngle={Math.PI / 2 + 0.04}
+          minDistance={1.0}
+          maxDistance={12}
         />
 
         {/* Global Atmospheric Ambient Dust Motes & Scenic Landscape */}
@@ -150,20 +129,20 @@ export const Scene = () => {
           {/* Exploded View 3D Subassembly Callout Tags */}
           <ExplodedLabels />
 
-          {/* Subtle grid overlay on platform */}
-          <gridHelper args={[10, 20, '#94a3b8', '#e2e8f0']} position={[-0.5, -2.18, 0]}>
-            <lineBasicMaterial attach="material" transparent opacity={0.08} />
+          {/* Subtle grid overlay under machine base */}
+          <gridHelper args={[4.5, 12, '#0284c7', '#334155']} position={[-0.1, -2.18, -0.05]}>
+            <lineBasicMaterial attach="material" transparent opacity={0.12} />
           </gridHelper>
         </group>
 
-        {/* Soft Contact Shadows on the floor (baked frames={1} for silky 60fps) */}
+        {/* Soft Studio Contact Shadow directly beneath Leviathan v9 */}
         <ContactShadows
-          position={[0, -2.19, 0]}
+          position={[-0.1, -2.185, -0.05]}
           opacity={0.65}
-          scale={15}
-          blur={2.4}
-          far={4.5}
-          resolution={256}
+          scale={5.5}
+          blur={2.0}
+          far={3.0}
+          resolution={512}
           frames={1}
           color="#000000"
         />
