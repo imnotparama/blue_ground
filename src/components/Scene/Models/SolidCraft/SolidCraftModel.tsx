@@ -70,10 +70,10 @@ function useLiveTFTTexture(simState: any, isRunning: boolean) {
     ctx.fillText('IP: 192.168.4.1', w - 170, 34);
 
     // WHO Potable Water Quality Badge
-    const outTDS = Math.round(simState?.outputTDS ?? 24);
-    const inTDS = Math.round(simState?.inputTDS ?? 450);
+    const outTDS = Math.round(simState?.outputTds ?? 24);
+    const inTDS = Math.round(simState?.inputTds ?? 450);
     const outTurb = (simState?.outputTurbidity ?? 0.18).toFixed(2);
-    const outpH = (simState?.outputpH ?? 7.2).toFixed(1);
+    const outpH = (simState?.outputPh ?? 7.2).toFixed(1);
     const outFlow = (simState?.outputFlowRate ?? 3.4).toFixed(1);
     const pumpRpm = isRunning && simState?.pumpStatus === 'RUNNING' ? '1800 RPM' : 'IDLE';
 
@@ -337,18 +337,17 @@ const CADBodyItem: React.FC<{
 };
 
 // -------------------------------------------------------------
-// 3. 7-STAGE COMPLETE HYDRAULIC PIPING & FLUID VISUALIZER
+// 3. 100% CAD-CONGRUENT HYDRAULIC CIRCUIT FLUID FLOW VISUALIZER
 // -------------------------------------------------------------
-interface FlowCurveData {
+interface CADFlowSegment {
   curve: THREE.CatmullRomCurve3;
-  tubeRadius: number;
-  tubeColor: string;
   beadColor: string;
   beadEmissive: string;
   beadCount: number;
   beadSize: number;
   speedMultiplier: number;
   flowKey: 'inputFlow' | 'permFlow' | 'wasteFlow' | 'dispenseFlow';
+  renderSleeve?: boolean;
 }
 
 const FullHydraulicFlowVisualizer: React.FC<{
@@ -358,136 +357,168 @@ const FullHydraulicFlowVisualizer: React.FC<{
 }> = ({ simState, running, exploded }) => {
   const containerRef = useRef<THREE.Group>(null);
   const beadGroupsRef = useRef<(THREE.Group | null)[]>([]);
-  const timesRef = useRef<number[]>([0, 0, 0, 0, 0, 0, 0]);
+  const timesRef = useRef<number[]>(new Array(8).fill(0));
 
-  // Define the exact 7 CAD Catmull-Rom hydraulic splines
-  const flowCurves: FlowCurveData[] = useMemo(() => {
+  // Define 8 exact CAD centerline Catmull-Rom hydraulic trajectories
+  const flowSegments: CADFlowSegment[] = useMemo(() => {
     return [
-      // 1. Raw Borewell Inlet: Basement Skid -> High-pressure Riser -> Sediment Filter Raw Inlet
+      // 1. Raw Borewell Feed: Ground Contact -> Pipe_RawWater_Feed_Riser -> Brass Sweep Elbow -> Port_Sediment_RawInlet -> Cartridge Bowl
       {
         curve: new THREE.CatmullRomCurve3([
-          new THREE.Vector3(0.80, -2.145, 0.2505),
-          new THREE.Vector3(0.80, -1.30, 0.2505),
+          new THREE.Vector3(0.80, -2.18, 0.2505),
+          new THREE.Vector3(0.80, -1.33, 0.2505),
           new THREE.Vector3(0.80, -0.485, 0.2505),
-          new THREE.Vector3(0.725, -0.485, 0.228),
+          new THREE.Vector3(0.76, -0.485, 0.2505),
+          new THREE.Vector3(0.7185, -0.485, 0.228),
+          new THREE.Vector3(0.7185, -0.89, 0.1425),
         ]),
-        tubeRadius: 0.009,
-        tubeColor: '#38bdf8',
         beadColor: '#38bdf8',
         beadEmissive: '#0284c7',
         beadCount: 6,
-        beadSize: 0.012,
+        beadSize: 0.010,
         speedMultiplier: 0.35,
         flowKey: 'inputFlow',
+        renderSleeve: false,
       },
 
-      // 2. Sediment Filter Outlet -> Booster Pump P2 Suction Inlet
+      // 2. Pre-Filtered Intake: Port_Sediment_CleanOutlet -> Crossbar Tubes -> 90° Elbows -> Drop_Intake_To_SecTank -> Secondary Tank Inflow
       {
         curve: new THREE.CatmullRomCurve3([
           new THREE.Vector3(0.7185, -0.485, 0.012),
-          new THREE.Vector3(0.7185, -1.1525, 0.012),
-          new THREE.Vector3(0.7185, -1.1525, -0.6075),
-          new THREE.Vector3(0.5535, -1.1525, -0.6075),
+          new THREE.Vector3(0.5835, -0.485, 0.0345),
+          new THREE.Vector3(0.2385, -0.485, 0.0345),
+          new THREE.Vector3(0.0735, -0.485, 0.0345),
+          new THREE.Vector3(0.0735, -0.485, -0.0015),
+          new THREE.Vector3(0.0735, -0.485, -0.0375),
+          new THREE.Vector3(0.0735, -0.575, -0.0375),
+          new THREE.Vector3(0.0735, -0.66, -0.0375),
         ]),
-        tubeRadius: 0.008,
-        tubeColor: '#0ea5e9',
-        beadColor: '#38bdf8',
+        beadColor: '#0ea5e9',
         beadEmissive: '#0284c7',
-        beadCount: 5,
-        beadSize: 0.011,
+        beadCount: 6,
+        beadSize: 0.009,
         speedMultiplier: 0.35,
         flowKey: 'inputFlow',
+        renderSleeve: false,
       },
 
-      // 3. Booster Pump P2 Discharge -> 4-Stage Filter Rack (CTO Carbon F1)
+      // 3. Secondary Tank Suction: Drain_SecTank_Bulkhead -> Rear Rail Circuit -> Elbow Under Pump -> Port_PumpP2_SuctionInlet
+      {
+        curve: new THREE.CatmullRomCurve3([
+          new THREE.Vector3(-0.1065, -1.25, -0.0375),
+          new THREE.Vector3(-0.1065, -1.34, -0.0375),
+          new THREE.Vector3(-0.1065, -1.34, -0.6075),
+          new THREE.Vector3(0.2235, -1.34, -0.6075),
+          new THREE.Vector3(0.5535, -1.34, -0.6075),
+          new THREE.Vector3(0.5535, -1.2575, -0.6075),
+          new THREE.Vector3(0.5535, -1.1525, -0.6075),
+        ]),
+        beadColor: '#0ea5e9',
+        beadEmissive: '#0284c7',
+        beadCount: 6,
+        beadSize: 0.009,
+        speedMultiplier: 0.35,
+        flowKey: 'inputFlow',
+        renderSleeve: false,
+      },
+
+      // 4. High-Pressure Discharge: Port_PumpP2_DischargeOutlet -> Riser_PumpP2_To_Manifold -> Top Rail Manifold -> Filter F1 Carbon
       {
         curve: new THREE.CatmullRomCurve3([
           new THREE.Vector3(0.5535, -0.7175, -0.6075),
-          new THREE.Vector3(0.5535, -0.62, -0.6075),
-          new THREE.Vector3(-0.4665, -0.62, -0.6075),
-          new THREE.Vector3(-0.4665, -0.72, -0.6075),
+          new THREE.Vector3(0.5535, -0.6125, -0.6075),
+          new THREE.Vector3(0.5535, -0.455, -0.6075),
+          new THREE.Vector3(-0.4665, -0.455, -0.6075),
+          new THREE.Vector3(-0.4665, -0.578, -0.6075),
+          new THREE.Vector3(-0.4665, -0.86, -0.6075),
+          new THREE.Vector3(-0.4665, -1.05, -0.6075),
         ]),
-        tubeRadius: 0.008,
-        tubeColor: '#0ea5e9',
-        beadColor: '#38bdf8',
+        beadColor: '#0ea5e9',
         beadEmissive: '#0284c7',
         beadCount: 6,
-        beadSize: 0.011,
+        beadSize: 0.009,
         speedMultiplier: 0.35,
         flowKey: 'inputFlow',
+        renderSleeve: false,
       },
 
-      // 4. RO Permeate Train: RO F2 -> Mineral F3 -> Softener F4 -> UV Reactor
+      // 5. Pure Permeate Stream: RO F2 Core -> Mineral F3 -> Softener F4 -> DropTube_Collector_To_UV -> Collar_UV_TopDropPort
       {
         curve: new THREE.CatmullRomCurve3([
-          new THREE.Vector3(-0.2265, -1.05, -0.6075), // RO Permeate port
-          new THREE.Vector3(-0.10, -1.05, -0.6075),
-          new THREE.Vector3(0.0135, -0.70, -0.6075), // Mineral F3
-          new THREE.Vector3(0.2535, -0.70, -0.6075), // Softener F4
+          new THREE.Vector3(-0.2265, -0.62, -0.6075),
+          new THREE.Vector3(-0.2265, -1.05, -0.6075),
+          new THREE.Vector3(0.0135, -1.05, -0.6075),
+          new THREE.Vector3(0.0135, -0.68, -0.6075),
+          new THREE.Vector3(0.2535, -0.68, -0.6075),
           new THREE.Vector3(0.2535, -1.05, -0.6075),
-          new THREE.Vector3(0.10, -1.415, -0.6075), // Entering UV
-          new THREE.Vector3(-0.1065, -1.415, -0.6075),
+          new THREE.Vector3(-0.1065, -1.15, -0.6075),
+          new THREE.Vector3(-0.1065, -1.2875, -0.6075),
+          new THREE.Vector3(-0.1065, -1.349, -0.6075),
         ]),
-        tubeRadius: 0.008,
-        tubeColor: '#06b6d4',
         beadColor: '#00f0ff',
         beadEmissive: '#0891b2',
         beadCount: 8,
-        beadSize: 0.012,
+        beadSize: 0.010,
         speedMultiplier: 0.42,
         flowKey: 'permFlow',
+        renderSleeve: false,
       },
 
-      // 5. RO Brine Reject Train (30% Waste Stream): RO F2 Reject Port -> Frame Drain
+      // 6. Brine Reject Concentrate: RO F2 Reject Port -> Rear Rail Collector -> Frame Waste Discharge
       {
         curve: new THREE.CatmullRomCurve3([
-          new THREE.Vector3(-0.2265, -1.05, -0.55), // RO Brine port
-          new THREE.Vector3(-0.2265, -1.75, -0.55),
-          new THREE.Vector3(-0.45, -2.10, -0.55),
-          new THREE.Vector3(-0.75, -2.10, -0.55), // Waste outlet
+          new THREE.Vector3(-0.2265, -1.05, -0.55),
+          new THREE.Vector3(-0.2265, -1.34, -0.6075),
+          new THREE.Vector3(-0.75, -1.34, -0.6075),
         ]),
-        tubeRadius: 0.008,
-        tubeColor: '#f59e0b',
         beadColor: '#f59e0b',
         beadEmissive: '#d97706',
-        beadCount: 6,
-        beadSize: 0.011,
+        beadCount: 4,
+        beadSize: 0.009,
         speedMultiplier: 0.45,
         flowKey: 'wasteFlow',
+        renderSleeve: false,
       },
 
-      // 6. UV Reactor -> Primary Clean Storage Reservoir Downcomer
+      // 7. UV Chamber Discharge: Core UV -> Tube_UV_To_PrimaryReturn -> Bulkhead_UV_CleanTankInlet -> VERTICAL Drop into Reservoir
       {
         curve: new THREE.CatmullRomCurve3([
+          new THREE.Vector3(-0.1065, -1.415, -0.6075),
+          new THREE.Vector3(-0.1065, -1.415, -0.5325),
           new THREE.Vector3(-0.1065, -1.415, -0.4575),
-          new THREE.Vector3(-0.1065, -1.52, -0.38),
-          new THREE.Vector3(-0.1065, -1.68, -0.25),
+          new THREE.Vector3(-0.1065, -1.55, -0.4575),
+          new THREE.Vector3(-0.1065, -1.75, -0.4575),
         ]),
-        tubeRadius: 0.009,
-        tubeColor: '#818cf8',
         beadColor: '#a855f7',
         beadEmissive: '#7e22ce',
         beadCount: 5,
-        beadSize: 0.012,
+        beadSize: 0.010,
         speedMultiplier: 0.4,
         flowKey: 'permFlow',
+        renderSleeve: true, // Render sleeve for vertical downcomer
       },
 
-      // 7. Active Front Tap Potable Dispense Stream (To Beaker on Drip Tray)
+      // 8. Potable Dispense Circuit: Port_CleanTank_Discharge -> Riser_VDISP -> Pipe Through Rail -> Chrome Tap -> Beaker on Tray
       {
         curve: new THREE.CatmullRomCurve3([
-          new THREE.Vector3(0.5535, -1.93, 0.6225),
-          new THREE.Vector3(0.5535, -2.01, 0.6225),
-          new THREE.Vector3(0.5535, -2.09, 0.6225),
+          new THREE.Vector3(0.3435, -2.06, 0.3825),
+          new THREE.Vector3(0.5535, -2.06, 0.3825),
+          new THREE.Vector3(0.5535, -1.985, 0.3825),
+          new THREE.Vector3(0.5535, -1.91, 0.3825),
+          new THREE.Vector3(0.5535, -1.91, 0.465),
+          new THREE.Vector3(0.5535, -1.892, 0.5475),
+          new THREE.Vector3(0.5535, -1.856, 0.585),
+          new THREE.Vector3(0.5535, -1.895, 0.6225),
+          new THREE.Vector3(0.5535, -1.98, 0.6225),
+          new THREE.Vector3(0.5535, -2.06, 0.6225),
         ]),
-        tubeRadius: 0.007,
-        tubeColor: '#00f0ff',
-        beadColor: '#38bdf8',
+        beadColor: '#00f0ff',
         beadEmissive: '#0284c7',
-        beadCount: 5,
-        beadSize: 0.011,
-        speedMultiplier: 0.55,
+        beadCount: 6,
+        beadSize: 0.009,
+        speedMultiplier: 0.5,
         flowKey: 'dispenseFlow',
+        renderSleeve: false,
       },
     ];
   }, []);
@@ -508,7 +539,7 @@ const FullHydraulicFlowVisualizer: React.FC<{
       dispenseFlow,
     };
 
-    flowCurves.forEach((fc, idx) => {
+    flowSegments.forEach((fc, idx) => {
       const group = beadGroupsRef.current[idx];
       if (!group) return;
 
@@ -525,7 +556,7 @@ const FullHydraulicFlowVisualizer: React.FC<{
       const children = group.children;
       for (let i = 0; i < children.length; i++) {
         const bead = children[i] as THREE.Mesh;
-        const t = (timesRef.current[idx] * 0.35 + i / fc.beadCount) % 1.0;
+        const t = (timesRef.current[idx] * 0.32 + i / fc.beadCount) % 1.0;
         const pt = fc.curve.getPointAt(t);
         bead.position.copy(pt);
       }
@@ -534,26 +565,24 @@ const FullHydraulicFlowVisualizer: React.FC<{
 
   return (
     <group ref={containerRef}>
-      {flowCurves.map((fc, idx) => {
-        // Hide/ghost tubing when exploded
-        const tubeOpacity = exploded ? 0.06 : 0.42;
-
+      {flowSegments.map((fc, idx) => {
         return (
           <group key={idx}>
-            {/* Transparent Polyurethane Tubing Sleeve */}
-            <mesh>
-              <tubeGeometry args={[fc.curve, 64, fc.tubeRadius, 10, false]} />
-              <meshStandardMaterial
-                color={fc.tubeColor}
-                opacity={tubeOpacity}
-                transparent={true}
-                roughness={0.12}
-                metalness={0.1}
-                envMapIntensity={1.4}
-              />
-            </mesh>
+            {/* Optional sleek crystal sleeve for open lines (e.g. downcomer into clean tank) */}
+            {fc.renderSleeve && (
+              <mesh visible={!exploded}>
+                <tubeGeometry args={[fc.curve, 32, 0.006, 8, false]} />
+                <meshStandardMaterial
+                  color="#38bdf8"
+                  opacity={0.3}
+                  transparent={true}
+                  roughness={0.08}
+                  metalness={0.1}
+                />
+              </mesh>
+            )}
 
-            {/* Glowing Flowing Fluid Beads Inside Tubing */}
+            {/* Glowing Flowing Fluid Beads Inside Authentic CAD Pipes */}
             <group
               ref={(el) => {
                 beadGroupsRef.current[idx] = el;
@@ -566,7 +595,7 @@ const FullHydraulicFlowVisualizer: React.FC<{
                   <meshStandardMaterial
                     color={fc.beadColor}
                     emissive={fc.beadEmissive}
-                    emissiveIntensity={2.5}
+                    emissiveIntensity={2.8}
                     roughness={0.1}
                     metalness={0.2}
                   />
@@ -577,43 +606,57 @@ const FullHydraulicFlowVisualizer: React.FC<{
         );
       })}
 
-      {/* Laboratory Borosilicate Glass Beaker on Drip Tray */}
-      <group position={[0.5535, -2.08, 0.6225]} visible={!exploded}>
+      {/* Laminar Dispense Stream Pouring from Tap Nozzle directly into Beaker */}
+      <mesh position={[0.5535, -2.00, 0.6225]} visible={!exploded && running}>
+        <cylinderGeometry args={[0.004, 0.0045, 0.14, 16]} />
+        <meshStandardMaterial
+          color="#38bdf8"
+          emissive="#0284c7"
+          emissiveIntensity={1.8}
+          transparent={true}
+          opacity={0.65}
+          roughness={0.05}
+          metalness={0.1}
+        />
+      </mesh>
+
+      {/* Precision Borosilicate Laboratory Glass Beaker seated firmly on Basement Skid Shelf */}
+      <group position={[0.5535, -2.085, 0.6225]} visible={!exploded}>
         {/* Glass Beaker Body */}
         <mesh position={[0, 0, 0]}>
-          <cylinderGeometry args={[0.034, 0.032, 0.075, 32, 1, true]} />
+          <cylinderGeometry args={[0.034, 0.032, 0.07, 32, 1, true]} />
           <meshStandardMaterial
             color="#e0f2fe"
             metalness={0.1}
             roughness={0.05}
             transparent={true}
-            opacity={0.35}
+            opacity={0.38}
             side={THREE.DoubleSide}
           />
         </mesh>
-        {/* Beaker Glass Base */}
-        <mesh position={[0, -0.037, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        {/* Beaker Glass Base (Resting flush on tray at Y = -2.12) */}
+        <mesh position={[0, -0.035, 0]} rotation={[Math.PI / 2, 0, 0]}>
           <circleGeometry args={[0.032, 32]} />
           <meshStandardMaterial
             color="#e0f2fe"
             metalness={0.1}
             roughness={0.05}
             transparent={true}
-            opacity={0.45}
+            opacity={0.48}
             side={THREE.DoubleSide}
           />
         </mesh>
-        {/* Water Level Inside Beaker */}
-        <mesh position={[0, -0.01, 0]}>
-          <cylinderGeometry args={[0.031, 0.031, 0.05, 32]} />
+        {/* Water Pool Inside Beaker */}
+        <mesh position={[0, -0.012, 0]}>
+          <cylinderGeometry args={[0.031, 0.031, 0.045, 32]} />
           <meshStandardMaterial
             color="#00f0ff"
             emissive="#0284c7"
-            emissiveIntensity={0.8}
+            emissiveIntensity={1.0}
             metalness={0.1}
-            roughness={0.1}
+            roughness={0.08}
             transparent={true}
-            opacity={0.65}
+            opacity={0.7}
           />
         </mesh>
       </group>
@@ -645,7 +688,7 @@ export const SolidCraftModel: React.FC = () => {
         />
       ))}
 
-      {/* 7-STAGE COMPLETE HYDRAULIC PIPING & FLOW VISUALIZER */}
+      {/* 100% CAD-CONGRUENT HYDRAULIC CIRCUIT FLUID FLOW */}
       <FullHydraulicFlowVisualizer
         simState={simState}
         running={isFlowing}

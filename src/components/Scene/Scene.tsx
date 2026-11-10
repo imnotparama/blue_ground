@@ -85,8 +85,8 @@ export const Scene = () => {
         <AmbientLife />
         <ScenicEnvironment />
 
-        {/* Hardware Components Group seated firmly on datum foundation */}
-        <group position={[0, -0.2, 0]}>
+        {/* Hardware Components Group seated firmly on datum foundation (zero offset for true CAD grounding) */}
+        <group position={[0, 0, 0]}>
           {/* Authentic SolidCraft v9 CAD Digital Twin Model (256 Parametric Bodies) */}
           <SolidCraftModel />
 
@@ -96,15 +96,15 @@ export const Scene = () => {
           {/* Exploded View 3D Subassembly Callout Tags */}
           <ExplodedLabels />
 
-          {/* Subtle grid overlay under machine base */}
-          <gridHelper args={[4.5, 12, '#0284c7', '#334155']} position={[-0.1, -2.18, -0.05]}>
-            <lineBasicMaterial attach="material" transparent opacity={0.12} />
+          {/* Subtle grid overlay flush with rubber contact feet */}
+          <gridHelper args={[4.2, 14, '#0284c7', '#1e293b']} position={[-0.1065, -2.186, -0.0375]}>
+            <lineBasicMaterial attach="material" transparent opacity={0.15} />
           </gridHelper>
         </group>
 
         {/* Soft Studio Contact Shadow directly beneath Leviathan v9 */}
         <ContactShadows
-          position={[-0.1, -2.185, -0.05]}
+          position={[-0.1065, -2.186, -0.0375]}
           opacity={0.65}
           scale={5.5}
           blur={2.0}
