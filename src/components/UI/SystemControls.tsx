@@ -19,6 +19,7 @@ import {
   Zap,
   Filter,
   Activity,
+  Box,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -63,6 +64,8 @@ export const SystemControls = () => {
     setScenario,
     simulationViewOpen,
     setSimulationViewOpen,
+    cadModelMode,
+    setCadModelMode,
   } = useSystemState();
 
   if (!landingVisited || demoRunning) return null; // Hide controls during landing or guided tour
@@ -388,6 +391,19 @@ export const SystemControls = () => {
             >
               <Filter className={`w-3 h-3 ${filterView ? 'text-cyan-400 animate-pulse' : 'text-zinc-400'}`} />
               {filterView ? '4-Stage Filter View: ACTIVE (F)' : '4-Stage Filter View (F)'}
+            </button>
+
+            {/* Official SolidCraft CAD Model v9 Toggle */}
+            <button
+              onClick={() => setCadModelMode(!cadModelMode)}
+              className={`col-span-2 flex items-center justify-center gap-1.5 py-1.5 rounded-lg border text-[9px] font-mono font-bold tracking-wider transition-all cursor-pointer ${
+                cadModelMode
+                  ? 'bg-gradient-to-r from-blue-600/25 to-cyan-500/25 text-cyan-200 border-cyan-400/60 shadow-[0_0_12px_rgba(6,182,212,0.3)] ring-1 ring-cyan-400'
+                  : 'bg-white/2 border-white/5 text-zinc-400 hover:bg-white/5 hover:text-white'
+              }`}
+            >
+              <Box className={`w-3 h-3 ${cadModelMode ? 'text-cyan-400 animate-pulse' : 'text-zinc-400'}`} />
+              {cadModelMode ? 'SolidCraft v9 CAD Twin: ACTIVE' : 'Procedural Model'}
             </button>
           </div>
         </div>

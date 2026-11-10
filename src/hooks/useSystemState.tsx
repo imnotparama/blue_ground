@@ -180,6 +180,9 @@ interface SystemStateContextType {
   setSpeedMultiplier: (mult: number) => void;
   simulationViewOpen: boolean;
   setSimulationViewOpen: (val: boolean) => void;
+  // Official SolidCraft v9 CAD Digital Twin Model Toggle
+  cadModelMode: boolean;
+  setCadModelMode: (val: boolean) => void;
 }
 
 const SystemStateContext = createContext<SystemStateContextType | undefined>(undefined);
@@ -327,6 +330,7 @@ export const SystemStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const [metrics, setMetrics] = useState<SystemMetrics>(defaultMetrics);
   const [activeHotspot, setActiveHotspot] = useState<string | null>(null);
   const [landingVisited, setLandingVisited] = useState(false);
+  const [cadModelMode, setCadModelMode] = useState(true);
 
   // Guided tour state
   const [demoRunning, setDemoRunning] = useState(false);
@@ -818,6 +822,8 @@ export const SystemStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
         setSpeedMultiplier,
         simulationViewOpen,
         setSimulationViewOpen,
+        cadModelMode,
+        setCadModelMode,
       }}
     >
       {children}

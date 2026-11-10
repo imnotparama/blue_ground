@@ -24,6 +24,7 @@ import {
   Zap,
   Filter,
   Activity,
+  Box,
 } from 'lucide-react';
 
 export const TopBar = () => {
@@ -62,6 +63,8 @@ export const TopBar = () => {
     setScenario,
     simulationViewOpen,
     setSimulationViewOpen,
+    cadModelMode,
+    setCadModelMode,
   } = useSystemState();
 
   const runSim1 = () => {
@@ -138,6 +141,21 @@ export const TopBar = () => {
           <span className="text-[9px] px-1 py-0.2 rounded font-bold bg-cyan-950 text-cyan-300 border border-cyan-500/40">
             P&ID
           </span>
+        </button>
+
+        {/* Toggle Official SolidCraft v9 CAD Digital Twin */}
+        <button
+          onClick={() => setCadModelMode(!cadModelMode)}
+          className={`flex items-center gap-1.5 px-3 py-2 rounded-full border transition-all text-xs font-mono tracking-wide cursor-pointer ${
+            cadModelMode
+              ? 'bg-gradient-to-r from-blue-600/30 to-cyan-500/30 border-cyan-400 text-cyan-200 shadow-[0_0_16px_rgba(6,182,212,0.4)] ring-1 ring-cyan-400/60'
+              : 'bg-zinc-900/80 border-zinc-700 text-zinc-400 hover:text-white hover:border-cyan-500/40'
+          }`}
+          title="Toggle Authentic SolidCraft v9 CAD Assembly (250 Features)"
+        >
+          <Box className={`w-3.5 h-3.5 ${cadModelMode ? 'text-cyan-400 animate-pulse' : 'text-zinc-400'}`} />
+          <span className="hidden md:inline font-semibold">{cadModelMode ? 'CAD v9 Twin: ON' : 'Procedural'}</span>
+          <span className={`text-[9px] px-1 py-0.2 rounded font-bold ${cadModelMode ? 'bg-cyan-950 text-cyan-300 border border-cyan-500/40' : 'bg-zinc-800 border border-zinc-700 text-zinc-400'}`}>v9</span>
         </button>
 
         {/* Toggle CAD Exploded View Button */}

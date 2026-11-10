@@ -29,8 +29,11 @@ import { ScenicEnvironment } from './Environment/ScenicEnvironment';
 // Exploded 3D Subassembly Callout Labels
 import { ExplodedLabels } from './Models/Exploded/ExplodedLabels';
 
+// Official SolidCraft v9 CAD Digital Twin Model (250 Features)
+import { SolidCraftModel } from './Models/SolidCraft/SolidCraftModel';
+
 export const Scene = () => {
-  const { exploded, transparent, cutaway, mode } = useSystemState();
+  const { exploded, transparent, cutaway, mode, cadModelMode } = useSystemState();
 
   return (
     <div
@@ -120,22 +123,26 @@ export const Scene = () => {
 
         {/* Hardware Components Group seated firmly on datum foundation */}
         <group position={[0, -0.2, 0]}>
-          {/* Render the physical hardware system components */}
-          <Tanks />
-          <SolarPanel />
-          <BatteryUnit />
-          <ESP32Box />
-          <WaterPump />
-          <Sensors />
-          <FilterHousing />
-          <Pipes />
-          <SupportRack />
-
-          {/* Render dynamic fluids and current animations */}
-          <Water />
-          <TankMargins />
-          <WaterDropletTracker />
-          <Flows />
+          {/* Render the Official SolidCraft v9 CAD Digital Twin or Procedural Model */}
+          {cadModelMode ? (
+            <SolidCraftModel />
+          ) : (
+            <>
+              <Tanks />
+              <SolarPanel />
+              <BatteryUnit />
+              <ESP32Box />
+              <WaterPump />
+              <Sensors />
+              <FilterHousing />
+              <Pipes />
+              <SupportRack />
+              <Water />
+              <TankMargins />
+              <WaterDropletTracker />
+              <Flows />
+            </>
+          )}
 
           {/* Vision Pro style hotspots */}
           <Hotspots />
