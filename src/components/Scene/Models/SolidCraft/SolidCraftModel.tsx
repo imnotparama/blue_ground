@@ -77,6 +77,16 @@ const CADBodyItem: React.FC<{
         damp
       );
     }
+
+    // 5. Dynamic 5-Micron Spun PP Cartridge Reaction to Silt/Clogging
+    if (body.name === 'Cartridge_Sediment_SpunPP' && matRef.current) {
+      const isClogged = simState ? simState.filterHealth.stage1 < 45 : false;
+      const isTurbid = simState ? simState.inputTurbidity > 8 : false;
+      const targetColor = (isClogged || isTurbid)
+        ? new THREE.Color('#92400e')
+        : new THREE.Color('#f1f5f9');
+      matRef.current.color.lerp(targetColor, damp);
+    }
   });
 
   // Render Box Geometry
@@ -132,12 +142,64 @@ const CADBodyItem: React.FC<{
   return null;
 };
 
+// Animated stream of incoming borewell water entering the white sedimentation filter
+const RawWaterInletFlow: React.FC<{ running: boolean; flowRate: number; exploded: boolean }> = ({
+  running,
+  flowRate,
+  exploded,
+}) => {
+  const groupRef = useRef<THREE.Group>(null);
+  const timeRef = useRef(0);
+  const speed = Math.max(0.4, Math.min(flowRate * 0.35, 2.5));
+
+  useFrame((_, delta) => {
+    if (!groupRef.current) return;
+    timeRef.current += delta * speed;
+    const xOffset = exploded ? 0.65 : 0;
+    groupRef.current.position.x = THREE.MathUtils.lerp(groupRef.current.position.x, xOffset, 0.1);
+
+    const children = groupRef.current.children;
+    for (let i = 0; i < children.length; i++) {
+      const child = children[i] as THREE.Mesh;
+      const progress = (timeRef.current * 0.4 + i * 0.16) % 1.0;
+      // Interpolate along the vertical riser and into the inlet elbow
+      if (progress < 0.85) {
+        child.position.set(0.80, -2.15 + (progress / 0.85) * 1.65, 0.2505);
+      } else {
+        const elbowT = (progress - 0.85) / 0.15;
+        child.position.set(0.80 - elbowT * 0.08, -0.485, 0.2505);
+      }
+    }
+  });
+
+  if (!running || flowRate < 0.05) return null;
+
+  return (
+    <group ref={groupRef}>
+      {[0, 1, 2, 3, 4, 5].map((i) => (
+        <mesh key={i} position={[0.80, -2.15, 0.2505]}>
+          <sphereGeometry args={[0.011, 16, 16]} />
+          <meshStandardMaterial
+            color="#38bdf8"
+            emissive="#0284c7"
+            emissiveIntensity={2.0}
+            roughness={0.1}
+            metalness={0.1}
+          />
+        </mesh>
+      ))}
+    </group>
+  );
+};
+
 export const SolidCraftModel: React.FC = () => {
-  const { exploded, simState } = useSystemState();
+  const { exploded, simState, simulationRunning } = useSystemState();
+
+  const isFlowing = simulationRunning && (simState?.inputFlowRate || 0) > 0.05;
 
   return (
     <group name="SolidCraft_Leviathan_v9_Assembly">
-      {/* RENDER ALL 239 AUTHENTIC SOLIDCRAFT CAD BODIES */}
+      {/* RENDER ALL 256 AUTHENTIC SOLIDCRAFT CAD BODIES */}
       {SOLID_CRAFT_BODIES.map((body) => (
         <CADBodyItem
           key={body.id}
@@ -146,6 +208,13 @@ export const SolidCraftModel: React.FC = () => {
           simState={simState}
         />
       ))}
+
+      {/* Dynamic Water Flow Stream: Entering Directly into White Sedimentation Filter */}
+      <RawWaterInletFlow
+        running={isFlowing}
+        flowRate={simState?.inputFlowRate ?? 4.8}
+        exploded={exploded}
+      />
     </group>
   );
 };

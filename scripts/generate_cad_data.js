@@ -84,6 +84,20 @@ data.features.forEach(f => {
     colorHex = '#d97706';
     metalness = 0.88;
     roughness = 0.25;
+  } else if (n === 'Cartridge_Sediment_SpunPP') {
+    // Spun Polypropylene 5-Micron White Fiber Cartridge
+    colorHex = '#f1f5f9';
+    metalness = 0.05;
+    roughness = 0.40;
+    opacity = 1.0;
+    transparent = false;
+  } else if (n === 'Housing_Sediment_Bowl' || n === 'Housing_Sediment_Dome') {
+    // Semi-Opaque Medical White Polypropylene Filter Bowl
+    colorHex = '#f8fafc';
+    opacity = 0.88;
+    transparent = true;
+    metalness = 0.08;
+    roughness = 0.16;
   } else if (n.includes('Filter_F') || n.includes('Housing_Sediment')) {
     // Medical Pure White Filter Bodies
     colorHex = '#f8fafc';
@@ -236,6 +250,224 @@ bodies.push({
   opacity: 1,
   transparent: false,
   explodedOffset: [0, 0.45, 0],
+  isFluid: false
+});
+
+// =========================================================================
+// 1. REINFORCED TANK BASEMENT DECK & CRADLE FOUNDATION (FOR CLEAN TANK)
+// =========================================================================
+bodies.push({
+  id: 2101,
+  name: 'Deck_Tank_Basement_Platform',
+  type: 'box',
+  subassembly: 'CLEAN_TANK',
+  pos: [-0.1065, -2.145, -0.0375],
+  rot: [0, 0, 0],
+  size: [1.20, 0.045, 0.90],
+  color: '#475569',
+  metalness: 0.85,
+  roughness: 0.25,
+  opacity: 1,
+  transparent: false,
+  explodedOffset: [0, 0, 0],
+  isFluid: false
+});
+
+bodies.push({
+  id: 2102,
+  name: 'Rim_Tank_Basement_ContainmentLip',
+  type: 'box',
+  subassembly: 'CLEAN_TANK',
+  pos: [-0.1065, -2.115, -0.0375],
+  rot: [0, 0, 0],
+  size: [1.22, 0.015, 0.92],
+  color: '#334155',
+  metalness: 0.70,
+  roughness: 0.35,
+  opacity: 1,
+  transparent: false,
+  explodedOffset: [0, 0, 0],
+  isFluid: false
+});
+
+// Anti-vibration rubber mounts at 4 basement corners
+const basementCorners = [
+  [-0.64, -2.17, -0.44],
+  [0.42, -2.17, -0.44],
+  [-0.64, -2.17, 0.36],
+  [0.42, -2.17, 0.36],
+];
+
+basementCorners.forEach((pos, idx) => {
+  bodies.push({
+    id: 2110 + idx,
+    name: `Mount_Tank_Basement_RubberFoot_${idx + 1}`,
+    type: 'cylinder',
+    subassembly: 'CLEAN_TANK',
+    pos: [pos[0], pos[1], pos[2]],
+    rot: [0, 0, 0],
+    size: [0.035, 0.025],
+    color: '#0f172a',
+    metalness: 0.1,
+    roughness: 0.8,
+    opacity: 1,
+    transparent: false,
+    explodedOffset: [0, 0, 0],
+    isFluid: false
+  });
+});
+
+// Stainless tank retention brackets at 4 corners
+const bracketCorners = [
+  [-0.63, -2.10, -0.43],
+  [0.41, -2.10, -0.43],
+  [-0.63, -2.10, 0.35],
+  [0.41, -2.10, 0.35],
+];
+
+bracketCorners.forEach((pos, idx) => {
+  bodies.push({
+    id: 2120 + idx,
+    name: `Bracket_Tank_Basement_Anchor_${idx + 1}`,
+    type: 'box',
+    subassembly: 'CLEAN_TANK',
+    pos: [pos[0], pos[1], pos[2]],
+    rot: [0, 0, 0],
+    size: [0.045, 0.065, 0.045],
+    color: '#cbd5e1',
+    metalness: 0.9,
+    roughness: 0.18,
+    opacity: 1,
+    transparent: false,
+    explodedOffset: [0, 0, 0],
+    isFluid: false
+  });
+});
+
+// =========================================================================
+// 2. RAW WATER INLET ASSEMBLY INTO THE WHITE SEDIMENTATION FILTER
+// =========================================================================
+// Riser pipe from floor up to white sediment filter inlet port
+bodies.push({
+  id: 2201,
+  name: 'Pipe_RawWater_Feed_Riser',
+  type: 'cylinder',
+  subassembly: 'SEDIMENT_FILTER',
+  pos: [0.80, -1.33, 0.2505],
+  rot: [0, 0, 0],
+  size: [0.016, 1.70],
+  color: '#0284c7',
+  metalness: 0.15,
+  roughness: 0.25,
+  opacity: 1,
+  transparent: false,
+  explodedOffset: [0.65, 0.1, 0],
+  isFluid: false
+});
+
+// Brass 90-degree sweep elbow into Port_Sediment_RawInlet
+bodies.push({
+  id: 2202,
+  name: 'Fitting_RawWater_Inlet_Elbow',
+  type: 'cylinder',
+  subassembly: 'SEDIMENT_FILTER',
+  pos: [0.76, -0.485, 0.2505],
+  rot: [0, 0, Math.PI / 2],
+  size: [0.018, 0.08],
+  color: '#d97706',
+  metalness: 0.88,
+  roughness: 0.25,
+  opacity: 1,
+  transparent: false,
+  explodedOffset: [0.65, 0.1, 0],
+  isFluid: false
+});
+
+// Brass isolation ball valve body
+bodies.push({
+  id: 2203,
+  name: 'Valve_RawWater_Inlet_BallBody',
+  type: 'cylinder',
+  subassembly: 'SEDIMENT_FILTER',
+  pos: [0.80, -0.75, 0.2505],
+  rot: [0, 0, 0],
+  size: [0.026, 0.06],
+  color: '#d97706',
+  metalness: 0.88,
+  roughness: 0.25,
+  opacity: 1,
+  transparent: false,
+  explodedOffset: [0.65, 0.1, 0],
+  isFluid: false
+});
+
+// Ball valve quarter-turn safety-yellow handle
+bodies.push({
+  id: 2204,
+  name: 'Handle_RawWater_Inlet_Valve',
+  type: 'box',
+  subassembly: 'SEDIMENT_FILTER',
+  pos: [0.84, -0.75, 0.2505],
+  rot: [0, 0, 0],
+  size: [0.06, 0.012, 0.02],
+  color: '#eab308',
+  metalness: 0.3,
+  roughness: 0.4,
+  opacity: 1,
+  transparent: false,
+  explodedOffset: [0.65, 0.1, 0],
+  isFluid: false
+});
+
+// Pressure gauge stem & dial face
+bodies.push({
+  id: 2205,
+  name: 'Stem_RawWater_Inlet_Gauge',
+  type: 'cylinder',
+  subassembly: 'SEDIMENT_FILTER',
+  pos: [0.80, -0.44, 0.2505],
+  rot: [0, 0, 0],
+  size: [0.008, 0.05],
+  color: '#d97706',
+  metalness: 0.88,
+  roughness: 0.25,
+  opacity: 1,
+  transparent: false,
+  explodedOffset: [0.65, 0.1, 0],
+  isFluid: false
+});
+
+bodies.push({
+  id: 2206,
+  name: 'Gauge_RawWater_Inlet_Pressure',
+  type: 'cylinder',
+  subassembly: 'SEDIMENT_FILTER',
+  pos: [0.80, -0.40, 0.2505],
+  rot: [Math.PI / 2, 0, 0],
+  size: [0.038, 0.02],
+  color: '#f8fafc',
+  metalness: 0.2,
+  roughness: 0.2,
+  opacity: 1,
+  transparent: false,
+  explodedOffset: [0.65, 0.1, 0],
+  isFluid: false
+});
+
+bodies.push({
+  id: 2207,
+  name: 'Bezel_RawWater_Inlet_GaugeRing',
+  type: 'cylinder',
+  subassembly: 'SEDIMENT_FILTER',
+  pos: [0.80, -0.40, 0.261],
+  rot: [Math.PI / 2, 0, 0],
+  size: [0.040, 0.005],
+  color: '#0284c7',
+  metalness: 0.85,
+  roughness: 0.2,
+  opacity: 1,
+  transparent: false,
+  explodedOffset: [0.65, 0.1, 0],
   isFluid: false
 });
 

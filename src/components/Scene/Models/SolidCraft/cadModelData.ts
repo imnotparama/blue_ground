@@ -995,10 +995,10 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.72
     ],
     "color": "#f8fafc",
-    "metalness": 0.05,
-    "roughness": 0.2,
-    "opacity": 1,
-    "transparent": false,
+    "metalness": 0.08,
+    "roughness": 0.16,
+    "opacity": 0.88,
+    "transparent": true,
     "explodedOffset": [
       0.65,
       0.1,
@@ -1026,10 +1026,10 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.045
     ],
     "color": "#f8fafc",
-    "metalness": 0.05,
-    "roughness": 0.2,
-    "opacity": 1,
-    "transparent": false,
+    "metalness": 0.08,
+    "roughness": 0.16,
+    "opacity": 0.88,
+    "transparent": true,
     "explodedOffset": [
       0.65,
       0.1,
@@ -1149,8 +1149,8 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.066,
       0.66
     ],
-    "color": "#1e293b",
-    "metalness": 0.1,
+    "color": "#f1f5f9",
+    "metalness": 0.05,
     "roughness": 0.4,
     "opacity": 1,
     "transparent": false,
@@ -7492,6 +7492,540 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
     "explodedOffset": [
       0,
       0.45,
+      0
+    ],
+    "isFluid": false
+  },
+  {
+    "id": 2101,
+    "name": "Deck_Tank_Basement_Platform",
+    "type": "box",
+    "subassembly": "CLEAN_TANK",
+    "pos": [
+      -0.1065,
+      -2.145,
+      -0.0375
+    ],
+    "rot": [
+      0,
+      0,
+      0
+    ],
+    "size": [
+      1.2,
+      0.045,
+      0.9
+    ],
+    "color": "#475569",
+    "metalness": 0.85,
+    "roughness": 0.25,
+    "opacity": 1,
+    "transparent": false,
+    "explodedOffset": [
+      0,
+      0,
+      0
+    ],
+    "isFluid": false
+  },
+  {
+    "id": 2102,
+    "name": "Rim_Tank_Basement_ContainmentLip",
+    "type": "box",
+    "subassembly": "CLEAN_TANK",
+    "pos": [
+      -0.1065,
+      -2.115,
+      -0.0375
+    ],
+    "rot": [
+      0,
+      0,
+      0
+    ],
+    "size": [
+      1.22,
+      0.015,
+      0.92
+    ],
+    "color": "#334155",
+    "metalness": 0.7,
+    "roughness": 0.35,
+    "opacity": 1,
+    "transparent": false,
+    "explodedOffset": [
+      0,
+      0,
+      0
+    ],
+    "isFluid": false
+  },
+  {
+    "id": 2110,
+    "name": "Mount_Tank_Basement_RubberFoot_1",
+    "type": "cylinder",
+    "subassembly": "CLEAN_TANK",
+    "pos": [
+      -0.64,
+      -2.17,
+      -0.44
+    ],
+    "rot": [
+      0,
+      0,
+      0
+    ],
+    "size": [
+      0.035,
+      0.025
+    ],
+    "color": "#0f172a",
+    "metalness": 0.1,
+    "roughness": 0.8,
+    "opacity": 1,
+    "transparent": false,
+    "explodedOffset": [
+      0,
+      0,
+      0
+    ],
+    "isFluid": false
+  },
+  {
+    "id": 2111,
+    "name": "Mount_Tank_Basement_RubberFoot_2",
+    "type": "cylinder",
+    "subassembly": "CLEAN_TANK",
+    "pos": [
+      0.42,
+      -2.17,
+      -0.44
+    ],
+    "rot": [
+      0,
+      0,
+      0
+    ],
+    "size": [
+      0.035,
+      0.025
+    ],
+    "color": "#0f172a",
+    "metalness": 0.1,
+    "roughness": 0.8,
+    "opacity": 1,
+    "transparent": false,
+    "explodedOffset": [
+      0,
+      0,
+      0
+    ],
+    "isFluid": false
+  },
+  {
+    "id": 2112,
+    "name": "Mount_Tank_Basement_RubberFoot_3",
+    "type": "cylinder",
+    "subassembly": "CLEAN_TANK",
+    "pos": [
+      -0.64,
+      -2.17,
+      0.36
+    ],
+    "rot": [
+      0,
+      0,
+      0
+    ],
+    "size": [
+      0.035,
+      0.025
+    ],
+    "color": "#0f172a",
+    "metalness": 0.1,
+    "roughness": 0.8,
+    "opacity": 1,
+    "transparent": false,
+    "explodedOffset": [
+      0,
+      0,
+      0
+    ],
+    "isFluid": false
+  },
+  {
+    "id": 2113,
+    "name": "Mount_Tank_Basement_RubberFoot_4",
+    "type": "cylinder",
+    "subassembly": "CLEAN_TANK",
+    "pos": [
+      0.42,
+      -2.17,
+      0.36
+    ],
+    "rot": [
+      0,
+      0,
+      0
+    ],
+    "size": [
+      0.035,
+      0.025
+    ],
+    "color": "#0f172a",
+    "metalness": 0.1,
+    "roughness": 0.8,
+    "opacity": 1,
+    "transparent": false,
+    "explodedOffset": [
+      0,
+      0,
+      0
+    ],
+    "isFluid": false
+  },
+  {
+    "id": 2120,
+    "name": "Bracket_Tank_Basement_Anchor_1",
+    "type": "box",
+    "subassembly": "CLEAN_TANK",
+    "pos": [
+      -0.63,
+      -2.1,
+      -0.43
+    ],
+    "rot": [
+      0,
+      0,
+      0
+    ],
+    "size": [
+      0.045,
+      0.065,
+      0.045
+    ],
+    "color": "#cbd5e1",
+    "metalness": 0.9,
+    "roughness": 0.18,
+    "opacity": 1,
+    "transparent": false,
+    "explodedOffset": [
+      0,
+      0,
+      0
+    ],
+    "isFluid": false
+  },
+  {
+    "id": 2121,
+    "name": "Bracket_Tank_Basement_Anchor_2",
+    "type": "box",
+    "subassembly": "CLEAN_TANK",
+    "pos": [
+      0.41,
+      -2.1,
+      -0.43
+    ],
+    "rot": [
+      0,
+      0,
+      0
+    ],
+    "size": [
+      0.045,
+      0.065,
+      0.045
+    ],
+    "color": "#cbd5e1",
+    "metalness": 0.9,
+    "roughness": 0.18,
+    "opacity": 1,
+    "transparent": false,
+    "explodedOffset": [
+      0,
+      0,
+      0
+    ],
+    "isFluid": false
+  },
+  {
+    "id": 2122,
+    "name": "Bracket_Tank_Basement_Anchor_3",
+    "type": "box",
+    "subassembly": "CLEAN_TANK",
+    "pos": [
+      -0.63,
+      -2.1,
+      0.35
+    ],
+    "rot": [
+      0,
+      0,
+      0
+    ],
+    "size": [
+      0.045,
+      0.065,
+      0.045
+    ],
+    "color": "#cbd5e1",
+    "metalness": 0.9,
+    "roughness": 0.18,
+    "opacity": 1,
+    "transparent": false,
+    "explodedOffset": [
+      0,
+      0,
+      0
+    ],
+    "isFluid": false
+  },
+  {
+    "id": 2123,
+    "name": "Bracket_Tank_Basement_Anchor_4",
+    "type": "box",
+    "subassembly": "CLEAN_TANK",
+    "pos": [
+      0.41,
+      -2.1,
+      0.35
+    ],
+    "rot": [
+      0,
+      0,
+      0
+    ],
+    "size": [
+      0.045,
+      0.065,
+      0.045
+    ],
+    "color": "#cbd5e1",
+    "metalness": 0.9,
+    "roughness": 0.18,
+    "opacity": 1,
+    "transparent": false,
+    "explodedOffset": [
+      0,
+      0,
+      0
+    ],
+    "isFluid": false
+  },
+  {
+    "id": 2201,
+    "name": "Pipe_RawWater_Feed_Riser",
+    "type": "cylinder",
+    "subassembly": "SEDIMENT_FILTER",
+    "pos": [
+      0.8,
+      -1.33,
+      0.2505
+    ],
+    "rot": [
+      0,
+      0,
+      0
+    ],
+    "size": [
+      0.016,
+      1.7
+    ],
+    "color": "#0284c7",
+    "metalness": 0.15,
+    "roughness": 0.25,
+    "opacity": 1,
+    "transparent": false,
+    "explodedOffset": [
+      0.65,
+      0.1,
+      0
+    ],
+    "isFluid": false
+  },
+  {
+    "id": 2202,
+    "name": "Fitting_RawWater_Inlet_Elbow",
+    "type": "cylinder",
+    "subassembly": "SEDIMENT_FILTER",
+    "pos": [
+      0.76,
+      -0.485,
+      0.2505
+    ],
+    "rot": [
+      0,
+      0,
+      1.5707963267948966
+    ],
+    "size": [
+      0.018,
+      0.08
+    ],
+    "color": "#d97706",
+    "metalness": 0.88,
+    "roughness": 0.25,
+    "opacity": 1,
+    "transparent": false,
+    "explodedOffset": [
+      0.65,
+      0.1,
+      0
+    ],
+    "isFluid": false
+  },
+  {
+    "id": 2203,
+    "name": "Valve_RawWater_Inlet_BallBody",
+    "type": "cylinder",
+    "subassembly": "SEDIMENT_FILTER",
+    "pos": [
+      0.8,
+      -0.75,
+      0.2505
+    ],
+    "rot": [
+      0,
+      0,
+      0
+    ],
+    "size": [
+      0.026,
+      0.06
+    ],
+    "color": "#d97706",
+    "metalness": 0.88,
+    "roughness": 0.25,
+    "opacity": 1,
+    "transparent": false,
+    "explodedOffset": [
+      0.65,
+      0.1,
+      0
+    ],
+    "isFluid": false
+  },
+  {
+    "id": 2204,
+    "name": "Handle_RawWater_Inlet_Valve",
+    "type": "box",
+    "subassembly": "SEDIMENT_FILTER",
+    "pos": [
+      0.84,
+      -0.75,
+      0.2505
+    ],
+    "rot": [
+      0,
+      0,
+      0
+    ],
+    "size": [
+      0.06,
+      0.012,
+      0.02
+    ],
+    "color": "#eab308",
+    "metalness": 0.3,
+    "roughness": 0.4,
+    "opacity": 1,
+    "transparent": false,
+    "explodedOffset": [
+      0.65,
+      0.1,
+      0
+    ],
+    "isFluid": false
+  },
+  {
+    "id": 2205,
+    "name": "Stem_RawWater_Inlet_Gauge",
+    "type": "cylinder",
+    "subassembly": "SEDIMENT_FILTER",
+    "pos": [
+      0.8,
+      -0.44,
+      0.2505
+    ],
+    "rot": [
+      0,
+      0,
+      0
+    ],
+    "size": [
+      0.008,
+      0.05
+    ],
+    "color": "#d97706",
+    "metalness": 0.88,
+    "roughness": 0.25,
+    "opacity": 1,
+    "transparent": false,
+    "explodedOffset": [
+      0.65,
+      0.1,
+      0
+    ],
+    "isFluid": false
+  },
+  {
+    "id": 2206,
+    "name": "Gauge_RawWater_Inlet_Pressure",
+    "type": "cylinder",
+    "subassembly": "SEDIMENT_FILTER",
+    "pos": [
+      0.8,
+      -0.4,
+      0.2505
+    ],
+    "rot": [
+      1.5707963267948966,
+      0,
+      0
+    ],
+    "size": [
+      0.038,
+      0.02
+    ],
+    "color": "#f8fafc",
+    "metalness": 0.2,
+    "roughness": 0.2,
+    "opacity": 1,
+    "transparent": false,
+    "explodedOffset": [
+      0.65,
+      0.1,
+      0
+    ],
+    "isFluid": false
+  },
+  {
+    "id": 2207,
+    "name": "Bezel_RawWater_Inlet_GaugeRing",
+    "type": "cylinder",
+    "subassembly": "SEDIMENT_FILTER",
+    "pos": [
+      0.8,
+      -0.4,
+      0.261
+    ],
+    "rot": [
+      1.5707963267948966,
+      0,
+      0
+    ],
+    "size": [
+      0.04,
+      0.005
+    ],
+    "color": "#0284c7",
+    "metalness": 0.85,
+    "roughness": 0.2,
+    "opacity": 1,
+    "transparent": false,
+    "explodedOffset": [
+      0.65,
+      0.1,
       0
     ],
     "isFluid": false

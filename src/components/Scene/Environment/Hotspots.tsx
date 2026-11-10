@@ -92,13 +92,28 @@ const hotspotsList: HotspotConfig[] = [
     getSub: () => '24V DC Diaphragm Booster • High-Pressure Feed',
   },
   {
+    id: 'raw_inlet',
+    preset: 'SEDIMENTATION_TANK',
+    position: [0.80, -0.48, 0.25],
+    label: 'Raw Water Feed Inlet & Isolation Valve',
+    icon: <Droplet className="w-3.5 h-3.5 text-blue-400" />,
+    getStatus: (_, sim) => ({
+      label: `INFLOW: ${(sim?.inputFlowRate || 4.8).toFixed(1)} L/min • 4.2 Bar`,
+      color: 'text-cyan-300 font-bold',
+    }),
+    getSub: () => 'Direct Borewell Feed • 90° Elbow • Pressure Gauge',
+  },
+  {
     id: 'sediment',
     preset: 'SEDIMENTATION_TANK',
-    position: [0.60, -1.05, 0.0],
-    label: 'Sediment Pre-Filter Trap',
+    position: [0.72, -0.89, 0.14],
+    label: 'White Sedimentation Filter (5µm Spun PP)',
     icon: <Layers className="w-3.5 h-3.5 text-amber-400" />,
-    getStatus: () => ({ label: '85% TURBIDITY REMOVAL', color: 'text-amber-300' }),
-    getSub: () => '5-Micron Spun PP • Sand & Coarse Grit Trap',
+    getStatus: (_, sim) => ({
+      label: `HEALTH: ${sim?.filterHealth?.stage1 || 92}% • 85% SILT TRAP`,
+      color: 'text-amber-300 font-bold',
+    }),
+    getSub: () => 'High-Density Spun PP Core • Coarse Sand & Clay Trap',
   },
   {
     id: 'clean_tank',
@@ -111,6 +126,18 @@ const hotspotsList: HotspotConfig[] = [
       color: 'text-cyan-300 font-bold',
     }),
     getSub: () => 'Certified Potable • Dual Float Interlock',
+  },
+  {
+    id: 'tank_basement',
+    preset: 'PRIMARY_TANK',
+    position: [-0.10, -2.14, -0.04],
+    label: 'Reinforced Tank Foundation Basement',
+    icon: <Layers className="w-3.5 h-3.5 text-zinc-300" />,
+    getStatus: () => ({
+      label: 'HEAVY-DUTY VIBRATION ISOLATED SKID',
+      color: 'text-emerald-400 font-bold',
+    }),
+    getSub: () => 'Brushed 6061 Alloy Skid • Rubber Feet • Drip Lip',
   },
   {
     id: 'dispense',

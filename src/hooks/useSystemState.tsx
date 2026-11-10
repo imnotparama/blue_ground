@@ -227,70 +227,37 @@ const presentationSteps: PresentationStep[] = [
   {
     target: 'OVERVIEW',
     title: 'The Challenge: Mining Water Pollution',
-    description: 'In open-cast mining sites and remote off-grid communities, heavy mineral runoff and high turbidity contaminate local water sources. blueground Leviathan is an autonomous, solar-powered IoT water purification system engineered to solve this crisis.',
+    description: 'In open-cast mining sites and remote off-grid communities, heavy mineral runoff and high turbidity contaminate local water sources. BlueGround Leviathan is an autonomous, solar-powered IoT water purification system engineered to solve this crisis.',
     duration: 6500,
   },
   {
-    target: 'INTAKE_PIPE',
-    title: 'Phase 1: Raw Intake from Mining Runoff Pit',
-    description: 'The system draws contaminated slurry water directly from open-cast settling ponds and borewells, passing through industrial strainer foot valves into the primary filtration circuit.',
-    duration: 5500,
-  },
-  {
-    target: 'HYDRO_GENERATOR',
-    title: 'Phase 1B: Hydro-Power Energy Harvester',
-    description: 'An inline micro-hydro turbine generator recovers kinetic flow energy directly from the incoming water stream, generating +28.5W of supplementary power transmitted via overhead conduit to charge the lithium battery system.',
-    duration: 6000,
-    actions: (setMetrics) => {
-      setMetrics(prev => ({ ...prev, hydroWatts: 28.5, batteryPercent: Math.min(prev.batteryPercent + 1, 100) }));
-    },
-  },
-  {
     target: 'SEDIMENTATION_TANK',
-    title: 'Phase 2: Gravitational Sedimentation Trap',
-    description: 'Raw water from the borewell enters the 45L sedimentation vessel. Multi-density settling layers of coarse gravel, quartz sand, and activated carbon trap heavy suspended solids, clay silt, and mining grit before pumping.',
-    duration: 5500,
-  },
-  {
-    target: 'FLOW_SENSOR',
-    title: 'Phase 2B: Inline Flow Rate Telemetry',
-    description: 'Settled water passes through the inline YF-S201 Hall-effect flow sensor for instantaneous volumetric rate telemetry (L/min) into the secondary settling chamber.',
-    duration: 5000,
-  },
-  {
-    target: 'SECONDARY_TANK',
-    title: 'Phase 2C: Secondary Settling Tank & Sensor Bridge',
-    description: 'Pre-filtered water enters the secondary settling tank. An overhead stainless bridge suspends an array of industrial sensors (pH probe, Turbidity optical sensor, TDS dual-pin electrodes, and DS18B20 temperature probe) to profile raw water quality before booster intake.',
+    title: 'Phase 1: Raw Feed Inlet & White Sedimentation Filter',
+    description: 'Contaminated borewell water enters through the quarter-turn isolation ball valve and analog pressure gauge directly into the 5-micron white spun polypropylene sedimentation filter, removing 85% of coarse sand and slurry silt.',
     duration: 6000,
   },
   {
     target: 'PUMP',
-    title: 'Phase 2D: High-Pressure 24V Booster Pump',
-    description: 'The high-efficiency booster pump draws settled water from the secondary tank base and pressurizes the stream up to 4.5 Bar, driving it into the overhead 4-stage smart filtration train.',
+    title: 'Phase 2: High-Pressure 24V Booster Pump P2',
+    description: 'Pre-filtered water is drawn into Booster Pump P2, pressurizing the stream up to 6.8 Bar (100 PSI) to force fluid through the high-density reverse osmosis semi-permeable membrane.',
     duration: 5500,
   },
   {
     target: 'FILTER_HOUSING',
-    title: 'Phase 3: 4-Stage Smart Filtration Train',
-    description: 'Four-stage sequential defense: Stage 1 SediShield traps sand, rust and silt; Stage 2 ChemoBlock cuts chlorine, odor and organic load; Stage 3 RO Maxx strips heavy metals and reduces TDS by 96%; Stage 4 Active Copper Filter infuses copper ions (Cu²⁺) for antimicrobial defense and mineral balance.',
+    title: 'Phase 3: 4-Stage Smart Filtration Rack',
+    description: 'Pressurized water flows across the 4-cartridge array: CTO Carbon removes chlorine and VOCs; RO Maxx membrane strips 95% of dissolved salts and heavy metals (splitting 70% permeate and 30% reject); and Active Minerals balance taste.',
     duration: 6500,
   },
   {
-    target: 'TANK2_VERIFICATION',
-    title: 'Phase 4: Post-Filtration Quality Verification',
-    description: 'Discharge flows directly into the Quality Verification Chamber (Tank 2). Integrated multi-sensor arrays (TDS #2, pH #2, Turbidity #2) perform real-time optical and electrical inspection before release.',
-    duration: 6000,
-  },
-  {
-    target: 'RECIRCULATION_LOOP',
-    title: 'Phase 5: Closed-Loop Recirculation Decision Gate',
-    description: 'If verified pure, water flows straight into clean storage. If water fails safety thresholds (TDS > 100 ppm), the bottom 3-way solenoid valve diverts water into the recirculation loop, pumping it back to Stage 1 (SediShield) to be re-filtered!',
-    duration: 6500,
+    target: 'UV_LED',
+    title: 'Phase 4: UV Germicidal Disinfection Chamber',
+    description: 'Permeate flows through the 254nm ultraviolet sterilization chamber, achieving Log-4 bacterial and pathogen neutralization without chemical additives.',
+    duration: 5500,
   },
   {
     target: 'PRIMARY_TANK',
-    title: 'Phase 6: Clean Storage & UV-C Sterilization',
-    description: 'Purified water cascades into the 250-liter primary clean reservoir. A high-output germicidal UV-C emitter sterilizes pathogens while a float switch continuously tracks reservoir volume.',
+    title: 'Phase 5: Clean Storage Reservoir & Basement Skid',
+    description: 'Verified potable water collects in the transparent acrylic storage tank, solidly cradled on the heavy-duty 6061 alloy basement skid with vibration isolation mounts and spill containment lip.',
     duration: 6000,
     actions: (setMetrics) => {
       setMetrics(prev => ({ ...prev, waterLevel: 78, waterQuality: 'EXCELLENT' }));
@@ -298,8 +265,8 @@ const presentationSteps: PresentationStep[] = [
   },
   {
     target: 'SOLAR',
-    title: 'Phase 7: 100% Autonomous Solar Energy',
-    description: 'Powered entirely by rooftop monocrystalline photovoltaics and smart lithium storage, Leviathan operates 24/7 off-grid without requiring diesel generators or grid connectivity.',
+    title: 'Phase 6: 100% Autonomous Solar Energy',
+    description: 'Powered entirely by the rooftop monocrystalline photovoltaic canopy and lithium storage, Leviathan operates 24/7 off-grid without requiring diesel generators or grid connectivity.',
     duration: 5500,
     actions: (setMetrics, setMode) => {
       setMode('NORMAL');
@@ -307,15 +274,15 @@ const presentationSteps: PresentationStep[] = [
     },
   },
   {
-    target: 'DISPLAY',
-    title: 'Phase 8: Edge IoT Diagnostics & Cloud Sync',
-    description: 'The ESP32 controller renders live water metrics on its 1.8 TFT color screen and transmits encrypted telemetry to remote cloud monitoring dashboards for mining supervisors.',
+    target: 'ESP32',
+    title: 'Phase 7: Edge IoT Diagnostics & Cloud Sync',
+    description: 'The ESP32-S3 controller samples inline TDS, pH, and turbidity sensors, driving local diagnostic readouts and syncing live telemetry to remote monitoring dashboards.',
     duration: 5500,
   },
   {
     target: 'OVERVIEW',
-    title: 'The Impact: Safe Drinking Water Restored',
-    description: 'Safe, certified drinking water is dispensed to local mining workers and remote communities. Explore the 3D twin freely, press "T" for Tanks Only Margins, or press "H" for Clean Showroom View.',
+    title: 'The Impact: Certified Safe Potable Water',
+    description: 'Safe, certified drinking water is delivered to mining personnel and remote villages. Explore the 3D twin freely, toggle Exploded View (E), or inspect individual components.',
     duration: 7000,
   },
 ];

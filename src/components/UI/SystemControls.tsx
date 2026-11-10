@@ -203,208 +203,63 @@ export const SystemControls = () => {
               X-Ray Mode
             </button>
 
-            {/* Pipeline Architecture Selector: Setup 1 (Direct) vs Setup 2 (Dual-Verification) */}
-            <div className="col-span-2 flex flex-col gap-2 p-2.5 rounded-xl bg-gradient-to-b from-purple-950/30 to-zinc-950/40 border border-purple-500/30">
-              <div className="flex items-center justify-between text-[8px] font-mono text-purple-300 font-bold">
-                <span className="flex items-center gap-1">
-                  <Repeat className="w-3 h-3 text-purple-400" />
-                  PIPELINE ARCHITECTURE
-                </span>
-                <span className="text-[7px] px-1 py-0.2 rounded bg-purple-950 text-purple-300 border border-purple-500/40">HOTKEY: V</span>
-              </div>
-
-              {/* Toggle Switch between Setup 1 and Setup 2 */}
-              <div className="grid grid-cols-2 gap-1 font-mono text-[8px]">
-                <button
-                  onClick={() => {
-                    setDualVerificationMode(false);
-                    setRecirculationTriggered(false);
-                    setCameraPreset('SETUP1_DIRECT');
-                    setMetrics(prev => ({ ...prev, recirculationActive: false }));
-                  }}
-                  className={`py-1.5 px-2 rounded-lg border text-center transition-all cursor-pointer flex flex-col items-center gap-0.5 ${
-                    !dualVerificationMode
-                      ? 'bg-emerald-500/30 border-emerald-400 text-emerald-300 font-bold shadow-[0_0_10px_rgba(16,185,129,0.35)]'
-                      : 'bg-black/40 border-white/5 text-zinc-500 hover:text-white'
-                  }`}
-                  title="Setup 1: Direct single-pass from 4-stage filter outlet directly into 250L Potable Reservoir"
-                >
-                  <span className="text-[9px]">⚡ Setup 1</span>
-                  <span className="text-[7px] opacity-80">Direct Cascade</span>
-                </button>
-
-                <button
-                  onClick={() => {
-                    setDualVerificationMode(true);
-                    setCameraPreset('TANK2_VERIFICATION');
-                  }}
-                  className={`py-1.5 px-2 rounded-lg border text-center transition-all cursor-pointer flex flex-col items-center gap-0.5 ${
-                    dualVerificationMode
-                      ? 'bg-purple-500/30 border-purple-400 text-purple-200 font-bold shadow-[0_0_10px_rgba(168,85,247,0.35)]'
-                      : 'bg-black/40 border-white/5 text-zinc-500 hover:text-white'
-                  }`}
-                  title="Setup 2: Dual-Verification through Tank 2 sensor suite with automated recirculation"
-                >
-                  <span className="text-[9px]">🛡️ Setup 2</span>
-                  <span className="text-[7px] opacity-80">Tank 2 Verif</span>
-                </button>
-              </div>
-
-              {/* Sub-status & sub-controls depending on active mode */}
-              {!dualVerificationMode ? (
-                <div className="p-1.5 rounded-lg bg-emerald-950/20 border border-emerald-500/20 flex flex-col gap-1">
-                  <div className="text-[7.5px] font-mono text-emerald-300 font-semibold flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                    Setup 1: Direct Single-Pass ACTIVE
-                  </div>
-                  <div className="text-[7px] font-mono text-zinc-400 leading-tight">
-                    Direct drop valve open ➔ 250L clean reservoir. Tank 2 bypassed.
-                  </div>
-                </div>
-              ) : (
-                <div className="flex flex-col gap-1.5">
-                  <div className="text-[7px] font-mono text-zinc-400">
-                    Tank 2 Quality Gate Thresholds:
-                  </div>
-                  <div className="grid grid-cols-2 gap-1 font-mono text-[8px]">
-                    <button
-                      onClick={() => {
-                        setDualVerificationMode(true);
-                        setTank2Tds(28);
-                        setRecirculationTriggered(false);
-                        setMetrics(prev => ({ ...prev, tds2: 28, recirculationActive: false }));
-                      }}
-                      className={`py-1 px-1.5 rounded-md border text-center transition-all cursor-pointer ${
-                        metrics.tds2 <= 100
-                          ? 'bg-emerald-500/30 border-emerald-400 text-emerald-300 font-bold shadow-[0_0_8px_rgba(16,185,129,0.3)]'
-                          : 'bg-black/40 border-white/5 text-zinc-500 hover:text-white'
-                      }`}
-                      title="Verified Pure: Pass directly to Clean 250L Potable Reservoir"
-                    >
-                      ✓ Pure (28 ppm)
-                    </button>
-                    <button
-                      onClick={() => {
-                        setDualVerificationMode(true);
-                        setTank2Tds(185);
-                        setRecirculationTriggered(true);
-                        setMetrics(prev => ({ ...prev, tds2: 185, recirculationActive: true }));
-                      }}
-                      className={`py-1 px-1.5 rounded-md border text-center transition-all cursor-pointer ${
-                        metrics.tds2 > 100
-                          ? 'bg-amber-500/30 border-amber-400 text-amber-300 font-bold animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.3)]'
-                          : 'bg-black/40 border-white/5 text-zinc-500 hover:text-white'
-                      }`}
-                      title="Impure Detected: Divert via Solenoid back into Stage 1 SediShield"
-                    >
-                      ↻ Impure (185 ppm)
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Hydro-Power Motor Energy Harvesting Toggle */}
-            <div className="col-span-2 flex flex-col gap-1 p-2 rounded-xl bg-blue-950/20 border border-blue-500/30">
-              <div className="flex items-center justify-between text-[9px] font-mono">
-                <span className="font-bold text-blue-300 flex items-center gap-1">
-                  <Zap className="w-3 h-3 text-cyan-400" /> Hydro Turbine Gen:
-                </span>
-                <span className={`px-1.5 py-0.2 rounded font-bold text-[8px] ${
-                  hydroGeneratorMode ? 'bg-blue-950 text-cyan-300 border border-cyan-500/40 animate-pulse' : 'text-zinc-500'
-                }`}>
-                  {hydroGeneratorMode ? `+${(metrics.hydroWatts || 28.5).toFixed(1)}W ACTIVE` : 'OFF'}
-                </span>
-              </div>
-              <button
-                onClick={() => setHydroGeneratorMode(!hydroGeneratorMode)}
-                className={`w-full py-1 rounded-md border text-center font-mono text-[9px] font-bold transition-all cursor-pointer ${
-                  hydroGeneratorMode
-                    ? 'bg-blue-500/30 border-blue-400 text-blue-200 shadow-[0_0_10px_rgba(59,130,246,0.3)]'
-                    : 'bg-white/2 border-white/5 text-zinc-400 hover:bg-white/5 hover:text-white'
-                }`}
-              >
-                {hydroGeneratorMode ? '⚡ Hydro Generator: ON (G)' : 'Enable Hydro Turbine Power (G)'}
-              </button>
-            </div>
-
-            {/* Hotspot Dots / Clean Showroom View Toggle */}
+            {/* Inspection Pins Toggle */}
             <button
               onClick={() => setShowHotspots(!showHotspots)}
-              className={`col-span-2 flex items-center justify-center gap-1.5 py-1.5 rounded-lg border text-[9px] font-mono font-bold tracking-wider transition-all cursor-pointer ${
-                !showHotspots
-                  ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-[0_0_8px_rgba(245,158,11,0.15)]'
-                  : 'bg-cyan-500/10 text-cyan-300 border-cyan-500/30 hover:bg-cyan-500/20'
-              }`}
-            >
-              {showHotspots ? <Eye className="w-3 h-3 text-cyan-400" /> : <EyeOff className="w-3 h-3 text-amber-400" />}
-              {showHotspots ? 'Hotspot Details: VISIBLE' : 'Clean Showroom View (No Dots)'}
-            </button>
-
-            {/* Tanks Only & Vessel Boundary Margins Mode */}
-            <button
-              onClick={() => setTanksOnly(!tanksOnly)}
-              className={`col-span-2 flex items-center justify-center gap-1.5 py-1.5 rounded-lg border text-[9px] font-mono font-bold tracking-wider transition-all cursor-pointer ${
-                tanksOnly
-                  ? 'bg-emerald-500/25 text-emerald-300 border-emerald-500/50 shadow-[0_0_12px_rgba(168,85,129,0.25)]'
+              className={`flex items-center justify-center gap-1 py-1.5 rounded-lg border text-[9px] font-mono font-bold tracking-wider transition-all cursor-pointer ${
+                showHotspots
+                  ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-[0_0_8px_rgba(16,185,129,0.15)]'
                   : 'bg-white/2 border-white/5 text-zinc-400 hover:bg-white/5 hover:text-white'
               }`}
             >
-              <Layers className={`w-3 h-3 ${tanksOnly ? 'text-emerald-400' : 'text-zinc-400'}`} />
-              {tanksOnly ? 'Tanks Margins: ISOLATED (T)' : 'Show Tanks Only (T)'}
+              <Eye className="w-3 h-3 text-emerald-400" />
+              Inspection Pins
             </button>
 
-            {/* Sensors & Tools Inventory View Toggle */}
-            <button
-              onClick={() => setSidebarTab(sidebarTab === 'TOOLS' ? 'TELEMETRY' : 'TOOLS')}
-              className={`col-span-2 flex items-center justify-center gap-1.5 py-1.5 rounded-lg border text-[9px] font-mono font-bold tracking-wider transition-all cursor-pointer ${
-                sidebarTab === 'TOOLS'
-                  ? 'bg-amber-500/25 text-amber-300 border-amber-500/50 shadow-[0_0_12px_rgba(245,158,11,0.25)]'
-                  : 'bg-white/2 border-white/5 text-zinc-400 hover:bg-white/5 hover:text-white'
-              }`}
-            >
-              <Wrench className={`w-3 h-3 ${sidebarTab === 'TOOLS' ? 'text-amber-400' : 'text-zinc-400'}`} />
-              {sidebarTab === 'TOOLS' ? 'Sensors & Tools: OPEN (S)' : 'Sensors & Tools List (S)'}
-            </button>
-
-            {/* Water Flow Journey Focus Mode */}
-            <button
-              onClick={() => setWaterTrackMode(!waterTrackMode)}
-              className={`col-span-2 flex items-center justify-center gap-1.5 py-1.5 rounded-lg border text-[9px] font-mono font-bold tracking-wider transition-all cursor-pointer ${
-                waterTrackMode
-                  ? 'bg-cyan-500/25 text-cyan-300 border-cyan-400/60 shadow-[0_0_12px_rgba(6,182,212,0.25)]'
-                  : 'bg-white/2 border-white/5 text-zinc-400 hover:bg-white/5 hover:text-white'
-              }`}
-            >
-              <Droplets className={`w-3 h-3 ${waterTrackMode ? 'text-cyan-400 animate-bounce-subtle' : 'text-zinc-400'}`} />
-              {waterTrackMode ? 'Water Flow Tour: ACTIVE (W)' : 'Water Flow Journey (W)'}
-            </button>
-
-            {/* 4-Stage Filter Rack Focus Mode */}
-            <button
-              onClick={() => setFilterView(!filterView)}
-              className={`col-span-2 flex items-center justify-center gap-1.5 py-1.5 rounded-lg border text-[9px] font-mono font-bold tracking-wider transition-all cursor-pointer ${
-                filterView
-                  ? 'bg-gradient-to-r from-cyan-500/25 to-emerald-500/25 text-cyan-200 border-cyan-400/60 shadow-[0_0_12px_rgba(6,182,212,0.25)] ring-1 ring-cyan-400'
-                  : 'bg-white/2 border-white/5 text-zinc-400 hover:bg-white/5 hover:text-white'
-              }`}
-            >
-              <Filter className={`w-3 h-3 ${filterView ? 'text-cyan-400 animate-pulse' : 'text-zinc-400'}`} />
-              {filterView ? '4-Stage Filter View: ACTIVE (F)' : '4-Stage Filter View (F)'}
-            </button>
-
-            {/* Official SolidCraft CAD Model v9 Toggle */}
-            <button
-              onClick={() => setCadModelMode(!cadModelMode)}
-              className={`col-span-2 flex items-center justify-center gap-1.5 py-1.5 rounded-lg border text-[9px] font-mono font-bold tracking-wider transition-all cursor-pointer ${
-                cadModelMode
-                  ? 'bg-gradient-to-r from-blue-600/25 to-cyan-500/25 text-cyan-200 border-cyan-400/60 shadow-[0_0_12px_rgba(6,182,212,0.3)] ring-1 ring-cyan-400'
-                  : 'bg-white/2 border-white/5 text-zinc-400 hover:bg-white/5 hover:text-white'
-              }`}
-            >
-              <Box className={`w-3 h-3 ${cadModelMode ? 'text-cyan-400 animate-pulse' : 'text-zinc-400'}`} />
-              {cadModelMode ? 'SolidCraft v9 CAD Twin: ACTIVE' : 'Procedural Model'}
-            </button>
+            {/* Quick Camera Navigation Focus Points */}
+            <div className="col-span-2 flex flex-col gap-1.5 p-2 rounded-xl bg-zinc-900/60 border border-white/5 font-mono text-[8px]">
+              <span className="text-[7.5px] text-zinc-400 uppercase tracking-widest flex items-center gap-1 font-bold">
+                <Compass className="w-3 h-3 text-cyan-400" /> CAD Inspection Jump
+              </span>
+              <div className="grid grid-cols-2 gap-1">
+                <button
+                  onClick={() => setCameraPreset('SEDIMENTATION_TANK')}
+                  className="py-1 px-1.5 rounded bg-white/2 hover:bg-white/5 border border-white/5 text-zinc-300 hover:text-cyan-300 text-left transition-all cursor-pointer"
+                >
+                  1. Raw Inlet & Filter
+                </button>
+                <button
+                  onClick={() => setCameraPreset('PUMP')}
+                  className="py-1 px-1.5 rounded bg-white/2 hover:bg-white/5 border border-white/5 text-zinc-300 hover:text-cyan-300 text-left transition-all cursor-pointer"
+                >
+                  2. Booster Pump P2
+                </button>
+                <button
+                  onClick={() => setCameraPreset('FILTER_HOUSING')}
+                  className="py-1 px-1.5 rounded bg-white/2 hover:bg-white/5 border border-white/5 text-zinc-300 hover:text-cyan-300 text-left transition-all cursor-pointer"
+                >
+                  3. 4-Stage Filter Rack
+                </button>
+                <button
+                  onClick={() => setCameraPreset('UV_LED')}
+                  className="py-1 px-1.5 rounded bg-white/2 hover:bg-white/5 border border-white/5 text-zinc-300 hover:text-cyan-300 text-left transition-all cursor-pointer"
+                >
+                  4. UV Chamber
+                </button>
+                <button
+                  onClick={() => setCameraPreset('PRIMARY_TANK')}
+                  className="py-1 px-1.5 rounded bg-white/2 hover:bg-white/5 border border-white/5 text-zinc-300 hover:text-cyan-300 text-left transition-all cursor-pointer"
+                >
+                  5. Tank & Basement Skid
+                </button>
+                <button
+                  onClick={() => setCameraPreset('OVERVIEW')}
+                  className="py-1 px-1.5 rounded bg-cyan-950/40 hover:bg-cyan-900/50 border border-cyan-500/30 text-cyan-200 text-left transition-all cursor-pointer font-bold"
+                >
+                  ↺ Studio Overview
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 

@@ -6,34 +6,19 @@ import { CameraController } from './Camera/CameraController';
 import { SceneLighting } from './Lighting/SceneLighting';
 import { useSystemState } from '@/hooks/useSystemState';
 
-// Hardware components imported for Phase 2
-import { Tanks } from './Models/Tank/Tanks';
-import { SolarPanel } from './Models/Solar/SolarPanel';
-import { BatteryUnit } from './Models/Battery/BatteryUnit';
-import { ESP32Box } from './Models/ESP32/ESP32Box';
-import { WaterPump } from './Models/Pump/WaterPump';
-import { Sensors } from './Models/Sensors/Sensors';
-import { FilterHousing } from './Models/Filter/FilterHousing';
-import { Pipes } from './Models/Pipes/Pipes';
-
-// Flow and environment simulations imported for Phase 3
-import { Water } from './Models/Tank/Water';
-import { TankMargins } from './Models/Tank/TankMargins';
-import { WaterDropletTracker } from './Models/Tank/WaterDropletTracker';
-import { Flows } from './Models/Pipes/Flows';
+// Visual environment & inspection systems
 import { AmbientLife } from './Environment/AmbientLife';
 import { Hotspots } from './Environment/Hotspots';
-import { SupportRack } from './Environment/SupportRack';
 import { ScenicEnvironment } from './Environment/ScenicEnvironment';
 
 // Exploded 3D Subassembly Callout Labels
 import { ExplodedLabels } from './Models/Exploded/ExplodedLabels';
 
-// Official SolidCraft v9 CAD Digital Twin Model (250 Features)
+// Official SolidCraft v9 CAD Digital Twin Model (Complete 256 Bodies Assembly)
 import { SolidCraftModel } from './Models/SolidCraft/SolidCraftModel';
 
 export const Scene = () => {
-  const { exploded, transparent, cutaway, mode, cadModelMode } = useSystemState();
+  const { exploded } = useSystemState();
 
   return (
     <div
@@ -102,28 +87,10 @@ export const Scene = () => {
 
         {/* Hardware Components Group seated firmly on datum foundation */}
         <group position={[0, -0.2, 0]}>
-          {/* Render the Official SolidCraft v9 CAD Digital Twin or Procedural Model */}
-          {cadModelMode ? (
-            <SolidCraftModel />
-          ) : (
-            <>
-              <Tanks />
-              <SolarPanel />
-              <BatteryUnit />
-              <ESP32Box />
-              <WaterPump />
-              <Sensors />
-              <FilterHousing />
-              <Pipes />
-              <SupportRack />
-              <Water />
-              <TankMargins />
-              <WaterDropletTracker />
-              <Flows />
-            </>
-          )}
+          {/* Authentic SolidCraft v9 CAD Digital Twin Model (256 Parametric Bodies) */}
+          <SolidCraftModel />
 
-          {/* Vision Pro style hotspots */}
+          {/* Minimalist Apple-Style Inspection Pins */}
           <Hotspots />
 
           {/* Exploded View 3D Subassembly Callout Tags */}

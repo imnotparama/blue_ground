@@ -311,6 +311,26 @@ const componentCatalog: Record<string, ComponentDetail> = {
     processRole: 'Primary manual intake mechanism. Lifts raw subterranean water and discharges it through the hydro turbine and booster pump into the 4-stage filtration train.',
     getLiveReadout: (m) => `Intake Throughput: ${m.flowRate.toFixed(1)} L/min | Mechanism Status: OPERATIONAL`,
   },
+  raw_inlet: {
+    name: 'Raw Water Feed Inlet & Isolation Valve',
+    purpose: 'Receives contaminated borewell/slurry feed and channels it directly into the 5-micron white sedimentation filter.',
+    principle: 'Combines an industrial brass quarter-turn ball valve, analog bourdon pressure gauge (0-10 bar), and braided intake line directly connected to the sediment filter manifold.',
+    specifications: ['Port: 1/2" Compression Coupling', 'Valve: Heavy-duty forged brass ball valve', 'Gauge: 0-10 Bar (0-150 PSI) glycerin damped'],
+    power: 'Passive hydraulic intake',
+    maintenance: '99% - Verify valve packing yearly',
+    processRole: 'Primary system intake. Allows instantaneous mechanical shutoff of raw borewell feed.',
+    getLiveReadout: (m) => `Inflow: ${m.flowRate?.toFixed(1) || 4.8} L/min • 4.2 Bar Feed`,
+  },
+  tank_basement: {
+    name: 'Reinforced Tank Foundation Basement Skid',
+    purpose: 'Provides rigid structural cradle and vibration isolation for the clean potable water storage reservoir.',
+    principle: 'Heavy-duty 6061 alloy basement skid with 4 industrial elastomer damping feet, corner retaining brackets, and raised spill-containment rim.',
+    specifications: ['Platform: 1200 x 900 x 45 mm', 'Material: Marine-grade brushed 6061-T6 alloy', 'Dampers: High-durometer NBR anti-vibration foot mounts', 'Spill lip: 15 mm perimeter lip'],
+    power: 'Passive mechanical foundation',
+    maintenance: '100% - Inspect rubber mounts annually',
+    processRole: 'Structural foundation. Prevents pump vibration transmission and securely beds the 100L clean reservoir.',
+    getLiveReadout: () => `Status: Level & Anchored • Vibration Isolated`,
+  },
 };
 
 // Aliases for unified telemetry lookup across all modules

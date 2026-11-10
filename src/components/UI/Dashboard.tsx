@@ -216,443 +216,297 @@ export const Dashboard = () => {
               </div>
             </div>
 
-            {/* TAB CONTENT: SENSORS & TOOLS VS TELEMETRY */}
+            {/* TAB CONTENT: SENSORS & TOOLS VS SIMPLIFIED TELEMETRY */}
             {sidebarTab === 'TOOLS' ? (
               <SensorsAndTools />
             ) : (
               <>
+                {/* 1. HERO PURITY & POTABILITY STATUS */}
+                <div className="p-3.5 rounded-2xl bg-gradient-to-br from-cyan-950/40 via-zinc-900/90 to-emerald-950/40 border border-cyan-500/30 flex flex-col gap-2.5 shadow-[0_8px_24px_rgba(6,182,212,0.12)]">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[9px] font-bold tracking-widest text-zinc-400 uppercase font-mono flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+                      POTABILITY INDEX
+                    </span>
+                    <span className="text-[8px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      WHO CERTIFIED POTABLE
+                    </span>
+                  </div>
 
-            {/* ======================================================== */}
-            {/* 1. SIMULATION ENGINE CONTROL & SCENARIOS */}
-            {/* ======================================================== */}
-            <div className="p-2.5 rounded-xl bg-gradient-to-r from-cyan-950/40 via-zinc-900/70 to-emerald-950/30 border border-cyan-500/30 flex flex-col gap-2">
-              <div className="flex items-center justify-between text-[9px] font-mono">
-                <span className="font-bold text-white flex items-center gap-1">
-                  <Gauge className="w-3.5 h-3.5 text-cyan-400" />
-                  ENGINE STATUS:
-                </span>
-                <span className={`px-2 py-0.5 rounded font-bold text-[8px] border ${
-                  simulationRunning 
-                    ? 'bg-emerald-950 text-emerald-300 border-emerald-500/40 animate-pulse' 
-                    : 'bg-zinc-900 text-zinc-400 border-zinc-700'
-                }`}>
-                  {simulationRunning ? '● RUNNING' : '○ STANDBY'}
-                </span>
-              </div>
-
-              {/* Action Buttons: Start/Pause, Reset, Speed Multipliers */}
-              <div className="flex items-center gap-1.5">
-                <button
-                  onClick={() => simulationRunning ? pauseSimulation() : startSimulation()}
-                  className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer shadow-md ${
-                    simulationRunning
-                      ? 'bg-amber-500/30 text-amber-200 border border-amber-400 hover:bg-amber-500/40 shadow-[0_0_12px_rgba(245,158,11,0.3)]'
-                      : 'bg-emerald-500/30 text-emerald-200 border border-emerald-400 hover:bg-emerald-500/40 shadow-[0_0_12px_rgba(16,185,129,0.3)]'
-                  }`}
-                >
-                  {simulationRunning ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 fill-current" />}
-                  <span>{simulationRunning ? 'Pause Sim' : 'Start Simulation'}</span>
-                </button>
-
-                <button
-                  onClick={resetSimulation}
-                  className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-300 border border-white/10 hover:text-white transition-all cursor-pointer"
-                  title="Reset simulation parameters to scenario defaults"
-                >
-                  <RotateCcw className="w-3.5 h-3.5" />
-                </button>
-
-                {/* Speed Multipliers */}
-                <div className="flex items-center gap-0.5 p-0.5 rounded-lg bg-black/40 border border-white/10">
-                  {[1, 2, 5, 10].map((spd) => (
-                    <button
-                      key={spd}
-                      onClick={() => setSpeedMultiplier(spd)}
-                      className={`px-1.5 py-1 rounded text-[8px] font-mono font-bold transition-all cursor-pointer ${
-                        speedMultiplier === spd
-                          ? 'bg-cyan-500/30 text-cyan-300 border border-cyan-400'
-                          : 'text-zinc-500 hover:text-zinc-300'
-                      }`}
-                    >
-                      {spd}x
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Scenario Selector Dropdown */}
-              <div className="flex flex-col gap-1 pt-1 border-t border-white/5">
-                <span className="text-[8px] font-mono text-zinc-400 uppercase tracking-wider flex items-center justify-between">
-                  <span>Operational / Failure Scenario:</span>
-                  <span className="text-cyan-400 font-bold">{SCENARIO_DEFINITIONS[activeScenario]?.badge || 'NORMAL'}</span>
-                </span>
-                <select
-                  value={activeScenario}
-                  onChange={(e) => setScenario(e.target.value as SimulationScenarioId)}
-                  className="w-full bg-zinc-900 border border-white/15 rounded-lg px-2 py-1.5 text-[10px] font-mono text-white focus:outline-none focus:border-cyan-400 cursor-pointer"
-                >
-                  {Object.values(SCENARIO_DEFINITIONS).map((sc) => (
-                    <option key={sc.id} value={sc.id}>
-                      {sc.name}
-                    </option>
-                  ))}
-                </select>
-                <p className="text-[8px] text-zinc-400 font-sans leading-tight">
-                  {SCENARIO_DEFINITIONS[activeScenario]?.description}
-                </p>
-              </div>
-
-              {/* Complete Simulation Workbench Launcher Button */}
-              <button
-                onClick={() => setSimulationViewOpen(true)}
-                className="w-full py-2 px-3 rounded-xl border border-cyan-500/40 bg-cyan-950/60 text-cyan-200 text-[10px] font-mono font-bold tracking-wider hover:bg-cyan-900/80 hover:border-cyan-400 transition-all cursor-pointer flex items-center justify-center gap-2 shadow-[0_0_12px_rgba(6,182,212,0.2)]"
-              >
-                <Activity className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
-                <span>EXPAND COMPLETE SIMULATION VIEW</span>
-              </button>
-            </div>
-
-            {/* ======================================================== */}
-            {/* 2. DYNAMIC AI HEALTH SCORE & RECOMMENDATIONS */}
-            {/* ======================================================== */}
-            <div className="flex flex-col gap-1.5">
-              <div className="flex items-center justify-between border-b border-white/5 pb-1">
-                <h2 className="text-[9px] font-bold text-zinc-300 tracking-wider uppercase font-mono flex items-center gap-1.5">
-                  <Cpu className="w-3.5 h-3.5 text-purple-400" /> AI PREDICTIVE INTELLIGENCE
-                </h2>
-                <span className={`text-[8px] font-mono px-2 py-0.5 rounded border font-bold ${aiScoreBadge}`}>
-                  HEALTH SCORE: {aiScore}/100
-                </span>
-              </div>
-
-              {/* Dynamic Recommendations List */}
-              <div className="flex flex-col gap-1.5">
-                {(simState?.aiRecommendations || []).slice(0, 3).map((rec) => (
-                  <div
-                    key={rec.id}
-                    className={`p-2 rounded-xl border flex flex-col gap-0.5 font-mono text-[8.5px] ${
-                      rec.severity === 'CRITICAL'
-                        ? 'bg-rose-950/30 border-rose-500/40 text-rose-200'
-                        : rec.severity === 'WARNING'
-                        ? 'bg-amber-950/30 border-amber-500/40 text-amber-200'
-                        : rec.severity === 'SUCCESS'
-                        ? 'bg-emerald-950/20 border-emerald-500/30 text-emerald-200'
-                        : 'bg-zinc-900/60 border-white/10 text-zinc-300'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between font-bold">
-                      <span className="flex items-center gap-1">
-                        {rec.severity === 'CRITICAL' ? <AlertTriangle className="w-3 h-3 text-rose-400" /> :
-                         rec.severity === 'WARNING' ? <AlertTriangle className="w-3 h-3 text-amber-400" /> :
-                         <CheckCircle className="w-3 h-3 text-emerald-400" />}
-                        {rec.title}
-                      </span>
-                      {rec.predictedDaysRemaining !== undefined && (
-                        <span className="text-[7.5px] px-1 py-0.2 rounded bg-black/40 text-amber-300 border border-amber-500/30">
-                          ~{rec.predictedDaysRemaining}d remaining
+                  {/* 3 Core Water Quality Readouts */}
+                  <div className="grid grid-cols-3 gap-2 pt-1 font-mono">
+                    {/* TDS Mineral Level */}
+                    <div className="flex flex-col bg-black/40 p-2 rounded-xl border border-white/5">
+                      <span className="text-[7.5px] text-zinc-400 uppercase">TDS MINERALS</span>
+                      <div className="flex items-baseline gap-1 mt-0.5">
+                        <span className="text-base font-bold text-cyan-300">
+                          {simState?.outputTds ?? 18}
                         </span>
-                      )}
+                        <span className="text-[8px] text-zinc-400">ppm</span>
+                      </div>
+                      <span className="text-[7px] text-emerald-400 font-bold mt-0.5">
+                        -{simState ? Math.round(simState.roRejectionRate * 100) : 94}% salts
+                      </span>
+                    </div>
+
+                    {/* Turbidity Clarity */}
+                    <div className="flex flex-col bg-black/40 p-2 rounded-xl border border-white/5">
+                      <span className="text-[7.5px] text-zinc-400 uppercase">TURBIDITY</span>
+                      <div className="flex items-baseline gap-1 mt-0.5">
+                        <span className="text-base font-bold text-emerald-300">
+                          {(simState?.outputTurbidity ?? 0.11).toFixed(2)}
+                        </span>
+                        <span className="text-[8px] text-zinc-400">NTU</span>
+                      </div>
+                      <span className="text-[7px] text-zinc-400 mt-0.5">
+                        Target &lt;1.0 NTU
+                      </span>
+                    </div>
+
+                    {/* pH Acidity Balance */}
+                    <div className="flex flex-col bg-black/40 p-2 rounded-xl border border-white/5">
+                      <span className="text-[7.5px] text-zinc-400 uppercase">pH BALANCE</span>
+                      <div className="flex items-baseline gap-1 mt-0.5">
+                        <span className="text-base font-bold text-pink-300">
+                          {(simState?.outputPh ?? 7.35).toFixed(2)}
+                        </span>
+                        <span className="text-[8px] text-zinc-400">pH</span>
+                      </div>
+                      <span className="text-[7px] text-pink-400 mt-0.5">
+                        Neutral Potable
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 2. WATER FLOW & RESERVOIR CAPACITY */}
+                <div className="p-3 rounded-2xl bg-zinc-900/60 border border-white/10 flex flex-col gap-2.5 font-mono">
+                  <div className="flex items-center justify-between border-b border-white/5 pb-1">
+                    <span className="text-[8.5px] font-bold text-zinc-300 uppercase tracking-wider flex items-center gap-1.5">
+                      <Droplet className="w-3 h-3 text-cyan-400" />
+                      FLOW STREAMS & RESERVOIRS
+                    </span>
+                    <span className="text-[7.5px] text-cyan-300">70% RECOVERY SPLIT</span>
+                  </div>
+
+                  {/* Clean Tank & Raw Tank Levels */}
+                  <div className="grid grid-cols-2 gap-2 text-[8px]">
+                    <div className="flex flex-col gap-1 p-2 rounded-xl bg-black/30 border border-white/5">
+                      <div className="flex justify-between items-center">
+                        <span className="text-zinc-400">Clean Reservoir</span>
+                        <strong className="text-cyan-300 text-[10px]">
+                          {Math.round(simState?.purifiedWaterLevel ?? 68)} L
+                        </strong>
+                      </div>
+                      <div className="w-full h-2 bg-zinc-800 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-cyan-500 to-emerald-400 transition-all duration-300"
+                          style={{ width: `${Math.min(100, Math.max(8, simState?.purifiedWaterLevel ?? 68))}%` }}
+                        />
+                      </div>
+                      <span className="text-[7px] text-zinc-400 text-right">Cap: 100 L</span>
+                    </div>
+
+                    <div className="flex flex-col gap-1 p-2 rounded-xl bg-black/30 border border-white/5">
+                      <div className="flex justify-between items-center">
+                        <span className="text-zinc-400">Raw Supply Tank</span>
+                        <strong className="text-amber-300 text-[10px]">
+                          {Math.round(simState?.rawWaterLevel ?? 82)} L
+                        </strong>
+                      </div>
+                      <div className="w-full h-2 bg-zinc-800 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-amber-500 to-blue-500 transition-all duration-300"
+                          style={{ width: `${Math.min(100, Math.max(8, simState?.rawWaterLevel ?? 82))}%` }}
+                        />
+                      </div>
+                      <span className="text-[7px] text-zinc-400 text-right">Cap: 100 L</span>
+                    </div>
+                  </div>
+
+                  {/* Flow Rate Split Bar */}
+                  <div className="flex items-center justify-between p-2 rounded-xl bg-black/40 border border-white/5 text-[8.5px]">
+                    <div className="flex flex-col">
+                      <span className="text-zinc-400 text-[7.5px]">RAW FEED</span>
+                      <strong className="text-cyan-300">
+                        {(simState?.inputFlowRate ?? 4.8).toFixed(1)} L/m
+                      </strong>
+                    </div>
+                    <span className="text-zinc-500">➔</span>
+                    <div className="flex flex-col text-center">
+                      <span className="text-emerald-400 text-[7.5px]">POTABLE PERMEATE (70%)</span>
+                      <strong className="text-emerald-300">
+                        {(simState?.outputFlowRate ?? 3.4).toFixed(1)} L/m
+                      </strong>
+                    </div>
+                    <span className="text-zinc-500">+</span>
+                    <div className="flex flex-col text-right">
+                      <span className="text-amber-400 text-[7.5px]">FLUSH REJECT (30%)</span>
+                      <strong className="text-amber-300">
+                        {(simState?.wasteFlowRate ?? 1.4).toFixed(1)} L/m
+                      </strong>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3. AI PREDICTIVE GUARDIAN */}
+                <div className="p-3 rounded-2xl bg-purple-950/20 border border-purple-500/30 flex flex-col gap-1.5 font-mono">
+                  <div className="flex items-center justify-between border-b border-purple-500/20 pb-1">
+                    <span className="text-[8.5px] font-bold text-purple-300 uppercase tracking-wider flex items-center gap-1.5">
+                      <Cpu className="w-3.5 h-3.5 text-purple-400" />
+                      AI PREDICTIVE HEALTH
+                    </span>
+                    <span className="text-[8px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold">
+                      SCORE: {simState?.aiHealthScore ?? 94}/100
+                    </span>
+                  </div>
+                  <div className="p-2 rounded-xl bg-black/40 border border-white/5 text-[8px] flex flex-col gap-1">
+                    <div className="flex items-center justify-between text-zinc-200 font-bold">
+                      <span className="flex items-center gap-1 text-emerald-300">
+                        <CheckCircle className="w-3 h-3 text-emerald-400" />
+                        {simState?.aiRecommendations?.[0]?.title || 'All 4 Purification Stages Healthy'}
+                      </span>
+                      <span className="text-[7.5px] text-amber-300 font-normal">
+                        ~18d remaining
+                      </span>
                     </div>
                     <p className="text-[7.5px] text-zinc-300 font-sans leading-tight">
-                      {rec.message}
+                      {simState?.aiRecommendations?.[0]?.message || 'Reverse osmosis rejection rate is 95.2%. Operating pressure and flow rates are nominal.'}
                     </p>
-                    <span className="text-[7px] text-zinc-400 font-mono italic">
-                      Action: {rec.action}
+                  </div>
+                </div>
+
+                {/* 4. MASTER SIMULATION CONTROLS & QUICK SCENARIOS */}
+                <div className="p-3 rounded-2xl bg-zinc-900/80 border border-cyan-500/30 flex flex-col gap-2.5 font-mono">
+                  {/* Master Start / Pause Button */}
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => (simulationRunning ? pauseSimulation() : startSimulation())}
+                      className={`flex-1 py-2 px-3 rounded-xl border text-[10px] font-bold tracking-wider transition-all cursor-pointer flex items-center justify-center gap-2 shadow-lg ${
+                        simulationRunning
+                          ? 'bg-amber-500/25 border-amber-400 text-amber-200 shadow-[0_0_14px_rgba(245,158,11,0.3)]'
+                          : 'bg-emerald-500/25 border-emerald-400 text-emerald-200 shadow-[0_0_14px_rgba(16,185,129,0.3)]'
+                      }`}
+                    >
+                      {simulationRunning ? (
+                        <Pause className="w-3.5 h-3.5" />
+                      ) : (
+                        <Play className="w-3.5 h-3.5 fill-current" />
+                      )}
+                      <span>{simulationRunning ? 'PAUSE SIMULATION' : 'START SIMULATION'}</span>
+                    </button>
+
+                    <button
+                      onClick={resetSimulation}
+                      className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 border border-white/10 hover:text-white transition-all cursor-pointer"
+                      title="Reset simulation parameters"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" />
+                    </button>
+
+                    {/* Speed Multipliers */}
+                    <div className="flex items-center gap-0.5 p-0.5 rounded-xl bg-black/40 border border-white/10">
+                      {[1, 2, 5].map((spd) => (
+                        <button
+                          key={spd}
+                          onClick={() => setSpeedMultiplier(spd)}
+                          className={`px-1.5 py-1 rounded-lg text-[8px] font-bold transition-all cursor-pointer ${
+                            speedMultiplier === spd
+                              ? 'bg-cyan-500/30 text-cyan-300 border border-cyan-400'
+                              : 'text-zinc-500 hover:text-zinc-300'
+                          }`}
+                        >
+                          {spd}x
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Quick Scenario Chips */}
+                  <div className="flex flex-col gap-1.5 pt-1 border-t border-white/5">
+                    <span className="text-[7.5px] text-zinc-400 uppercase tracking-wider">
+                      Quick Failure & Operational Scenarios:
                     </span>
-                  </div>
-                ))}
-              </div>
-            </div>
+                    <div className="grid grid-cols-2 gap-1 text-[8px]">
+                      <button
+                        onClick={() => {
+                          setScenario('NORMAL');
+                          startSimulation();
+                        }}
+                        className={`py-1.5 px-2 rounded-lg border text-left transition-all cursor-pointer ${
+                          activeScenario === 'NORMAL'
+                            ? 'bg-emerald-500/25 border-emerald-400 text-emerald-300 font-bold'
+                            : 'bg-black/30 border-white/5 text-zinc-400 hover:text-white'
+                        }`}
+                      >
+                        🟢 Nominal Flow
+                      </button>
+                      <button
+                        onClick={() => {
+                          setScenario('HIGH_TDS');
+                          startSimulation();
+                        }}
+                        className={`py-1.5 px-2 rounded-lg border text-left transition-all cursor-pointer ${
+                          activeScenario === 'HIGH_TDS'
+                            ? 'bg-cyan-500/25 border-cyan-400 text-cyan-300 font-bold'
+                            : 'bg-black/30 border-white/5 text-zinc-400 hover:text-white'
+                        }`}
+                      >
+                        💧 High TDS (1180)
+                      </button>
+                      <button
+                        onClick={() => {
+                          setScenario('HIGH_TURBIDITY');
+                          startSimulation();
+                        }}
+                        className={`py-1.5 px-2 rounded-lg border text-left transition-all cursor-pointer ${
+                          activeScenario === 'HIGH_TURBIDITY'
+                            ? 'bg-amber-500/25 border-amber-400 text-amber-300 font-bold'
+                            : 'bg-black/30 border-white/5 text-zinc-400 hover:text-white'
+                        }`}
+                      >
+                        🟡 Silt Slurry (52 NTU)
+                      </button>
+                      <button
+                        onClick={() => {
+                          setScenario('PUMP_FAILURE');
+                          startSimulation();
+                        }}
+                        className={`py-1.5 px-2 rounded-lg border text-left transition-all cursor-pointer ${
+                          activeScenario === 'PUMP_FAILURE'
+                            ? 'bg-rose-500/25 border-rose-400 text-rose-300 font-bold'
+                            : 'bg-black/30 border-white/5 text-zinc-400 hover:text-white'
+                        }`}
+                      >
+                        🔴 Pump Fault (0 RPM)
+                      </button>
+                    </div>
 
-            {/* ======================================================== */}
-            {/* 3. TANK FLUID LEVELS (RAW, PURIFIED, WASTE) */}
-            {/* ======================================================== */}
-            <div className="flex flex-col gap-1.5">
-              <h2 className="text-[9px] font-bold text-zinc-400 tracking-wider uppercase font-mono flex items-center justify-between border-b border-white/5 pb-1">
-                <span className="flex items-center gap-1.5"><Layers className="w-3.5 h-3.5 text-blue-400" /> TANK INVENTORY LEVELS</span>
-                <span className="text-[8px] font-mono text-cyan-300">MASS BALANCE ACTIVE</span>
-              </h2>
-              
-              <div className="grid grid-cols-3 gap-2 bg-white/2 p-2.5 rounded-xl border border-white/5 text-[9px] font-mono">
-                {/* Raw Feed Tank */}
-                <div className="flex flex-col gap-1">
-                  <div className="flex justify-between items-center text-[8px]">
-                    <span className="text-zinc-500">RAW TANK</span>
-                    <strong className="text-zinc-300">{simState ? simState.rawWaterLevel.toFixed(1) : 100}L</strong>
+                    {/* Scenario Dropdown for All 9 Modes */}
+                    <select
+                      value={activeScenario}
+                      onChange={(e) => setScenario(e.target.value as SimulationScenarioId)}
+                      className="w-full bg-zinc-900 border border-white/10 rounded-lg px-2 py-1 text-[8.5px] font-mono text-zinc-300 focus:outline-none focus:border-cyan-400 cursor-pointer mt-0.5"
+                    >
+                      {Object.values(SCENARIO_DEFINITIONS).map((sc) => (
+                        <option key={sc.id} value={sc.id}>
+                          {sc.name}
+                        </option>
+                      ))}
+                    </select>
                   </div>
-                  <div className="w-full h-2 bg-zinc-800 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-amber-500 transition-all duration-300"
-                      style={{ width: `${((simState?.rawWaterLevel ?? 100) / 100) * 100}%` }}
-                    />
-                  </div>
-                  <span className="text-[7px] text-zinc-500 text-center">Cap: 100 L</span>
+
+                  {/* Open Complete Simulation Matrix Modal */}
+                  <button
+                    onClick={() => setSimulationViewOpen(true)}
+                    className="w-full py-2 px-3 rounded-xl border border-cyan-500/40 bg-gradient-to-r from-cyan-950/60 to-blue-950/60 text-cyan-200 text-[9px] font-bold tracking-wider hover:bg-cyan-900/80 hover:border-cyan-400 transition-all cursor-pointer flex items-center justify-center gap-2 shadow-[0_0_12px_rgba(6,182,212,0.2)]"
+                  >
+                    <Activity className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
+                    <span>VIEW COMPLETE ENGINEERING DATA MATRIX</span>
+                  </button>
                 </div>
-
-                {/* Purified Product Tank */}
-                <div className="flex flex-col gap-1">
-                  <div className="flex justify-between items-center text-[8px]">
-                    <span className="text-zinc-500">CLEAN TANK</span>
-                    <strong className="text-cyan-300">{simState ? simState.purifiedWaterLevel.toFixed(1) : 15}L</strong>
-                  </div>
-                  <div className="w-full h-2 bg-zinc-800 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-cyan-400 transition-all duration-300"
-                      style={{ width: `${((simState?.purifiedWaterLevel ?? 15) / 100) * 100}%` }}
-                    />
-                  </div>
-                  <span className="text-[7px] text-cyan-500 text-center">Cap: 100 L</span>
-                </div>
-
-                {/* Waste Water Tank */}
-                <div className="flex flex-col gap-1">
-                  <div className="flex justify-between items-center text-[8px]">
-                    <span className="text-zinc-500">WASTE BRINE</span>
-                    <strong className="text-amber-400">{simState ? simState.wasteWaterLevel.toFixed(1) : 6}L</strong>
-                  </div>
-                  <div className="w-full h-2 bg-zinc-800 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-rose-500 transition-all duration-300"
-                      style={{ width: `${((simState?.wasteWaterLevel ?? 6) / 50) * 100}%` }}
-                    />
-                  </div>
-                  <span className="text-[7px] text-amber-500 text-center">Cap: 50 L</span>
-                </div>
-              </div>
-            </div>
-
-            {/* ======================================================== */}
-            {/* 4. THREE FLOW STREAMS KINETICS (IN, PERMEATE, REJECT) */}
-            {/* ======================================================== */}
-            <div className="flex flex-col gap-1.5">
-              <h2 className="text-[9px] font-bold text-zinc-400 tracking-wider uppercase font-mono flex items-center justify-between border-b border-white/5 pb-1">
-                <span className="flex items-center gap-1.5"><Droplet className="w-3.5 h-3.5 text-cyan-400" /> HYDRAULIC FLOW RATES</span>
-                <span className="text-[8px] font-mono text-emerald-400">70% RECOVERY SPLIT</span>
-              </h2>
-              <div className="grid grid-cols-3 gap-2 bg-white/2 p-2.5 rounded-xl border border-white/5 text-center font-mono">
-                <div>
-                  <span className="text-[8px] text-zinc-500 block">FEED INLET</span>
-                  <span className="text-xs font-bold text-cyan-300">{(simState?.inputFlowRate ?? metrics.flowRate).toFixed(2)} L/m</span>
-                  <span className="text-[7px] text-zinc-400 block mt-0.5">100% Inflow</span>
-                </div>
-                <div>
-                  <span className="text-[8px] text-zinc-500 block">PURIFIED PERMEATE</span>
-                  <span className="text-xs font-bold text-emerald-300">{(simState?.outputFlowRate ?? (metrics.flowRate * 0.7)).toFixed(2)} L/m</span>
-                  <span className="text-[7px] text-emerald-400 font-bold block mt-0.5">{simState ? (simState.roRecoveryRate * 100).toFixed(0) : 70}% Recovery</span>
-                </div>
-                <div>
-                  <span className="text-[8px] text-zinc-500 block">REJECT CONCENTRATE</span>
-                  <span className="text-xs font-bold text-amber-400">{(simState?.wasteFlowRate ?? (metrics.flowRate * 0.3)).toFixed(2)} L/m</span>
-                  <span className="text-[7px] text-amber-500 block mt-0.5">{simState ? (100 - simState.roRecoveryRate * 100).toFixed(0) : 30}% Waste</span>
-                </div>
-              </div>
-            </div>
-
-            {/* ======================================================== */}
-            {/* 5. WATER CHEMISTRY (RAW vs PURIFIED) */}
-            {/* ======================================================== */}
-            <div className="flex flex-col gap-1.5">
-              <div className="flex items-center justify-between border-b border-white/5 pb-1">
-                <h2 className="text-[9px] font-bold text-zinc-400 tracking-wider uppercase font-mono flex items-center gap-1.5">
-                  <Activity className="w-3.5 h-3.5 text-pink-400" /> WATER CHEMISTRY PROFILE
-                </h2>
-                <span className="text-[8px] font-mono text-cyan-300">BEFORE ➔ AFTER</span>
-              </div>
-              <div className="grid grid-cols-2 gap-2 text-mono">
-                {/* TDS Comparison */}
-                <div className="bg-white/2 p-2 rounded-xl border border-white/5 flex flex-col gap-0.5">
-                  <div className="flex justify-between items-center text-[8px] text-zinc-400 font-mono">
-                    <span>TDS MINERAL PURITY</span>
-                    <span className="text-emerald-400 font-bold">-{simState ? (simState.roRejectionRate * 100).toFixed(0) : 95}%</span>
-                  </div>
-                  <div className="flex items-baseline justify-between font-mono">
-                    <span className="text-[10px] text-zinc-400 line-through">{simState?.inputTds ?? 240}</span>
-                    <span className="text-sm font-bold text-sky-400">{simState?.outputTds ?? 24} ppm</span>
-                  </div>
-                  <Sparkline data={history.tds} color="#38bdf8" />
-                </div>
-
-                {/* Turbidity Comparison */}
-                <div className="bg-white/2 p-2 rounded-xl border border-white/5 flex flex-col gap-0.5">
-                  <div className="flex justify-between items-center text-[8px] text-zinc-400 font-mono">
-                    <span>TURBIDITY CLARITY</span>
-                    <span className="text-emerald-400 font-bold">CLEAR</span>
-                  </div>
-                  <div className="flex items-baseline justify-between font-mono">
-                    <span className="text-[10px] text-zinc-400 line-through">{(simState?.inputTurbidity ?? 2.2).toFixed(1)}</span>
-                    <span className={`text-sm font-bold ${(simState?.outputTurbidity ?? 0.1) > 1.0 ? 'text-amber-400' : 'text-emerald-400'}`}>
-                      {(simState?.outputTurbidity ?? 0.12).toFixed(2)} NTU
-                    </span>
-                  </div>
-                  <Sparkline data={history.turbidity} color="#34d399" />
-                </div>
-
-                {/* pH Stabilization */}
-                <div className="bg-white/2 p-2 rounded-xl border border-white/5 flex flex-col gap-0.5">
-                  <div className="flex justify-between items-center text-[8px] text-zinc-400 font-mono">
-                    <span>pH ACIDITY INDEX</span>
-                    <span className="text-pink-400 font-bold">STABILIZED</span>
-                  </div>
-                  <div className="flex items-baseline justify-between font-mono">
-                    <span className="text-[10px] text-zinc-400">{simState?.inputPh.toFixed(2) ?? 7.25}</span>
-                    <span className="text-xs font-bold text-pink-400">➔ {simState?.outputPh.toFixed(2) ?? 7.36} pH</span>
-                  </div>
-                  <Sparkline data={history.ph} color="#f472b6" />
-                </div>
-
-                {/* Reject Brine Concentration */}
-                <div className="bg-white/2 p-2 rounded-xl border border-white/5 flex flex-col gap-0.5">
-                  <div className="flex justify-between items-center text-[8px] text-zinc-400 font-mono">
-                    <span>REJECT BRINE TDS</span>
-                    <span className="text-amber-400 font-bold">CONCENTRATED</span>
-                  </div>
-                  <div className="flex items-baseline justify-between font-mono">
-                    <span className="text-[10px] text-zinc-500">BRINE</span>
-                    <span className="text-xs font-bold text-amber-400">{simState?.stageProfiles.tds.roReject ?? 420} ppm</span>
-                  </div>
-                  <span className="text-[7.5px] text-zinc-500 font-mono">Mineral salts flushed to waste</span>
-                </div>
-              </div>
-            </div>
-
-            {/* ======================================================== */}
-            {/* 6. ACTUATORS & HARDWARE STATES */}
-            {/* ======================================================== */}
-            <div className="flex flex-col gap-1.5">
-              <h2 className="text-[9px] font-bold text-zinc-400 tracking-wider uppercase font-mono flex items-center justify-between border-b border-white/5 pb-1">
-                <span className="flex items-center gap-1.5"><Wrench className="w-3.5 h-3.5 text-amber-400" /> ACTUATORS & INTERLOCKS</span>
-                <span className="text-[8px] font-mono text-zinc-400">24V / 12V BUS</span>
-              </h2>
-              <div className="grid grid-cols-3 gap-2 bg-white/2 p-2 rounded-xl border border-white/5 text-center font-mono text-[9px]">
-                <div className="p-1 rounded bg-black/40 border border-white/5">
-                  <span className="text-[7.5px] text-zinc-500 block">PUMP STATUS</span>
-                  <span className={`font-bold ${
-                    simState?.pumpStatus === 'RUNNING' ? 'text-emerald-400' :
-                    simState?.pumpStatus === 'FAULT' ? 'text-rose-400 animate-pulse' : 'text-zinc-400'
-                  }`}>
-                    {simState?.pumpStatus ?? 'IDLE'}
-                  </span>
-                  <span className="text-[7px] text-zinc-400 block">{simState?.pumpRpm ?? 0} RPM</span>
-                </div>
-
-                <div className="p-1 rounded bg-black/40 border border-white/5">
-                  <span className="text-[7.5px] text-zinc-500 block">SOLENOID VALVE</span>
-                  <span className={`font-bold ${
-                    simState?.solenoidValveStatus === 'OPEN' ? 'text-emerald-400' : 'text-zinc-400'
-                  }`}>
-                    {simState?.solenoidValveStatus ?? 'CLOSED'}
-                  </span>
-                  <span className="text-[7px] text-zinc-400 block">{simState?.valveAngleDeg ?? 0}° ANGLE</span>
-                </div>
-
-                <div className="p-1 rounded bg-black/40 border border-white/5">
-                  <span className="text-[7.5px] text-zinc-500 block">UV STERILIZER</span>
-                  <span className={`font-bold ${
-                    simState?.uvStatus === 'ON' ? 'text-violet-300 animate-pulse' :
-                    simState?.uvStatus === 'FAULT' ? 'text-rose-400' : 'text-zinc-500'
-                  }`}>
-                    {simState?.uvStatus ?? 'OFF'}
-                  </span>
-                  <span className="text-[7px] text-zinc-400 block">{simState?.uvIntensity ?? 16.5} mW/cm²</span>
-                </div>
-              </div>
-            </div>
-
-            {/* ======================================================== */}
-            {/* 7. FOUR-STAGE FILTER CARTRIDGE HEALTH */}
-            {/* ======================================================== */}
-            <div className="flex flex-col gap-1.5">
-              <h2 className="text-[9px] font-bold text-zinc-400 tracking-wider uppercase font-mono flex items-center justify-between border-b border-white/5 pb-1">
-                <span className="flex items-center gap-1.5 text-cyan-400 font-bold">
-                  <Layers className="w-3.5 h-3.5 text-cyan-400" />
-                  4-STAGE FILTER TRAIN HEALTH
-                </span>
-                <span className="text-[8px] font-mono text-emerald-400 bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-500/30">
-                  OVERALL: {simState ? simState.filterHealth.overall : 94}%
-                </span>
-              </h2>
-
-              <div className="grid grid-cols-2 gap-2 bg-white/2 p-2.5 rounded-xl border border-white/5 text-[9px] font-mono">
-                {/* Stage 1: SediShield */}
-                <div className="flex flex-col gap-1 p-1.5 rounded-lg bg-black/40 border border-amber-500/20">
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-amber-300">SediShield</span>
-                    <strong className={(simState?.filterHealth.sediment ?? 94) < 30 ? 'text-rose-400' : 'text-amber-400'}>
-                      {(simState?.filterHealth.sediment ?? 94).toFixed(0)}%
-                    </strong>
-                  </div>
-                  <div className="text-[7px] text-zinc-400 font-sans leading-tight">5µm PP Silt & Sand</div>
-                  <div className="w-full h-1 bg-zinc-800 rounded-full overflow-hidden mt-0.5">
-                    <div className="h-full bg-amber-400" style={{ width: `${simState?.filterHealth.sediment ?? 94}%` }} />
-                  </div>
-                </div>
-
-                {/* Stage 2: ChemoBlock */}
-                <div className="flex flex-col gap-1 p-1.5 rounded-lg bg-black/40 border border-emerald-500/20">
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-emerald-300">ChemoBlock</span>
-                    <strong className="text-emerald-400">{(simState?.filterHealth.carbon ?? 90).toFixed(0)}%</strong>
-                  </div>
-                  <div className="text-[7px] text-zinc-400 font-sans leading-tight">CTO Carbon Block</div>
-                  <div className="w-full h-1 bg-zinc-800 rounded-full overflow-hidden mt-0.5">
-                    <div className="h-full bg-emerald-400" style={{ width: `${simState?.filterHealth.carbon ?? 90}%` }} />
-                  </div>
-                </div>
-
-                {/* Stage 3: RO Maxx */}
-                <div className="flex flex-col gap-1 p-1.5 rounded-lg bg-black/40 border border-cyan-500/20">
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-cyan-300">RO Maxx</span>
-                    <strong className={(simState?.filterHealth.ro ?? 95) < 30 ? 'text-rose-400' : 'text-cyan-400'}>
-                      {(simState?.filterHealth.ro ?? 95).toFixed(0)}%
-                    </strong>
-                  </div>
-                  <div className="text-[7px] text-cyan-300 font-sans leading-tight">0.0001µm TFC Membrane</div>
-                  <div className="w-full h-1 bg-zinc-800 rounded-full overflow-hidden mt-0.5">
-                    <div className="h-full bg-cyan-400" style={{ width: `${simState?.filterHealth.ro ?? 95}%` }} />
-                  </div>
-                </div>
-
-                {/* Stage 4: Active Copper */}
-                <div className="flex flex-col gap-1 p-1.5 rounded-lg bg-black/40 border border-amber-500/20">
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-amber-300">Active Copper</span>
-                    <strong className="text-amber-400">{(simState?.filterHealth.uf ?? 96).toFixed(0)}%</strong>
-                  </div>
-                  <div className="text-[7px] text-zinc-400 font-sans leading-tight">Cu²⁺ Mineral Polish</div>
-                  <div className="w-full h-1 bg-zinc-800 rounded-full overflow-hidden mt-0.5">
-                    <div className="h-full bg-amber-400" style={{ width: `${simState?.filterHealth.uf ?? 96}%` }} />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* ======================================================== */}
-            {/* 8. CUMULATIVE VOLUME & OPERATING HOURS */}
-            {/* ======================================================== */}
-            <div className="grid grid-cols-3 gap-2 bg-white/2 p-2.5 rounded-xl border border-white/5 text-center font-mono">
-              <div>
-                <span className="text-[7.5px] text-zinc-500 block">TOTAL PURIFIED</span>
-                <span className="text-xs font-bold text-cyan-300">{(simState?.totalWaterPurified ?? 0).toFixed(1)} L</span>
-              </div>
-              <div>
-                <span className="text-[7.5px] text-zinc-500 block">TOTAL WASTE</span>
-                <span className="text-xs font-bold text-amber-400">{(simState?.totalWasteWater ?? 0).toFixed(1)} L</span>
-              </div>
-              <div>
-                <span className="text-[7.5px] text-zinc-500 block">OPERATING HRS</span>
-                <span className="text-xs font-bold text-zinc-200">{(simState?.operatingHours ?? 14.2).toFixed(1)} h</span>
-              </div>
-            </div>
-
-            {/* ======================================================== */}
-            {/* 9. OVERALL POTABILITY QUALITY BADGE */}
-            {/* ======================================================== */}
-            <div className={`flex items-center justify-between border p-2.5 rounded-xl ${getQualityColor()}`}>
-              <span className="text-zinc-300 text-[9px] uppercase tracking-wider font-semibold">CERTIFIED QUALITY INDEX:</span>
-              <span className="font-bold tracking-widest font-mono">{quality} (POTABLE)</span>
-            </div>
-            </>
+              </>
             )}
           </div>
         </motion.div>
