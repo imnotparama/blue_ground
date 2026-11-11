@@ -58,8 +58,8 @@ export const Scene = () => {
           rayleigh={1.1}
         />
 
-        {/* Soft tropical atmospheric depth haze */}
-        <fog attach="fog" args={['#bae6fd', 28, 90]} />
+        {/* Soft tropical atmospheric depth haze calibrated to panoramic horizon */}
+        <fog attach="fog" args={['#bae6fd', 55, 95]} />
 
         {/* Lighting setup */}
         <SceneLighting />
