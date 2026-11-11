@@ -25,7 +25,7 @@ export class SimulationEngine implements WaterPurifierTelemetrySource {
     const baseState: SimulationState = {
       rawWaterLevel: initialRawLevel,
       rawTankCapacity: 100,
-      purifiedWaterLevel: 15,
+      purifiedWaterLevel: 75,
       purifiedTankCapacity: 100,
       wasteWaterLevel: 6,
       wasteTankCapacity: 50,

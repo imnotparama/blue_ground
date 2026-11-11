@@ -6,45 +6,48 @@ const textureCache = new Map<string, THREE.CanvasTexture>();
 // -------------------------------------------------------------
 // 1. HIGH-EFFICIENCY MONOCRYSTALLINE PHOTOVOLTAIC TEXTURE
 // -------------------------------------------------------------
+// 1. HIGH-EFFICIENCY MONOCRYSTALLINE PHOTOVOLTAIC TEXTURE (2048x2048 PHOTOREALISTIC)
+// -------------------------------------------------------------
 export function getSolarCellTexture(): THREE.CanvasTexture | null {
   if (typeof document === 'undefined') return null;
-  const key = 'solar_pv_cells_v1';
+  const key = 'solar_pv_cells_v2';
   if (textureCache.has(key)) return textureCache.get(key)!;
 
   const canvas = document.createElement('canvas');
-  canvas.width = 1024;
-  canvas.height = 1024;
+  canvas.width = 2048;
+  canvas.height = 2048;
   const ctx = canvas.getContext('2d');
   if (!ctx) return null;
 
   const w = canvas.width;
   const h = canvas.height;
 
-  // 1. Base White Tedlar Inter-Cell Backsheet
-  ctx.fillStyle = '#f1f5f9';
+  // 1. Base Bright White Tedlar Inter-Cell Backsheet
+  ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, w, h);
 
   // 2. Monocrystalline Pseudo-Square Cells Matrix (6 columns x 10 rows)
   const cols = 6;
   const rows = 10;
-  const padX = 20;
-  const padY = 20;
-  const gap = 8;
+  const padX = 40;
+  const padY = 40;
+  const gap = 14;
 
   const cellW = (w - padX * 2 - gap * (cols - 1)) / cols;
   const cellH = (h - padY * 2 - gap * (rows - 1)) / rows;
-  const chamfer = Math.min(cellW, cellH) * 0.16; // 45° cut corners
+  const chamfer = Math.min(cellW, cellH) * 0.16; // 45° cut corners creating classic white diamonds
 
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
       const x = padX + c * (cellW + gap);
       const y = padY + r * (cellH + gap);
 
-      // Deep dark blue / indigo-black monocrystalline silicon wafer
+      // Authentic Photorealistic Monocrystalline PERC Deep Navy/Royal Blue Silicon Wafer
       const grad = ctx.createLinearGradient(x, y, x + cellW, y + cellH);
-      grad.addColorStop(0, '#09152b');
-      grad.addColorStop(0.5, '#0c1e3d');
-      grad.addColorStop(1, '#071024');
+      grad.addColorStop(0, '#0c234b');
+      grad.addColorStop(0.35, '#163a78');
+      grad.addColorStop(0.7, '#1b448c');
+      grad.addColorStop(1, '#0e2652');
 
       ctx.save();
       ctx.beginPath();
@@ -61,33 +64,52 @@ export function getSolarCellTexture(): THREE.CanvasTexture | null {
       ctx.fillStyle = grad;
       ctx.fill();
 
-      // Ultra-fine conductive silver finger grid lines
-      ctx.strokeStyle = 'rgba(203, 213, 225, 0.35)';
-      ctx.lineWidth = 1;
-      const numFingers = 24;
+      // Subtle anti-reflective coating sheen highlight across wafer diagonal
+      const arcSheen = ctx.createLinearGradient(x, y, x + cellW * 0.6, y + cellH * 0.6);
+      arcSheen.addColorStop(0, 'rgba(56, 189, 248, 0.12)');
+      arcSheen.addColorStop(0.5, 'rgba(30, 64, 175, 0.0)');
+      arcSheen.addColorStop(1, 'rgba(14, 165, 233, 0.08)');
+      ctx.fillStyle = arcSheen;
+      ctx.fill();
+
+      // Ultra-fine conductive silver finger grid lines (32 lines per cell)
+      ctx.strokeStyle = 'rgba(226, 232, 240, 0.45)';
+      ctx.lineWidth = 1.2;
+      const numFingers = 32;
       for (let f = 1; f < numFingers; f++) {
         const fy = y + (f / numFingers) * cellH;
         ctx.beginPath();
-        ctx.moveTo(x + 2, fy);
-        ctx.lineTo(x + cellW - 2, fy);
+        ctx.moveTo(x + 3, fy);
+        ctx.lineTo(x + cellW - 3, fy);
         ctx.stroke();
       }
 
-      // 3 Bright Continuous Silver Busbar Ribbons per cell
-      ctx.strokeStyle = '#e2e8f0';
-      ctx.lineWidth = 2.2;
-      for (let b = 1; b <= 3; b++) {
-        const bx = x + (b / 4) * cellW;
+      // 5 Bright Continuous Silver Busbar Ribbons per cell (High-Efficiency 5BB/MBB Module)
+      const numBusbars = 5;
+      for (let b = 1; b <= numBusbars; b++) {
+        const bx = x + (b / (numBusbars + 1)) * cellW;
+
+        // Busbar ribbon conductor
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 3.2;
         ctx.beginPath();
         ctx.moveTo(bx, y);
         ctx.lineTo(bx, y + cellH);
         ctx.stroke();
 
-        // Solder joint pads along the busbars
-        ctx.fillStyle = '#f8fafc';
-        for (let s = 1; s <= 4; s++) {
-          const sy = y + (s / 5) * cellH;
-          ctx.fillRect(bx - 2, sy - 2, 4, 4);
+        // Secondary silver reflection edge
+        ctx.strokeStyle = '#cbd5e1';
+        ctx.lineWidth = 1.0;
+        ctx.beginPath();
+        ctx.moveTo(bx + 1.2, y);
+        ctx.lineTo(bx + 1.2, y + cellH);
+        ctx.stroke();
+
+        // Precision solder joint pads along the busbar
+        ctx.fillStyle = '#ffffff';
+        for (let s = 1; s <= 5; s++) {
+          const sy = y + (s / 6) * cellH;
+          ctx.fillRect(bx - 3, sy - 3, 6, 6);
         }
       }
 
@@ -95,15 +117,30 @@ export function getSolarCellTexture(): THREE.CanvasTexture | null {
     }
   }
 
-  // 3. Perimeter Framing Rubber Gasket Trim
-  ctx.lineWidth = 12;
-  ctx.strokeStyle = '#1e293b';
-  ctx.strokeRect(6, 6, w - 12, h - 12);
+  // 3. Extruded Anodized Aluminum Perimeter Frame Rim
+  ctx.lineWidth = 28;
+  ctx.strokeStyle = '#94a3b8'; // Satin silver anodized aluminum frame
+  ctx.strokeRect(14, 14, w - 28, h - 28);
+
+  ctx.lineWidth = 4;
+  ctx.strokeStyle = '#f8fafc'; // Outer beveled edge highlight
+  ctx.strokeRect(4, 4, w - 8, h - 8);
+
+  ctx.lineWidth = 6;
+  ctx.strokeStyle = '#334155'; // Inner rubber weatherproofing gasket
+  ctx.strokeRect(28, 28, w - 56, h - 56);
+
+  // 4. Laser-Marked Technical Nameplate at bottom right margin
+  ctx.fillStyle = '#0f172a';
+  ctx.font = 'bold 20px monospace';
+  ctx.textAlign = 'right';
+  ctx.fillText('LEVIATHAN SOLAR PV-420W MONO PERC • TEAM CHOOSENONES', w - 48, h - 16);
 
   const texture = new THREE.CanvasTexture(canvas);
   texture.minFilter = THREE.LinearMipmapLinearFilter;
   texture.magFilter = THREE.LinearFilter;
   texture.generateMipmaps = true;
+  texture.anisotropy = 8;
   textureCache.set(key, texture);
   return texture;
 }

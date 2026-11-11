@@ -18,52 +18,71 @@ export const SolarPanel = () => {
     const ctx = canvas.getContext('2d');
 
     if (ctx) {
-      // Dark navy monocrystalline base
-      ctx.fillStyle = '#050c1e';
+      // White Tedlar backsheet
+      ctx.fillStyle = '#ffffff';
       ctx.fillRect(0, 0, 512, 512);
 
-      const gradient = ctx.createLinearGradient(0, 0, 512, 512);
-      gradient.addColorStop(0, '#091838');
-      gradient.addColorStop(0.5, '#040d21');
-      gradient.addColorStop(1, '#020612');
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, 512, 512);
+      // 4x4 Monocrystalline PERC cell array with white diamond cutouts
+      const cols = 4;
+      const rows = 4;
+      const pad = 12;
+      const gap = 6;
+      const cW = (512 - pad * 2 - gap * (cols - 1)) / cols;
+      const cH = (512 - pad * 2 - gap * (rows - 1)) / rows;
+      const chamfer = 14;
 
-      // Silver Busbar Ribbons (3 main vertical conductors per cell)
-      ctx.strokeStyle = '#e2e8f0';
-      ctx.lineWidth = 3;
-      for (let x = 42; x < 512; x += 85) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, 512);
-        ctx.stroke();
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const x = pad + c * (cW + gap);
+          const y = pad + r * (cH + gap);
+
+          const grad = ctx.createLinearGradient(x, y, x + cW, y + cH);
+          grad.addColorStop(0, '#0c234b');
+          grad.addColorStop(0.4, '#163a78');
+          grad.addColorStop(0.8, '#1b448c');
+          grad.addColorStop(1, '#0e2652');
+
+          ctx.beginPath();
+          ctx.moveTo(x + chamfer, y);
+          ctx.lineTo(x + cW - chamfer, y);
+          ctx.lineTo(x + cW, y + chamfer);
+          ctx.lineTo(x + cW, y + cH - chamfer);
+          ctx.lineTo(x + cW - chamfer, y + cH);
+          ctx.lineTo(x + chamfer, y + cH);
+          ctx.lineTo(x, y + cH - chamfer);
+          ctx.lineTo(x, y + chamfer);
+          ctx.closePath();
+          ctx.fillStyle = grad;
+          ctx.fill();
+
+          // Silver Busbar Ribbons (3 vertical lines per cell)
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 2.5;
+          for (let b = 1; b <= 3; b++) {
+            const bx = x + (b / 4) * cW;
+            ctx.beginPath();
+            ctx.moveTo(bx, y);
+            ctx.lineTo(bx, y + cH);
+            ctx.stroke();
+          }
+
+          // Micro Finger Grid Wires
+          ctx.strokeStyle = 'rgba(226, 232, 240, 0.4)';
+          ctx.lineWidth = 1;
+          for (let f = 1; f < 16; f++) {
+            const fy = y + (f / 16) * cH;
+            ctx.beginPath();
+            ctx.moveTo(x + 2, fy);
+            ctx.lineTo(x + cW - 2, fy);
+            ctx.stroke();
+          }
+        }
       }
 
-      // Micro Finger Grid Wires
-      ctx.strokeStyle = 'rgba(226, 232, 240, 0.45)';
-      ctx.lineWidth = 1;
-      for (let y = 8; y < 512; y += 8) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(512, y);
-        ctx.stroke();
-      }
-
-      // Cell Border Isolation Grooves
-      ctx.strokeStyle = '#020617';
-      ctx.lineWidth = 4;
-      for (let x = 0; x <= 512; x += 170) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, 512);
-        ctx.stroke();
-      }
-      for (let y = 0; y <= 512; y += 170) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(512, y);
-        ctx.stroke();
-      }
+      // Aluminum frame trim
+      ctx.lineWidth = 16;
+      ctx.strokeStyle = '#94a3b8';
+      ctx.strokeRect(8, 8, 496, 496);
 
       const texture = new THREE.CanvasTexture(canvas);
       texture.wrapS = THREE.RepeatWrapping;

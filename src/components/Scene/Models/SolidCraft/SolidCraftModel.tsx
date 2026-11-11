@@ -281,9 +281,13 @@ const CADBodyItem: React.FC<{
 
     // 2. Dynamic Fluid Reaction: Primary Clean Tank Water
     if (body.name === 'Fluid_Primary_Clean_Water') {
-      const cleanRatio = simState
-        ? Math.max(simState.purifiedWaterLevel / simState.purifiedTankCapacity, 0.08)
-        : 0.7;
+      const cleanRatio = THREE.MathUtils.clamp(
+        simState
+          ? (simState.purifiedWaterLevel / simState.purifiedTankCapacity) * 0.72 + 0.22
+          : 0.78,
+        0.35,
+        0.92
+      );
       meshRef.current.scale.y = THREE.MathUtils.lerp(meshRef.current.scale.y, cleanRatio, damp);
       meshRef.current.position.y = THREE.MathUtils.lerp(
         meshRef.current.position.y,
@@ -294,14 +298,18 @@ const CADBodyItem: React.FC<{
 
     // 3. Dynamic Fluid Reaction: Secondary Raw Sensor Tank Water
     if (body.name === 'Fluid_Secondary_Sensor_Water') {
-      const rawRatio = simState
-        ? Math.max(simState.rawWaterLevel / simState.rawTankCapacity, 0.08)
-        : 0.85;
+      const rawRatio = THREE.MathUtils.clamp(
+        simState
+          ? (simState.rawWaterLevel / simState.rawTankCapacity) * 0.75 + 0.15
+          : 0.82,
+        0.35,
+        0.90
+      );
       meshRef.current.scale.y = THREE.MathUtils.lerp(meshRef.current.scale.y, rawRatio, damp);
 
       // Turbidity color shift to brown when contaminated
       if (matRef.current) {
-        const isTurbid = simState ? simState.inputTurbidity > 10 : false;
+        const isTurbid = simState ? simState.inputTurbidity > 8 : false;
         const targetColor = isTurbid ? new THREE.Color('#92400e') : new THREE.Color('#0ea5e9');
         matRef.current.color.lerp(targetColor, damp);
       }
@@ -345,24 +353,61 @@ const CADBodyItem: React.FC<{
     );
   }
 
-  // 2. Photovoltaic Monocrystalline Silicon Cells Grid
+  // 2. Photovoltaic Monocrystalline Silicon Cells Grid & Extruded Aluminum Perimeter Frame
+  if (body.name === 'Solar_Canopy_Frame') {
+    const s = body.size as [number, number, number];
+    const railW = 0.042;
+    return (
+      <group ref={meshRef as any} position={body.pos} rotation={baseRot}>
+        {/* Perimeter Extruded Aluminum Frame Channels (Satin Silver Anodized Finish) */}
+        {/* Left Outer Channel */}
+        <mesh position={[-s[0] * 0.5 + railW * 0.5, 0, 0]} castShadow receiveShadow>
+          <boxGeometry args={[railW, s[1], s[2]]} />
+          <meshStandardMaterial color="#94a3b8" metalness={0.88} roughness={0.24} />
+        </mesh>
+        {/* Right Outer Channel */}
+        <mesh position={[s[0] * 0.5 - railW * 0.5, 0, 0]} castShadow receiveShadow>
+          <boxGeometry args={[railW, s[1], s[2]]} />
+          <meshStandardMaterial color="#94a3b8" metalness={0.88} roughness={0.24} />
+        </mesh>
+        {/* Front Outer Channel */}
+        <mesh position={[0, 0, s[2] * 0.5 - railW * 0.5]} castShadow receiveShadow>
+          <boxGeometry args={[s[0], s[1], railW]} />
+          <meshStandardMaterial color="#94a3b8" metalness={0.88} roughness={0.24} />
+        </mesh>
+        {/* Back Outer Channel */}
+        <mesh position={[0, 0, -s[2] * 0.5 + railW * 0.5]} castShadow receiveShadow>
+          <boxGeometry args={[s[0], s[1], railW]} />
+          <meshStandardMaterial color="#94a3b8" metalness={0.88} roughness={0.24} />
+        </mesh>
+        {/* Underside Structural Bed Crossbars */}
+        {[-0.32, 0.32].map((zOff, idx) => (
+          <mesh key={idx} position={[0, -s[1] * 0.5 + 0.008, zOff]} castShadow>
+            <boxGeometry args={[s[0] - railW * 2, 0.016, 0.038]} />
+            <meshStandardMaterial color="#64748b" metalness={0.85} roughness={0.3} />
+          </mesh>
+        ))}
+      </group>
+    );
+  }
+
   if (body.name === 'Solar_Cells_Grid') {
     const solarTex = getSolarCellTexture();
+    const s = body.size as [number, number, number];
     return (
       <mesh
         ref={meshRef}
-        position={body.pos}
+        position={[body.pos[0], body.pos[1] + 0.012, body.pos[2]]}
         rotation={baseRot}
-        castShadow
         receiveShadow
       >
-        <boxGeometry args={body.size as [number, number, number]} />
+        <boxGeometry args={[s[0], 0.004, s[2]]} />
         <meshStandardMaterial
           map={solarTex || undefined}
-          color={solarTex ? '#ffffff' : body.color}
-          metalness={0.75}
-          roughness={0.18}
-          envMapIntensity={1.6}
+          color="#ffffff"
+          metalness={0.65}
+          roughness={0.22}
+          envMapIntensity={1.8}
         />
       </mesh>
     );
@@ -370,23 +415,24 @@ const CADBodyItem: React.FC<{
 
   // 3. Low-Iron Anti-Reflective Tempered Solar PV Glass
   if (body.name === 'Solar_PV_Glass') {
+    const s = body.size as [number, number, number];
     return (
       <mesh
         ref={meshRef}
-        position={body.pos}
+        position={[body.pos[0], body.pos[1] + 0.015, body.pos[2]]}
         rotation={baseRot}
-        castShadow
+        castShadow={false}
       >
-        <boxGeometry args={body.size as [number, number, number]} />
+        <boxGeometry args={[s[0], 0.002, s[2]]} />
         <meshPhysicalMaterial
           color="#e0f2fe"
           metalness={0.05}
-          roughness={0.04}
-          transmission={0.88}
+          roughness={0.06}
           transparent={true}
-          opacity={0.35}
-          ior={1.52}
-          envMapIntensity={2.5}
+          opacity={0.16}
+          clearcoat={1.0}
+          clearcoatRoughness={0.03}
+          depthWrite={false}
         />
       </mesh>
     );
@@ -431,16 +477,15 @@ const CADBodyItem: React.FC<{
       >
         <boxGeometry args={size} />
         <meshPhysicalMaterial
-          color="#bae6fd"
+          color="#e0f2fe"
           metalness={0.02}
-          roughness={0.04}
-          transmission={0.92}
+          roughness={0.05}
           transparent={true}
-          opacity={0.32}
-          ior={1.491}
-          envMapIntensity={2.0}
+          opacity={0.22}
           clearcoat={1.0}
-          clearcoatRoughness={0.05}
+          clearcoatRoughness={0.04}
+          depthWrite={false}
+          side={THREE.DoubleSide}
         />
 
         {/* Laser-Etched Graduated Measurement Scale on Front Face */}
@@ -473,8 +518,9 @@ const CADBodyItem: React.FC<{
     );
   }
 
-  // 6. Dynamic Water Volumes with Rising Micro-Bubbles
+  // 6. Dynamic Water Volumes with Rippling Meniscus & Rising Micro-Bubbles
   if (body.name === 'Fluid_Primary_Clean_Water' || body.name === 'Fluid_Secondary_Sensor_Water') {
+    const isClean = body.name === 'Fluid_Primary_Clean_Water';
     const size = body.size as [number, number, number];
     return (
       <mesh
@@ -483,20 +529,47 @@ const CADBodyItem: React.FC<{
         rotation={baseRot}
         receiveShadow
       >
-        <boxGeometry args={size} />
-        <meshStandardMaterial
+        <boxGeometry args={[size[0] - 0.008, size[1], size[2] - 0.008]} />
+        <meshPhysicalMaterial
           ref={matRef}
-          color={body.color}
-          metalness={0.1}
-          roughness={0.06}
-          opacity={body.opacity}
+          color={isClean ? '#0284c7' : '#0ea5e9'}
+          metalness={0.06}
+          roughness={0.03}
+          opacity={isClean ? 0.72 : 0.68}
           transparent={true}
-          envMapIntensity={1.8}
+          clearcoat={1.0}
+          clearcoatRoughness={0.02}
+          depthWrite={false}
+          envMapIntensity={2.2}
         />
+        {/* Animated Top Water Meniscus Surface Plane */}
+        <mesh position={[0, size[1] * 0.5 - 0.002, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <planeGeometry args={[size[0] - 0.012, size[2] - 0.012]} />
+          <meshPhysicalMaterial
+            color={isClean ? '#38bdf8' : '#7dd3fc'}
+            transparent
+            opacity={0.85}
+            roughness={0.02}
+            metalness={0.12}
+            clearcoat={1.0}
+            clearcoatRoughness={0.02}
+            depthWrite={false}
+          />
+        </mesh>
+        {/* Water Surface Tension Meniscus Border Ring */}
+        <mesh position={[0, size[1] * 0.5 - 0.001, 0]}>
+          <boxGeometry args={[size[0] - 0.006, 0.004, size[2] - 0.006]} />
+          <meshBasicMaterial
+            color={isClean ? '#7dd3fc' : '#a5f3fc'}
+            transparent
+            opacity={0.6}
+            depthWrite={false}
+          />
+        </mesh>
         {/* Rising Micro-Bubbles when system is circulating */}
         <RisingMicroBubbles
           bounds={size}
-          count={body.name === 'Fluid_Primary_Clean_Water' ? 20 : 12}
+          count={isClean ? 24 : 16}
           active={isFlowing}
         />
       </mesh>
