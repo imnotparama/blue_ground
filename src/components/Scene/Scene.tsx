@@ -25,7 +25,7 @@ export const Scene = () => {
       className="w-full h-full relative select-none"
       style={{
         background:
-          'linear-gradient(180deg, #38bdf8 0%, #7dd3fc 35%, #bae6fd 65%, #e0f2fe 85%, #f8fafc 100%)',
+          'linear-gradient(180deg, #0284c7 0%, #38bdf8 25%, #7dd3fc 50%, #bae6fd 70%, #fed7aa 90%, #ffedd5 100%)',
       }}
     >
       {/* 3D R3F Canvas with high-DPI crispness and smooth performance */}
@@ -52,14 +52,14 @@ export const Scene = () => {
         <Sky
           distance={450000}
           sunPosition={[10, 14, -4]}
-          inclination={0.6}
+          inclination={0.55}
           azimuth={0.25}
-          turbidity={5}
-          rayleigh={0.9}
+          turbidity={6}
+          rayleigh={1.1}
         />
 
-        {/* Soft atmospheric depth haze */}
-        <fog attach="fog" args={['#e0f2fe', 25, 90]} />
+        {/* Soft tropical atmospheric depth haze */}
+        <fog attach="fog" args={['#bae6fd', 28, 90]} />
 
         {/* Lighting setup */}
         <SceneLighting />
