@@ -25,6 +25,7 @@ import {
   Filter,
   Activity,
   Box,
+  Camera,
 } from 'lucide-react';
 
 export const TopBar = () => {
@@ -65,6 +66,8 @@ export const TopBar = () => {
     setSimulationViewOpen,
     cadModelMode,
     setCadModelMode,
+    photoMode,
+    setPhotoMode,
   } = useSystemState();
 
   const runSim1 = () => {
@@ -189,6 +192,29 @@ export const TopBar = () => {
           <span className="text-[9px] px-1 py-0.2 rounded font-bold bg-cyan-950 text-cyan-300 border border-cyan-500/40">
             P&ID
           </span>
+        </button>
+
+        {/* Dedicated Clean Presentation Photo Mode */}
+        <button
+          onClick={() => {
+            const next = !photoMode;
+            setPhotoMode(next);
+            if (next) {
+              setCameraPreset('PHOTO_HERO_34');
+            } else {
+              setCameraPreset('OVERVIEW');
+            }
+          }}
+          className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full border transition-all text-xs font-mono tracking-wide cursor-pointer shadow-md ${
+            photoMode
+              ? 'bg-gradient-to-r from-pink-500/30 to-purple-500/30 border-pink-400 text-pink-200 shadow-[0_0_18px_rgba(244,114,182,0.45)] ring-1 ring-pink-400'
+              : 'bg-zinc-900/80 border-zinc-700 text-zinc-400 hover:text-white hover:border-pink-500/40 hover:bg-zinc-800'
+          }`}
+          title="Toggle Clean Studio Photo Mode (Hotkey: P)"
+        >
+          <Camera className={`w-3.5 h-3.5 ${photoMode ? 'text-pink-400 animate-pulse' : 'text-zinc-400'}`} />
+          <span className="hidden sm:inline font-bold">{photoMode ? 'Photo: ON' : 'Photo Mode'}</span>
+          <span className={`text-[10px] px-1 py-0.2 rounded font-bold ${photoMode ? 'bg-pink-950 text-pink-300 border border-pink-500/40' : 'bg-zinc-800 border border-zinc-700 text-zinc-400'}`}>P</span>
         </button>
 
         {/* Guided Presentation Tour Button */}

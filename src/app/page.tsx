@@ -2,7 +2,7 @@
 
 import React from 'react';
 import dynamic from 'next/dynamic';
-import { SystemStateProvider } from '@/hooks/useSystemState';
+import { SystemStateProvider, useSystemState } from '@/hooks/useSystemState';
 import { TopBar } from '@/components/UI/TopBar';
 import { PresentationOverlay } from '@/components/UI/PresentationOverlay';
 import { Dashboard } from '@/components/UI/Dashboard';
@@ -12,6 +12,7 @@ import { LandingHero } from '@/components/UI/LandingHero';
 import { WaterTrackerHUD } from '@/components/UI/WaterTrackerHUD';
 import { FilterViewHUD } from '@/components/UI/FilterViewHUD';
 import { SimulationWorkbench } from '@/components/UI/SimulationWorkbench';
+import { PhotoModeHUD } from '@/components/UI/PhotoModeHUD';
 
 // Dynamically import the 3D Scene with SSR disabled to prevent WebGL hydration mismatches in Next.js
 const Scene = dynamic(
@@ -36,6 +37,8 @@ const Scene = dynamic(
 
 // Inner page component that consumes the context provider
 const HomePageContent = () => {
+  const { photoMode } = useSystemState();
+
   return (
     <main className="relative w-screen h-screen overflow-hidden bg-[#050507]">
       {/* Cinematic Vignette Backdrop */}
@@ -46,46 +49,53 @@ const HomePageContent = () => {
         <Scene />
       </div>
 
-      {/* Header diagnostics and env controls */}
-      <TopBar />
+      {/* Dedicated Clean Presentation Studio Photo Mode HUD */}
+      {photoMode ? (
+        <PhotoModeHUD />
+      ) : (
+        <>
+          {/* Header diagnostics and env controls */}
+          <TopBar />
 
-      {/* Live Monitoring diagnostics sidebar */}
-      <Dashboard />
+          {/* Live Monitoring diagnostics sidebar */}
+          <Dashboard />
 
-      {/* Slide-up bottom detail drawer (replaces left panel) */}
-      <BottomDetailCard />
+          {/* Slide-up bottom detail drawer (replaces left panel) */}
+          <BottomDetailCard />
 
-      {/* Floating CAD & Scenario engine controller (bottom-left) */}
-      <SystemControls />
+          {/* Floating CAD & Scenario engine controller (bottom-left) */}
+          <SystemControls />
 
-      {/* Narrative AI Presentation card overlay */}
-      <PresentationOverlay />
+          {/* Narrative AI Presentation card overlay */}
+          <PresentationOverlay />
 
-      {/* Interactive Water Flow Tracker Stepper HUD (Focus View Mode) */}
-      <WaterTrackerHUD />
+          {/* Interactive Water Flow Tracker Stepper HUD (Focus View Mode) */}
+          <WaterTrackerHUD />
 
-      {/* 4-Stage Smart Filtration Rack Focus HUD (Filter View Mode) */}
-      <FilterViewHUD />
+          {/* 4-Stage Smart Filtration Rack Focus HUD (Filter View Mode) */}
+          <FilterViewHUD />
 
-      {/* Comprehensive Real-Time Engineering Simulation Workbench */}
-      <SimulationWorkbench />
+          {/* Comprehensive Real-Time Engineering Simulation Workbench */}
+          <SimulationWorkbench />
 
-      {/* Fullscreen cinematic landing intro cover */}
-      <LandingHero />
+          {/* Fullscreen cinematic landing intro cover */}
+          <LandingHero />
 
-      {/* Decorative ambient elements (Apple aesthetics) */}
-      <div className="fixed bottom-4 left-6 z-10 pointer-events-none text-[10px] font-mono text-zinc-500 tracking-wider flex items-center gap-2">
-        <span>© 2026 BLUEGROUND LEVIATHAN v2.0</span>
-        <span className="text-zinc-700">•</span>
-        <span>SMART IOT SOLAR PURIFICATION LOOP</span>
-        <span className="text-zinc-700">•</span>
-        <span>ENGINEERED BY <strong className="text-cyan-400 font-bold">TEAM CHOOSENONES</strong> (PARAMESHWARAN S)</span>
-      </div>
-      <div className="fixed bottom-4 right-6 z-10 pointer-events-none text-[10px] font-mono text-zinc-500 tracking-wider flex items-center gap-2">
-        <span className="text-zinc-400 font-semibold">BlueGround Leviathan – Water Guardian</span>
-        <span className="text-zinc-700">•</span>
-        <span className="text-cyan-400 font-mono font-bold">LAT 13.0827° N / LON 80.2707° E</span>
-      </div>
+          {/* Decorative ambient elements (Apple aesthetics) */}
+          <div className="fixed bottom-4 left-6 z-10 pointer-events-none text-[10px] font-mono text-zinc-500 tracking-wider flex items-center gap-2">
+            <span>© 2026 BLUEGROUND LEVIATHAN v2.0</span>
+            <span className="text-zinc-700">•</span>
+            <span>SMART IOT SOLAR PURIFICATION LOOP</span>
+            <span className="text-zinc-700">•</span>
+            <span>ENGINEERED BY <strong className="text-cyan-400 font-bold">TEAM CHOOSENONES</strong> (PARAMESHWARAN S)</span>
+          </div>
+          <div className="fixed bottom-4 right-6 z-10 pointer-events-none text-[10px] font-mono text-zinc-500 tracking-wider flex items-center gap-2">
+            <span className="text-zinc-400 font-semibold">BlueGround Leviathan – Water Guardian</span>
+            <span className="text-zinc-700">•</span>
+            <span className="text-cyan-400 font-mono font-bold">LAT 13.0827° N / LON 80.2707° E</span>
+          </div>
+        </>
+      )}
     </main>
   );
 };

@@ -157,6 +157,31 @@ export const CAMERA_PRESETS: Record<CameraPreset, { position: [number, number, n
     position: [0.30, -0.55, -1.5],
     target: [0.20, -0.75, -0.62],
   },
+  // Studio Photo Mode Cinematic Camera Angles
+  PHOTO_HERO_34: {
+    position: [2.1, 0.35, 3.2],
+    target: [-0.10, -0.65, -0.05],
+  },
+  PHOTO_SOLAR_TOP: {
+    position: [0.0, 1.85, 1.7],
+    target: [-0.10, 0.45, -0.10],
+  },
+  PHOTO_FILTERS_DETAIL: {
+    position: [-0.85, -0.55, -1.25],
+    target: [-0.10, -0.75, -0.62],
+  },
+  PHOTO_WATER_TANKS: {
+    position: [0.85, -1.35, 1.95],
+    target: [-0.10, -1.65, -0.05],
+  },
+  PHOTO_VILLAGE_VISTA: {
+    position: [0.0, 0.35, 5.2],
+    target: [-0.10, -0.65, -0.05],
+  },
+  PHOTO_HANDPUMP_STATION: {
+    position: [3.1, -1.45, 2.2],
+    target: [1.4, -1.55, 0.2],
+  },
 };
 
 export const CameraController = () => {

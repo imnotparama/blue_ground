@@ -20,7 +20,7 @@ import { SolidCraftModel } from './Models/SolidCraft/SolidCraftModel';
 import { ClassicBigTankModel } from './Models/Legacy/ClassicBigTankModel';
 
 export const Scene = () => {
-  const { exploded, cadModelMode } = useSystemState();
+  const { exploded, cadModelMode, photoMode, photoAutoRotate } = useSystemState();
 
   return (
     <div
@@ -41,6 +41,7 @@ export const Scene = () => {
           stencil: false,
           depth: true,
           toneMappingExposure: 1.25,
+          preserveDrawingBuffer: true,
         }}
         camera={{
           fov: 46,
@@ -69,7 +70,7 @@ export const Scene = () => {
         {/* Camera state transitions controller */}
         <CameraController />
 
-        {/* Silky Smooth Studio Orbit controls */}
+        {/* Silky Smooth Studio Orbit controls with optional cinematic 360° turntable in Photo Mode */}
         <OrbitControls
           makeDefault
           enableDamping
@@ -81,6 +82,8 @@ export const Scene = () => {
           maxPolarAngle={Math.PI / 2 + 0.04}
           minDistance={1.0}
           maxDistance={12}
+          autoRotate={photoMode && photoAutoRotate}
+          autoRotateSpeed={0.75}
         />
 
         {/* Global Atmospheric Ambient Dust Motes & Scenic Landscape */}
@@ -96,14 +99,14 @@ export const Scene = () => {
             <ClassicBigTankModel />
           )}
 
-          {/* Minimalist Apple-Style Inspection Pins */}
-          <Hotspots />
+          {/* Minimalist Apple-Style Inspection Pins (Cleanly hidden in Photo Mode for pristine presentation) */}
+          {!photoMode && <Hotspots />}
 
-          {/* Exploded View 3D Subassembly Callout Tags (CAD Twin mode) */}
-          {cadModelMode && <ExplodedLabels />}
+          {/* Exploded View 3D Subassembly Callout Tags (CAD Twin mode, hidden in Photo Mode) */}
+          {!photoMode && cadModelMode && <ExplodedLabels />}
 
-          {/* Technical CAD coordinate grid visible only during Exploded Engineering View */}
-          {exploded && (
+          {/* Technical CAD coordinate grid visible only during Exploded Engineering View (hidden in Photo Mode) */}
+          {!photoMode && exploded && (
             <gridHelper args={[4.2, 14, '#0284c7', '#1e293b']} position={[-0.1065, -2.186, -0.0375]}>
               <lineBasicMaterial attach="material" transparent opacity={0.25} />
             </gridHelper>

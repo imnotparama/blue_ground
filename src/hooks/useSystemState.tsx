@@ -54,7 +54,13 @@ export type CameraPreset =
   | 'FILTER_STAGE_1'
   | 'FILTER_STAGE_2'
   | 'FILTER_STAGE_3'
-  | 'FILTER_STAGE_4';
+  | 'FILTER_STAGE_4'
+  | 'PHOTO_HERO_34'
+  | 'PHOTO_SOLAR_TOP'
+  | 'PHOTO_FILTERS_DETAIL'
+  | 'PHOTO_WATER_TANKS'
+  | 'PHOTO_VILLAGE_VISTA'
+  | 'PHOTO_HANDPUMP_STATION';
 
 // Sensor and operational metrics structure
 export interface SystemMetrics {
@@ -183,6 +189,17 @@ interface SystemStateContextType {
   // Official SolidCraft v9 CAD Digital Twin Model Toggle
   cadModelMode: boolean;
   setCadModelMode: (val: boolean) => void;
+  // Dedicated Clean Presentation Photo Mode
+  photoMode: boolean;
+  setPhotoMode: (val: boolean) => void;
+  photoAutoRotate: boolean;
+  setPhotoAutoRotate: (val: boolean) => void;
+  photoGrid: 'NONE' | 'RULE_OF_THIRDS' | 'GOLDEN_RATIO' | 'SQUARE';
+  setPhotoGrid: (val: 'NONE' | 'RULE_OF_THIRDS' | 'GOLDEN_RATIO' | 'SQUARE') => void;
+  photoAspect: 'FULL' | '16:9' | '4:3' | '1:1';
+  setPhotoAspect: (val: 'FULL' | '16:9' | '4:3' | '1:1') => void;
+  photoWatermark: boolean;
+  setPhotoWatermark: (val: boolean) => void;
 }
 
 const SystemStateContext = createContext<SystemStateContextType | undefined>(undefined);
@@ -298,6 +315,13 @@ export const SystemStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const [activeHotspot, setActiveHotspot] = useState<string | null>(null);
   const [landingVisited, setLandingVisited] = useState(false);
   const [cadModelMode, setCadModelMode] = useState(true);
+
+  // Dedicated Clean Presentation Photo Mode
+  const [photoMode, setPhotoMode] = useState(false);
+  const [photoAutoRotate, setPhotoAutoRotate] = useState(false);
+  const [photoGrid, setPhotoGrid] = useState<'NONE' | 'RULE_OF_THIRDS' | 'GOLDEN_RATIO' | 'SQUARE'>('RULE_OF_THIRDS');
+  const [photoAspect, setPhotoAspect] = useState<'FULL' | '16:9' | '4:3' | '1:1'>('FULL');
+  const [photoWatermark, setPhotoWatermark] = useState(true);
 
   // Guided tour state
   const [demoRunning, setDemoRunning] = useState(false);
@@ -684,8 +708,31 @@ export const SystemStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
           return next;
         });
       }
+      if (e.key === 'p' || e.key === 'P') {
+        setPhotoMode(prev => {
+          const next = !prev;
+          if (next) {
+            setCameraPreset('PHOTO_HERO_34');
+            setActiveHotspot(null);
+            setFilterViewState(false);
+            setWaterTrackModeState(false);
+          } else {
+            setPhotoAutoRotate(false);
+            setCameraPreset('OVERVIEW');
+          }
+          return next;
+        });
+      }
       if (e.key === 'Escape') {
         setActiveHotspot(null);
+        setPhotoMode(prev => {
+          if (prev) {
+            setPhotoAutoRotate(false);
+            setCameraPreset('OVERVIEW');
+            return false;
+          }
+          return prev;
+        });
         setFilterViewState(prev => {
           if (prev) {
             setFilterStageFocusState(0);
@@ -791,6 +838,16 @@ export const SystemStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
         setSimulationViewOpen,
         cadModelMode,
         setCadModelMode,
+        photoMode,
+        setPhotoMode,
+        photoAutoRotate,
+        setPhotoAutoRotate,
+        photoGrid,
+        setPhotoGrid,
+        photoAspect,
+        setPhotoAspect,
+        photoWatermark,
+        setPhotoWatermark,
       }}
     >
       {children}
