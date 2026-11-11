@@ -7407,11 +7407,11 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
     "subassembly": "SOLAR",
     "pos": [
       -0.1065,
-      0.4585,
-      -0.105
+      0.445,
+      -0.0975
     ],
     "rot": [
-      0.297,
+      0.2705,
       0,
       0
     ],
@@ -7439,11 +7439,11 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
     "subassembly": "SOLAR",
     "pos": [
       -0.1065,
-      0.4675,
-      -0.105
+      0.454,
+      -0.0975
     ],
     "rot": [
-      0.297,
+      0.2705,
       0,
       0
     ],
@@ -7471,18 +7471,18 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
     "subassembly": "SOLAR",
     "pos": [
       -0.1065,
-      0.472,
-      -0.105
+      0.4585,
+      -0.0975
     ],
     "rot": [
-      0.297,
+      0.2705,
       0,
       0
     ],
     "size": [
-      1.3800000000000001,
+      1.38,
       0.003,
-      1.1400000000000001
+      1.14
     ],
     "color": "#0f172a",
     "metalness": 0.65,
@@ -8030,4 +8030,452 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
     ],
     "isFluid": false
   }
+,
+  {
+  "id": 2208,
+  "name": "Beam_TopRafter_Left",
+  "type": "box",
+  "subassembly": "FRAME",
+  "pos": [
+    -0.7965,
+    0.37,
+    -0.0975
+  ],
+  "rot": [
+    0.2705,
+    0,
+    0
+  ],
+  "size": [
+    0.06,
+    0.06,
+    1.121
+  ],
+  "color": "#94a3b8",
+  "metalness": 0.85,
+  "roughness": 0.22,
+  "opacity": 1,
+  "transparent": false,
+  "explodedOffset": [
+    -0.25,
+    0.2,
+    0
+  ],
+  "isFluid": false
+},
+  {
+  "id": 2209,
+  "name": "Beam_TopRafter_Right",
+  "type": "box",
+  "subassembly": "FRAME",
+  "pos": [
+    0.5835,
+    0.37,
+    -0.0975
+  ],
+  "rot": [
+    0.2705,
+    0,
+    0
+  ],
+  "size": [
+    0.06,
+    0.06,
+    1.121
+  ],
+  "color": "#94a3b8",
+  "metalness": 0.85,
+  "roughness": 0.22,
+  "opacity": 1,
+  "transparent": false,
+  "explodedOffset": [
+    0.25,
+    0.2,
+    0
+  ],
+  "isFluid": false
+},
+  {
+  "id": 2210,
+  "name": "Rail_Solar_Mount_Purlin_L",
+  "type": "box",
+  "subassembly": "SOLAR",
+  "pos": [
+    -0.52,
+    0.4,
+    -0.0975
+  ],
+  "rot": [
+    0.2705,
+    0,
+    0
+  ],
+  "size": [
+    0.045,
+    0.045,
+    1.28
+  ],
+  "color": "#64748b",
+  "metalness": 0.9,
+  "roughness": 0.25,
+  "opacity": 1,
+  "transparent": false,
+  "explodedOffset": [
+    0,
+    0.35,
+    0
+  ],
+  "isFluid": false
+},
+  {
+  "id": 2211,
+  "name": "Rail_Solar_Mount_Purlin_R",
+  "type": "box",
+  "subassembly": "SOLAR",
+  "pos": [
+    0.31,
+    0.4,
+    -0.0975
+  ],
+  "rot": [
+    0.2705,
+    0,
+    0
+  ],
+  "size": [
+    0.045,
+    0.045,
+    1.28
+  ],
+  "color": "#64748b",
+  "metalness": 0.9,
+  "roughness": 0.25,
+  "opacity": 1,
+  "transparent": false,
+  "explodedOffset": [
+    0,
+    0.35,
+    0
+  ],
+  "isFluid": false
+},
+  {
+  "id": 2212,
+  "name": "Bracket_Solar_Pivot_FL",
+  "type": "box",
+  "subassembly": "SOLAR",
+  "pos": [
+    -0.72,
+    0.235,
+    0.4425
+  ],
+  "rot": [
+    0,
+    0,
+    0
+  ],
+  "size": [
+    0.06,
+    0.045,
+    0.06
+  ],
+  "color": "#cbd5e1",
+  "metalness": 0.9,
+  "roughness": 0.2,
+  "opacity": 1,
+  "transparent": false,
+  "explodedOffset": [
+    0,
+    0.25,
+    0
+  ],
+  "isFluid": false
+},
+  {
+  "id": 2213,
+  "name": "Bracket_Solar_Pivot_FR",
+  "type": "box",
+  "subassembly": "SOLAR",
+  "pos": [
+    0.5,
+    0.235,
+    0.4425
+  ],
+  "rot": [
+    0,
+    0,
+    0
+  ],
+  "size": [
+    0.06,
+    0.045,
+    0.06
+  ],
+  "color": "#cbd5e1",
+  "metalness": 0.9,
+  "roughness": 0.2,
+  "opacity": 1,
+  "transparent": false,
+  "explodedOffset": [
+    0,
+    0.25,
+    0
+  ],
+  "isFluid": false
+},
+  {
+  "id": 2214,
+  "name": "Bracket_Solar_Riser_RL",
+  "type": "box",
+  "subassembly": "SOLAR",
+  "pos": [
+    -0.72,
+    0.535,
+    -0.6375
+  ],
+  "rot": [
+    0,
+    0,
+    0
+  ],
+  "size": [
+    0.06,
+    0.05,
+    0.06
+  ],
+  "color": "#cbd5e1",
+  "metalness": 0.9,
+  "roughness": 0.2,
+  "opacity": 1,
+  "transparent": false,
+  "explodedOffset": [
+    0,
+    0.25,
+    0
+  ],
+  "isFluid": false
+},
+  {
+  "id": 2215,
+  "name": "Bracket_Solar_Riser_RR",
+  "type": "box",
+  "subassembly": "SOLAR",
+  "pos": [
+    0.5,
+    0.535,
+    -0.6375
+  ],
+  "rot": [
+    0,
+    0,
+    0
+  ],
+  "size": [
+    0.06,
+    0.05,
+    0.06
+  ],
+  "color": "#cbd5e1",
+  "metalness": 0.9,
+  "roughness": 0.2,
+  "opacity": 1,
+  "transparent": false,
+  "explodedOffset": [
+    0,
+    0.25,
+    0
+  ],
+  "isFluid": false
+},
+  {
+  "id": 2216,
+  "name": "Clamp_Solar_Z_FL",
+  "type": "box",
+  "subassembly": "SOLAR",
+  "pos": [
+    -0.52,
+    0.468,
+    0.42
+  ],
+  "rot": [
+    0.2705,
+    0,
+    0
+  ],
+  "size": [
+    0.04,
+    0.02,
+    0.05
+  ],
+  "color": "#cbd5e1",
+  "metalness": 0.9,
+  "roughness": 0.2,
+  "opacity": 1,
+  "transparent": false,
+  "explodedOffset": [
+    0,
+    0.45,
+    0
+  ],
+  "isFluid": false
+},
+  {
+  "id": 2217,
+  "name": "Clamp_Solar_Z_FR",
+  "type": "box",
+  "subassembly": "SOLAR",
+  "pos": [
+    0.31,
+    0.468,
+    0.42
+  ],
+  "rot": [
+    0.2705,
+    0,
+    0
+  ],
+  "size": [
+    0.04,
+    0.02,
+    0.05
+  ],
+  "color": "#cbd5e1",
+  "metalness": 0.9,
+  "roughness": 0.2,
+  "opacity": 1,
+  "transparent": false,
+  "explodedOffset": [
+    0,
+    0.45,
+    0
+  ],
+  "isFluid": false
+},
+  {
+  "id": 2218,
+  "name": "Clamp_Solar_Z_RL",
+  "type": "box",
+  "subassembly": "SOLAR",
+  "pos": [
+    -0.52,
+    0.618,
+    -0.58
+  ],
+  "rot": [
+    0.2705,
+    0,
+    0
+  ],
+  "size": [
+    0.04,
+    0.02,
+    0.05
+  ],
+  "color": "#cbd5e1",
+  "metalness": 0.9,
+  "roughness": 0.2,
+  "opacity": 1,
+  "transparent": false,
+  "explodedOffset": [
+    0,
+    0.45,
+    0
+  ],
+  "isFluid": false
+},
+  {
+  "id": 2219,
+  "name": "Clamp_Solar_Z_RR",
+  "type": "box",
+  "subassembly": "SOLAR",
+  "pos": [
+    0.31,
+    0.618,
+    -0.58
+  ],
+  "rot": [
+    0.2705,
+    0,
+    0
+  ],
+  "size": [
+    0.04,
+    0.02,
+    0.05
+  ],
+  "color": "#cbd5e1",
+  "metalness": 0.9,
+  "roughness": 0.2,
+  "opacity": 1,
+  "transparent": false,
+  "explodedOffset": [
+    0,
+    0.45,
+    0
+  ],
+  "isFluid": false
+},
+  {
+  "id": 2220,
+  "name": "Box_Solar_JunctionBox",
+  "type": "box",
+  "subassembly": "SOLAR",
+  "pos": [
+    -0.1065,
+    0.415,
+    -0.42
+  ],
+  "rot": [
+    0.2705,
+    0,
+    0
+  ],
+  "size": [
+    0.12,
+    0.035,
+    0.12
+  ],
+  "color": "#1e293b",
+  "metalness": 0.4,
+  "roughness": 0.6,
+  "opacity": 1,
+  "transparent": false,
+  "explodedOffset": [
+    0,
+    0.45,
+    0
+  ],
+  "isFluid": false
+},
+  {
+  "id": 2221,
+  "name": "Conduit_Solar_DC_Cable",
+  "type": "cylinder",
+  "subassembly": "SOLAR",
+  "pos": [
+    -0.76,
+    0.22,
+    -0.58
+  ],
+  "rot": [
+    0,
+    0,
+    0
+  ],
+  "size": [
+    0.012,
+    0.55
+  ],
+  "color": "#0f172a",
+  "metalness": 0.3,
+  "roughness": 0.8,
+  "opacity": 1,
+  "transparent": false,
+  "explodedOffset": [
+    0,
+    0.2,
+    0
+  ],
+  "isFluid": false
+}
 ];

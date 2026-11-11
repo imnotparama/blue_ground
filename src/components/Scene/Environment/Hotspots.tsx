@@ -30,7 +30,7 @@ const hotspotsList: HotspotConfig[] = [
   {
     id: 'solar',
     preset: 'SOLAR',
-    position: [0.0, 0.60, -0.10],
+    position: [0.0, 0.52, -0.10],
     label: 'Solar Canopy & PV Grid',
     icon: <Sun className="w-3.5 h-3.5 text-amber-400" />,
     getStatus: (m) => m.solarWatts > 5 ? { label: '56.8W HARVESTING', color: 'text-emerald-400' } : { label: 'STANDBY', color: 'text-zinc-500' },
