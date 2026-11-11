@@ -4423,9 +4423,9 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.435,
       0.84
     ],
-    "color": "#1e3a8a",
-    "metalness": 0,
-    "roughness": 0.4,
+    "color": "#1e293b",
+    "metalness": 0.45,
+    "roughness": 0.32,
     "opacity": 1,
     "transparent": false,
     "explodedOffset": [
@@ -8030,6 +8030,7 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
     ],
     "isFluid": false
   }
+
 ,
   {
   "id": 2208,
@@ -8289,13 +8290,13 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
 },
   {
   "id": 2216,
-  "name": "Clamp_Solar_Z_FL",
+  "name": "Box_Solar_JunctionBox",
   "type": "box",
   "subassembly": "SOLAR",
   "pos": [
-    -0.52,
-    0.468,
-    0.42
+    -0.1065,
+    0.395,
+    -0.38
   ],
   "rot": [
     0.2705,
@@ -8303,159 +8304,157 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
     0
   ],
   "size": [
-    0.04,
-    0.02,
-    0.05
+    0.14,
+    0.035,
+    0.12
   ],
-  "color": "#cbd5e1",
-  "metalness": 0.9,
-  "roughness": 0.2,
+  "color": "#0f172a",
+  "metalness": 0.5,
+  "roughness": 0.4,
   "opacity": 1,
   "transparent": false,
   "explodedOffset": [
     0,
-    0.45,
+    0.4,
     0
   ],
   "isFluid": false
 },
   {
   "id": 2217,
-  "name": "Clamp_Solar_Z_FR",
+  "name": "Bezel_Tier3_EnclosureDoor",
   "type": "box",
-  "subassembly": "SOLAR",
+  "subassembly": "ELECTRONICS",
   "pos": [
-    0.31,
-    0.468,
-    0.42
+    -0.1065,
+    -0.1625,
+    0.3245
   ],
   "rot": [
-    0.2705,
+    0,
     0,
     0
   ],
   "size": [
-    0.04,
-    0.02,
-    0.05
+    1.16,
+    0.41,
+    0.016
   ],
-  "color": "#cbd5e1",
-  "metalness": 0.9,
-  "roughness": 0.2,
+  "color": "#334155",
+  "metalness": 0.55,
+  "roughness": 0.28,
   "opacity": 1,
   "transparent": false,
   "explodedOffset": [
     0,
-    0.45,
-    0
+    0.3,
+    0.45
   ],
   "isFluid": false
 },
   {
   "id": 2218,
-  "name": "Clamp_Solar_Z_RL",
-  "type": "box",
-  "subassembly": "SOLAR",
+  "name": "Latch_Enclosure_CamLeft",
+  "type": "cylinder",
+  "subassembly": "ELECTRONICS",
   "pos": [
-    -0.52,
-    0.618,
-    -0.58
+    -0.58,
+    -0.1625,
+    0.3345
   ],
   "rot": [
-    0.2705,
+    1.5707963267948966,
     0,
     0
   ],
   "size": [
-    0.04,
-    0.02,
-    0.05
+    0.024,
+    0.018
   ],
   "color": "#cbd5e1",
-  "metalness": 0.9,
-  "roughness": 0.2,
+  "metalness": 0.95,
+  "roughness": 0.15,
   "opacity": 1,
   "transparent": false,
   "explodedOffset": [
     0,
-    0.45,
-    0
+    0.3,
+    0.46
   ],
   "isFluid": false
 },
   {
   "id": 2219,
-  "name": "Clamp_Solar_Z_RR",
-  "type": "box",
-  "subassembly": "SOLAR",
+  "name": "Latch_Enclosure_CamRight",
+  "type": "cylinder",
+  "subassembly": "ELECTRONICS",
   "pos": [
-    0.31,
-    0.618,
-    -0.58
+    0.37,
+    -0.1625,
+    0.3345
   ],
   "rot": [
-    0.2705,
+    1.5707963267948966,
     0,
     0
   ],
   "size": [
-    0.04,
-    0.02,
-    0.05
+    0.024,
+    0.018
   ],
   "color": "#cbd5e1",
-  "metalness": 0.9,
-  "roughness": 0.2,
+  "metalness": 0.95,
+  "roughness": 0.15,
   "opacity": 1,
   "transparent": false,
   "explodedOffset": [
     0,
-    0.45,
-    0
+    0.3,
+    0.46
   ],
   "isFluid": false
 },
   {
   "id": 2220,
-  "name": "Box_Solar_JunctionBox",
+  "name": "Louver_Enclosure_Cooling_L",
   "type": "box",
-  "subassembly": "SOLAR",
+  "subassembly": "ELECTRONICS",
   "pos": [
-    -0.1065,
-    0.415,
-    -0.42
+    -0.71,
+    -0.1625,
+    -0.0975
   ],
   "rot": [
-    0.2705,
+    0,
     0,
     0
   ],
   "size": [
-    0.12,
-    0.035,
-    0.12
+    0.018,
+    0.22,
+    0.36
   ],
-  "color": "#1e293b",
-  "metalness": 0.4,
-  "roughness": 0.6,
+  "color": "#0f172a",
+  "metalness": 0.7,
+  "roughness": 0.35,
   "opacity": 1,
   "transparent": false,
   "explodedOffset": [
-    0,
-    0.45,
-    0
+    -0.15,
+    0.3,
+    0.4
   ],
   "isFluid": false
 },
   {
   "id": 2221,
-  "name": "Conduit_Solar_DC_Cable",
-  "type": "cylinder",
-  "subassembly": "SOLAR",
+  "name": "Louver_Enclosure_Cooling_R",
+  "type": "box",
+  "subassembly": "ELECTRONICS",
   "pos": [
-    -0.76,
-    0.22,
-    -0.58
+    0.4965,
+    -0.1625,
+    -0.0975
   ],
   "rot": [
     0,
@@ -8463,18 +8462,19 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
     0
   ],
   "size": [
-    0.012,
-    0.55
+    0.018,
+    0.22,
+    0.36
   ],
   "color": "#0f172a",
-  "metalness": 0.3,
-  "roughness": 0.8,
+  "metalness": 0.7,
+  "roughness": 0.35,
   "opacity": 1,
   "transparent": false,
   "explodedOffset": [
-    0,
-    0.2,
-    0
+    0.15,
+    0.3,
+    0.4
   ],
   "isFluid": false
 }

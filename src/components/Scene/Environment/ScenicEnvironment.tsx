@@ -5,14 +5,14 @@ import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
 // -------------------------------------------------------------
-// 1. REFINED SLENDER TROPICAL COCONUT PALM TREE
+// 1. ORGANIC COCONUT PALM TREE (SCENIC BACKGROUND CANOPY)
 // -------------------------------------------------------------
 const CoconutPalmTree: React.FC<{
   position: [number, number, number];
   scale?: number;
   rotationY?: number;
   leanAngle?: number;
-}> = ({ position, scale = 1, rotationY = 0, leanAngle = 0.08 }) => {
+}> = ({ position, scale = 1, rotationY = 0, leanAngle = 0.06 }) => {
   // 12 radiating arched palm fronds
   const fronds = useMemo(() => {
     const list: { rotY: number; pitch: number; roll: number; len: number }[] = [];
@@ -91,35 +91,7 @@ const CoconutPalmTree: React.FC<{
 };
 
 // -------------------------------------------------------------
-// 2. TROPICAL BANANA PLANTS (LOW FLANKING FOLIAGE)
-// -------------------------------------------------------------
-const BananaPlant: React.FC<{
-  position: [number, number, number];
-  scale?: number;
-}> = ({ position, scale = 1 }) => {
-  return (
-    <group position={position} scale={scale}>
-      {/* Fleshy Green Stem */}
-      <mesh position={[0, 0.35, 0]} castShadow>
-        <cylinderGeometry args={[0.055, 0.075, 0.7, 10]} />
-        <meshStandardMaterial color="#22c55e" roughness={0.6} />
-      </mesh>
-
-      {/* 5 Broad Emerald Paddle Leaves drooping outwards */}
-      {[0, 1.25, 2.5, 3.75, 5.0].map((angle, idx) => (
-        <group key={idx} position={[0, 0.65, 0]} rotation={[0.42, angle, 0.12]}>
-          <mesh position={[0, 0.38, 0]} rotation={[0, 0, 0.08]} castShadow>
-            <boxGeometry args={[0.22, 0.78, 0.006]} />
-            <meshStandardMaterial color="#16a34a" roughness={0.45} side={THREE.DoubleSide} />
-          </mesh>
-        </group>
-      ))}
-    </group>
-  );
-};
-
-// -------------------------------------------------------------
-// 3. TRADITIONAL VILLAGE CLAY & TERRACOTTA COTTAGE HUT
+// 2. TRADITIONAL VILLAGE CLAY & TERRACOTTA COTTAGE
 // -------------------------------------------------------------
 const VillageHut: React.FC<{
   position: [number, number, number];
@@ -131,7 +103,7 @@ const VillageHut: React.FC<{
       {/* Raised Mud / Stone Foundation Plinth */}
       <mesh position={[0, 0.12, 0]} receiveShadow castShadow>
         <boxGeometry args={[3.8, 0.24, 2.8]} />
-        <meshStandardMaterial color="#a88262" roughness={0.92} />
+        <meshStandardMaterial color="#8c6239" roughness={0.92} />
       </mesh>
 
       {/* Main Clay / Lime-Washed Walls */}
@@ -148,13 +120,13 @@ const VillageHut: React.FC<{
         </mesh>
       ))}
 
-      {/* Rustic Wooden Door & Window Frame */}
+      {/* Rustic Wooden Door */}
       <mesh position={[0, 0.85, 1.21]} castShadow>
         <boxGeometry args={[0.7, 1.2, 0.04]} />
         <meshStandardMaterial color="#582f0e" roughness={0.7} />
       </mesh>
 
-      {/* Traditional Country Terracotta Tiled Roof */}
+      {/* Country Terracotta Tiled Roof */}
       <mesh position={[0, 2.15, 0.1]} rotation={[0, 0, 0]} castShadow>
         <coneGeometry args={[2.6, 1.15, 4]} />
         <meshStandardMaterial color="#b45309" roughness={0.75} />
@@ -169,7 +141,7 @@ const VillageHut: React.FC<{
 };
 
 // -------------------------------------------------------------
-// 4. AUTHENTIC INDIA MARK II VILLAGE HAND PUMP & SPLASH APRON
+// 3. AUTHENTIC INDIA MARK II VILLAGE HAND PUMP
 // -------------------------------------------------------------
 const IndiaMark2HandPump: React.FC<{
   position: [number, number, number];
@@ -180,33 +152,33 @@ const IndiaMark2HandPump: React.FC<{
       {/* Circular Concrete Splash Platform */}
       <mesh position={[0, 0.02, 0]} receiveShadow>
         <cylinderGeometry args={[0.65, 0.72, 0.04, 24]} />
-        <meshStandardMaterial color="#94a3b8" roughness={0.9} />
+        <meshStandardMaterial color="#94a3b8" roughness={0.85} metalness={0.1} />
       </mesh>
       {/* Drainage Trough Rim */}
       <mesh position={[0, 0.035, 0]}>
         <cylinderGeometry args={[0.67, 0.67, 0.02, 24, 1, true]} />
-        <meshStandardMaterial color="#64748b" roughness={0.85} />
+        <meshStandardMaterial color="#64748b" roughness={0.8} />
       </mesh>
 
-      {/* Cast Iron Pump Body (Village Green) */}
+      {/* Cast Iron Pump Body (Deep Village Green) */}
       <mesh position={[0, 0.42, 0]} castShadow>
         <cylinderGeometry args={[0.07, 0.085, 0.76, 16]} />
-        <meshStandardMaterial color="#15803d" metalness={0.7} roughness={0.35} />
+        <meshStandardMaterial color="#166534" metalness={0.75} roughness={0.35} />
       </mesh>
       {/* Top Head Cap */}
       <mesh position={[0, 0.83, 0]} castShadow>
         <cylinderGeometry args={[0.09, 0.09, 0.1, 16]} />
-        <meshStandardMaterial color="#166534" metalness={0.7} roughness={0.3} />
+        <meshStandardMaterial color="#14532d" metalness={0.75} roughness={0.3} />
       </mesh>
 
       {/* Water Discharge Spout */}
       <mesh position={[0.14, 0.48, 0]} rotation={[0, 0, -Math.PI / 2]} castShadow>
         <cylinderGeometry args={[0.032, 0.032, 0.18, 12]} />
-        <meshStandardMaterial color="#15803d" metalness={0.7} roughness={0.35} />
+        <meshStandardMaterial color="#166534" metalness={0.75} roughness={0.35} />
       </mesh>
 
-      {/* Stainless Steel Lever Handle */}
-      <group position={[-0.06, 0.82, 0]} rotation={[0, 0, 0.2]}>
+      {/* Stainless Steel Lever Handle with Cast Counterweight Knob */}
+      <group position={[-0.06, 0.82, 0]} rotation={[0, 0, 0.18]}>
         <mesh position={[-0.42, 0, 0]} rotation={[0, 0, Math.PI / 2]} castShadow>
           <cylinderGeometry args={[0.016, 0.016, 0.85, 10]} />
           <meshStandardMaterial color="#cbd5e1" metalness={0.9} roughness={0.2} />
@@ -221,13 +193,13 @@ const IndiaMark2HandPump: React.FC<{
 };
 
 // -------------------------------------------------------------
-// 5. TRADITIONAL VILLAGE WATER POTS (MATKAS & BRASS KOODAM)
+// 4. TRADITIONAL VILLAGE WATER POTS (CLEAR OF TAP / BEAKER)
 // -------------------------------------------------------------
 const VillageWaterPots: React.FC = () => {
   return (
     <group name="Village_Water_Pots">
-      {/* Terracotta Matka 1 (Left of plinth) */}
-      <group position={[-1.15, -2.187, 0.55]} scale={1.05}>
+      {/* Terracotta Matkas on Left Resting Step */}
+      <group position={[-1.55, -2.187, 0.15]} scale={1.05}>
         <mesh position={[0, 0.15, 0]} castShadow>
           <sphereGeometry args={[0.14, 16, 16]} />
           <meshStandardMaterial color="#c2410c" roughness={0.72} />
@@ -242,8 +214,7 @@ const VillageWaterPots: React.FC = () => {
         </mesh>
       </group>
 
-      {/* Terracotta Matka 2 (Beside Matka 1) */}
-      <group position={[-0.92, -2.187, 0.72]} scale={0.9}>
+      <group position={[-1.32, -2.187, 0.38]} scale={0.92}>
         <mesh position={[0, 0.13, 0]} castShadow>
           <sphereGeometry args={[0.13, 16, 16]} />
           <meshStandardMaterial color="#b45309" roughness={0.75} />
@@ -254,8 +225,8 @@ const VillageWaterPots: React.FC = () => {
         </mesh>
       </group>
 
-      {/* Traditional Indian Polished Brass Water Pot (Right side near tap) */}
-      <group position={[0.85, -2.187, 0.62]} scale={0.95}>
+      {/* Traditional Indian Polished Brass Water Pot (Safely positioned near Hand Pump) */}
+      <group position={[1.75, -2.187, 0.25]} scale={0.95}>
         <mesh position={[0, 0.14, 0]} castShadow>
           <sphereGeometry args={[0.13, 16, 16]} />
           <meshStandardMaterial color="#f59e0b" metalness={0.88} roughness={0.22} />
@@ -274,7 +245,7 @@ const VillageWaterPots: React.FC = () => {
 };
 
 // -------------------------------------------------------------
-// 6. RUSTIC WOODEN FENCE WITH VINTAGE CART WHEEL
+// 5. RUSTIC WOODEN FENCE WITH VINTAGE CART WHEEL
 // -------------------------------------------------------------
 const RusticFenceAndWheel: React.FC<{
   position: [number, number, number];
@@ -282,14 +253,12 @@ const RusticFenceAndWheel: React.FC<{
 }> = ({ position, rotationY = 0 }) => {
   return (
     <group position={position} rotation={[0, rotationY, 0]}>
-      {/* 4 Wooden Fence Posts */}
       {[-1.2, -0.4, 0.4, 1.2].map((xP, i) => (
         <mesh key={i} position={[xP, 0.4, 0]} castShadow>
           <cylinderGeometry args={[0.035, 0.04, 0.85, 8]} />
           <meshStandardMaterial color="#5c3818" roughness={0.88} />
         </mesh>
       ))}
-      {/* 2 Horizontal Rails */}
       {[0.25, 0.6].map((yRail, j) => (
         <mesh key={j} position={[0, yRail, 0]} rotation={[0, 0, Math.PI / 2]} castShadow>
           <cylinderGeometry args={[0.022, 0.022, 2.5, 8]} />
@@ -297,19 +266,16 @@ const RusticFenceAndWheel: React.FC<{
         </mesh>
       ))}
 
-      {/* Vintage Wooden Bullock Cart Wheel leaning against post */}
+      {/* Vintage Wooden Cart Wheel */}
       <group position={[0.42, 0.28, 0.12]} rotation={[0.15, 0.2, 0]}>
-        {/* Outer Rim */}
         <mesh castShadow>
           <cylinderGeometry args={[0.28, 0.28, 0.03, 20, 1, true]} />
           <meshStandardMaterial color="#451a03" roughness={0.8} />
         </mesh>
-        {/* Center Hub */}
         <mesh rotation={[Math.PI / 2, 0, 0]} castShadow>
           <cylinderGeometry args={[0.06, 0.06, 0.08, 12]} />
           <meshStandardMaterial color="#291203" roughness={0.7} />
         </mesh>
-        {/* 6 Spokes */}
         {[0, 1, 2].map((sIdx) => (
           <mesh key={sIdx} rotation={[0, 0, (sIdx * Math.PI) / 3]}>
             <boxGeometry args={[0.02, 0.54, 0.02]} />
@@ -322,7 +288,7 @@ const RusticFenceAndWheel: React.FC<{
 };
 
 // -------------------------------------------------------------
-// 7. GLIDING VILLAGE BIRDS
+// 6. GLIDING VILLAGE BIRDS
 // -------------------------------------------------------------
 const VillageGlidingBirds: React.FC = () => {
   const birdsRef = useRef<THREE.Group>(null);
@@ -360,20 +326,20 @@ const VillageGlidingBirds: React.FC = () => {
 };
 
 // -------------------------------------------------------------
-// 8. DISTANT ROLLING VILLAGE HILLS
+// 7. DISTANT ROLLING VILLAGE HILLS
 // -------------------------------------------------------------
 const DistantHills: React.FC = () => {
   return (
     <group position={[0, -2.2, -45]}>
       {[
-        { pos: [-24, 4.5, 0], r: 18, h: 10, c: '#2d5a3f' },
-        { pos: [-6, 6.0, -6], r: 24, h: 13, c: '#234832' },
-        { pos: [14, 5.0, -3], r: 20, h: 11, c: '#2d5a3f' },
-        { pos: [32, 4.0, 2], r: 16, h: 9, c: '#366144' },
+        { pos: [-24, 4.5, 0], r: 18, h: 10, c: '#1f3e2b' },
+        { pos: [-6, 6.0, -6], r: 24, h: 13, c: '#183323' },
+        { pos: [14, 5.0, -3], r: 20, h: 11, c: '#1f3e2b' },
+        { pos: [32, 4.0, 2], r: 16, h: 9, c: '#274b34' },
       ].map((hill, i) => (
         <mesh key={i} position={hill.pos as [number, number, number]}>
           <coneGeometry args={[hill.r, hill.h, 16]} />
-          <meshStandardMaterial color={hill.c} roughness={0.95} />
+          <meshStandardMaterial color={hill.c} roughness={0.96} />
         </mesh>
       ))}
     </group>
@@ -381,95 +347,77 @@ const DistantHills: React.FC = () => {
 };
 
 // -------------------------------------------------------------
-// MAIN SCENIC ENVIRONMENT: RURAL VILLAGE VIBE
+// MAIN SCENIC ENVIRONMENT: PHOTOREALISTIC RURAL VILLAGE
 // -------------------------------------------------------------
 export const ScenicEnvironment: React.FC = () => {
   return (
     <group name="Rural_Village_Environment">
-      {/* 1. Rural Earth & Soil Ground Plane (Warm Sandy Clay) */}
+      {/* 1. Seamless Natural Rural Earth Ground Plane */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2.205, 0]} receiveShadow>
         <planeGeometry args={[180, 180, 1, 1]} />
         <meshStandardMaterial
-          color="#855430"
+          color="#523a28"
           roughness={0.96}
           metalness={0.02}
         />
       </mesh>
 
-      {/* 2. Soft Green Village Grass Pasture Overlay */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2.203, -12]} receiveShadow>
-        <planeGeometry args={[140, 120]} />
-        <meshStandardMaterial
-          color="#3f6e37"
-          roughness={0.92}
-          metalness={0.02}
-        />
-      </mesh>
-
-      {/* 3. Community Water Pavilion Concrete Plinth (Top flush with feet at Y = -2.187) */}
+      {/* 2. Paved Village Community Kiosk Apron (Top flush with feet at Y = -2.187) */}
       <mesh position={[-0.1065, -2.202, -0.0375]} receiveShadow>
-        <boxGeometry args={[2.8, 0.03, 2.4]} />
+        <boxGeometry args={[3.2, 0.03, 2.6]} />
         <meshStandardMaterial
-          color="#cbd5e1"
-          roughness={0.7}
-          metalness={0.15}
+          color="#94a3b8"
+          roughness={0.72}
+          metalness={0.12}
         />
       </mesh>
-      {/* Terracotta Border Curb around Kiosk Plinth */}
+      {/* Terracotta Curb Perimeter */}
       <mesh position={[-0.1065, -2.187, -0.0375]}>
-        <boxGeometry args={[2.84, 0.005, 2.44]} />
+        <boxGeometry args={[3.24, 0.005, 2.64]} />
         <meshStandardMaterial
-          color="#b45309"
+          color="#9a3412"
           roughness={0.65}
           metalness={0.2}
         />
       </mesh>
 
-      {/* 4. Deep-Borewell Wellhead Assembly (Under Raw Water Inlet Riser) */}
+      {/* 3. Deep-Borewell Wellhead Assembly (Under Raw Water Inlet Riser) */}
       <group position={[0.80, -2.187, 0.2505]}>
-        {/* Steel Borewell Casing Flange into ground */}
         <mesh position={[0, -0.015, 0]}>
           <cylinderGeometry args={[0.075, 0.085, 0.04, 16]} />
           <meshStandardMaterial color="#334155" metalness={0.8} roughness={0.4} />
         </mesh>
-        {/* Bolted Wellhead Cap */}
         <mesh position={[0, 0.008, 0]}>
           <cylinderGeometry args={[0.09, 0.09, 0.015, 16]} />
           <meshStandardMaterial color="#475569" metalness={0.85} roughness={0.3} />
         </mesh>
       </group>
 
-      {/* 5. Traditional Terracotta Water Pots & Brass Vessel */}
+      {/* 4. Traditional Terracotta Water Pots & Brass Vessel */}
       <VillageWaterPots />
 
-      {/* 6. Iconic India Mark II Village Hand Pump on Splash Apron */}
-      <IndiaMark2HandPump position={[2.4, -2.20, 0.6]} rotationY={-0.35} />
+      {/* 5. Iconic India Mark II Village Hand Pump on Splash Apron */}
+      <IndiaMark2HandPump position={[2.2, -2.20, 0.35]} rotationY={-0.35} />
 
-      {/* 7. Scenic Background Coconut Palm Trees (Far Enough to Never Obstruct the Purifier) */}
-      {/* Left Grove: Positioned well in the scenic background */}
-      <CoconutPalmTree position={[-7.5, -2.20, -7.5]} scale={1.15} rotationY={0.6} leanAngle={0.06} />
-      <CoconutPalmTree position={[-9.8, -2.20, -11.0]} scale={1.3} rotationY={1.4} leanAngle={0.08} />
-      <CoconutPalmTree position={[-13.5, -2.20, -15.0]} scale={1.45} rotationY={-0.8} leanAngle={0.05} />
+      {/* 6. Distant Tropical Coconut Palm Groves (Positioned far in background, framing the view) */}
+      <CoconutPalmTree position={[-8.5, -2.20, -9.0]} scale={1.2} rotationY={0.6} leanAngle={0.05} />
+      <CoconutPalmTree position={[-11.5, -2.20, -13.0]} scale={1.35} rotationY={1.4} leanAngle={0.06} />
+      <CoconutPalmTree position={[-15.0, -2.20, -17.0]} scale={1.5} rotationY={-0.8} leanAngle={0.04} />
 
-      {/* Right Grove: Positioned well in the scenic background */}
-      <CoconutPalmTree position={[7.5, -2.20, -7.5]} scale={1.15} rotationY={-0.6} leanAngle={-0.06} />
-      <CoconutPalmTree position={[9.8, -2.20, -11.0]} scale={1.3} rotationY={-1.4} leanAngle={-0.08} />
-      <CoconutPalmTree position={[13.5, -2.20, -15.0]} scale={1.45} rotationY={0.8} leanAngle={-0.05} />
+      <CoconutPalmTree position={[8.5, -2.20, -9.0]} scale={1.2} rotationY={-0.6} leanAngle={-0.05} />
+      <CoconutPalmTree position={[11.5, -2.20, -13.0]} scale={1.35} rotationY={-1.4} leanAngle={-0.06} />
+      <CoconutPalmTree position={[15.0, -2.20, -17.0]} scale={1.5} rotationY={0.8} leanAngle={-0.04} />
 
-      {/* 8. Flanking Banana Plants (Low Profile, Never Reaching the Canopy Level) */}
-      <BananaPlant position={[2.8, -2.20, -1.0]} scale={0.85} />
-      <BananaPlant position={[-2.6, -2.20, -1.2]} scale={0.8} />
+      {/* 7. Traditional Village Thatched Cottages in Background */}
+      <VillageHut position={[-11.0, -2.20, -11.0]} rotationY={0.35} scale={1.0} />
+      <VillageHut position={[11.0, -2.20, -12.5]} rotationY={-0.45} scale={1.1} />
+      <VillageHut position={[-18.0, -2.20, -18.0]} rotationY={0.2} scale={1.2} />
 
-      {/* 9. Traditional Village Thatched / Clay Cottages in Mid-Ground */}
-      <VillageHut position={[-10.5, -2.20, -9.5]} rotationY={0.35} scale={1.0} />
-      <VillageHut position={[10.0, -2.20, -11.5]} rotationY={-0.45} scale={1.1} />
-      <VillageHut position={[-16.0, -2.20, -17.0]} rotationY={0.2} scale={1.2} />
+      {/* 8. Rustic Split-Rail Fences */}
+      <RusticFenceAndWheel position={[-3.6, -2.20, 2.2]} rotationY={0.25} />
+      <RusticFenceAndWheel position={[3.4, -2.20, 2.3]} rotationY={-0.2} />
 
-      {/* 10. Rustic Wooden Split-Rail Fence with Bullock Cart Wheel */}
-      <RusticFenceAndWheel position={[-3.2, -2.20, 2.0]} rotationY={0.25} />
-      <RusticFenceAndWheel position={[3.0, -2.20, 2.1]} rotationY={-0.2} />
-
-      {/* 11. Distant Village Hills & Birds */}
+      {/* 9. Distant Mountain Ridge & Gliding Birds */}
       <DistantHills />
       <VillageGlidingBirds />
     </group>
