@@ -2118,8 +2118,8 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.084,
       0.045
     ],
-    "color": "#1d4ed8",
-    "metalness": 0.1,
+    "color": "#1e40af",
+    "metalness": 0.35,
     "roughness": 0.25,
     "opacity": 1,
     "transparent": false,
@@ -2149,7 +2149,7 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.084,
       0.045
     ],
-    "color": "#1d4ed8",
+    "color": "#1e40af",
     "metalness": 0.1,
     "roughness": 0.25,
     "opacity": 1,
@@ -2242,9 +2242,9 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.084,
       0.045
     ],
-    "color": "#1d4ed8",
-    "metalness": 0.1,
-    "roughness": 0.25,
+    "color": "#94a3b8",
+    "metalness": 0.85,
+    "roughness": 0.2,
     "opacity": 1,
     "transparent": false,
     "explodedOffset": [
@@ -2273,7 +2273,7 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.084,
       0.045
     ],
-    "color": "#1d4ed8",
+    "color": "#94a3b8",
     "metalness": 0.1,
     "roughness": 0.25,
     "opacity": 1,
@@ -2366,8 +2366,8 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.084,
       0.045
     ],
-    "color": "#1d4ed8",
-    "metalness": 0.1,
+    "color": "#059669",
+    "metalness": 0.35,
     "roughness": 0.25,
     "opacity": 1,
     "transparent": false,
@@ -2397,7 +2397,7 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.084,
       0.045
     ],
-    "color": "#1d4ed8",
+    "color": "#059669",
     "metalness": 0.1,
     "roughness": 0.25,
     "opacity": 1,
@@ -2490,9 +2490,9 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.084,
       0.045
     ],
-    "color": "#d97706",
-    "metalness": 0.75,
-    "roughness": 0.25,
+    "color": "#475569",
+    "metalness": 0.45,
+    "roughness": 0.35,
     "opacity": 1,
     "transparent": false,
     "explodedOffset": [
@@ -2521,7 +2521,7 @@ export const SOLID_CRAFT_BODIES: CADBodyData[] = [
       0.084,
       0.045
     ],
-    "color": "#d97706",
+    "color": "#475569",
     "metalness": 0.75,
     "roughness": 0.25,
     "opacity": 1,

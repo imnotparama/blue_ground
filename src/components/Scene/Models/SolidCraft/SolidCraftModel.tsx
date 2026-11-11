@@ -4,6 +4,14 @@ import React, { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useSystemState } from '@/hooks/useSystemState';
 import { SOLID_CRAFT_BODIES, CADBodyData } from './cadModelData';
+import {
+  getSolarCellTexture,
+  getEnclosureFaceplateTexture,
+  getTankGraduationTexture,
+  getFilterCanisterTexture,
+  getPressureGaugeTexture,
+  getBeakerGraduationTexture,
+} from './proceduralTextures';
 import * as THREE from 'three';
 
 // -------------------------------------------------------------
@@ -183,6 +191,59 @@ function useLiveTFTTexture(simState: any, isRunning: boolean) {
 }
 
 // -------------------------------------------------------------
+// 1.5. DYNAMIC RISING MICRO-BUBBLES FOR WATER RESERVOIRS
+// -------------------------------------------------------------
+const RisingMicroBubbles: React.FC<{
+  bounds: [number, number, number];
+  count?: number;
+  active: boolean;
+}> = ({ bounds, count = 16, active }) => {
+  const meshGroup = useRef<THREE.Group>(null);
+  const bubbleData = useMemo(() => {
+    return Array.from({ length: count }, () => ({
+      x: (Math.random() - 0.5) * bounds[0] * 0.8,
+      y: (Math.random() - 0.5) * bounds[1] * 0.8,
+      z: (Math.random() - 0.5) * bounds[2] * 0.8,
+      speed: 0.12 + Math.random() * 0.22,
+      size: 0.0035 + Math.random() * 0.005,
+      phase: Math.random() * Math.PI * 2,
+    }));
+  }, [bounds, count]);
+
+  useFrame((state, delta) => {
+    if (!meshGroup.current || !active) return;
+    const children = meshGroup.current.children;
+    const minY = -bounds[1] * 0.45;
+    const maxY = bounds[1] * 0.45;
+
+    for (let i = 0; i < children.length; i++) {
+      const bubble = children[i] as THREE.Mesh;
+      const data = bubbleData[i];
+      data.y += delta * data.speed;
+      if (data.y > maxY) {
+        data.y = minY;
+      }
+      bubble.position.y = data.y;
+      bubble.position.x = data.x + Math.sin(state.clock.elapsedTime * 2.5 + data.phase) * 0.008;
+      bubble.position.z = data.z + Math.cos(state.clock.elapsedTime * 2.5 + data.phase) * 0.008;
+    }
+  });
+
+  if (!active) return null;
+
+  return (
+    <group ref={meshGroup}>
+      {bubbleData.map((d, i) => (
+        <mesh key={i} position={[d.x, d.y, d.z]}>
+          <sphereGeometry args={[d.size, 8, 8]} />
+          <meshBasicMaterial color="#ffffff" transparent opacity={0.65} />
+        </mesh>
+      ))}
+    </group>
+  );
+};
+
+// -------------------------------------------------------------
 // 2. INDIVIDUAL CAD BODY ITEM WITH SILKY LERP & CANVASES
 // -------------------------------------------------------------
 const CADBodyItem: React.FC<{
@@ -190,7 +251,8 @@ const CADBodyItem: React.FC<{
   exploded: boolean;
   simState: any;
   tftTexture: THREE.CanvasTexture | null;
-}> = ({ body, exploded, simState, tftTexture }) => {
+  isFlowing: boolean;
+}> = ({ body, exploded, simState, tftTexture, isFlowing }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const matRef = useRef<THREE.MeshStandardMaterial>(null);
 
@@ -267,7 +329,7 @@ const CADBodyItem: React.FC<{
     }
   });
 
-  // Dedicated handling for 1.8" TFT screen
+  // 1. Dedicated handling for 1.8" TFT screen
   if (body.name === 'Screen_TFT_ActiveGlass' && tftTexture) {
     return (
       <mesh
@@ -280,6 +342,223 @@ const CADBodyItem: React.FC<{
         <boxGeometry args={body.size as [number, number, number]} />
         <meshBasicMaterial map={tftTexture} />
       </mesh>
+    );
+  }
+
+  // 2. Photovoltaic Monocrystalline Silicon Cells Grid
+  if (body.name === 'Solar_Cells_Grid') {
+    const solarTex = getSolarCellTexture();
+    return (
+      <mesh
+        ref={meshRef}
+        position={body.pos}
+        rotation={baseRot}
+        castShadow
+        receiveShadow
+      >
+        <boxGeometry args={body.size as [number, number, number]} />
+        <meshStandardMaterial
+          map={solarTex || undefined}
+          color={solarTex ? '#ffffff' : body.color}
+          metalness={0.75}
+          roughness={0.18}
+          envMapIntensity={1.6}
+        />
+      </mesh>
+    );
+  }
+
+  // 3. Low-Iron Anti-Reflective Tempered Solar PV Glass
+  if (body.name === 'Solar_PV_Glass') {
+    return (
+      <mesh
+        ref={meshRef}
+        position={body.pos}
+        rotation={baseRot}
+        castShadow
+      >
+        <boxGeometry args={body.size as [number, number, number]} />
+        <meshPhysicalMaterial
+          color="#e0f2fe"
+          metalness={0.05}
+          roughness={0.04}
+          transmission={0.88}
+          transparent={true}
+          opacity={0.35}
+          ior={1.52}
+          envMapIntensity={2.5}
+        />
+      </mesh>
+    );
+  }
+
+  // 4. Industrial IP66 Enclosure Faceplate Door with Warning Decals & Specs
+  if (body.name === 'Bezel_Tier3_EnclosureDoor') {
+    const doorTex = getEnclosureFaceplateTexture();
+    return (
+      <mesh
+        ref={meshRef}
+        position={body.pos}
+        rotation={baseRot}
+        castShadow
+        receiveShadow
+      >
+        <boxGeometry args={body.size as [number, number, number]} />
+        <meshStandardMaterial
+          map={doorTex || undefined}
+          color={doorTex ? '#ffffff' : body.color}
+          metalness={0.4}
+          roughness={0.35}
+          envMapIntensity={1.2}
+        />
+      </mesh>
+    );
+  }
+
+  // 5. Optical PMMA Cast Acrylic Tanks with Laser-Etched Graduated Volume Scales
+  if (body.name === 'Tank_Primary_Clean_Shell' || body.name === 'Tank_Secondary_Sensor_Shell') {
+    const isPrimary = body.name === 'Tank_Primary_Clean_Shell';
+    const scaleTex = getTankGraduationTexture(isPrimary);
+    const size = body.size as [number, number, number];
+
+    return (
+      <mesh
+        ref={meshRef}
+        position={body.pos}
+        rotation={baseRot}
+        castShadow={false}
+        receiveShadow
+      >
+        <boxGeometry args={size} />
+        <meshPhysicalMaterial
+          color="#bae6fd"
+          metalness={0.02}
+          roughness={0.04}
+          transmission={0.92}
+          transparent={true}
+          opacity={0.32}
+          ior={1.491}
+          envMapIntensity={2.0}
+          clearcoat={1.0}
+          clearcoatRoughness={0.05}
+        />
+
+        {/* Laser-Etched Graduated Measurement Scale on Front Face */}
+        {scaleTex && (
+          <mesh position={[0, 0, size[2] * 0.5 + 0.002]}>
+            <planeGeometry args={[size[0] * 0.94, size[1] * 0.94]} />
+            <meshBasicMaterial
+              map={scaleTex}
+              transparent={true}
+              opacity={0.9}
+              depthWrite={false}
+              side={THREE.DoubleSide}
+            />
+          </mesh>
+        )}
+
+        {/* Brushed Stainless Corner Edge Extrusions */}
+        {[-1, 1].map((sx) =>
+          [-1, 1].map((sz) => (
+            <mesh
+              key={`${sx}-${sz}`}
+              position={[sx * (size[0] * 0.5), 0, sz * (size[2] * 0.5)]}
+            >
+              <boxGeometry args={[0.016, size[1], 0.016]} />
+              <meshStandardMaterial color="#64748b" metalness={0.85} roughness={0.25} />
+            </mesh>
+          ))
+        )}
+      </mesh>
+    );
+  }
+
+  // 6. Dynamic Water Volumes with Rising Micro-Bubbles
+  if (body.name === 'Fluid_Primary_Clean_Water' || body.name === 'Fluid_Secondary_Sensor_Water') {
+    const size = body.size as [number, number, number];
+    return (
+      <mesh
+        ref={meshRef}
+        position={body.pos}
+        rotation={baseRot}
+        receiveShadow
+      >
+        <boxGeometry args={size} />
+        <meshStandardMaterial
+          ref={matRef}
+          color={body.color}
+          metalness={0.1}
+          roughness={0.06}
+          opacity={body.opacity}
+          transparent={true}
+          envMapIntensity={1.8}
+        />
+        {/* Rising Micro-Bubbles when system is circulating */}
+        <RisingMicroBubbles
+          bounds={size}
+          count={body.name === 'Fluid_Primary_Clean_Water' ? 20 : 12}
+          active={isFlowing}
+        />
+      </mesh>
+    );
+  }
+
+  // 7. 4-Stage Filtration Train Canisters (F1-F4) with Industrial Branding
+  if (
+    body.name === 'Filter_F1_Carbon' ||
+    body.name === 'Filter_F2_RO' ||
+    body.name === 'Filter_F3_Mineral' ||
+    body.name === 'Filter_F4_IonResin'
+  ) {
+    const stageNum =
+      body.name === 'Filter_F1_Carbon'
+        ? 1
+        : body.name === 'Filter_F2_RO'
+        ? 2
+        : body.name === 'Filter_F3_Mineral'
+        ? 3
+        : 4;
+    const filterTex = getFilterCanisterTexture(stageNum as 1 | 2 | 3 | 4);
+    const [radius, height] = body.size as [number, number];
+
+    return (
+      <mesh
+        ref={meshRef}
+        position={body.pos}
+        rotation={baseRot}
+        castShadow
+        receiveShadow
+      >
+        <cylinderGeometry args={[radius, radius, height, 48]} />
+        <meshStandardMaterial
+          map={filterTex || undefined}
+          color={filterTex ? '#ffffff' : body.color}
+          metalness={0.12}
+          roughness={0.25}
+          envMapIntensity={1.3}
+        />
+      </mesh>
+    );
+  }
+
+  // 8. Raw Water Inlet Pressure Gauge (0-10 bar analog dial)
+  if (body.name === 'Bezel_RawWater_Inlet_GaugeRing') {
+    const [radius, height] = body.size as [number, number];
+    const gaugeTex = getPressureGaugeTexture(simState?.pumpStatus === 'RUNNING' ? 4.2 : 0.8);
+
+    return (
+      <group position={body.pos} rotation={baseRot}>
+        <mesh castShadow receiveShadow>
+          <cylinderGeometry args={[radius, radius, height, 48]} />
+          <meshStandardMaterial color="#cbd5e1" metalness={0.92} roughness={0.18} />
+        </mesh>
+        {gaugeTex && (
+          <mesh position={[0, height * 0.5 + 0.001, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+            <circleGeometry args={[radius * 0.94, 32]} />
+            <meshBasicMaterial map={gaugeTex} />
+          </mesh>
+        )}
+      </group>
     );
   }
 
@@ -358,6 +637,7 @@ const FullHydraulicFlowVisualizer: React.FC<{
   const containerRef = useRef<THREE.Group>(null);
   const beadGroupsRef = useRef<(THREE.Group | null)[]>([]);
   const timesRef = useRef<number[]>(new Array(8).fill(0));
+  const beakerTex = useMemo(() => getBeakerGraduationTexture(), []);
 
   // Define 8 exact CAD centerline Catmull-Rom hydraulic trajectories
   const flowSegments: CADFlowSegment[] = useMemo(() => {
@@ -625,22 +905,37 @@ const FullHydraulicFlowVisualizer: React.FC<{
         {/* Glass Beaker Body */}
         <mesh position={[0, 0, 0]}>
           <cylinderGeometry args={[0.034, 0.032, 0.07, 32, 1, true]} />
-          <meshStandardMaterial
+          <meshPhysicalMaterial
             color="#e0f2fe"
-            metalness={0.1}
-            roughness={0.05}
+            metalness={0.05}
+            roughness={0.04}
+            transmission={0.92}
             transparent={true}
-            opacity={0.38}
+            opacity={0.4}
+            ior={1.47}
             side={THREE.DoubleSide}
           />
         </mesh>
+        {/* Beaker White Graduations Decal */}
+        {beakerTex && (
+          <mesh position={[0, 0, 0.034 + 0.001]}>
+            <planeGeometry args={[0.04, 0.065]} />
+            <meshBasicMaterial
+              map={beakerTex}
+              transparent
+              opacity={0.92}
+              depthWrite={false}
+              side={THREE.DoubleSide}
+            />
+          </mesh>
+        )}
         {/* Beaker Glass Base (Resting flush on tray at Y = -2.12) */}
         <mesh position={[0, -0.035, 0]} rotation={[Math.PI / 2, 0, 0]}>
           <circleGeometry args={[0.032, 32]} />
-          <meshStandardMaterial
+          <meshPhysicalMaterial
             color="#e0f2fe"
-            metalness={0.1}
-            roughness={0.05}
+            metalness={0.05}
+            roughness={0.04}
             transparent={true}
             opacity={0.48}
             side={THREE.DoubleSide}
@@ -650,13 +945,13 @@ const FullHydraulicFlowVisualizer: React.FC<{
         <mesh position={[0, -0.012, 0]}>
           <cylinderGeometry args={[0.031, 0.031, 0.045, 32]} />
           <meshStandardMaterial
-            color="#00f0ff"
+            color="#38bdf8"
             emissive="#0284c7"
-            emissiveIntensity={1.0}
+            emissiveIntensity={1.2}
             metalness={0.1}
-            roughness={0.08}
+            roughness={0.05}
             transparent={true}
-            opacity={0.7}
+            opacity={0.75}
           />
         </mesh>
       </group>
@@ -685,6 +980,7 @@ export const SolidCraftModel: React.FC = () => {
           exploded={exploded}
           simState={simState}
           tftTexture={tftTexture}
+          isFlowing={isFlowing}
         />
       ))}
 
