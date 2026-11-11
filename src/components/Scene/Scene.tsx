@@ -16,9 +16,11 @@ import { ExplodedLabels } from './Models/Exploded/ExplodedLabels';
 
 // Official SolidCraft v9 CAD Digital Twin Model (Complete 256 Bodies Assembly)
 import { SolidCraftModel } from './Models/SolidCraft/SolidCraftModel';
+// Classic Dual Big-Tank Prototype Model
+import { ClassicBigTankModel } from './Models/Legacy/ClassicBigTankModel';
 
 export const Scene = () => {
-  const { exploded } = useSystemState();
+  const { exploded, cadModelMode } = useSystemState();
 
   return (
     <div
@@ -87,14 +89,18 @@ export const Scene = () => {
 
         {/* Hardware Components Group seated firmly on datum foundation (zero offset for true CAD grounding) */}
         <group position={[0, 0, 0]}>
-          {/* Authentic SolidCraft v9 CAD Digital Twin Model (256 Parametric Bodies) */}
-          <SolidCraftModel />
+          {/* Dual Architecture Toggle: SolidCraft v9 CAD vs Classic Dual Big-Tank Prototype */}
+          {cadModelMode ? (
+            <SolidCraftModel />
+          ) : (
+            <ClassicBigTankModel />
+          )}
 
           {/* Minimalist Apple-Style Inspection Pins */}
           <Hotspots />
 
-          {/* Exploded View 3D Subassembly Callout Tags */}
-          <ExplodedLabels />
+          {/* Exploded View 3D Subassembly Callout Tags (CAD Twin mode) */}
+          {cadModelMode && <ExplodedLabels />}
 
           {/* Technical CAD coordinate grid visible only during Exploded Engineering View */}
           {exploded && (
@@ -104,9 +110,9 @@ export const Scene = () => {
           )}
         </group>
 
-        {/* Soft Studio Contact Shadow directly beneath Leviathan v9 */}
+        {/* Soft Studio Contact Shadow directly on top of kiosk slate pad (Y = -2.176 with zero clipping/flickering) */}
         <ContactShadows
-          position={[-0.1065, -2.186, -0.0375]}
+          position={[-0.1065, -2.176, -0.0375]}
           opacity={0.65}
           scale={5.5}
           blur={2.0}

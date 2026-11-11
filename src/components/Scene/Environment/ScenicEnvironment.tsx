@@ -312,22 +312,23 @@ export const ScenicEnvironment: React.FC = () => {
         />
       </mesh>
 
-      {/* 3. HONED NATURAL SLATE/GRANITE KIOSK PLATFORM (NO CHOPPY ORANGE MAT!) */}
-      <mesh position={[-0.1065, -2.195, -0.0375]} receiveShadow>
-        <boxGeometry args={[2.8, 0.024, 2.4]} />
+      {/* 3. TIERED ARCHITECTURAL KIOSK SLATE PLINTH (ZERO COPLANAR OVERLAP / ZERO FLICKERING) */}
+      {/* Lower Foundation Concrete Base Curb */}
+      <mesh position={[-0.1065, -2.202, -0.0375]} receiveShadow>
+        <boxGeometry args={[2.92, 0.032, 2.52]} />
         <meshStandardMaterial
-          color="#64748b"
-          roughness={0.75}
+          color="#334155"
+          roughness={0.85}
           metalness={0.15}
         />
       </mesh>
-      {/* Natural Weathered Stone Curb Trim */}
-      <mesh position={[-0.1065, -2.187, -0.0375]}>
-        <boxGeometry args={[2.84, 0.008, 2.44]} />
+      {/* Upper Honed Granite/Slate Surface Pad (Raised +0.016m above base curb) */}
+      <mesh position={[-0.1065, -2.182, -0.0375]} receiveShadow>
+        <boxGeometry args={[2.76, 0.008, 2.36]} />
         <meshStandardMaterial
-          color="#7c2d12"
-          roughness={0.8}
-          metalness={0.1}
+          color="#64748b"
+          roughness={0.65}
+          metalness={0.2}
         />
       </mesh>
 

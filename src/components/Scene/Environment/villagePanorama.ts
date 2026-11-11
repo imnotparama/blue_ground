@@ -252,3 +252,4 @@ export function getRuralGroundTexture(): THREE.CanvasTexture | null {
   cachedGroundTexture = texture;
   return texture;
 }
+

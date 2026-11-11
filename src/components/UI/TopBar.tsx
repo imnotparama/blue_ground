@@ -111,6 +111,25 @@ export const TopBar = () => {
 
       {/* Center Action Controls: Essential CAD & Simulation Navigation */}
       <div className="flex items-center gap-2 pointer-events-auto">
+        {/* Model Architecture Switcher: SolidCraft v9 CAD vs Classic Dual Big-Tank Prototype */}
+        <button
+          onClick={() => setCadModelMode(!cadModelMode)}
+          className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full border transition-all text-xs font-mono tracking-wide cursor-pointer shadow-md ${
+            cadModelMode
+              ? 'bg-cyan-500/20 border-cyan-400 text-cyan-200 shadow-[0_0_14px_rgba(6,182,212,0.35)] ring-1 ring-cyan-400/40'
+              : 'bg-purple-500/25 border-purple-400 text-purple-200 shadow-[0_0_14px_rgba(168,85,247,0.35)] ring-1 ring-purple-400/40 hover:bg-purple-500/35'
+          }`}
+          title="Toggle Digital Twin Version: SolidCraft v9 CAD Rack vs Classic Dual Big Tank Prototype"
+        >
+          <Box className={`w-3.5 h-3.5 ${cadModelMode ? 'text-cyan-400' : 'text-purple-400 animate-pulse'}`} />
+          <span className="hidden sm:inline font-bold">
+            {cadModelMode ? 'Twin: CAD v9' : 'Twin: Big Tank'}
+          </span>
+          <span className={`text-[9px] px-1 py-0.2 rounded font-bold ${cadModelMode ? 'bg-cyan-950 text-cyan-300 border border-cyan-500/40' : 'bg-purple-950 text-purple-300 border border-purple-500/40'}`}>
+            {cadModelMode ? 'v9' : 'LEGACY'}
+          </span>
+        </button>
+
         {/* Master Engineering Simulation Start / Pause Button */}
         <button
           onClick={() => (simulationRunning ? pauseSimulation() : startSimulation())}

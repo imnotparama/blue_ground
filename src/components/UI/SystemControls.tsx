@@ -187,6 +187,24 @@ export const SystemControls = () => {
               <span className={`text-[9px] px-1.5 py-0.5 rounded font-mono font-bold ${exploded ? 'bg-amber-950 text-amber-300 border border-amber-500/40' : 'bg-zinc-800 border border-zinc-700 text-zinc-400'}`}>E</span>
             </button>
 
+            {/* Model Architecture Switcher (SolidCraft v9 CAD vs Classic Dual Big Tank) */}
+            <button
+              onClick={() => setCadModelMode(!cadModelMode)}
+              className={`col-span-2 flex items-center justify-between py-2 px-3 rounded-xl border text-[9px] font-mono font-bold tracking-wider transition-all cursor-pointer ${
+                cadModelMode
+                  ? 'bg-cyan-500/15 border-cyan-400/40 text-cyan-200 shadow-[0_0_10px_rgba(6,182,212,0.2)]'
+                  : 'bg-purple-500/20 border-purple-400/40 text-purple-200 shadow-[0_0_10px_rgba(168,85,247,0.25)]'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <Box className={`w-3.5 h-3.5 ${cadModelMode ? 'text-cyan-400' : 'text-purple-400'}`} />
+                <span>{cadModelMode ? 'Digital Twin: SolidCraft v9 CAD' : 'Digital Twin: Classic Big Tank'}</span>
+              </div>
+              <span className={`text-[8.5px] px-1.5 py-0.5 rounded font-mono font-bold ${cadModelMode ? 'bg-cyan-950 text-cyan-300 border border-cyan-500/40' : 'bg-purple-950 text-purple-300 border border-purple-500/40'}`}>
+                {cadModelMode ? 'CAD v9' : 'LEGACY TANK'}
+              </span>
+            </button>
+
             {/* X-Ray / Transparency View Toggle */}
             <button
               onClick={() => {
