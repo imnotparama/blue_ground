@@ -96,10 +96,12 @@ export const Scene = () => {
           {/* Exploded View 3D Subassembly Callout Tags */}
           <ExplodedLabels />
 
-          {/* Subtle grid overlay flush with rubber contact feet */}
-          <gridHelper args={[4.2, 14, '#0284c7', '#1e293b']} position={[-0.1065, -2.186, -0.0375]}>
-            <lineBasicMaterial attach="material" transparent opacity={0.15} />
-          </gridHelper>
+          {/* Technical CAD coordinate grid visible only during Exploded Engineering View */}
+          {exploded && (
+            <gridHelper args={[4.2, 14, '#0284c7', '#1e293b']} position={[-0.1065, -2.186, -0.0375]}>
+              <lineBasicMaterial attach="material" transparent opacity={0.25} />
+            </gridHelper>
+          )}
         </group>
 
         {/* Soft Studio Contact Shadow directly beneath Leviathan v9 */}
