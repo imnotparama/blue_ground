@@ -79,7 +79,7 @@ const HomePageContent = () => {
         <span className="text-zinc-700">•</span>
         <span>SMART IOT SOLAR PURIFICATION LOOP</span>
         <span className="text-zinc-700">•</span>
-        <span>ENGINEERED BY <strong className="text-cyan-400 font-bold">PARAMESHWARAN S</strong></span>
+        <span>ENGINEERED BY <strong className="text-cyan-400 font-bold">TEAM CHOOSENONES</strong> (PARAMESHWARAN S)</span>
       </div>
       <div className="fixed bottom-4 right-6 z-10 pointer-events-none text-[10px] font-mono text-zinc-500 tracking-wider flex items-center gap-2">
         <span className="text-zinc-400 font-semibold">BlueGround Leviathan – Water Guardian</span>

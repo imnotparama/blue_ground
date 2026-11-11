@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "blueground Leviathan — Smart Solar IoT Water Purification System",
   description: "An interactive, Apple-inspired 3D digital-twin showcasing the blueground Leviathan solar-powered IoT water filtration and purification system designed for mining and remote communities.",
-  authors: [{ name: "blueground" }],
+  authors: [{ name: "Team ChoosenOnes" }],
 };
 
 export default function RootLayout({

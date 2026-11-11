@@ -195,7 +195,7 @@ export function getEnclosureFaceplateTexture(): THREE.CanvasTexture | null {
   ctx.fillText('WATER PRODUCTION: 120 L/HR WHO DRINKING POTABLE', plateX + 24, plateY + 128);
   ctx.fillText('PROTECTION RATING: NEMA 4X / IP66 DUST & WATERPROOF', plateX + 24, plateY + 148);
   ctx.fillText('CERTIFICATION: WHO-PQS-E003/001 | IS 10500:2012', plateX + 24, plateY + 168);
-  ctx.fillText('MANUFACTURED: BLUEGROUND ENGINEERING CORP', plateX + 24, plateY + 188);
+  ctx.fillText('ENGINEERED BY: TEAM CHOOSENONES (PARAMESHWARAN S)', plateX + 24, plateY + 188);
 
   // 3. High-Voltage Warning Decal (Right of Rating Plate)
   const warnX = 640;
@@ -700,3 +700,4 @@ export function getBeakerGraduationTexture(): THREE.CanvasTexture | null {
   textureCache.set(key, texture);
   return texture;
 }
+

@@ -383,13 +383,38 @@ export const ScenicEnvironment: React.FC = () => {
 
       {/* 3. Deep-Borewell Wellhead Assembly (Under Raw Water Inlet Riser) */}
       <group position={[0.80, -2.187, 0.2505]}>
-        <mesh position={[0, -0.015, 0]}>
+        {/* Ground casing flange */}
+        <mesh position={[0, -0.015, 0]} castShadow>
           <cylinderGeometry args={[0.075, 0.085, 0.04, 16]} />
           <meshStandardMaterial color="#334155" metalness={0.8} roughness={0.4} />
         </mesh>
-        <mesh position={[0, 0.008, 0]}>
+        {/* Machined bolt ring flange */}
+        <mesh position={[0, 0.008, 0]} castShadow>
           <cylinderGeometry args={[0.09, 0.09, 0.015, 16]} />
           <meshStandardMaterial color="#475569" metalness={0.85} roughness={0.3} />
+        </mesh>
+        {/* 6 Stainless Flange Stud Bolts */}
+        {[0, 1, 2, 3, 4, 5].map((bIdx) => {
+          const angle = (bIdx * Math.PI * 2) / 6;
+          return (
+            <mesh
+              key={bIdx}
+              position={[Math.cos(angle) * 0.075, 0.02, Math.sin(angle) * 0.075]}
+            >
+              <cylinderGeometry args={[0.006, 0.006, 0.012, 8]} />
+              <meshStandardMaterial color="#cbd5e1" metalness={0.95} roughness={0.15} />
+            </mesh>
+          );
+        })}
+        {/* Heavy-Duty Cast Iron Isolation Valve Body */}
+        <mesh position={[0, 0.05, 0]} castShadow>
+          <cylinderGeometry args={[0.038, 0.038, 0.065, 16]} />
+          <meshStandardMaterial color="#1e293b" metalness={0.7} roughness={0.35} />
+        </mesh>
+        {/* Red Quarter-Turn Valve Handle */}
+        <mesh position={[0.042, 0.065, 0]} rotation={[0, 0, -0.15]} castShadow>
+          <boxGeometry args={[0.085, 0.008, 0.02]} />
+          <meshStandardMaterial color="#dc2626" roughness={0.3} metalness={0.4} />
         </mesh>
       </group>
 

@@ -254,7 +254,7 @@ export function generateCertifiedLabReport(data: LabReportData) {
     <div class="meta-grid">
       <div class="meta-item">
         <span class="meta-label">Apparatus & Platform</span>
-        <span class="meta-value">BlueGround Leviathan v9.4 Smart Water Purifier</span>
+        <span class="meta-value">BlueGround Leviathan v9.4 (Team ChoosenOnes)</span>
       </div>
       <div class="meta-item">
         <span class="meta-label">Sampling Feed Source</span>
@@ -348,9 +348,9 @@ export function generateCertifiedLabReport(data: LabReportData) {
 
     <div class="footer-signatures">
       <div class="signature-box">
-        <div class="sign-line">Parameshwaran S</div>
-        <strong>Chief Systems Engineer</strong><br>
-        <span style="color: #64748b;">BlueGround Leviathan Project</span>
+        <div class="sign-line">Team ChoosenOnes</div>
+        <strong>Systems Engineering & Validation Group</strong><br>
+        <span style="color: #64748b;">Lead Engineer: Parameshwaran S</span>
       </div>
       <div style="text-align: center;">
         <div style="display: inline-block; border: 2px solid #0284c7; padding: 6px 14px; border-radius: 50px; font-weight: 800; font-size: 11px; color: #0284c7; letter-spacing: 0.1em;">

@@ -69,9 +69,9 @@ function useLiveTFTTexture(simState: any, isRunning: boolean) {
     ctx.fillStyle = isRunning ? '#22c55e' : '#ef4444';
     ctx.fill();
 
-    ctx.font = 'bold 20px "Courier New", monospace';
+    ctx.font = 'bold 18px "Courier New", monospace';
     ctx.fillStyle = '#38bdf8';
-    ctx.fillText('LEVIATHAN OS v9.4', 40, 34);
+    ctx.fillText('LEVIATHAN OS • CHOOSENONES', 40, 34);
 
     ctx.font = '14px "Courier New", monospace';
     ctx.fillStyle = '#94a3b8';

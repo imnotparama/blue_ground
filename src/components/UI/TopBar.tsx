@@ -105,7 +105,7 @@ export const TopBar = () => {
           <span className="text-[9px] tracking-widest text-zinc-400 font-mono uppercase font-bold">Leviathan</span>
         </div>
         <div className="hidden md:flex items-center gap-1.5 border-l border-white/10 pl-3">
-          <span className="text-[9px] font-mono text-zinc-400">DEV: <strong className="text-cyan-300 font-semibold">Parameshwaran S</strong></span>
+          <span className="text-[9px] font-mono text-zinc-400">TEAM: <strong className="text-cyan-300 font-semibold">ChoosenOnes</strong></span>
         </div>
       </div>
 
